@@ -1,0 +1,1 @@
+/usr/bin/c++  -O0 "CMakeFiles/stable-ui.dir/main.cpp.o" "CMakeFiles/stable-ui.dir/src/Rendering/RenderManager.cpp.o" -o stable-ui  libimgui.a _deps/glad-build/libglad.a _deps/glfw-build/src/libglfw3.a /usr/lib/libOpenGL.so /usr/lib/libGLX.so /usr/lib/libGLU.so /usr/lib/librt.a -lm -ldl 

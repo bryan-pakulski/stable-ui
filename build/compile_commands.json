@@ -1,0 +1,167 @@
+[
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build",
+  "command": "/usr/bin/c++  -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glad-build/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include  -O0 -DIMGUI_IMPL_OPENGL_LOADER_GLAD -std=gnu++17 -o CMakeFiles/imgui.dir/_deps/imgui-src/imgui.cpp.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src/imgui.cpp",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src/imgui.cpp"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build",
+  "command": "/usr/bin/c++  -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glad-build/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include  -O0 -DIMGUI_IMPL_OPENGL_LOADER_GLAD -std=gnu++17 -o CMakeFiles/imgui.dir/_deps/imgui-src/imgui_draw.cpp.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src/imgui_draw.cpp",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src/imgui_draw.cpp"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build",
+  "command": "/usr/bin/c++  -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glad-build/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include  -O0 -DIMGUI_IMPL_OPENGL_LOADER_GLAD -std=gnu++17 -o CMakeFiles/imgui.dir/_deps/imgui-src/imgui_tables.cpp.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src/imgui_tables.cpp",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src/imgui_tables.cpp"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build",
+  "command": "/usr/bin/c++  -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glad-build/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include  -O0 -DIMGUI_IMPL_OPENGL_LOADER_GLAD -std=gnu++17 -o CMakeFiles/imgui.dir/_deps/imgui-src/imgui_widgets.cpp.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src/imgui_widgets.cpp",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src/imgui_widgets.cpp"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build",
+  "command": "/usr/bin/c++  -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glad-build/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include  -O0 -DIMGUI_IMPL_OPENGL_LOADER_GLAD -std=gnu++17 -o CMakeFiles/imgui.dir/_deps/imgui-src/backends/imgui_impl_opengl3.cpp.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src/backends/imgui_impl_opengl3.cpp",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src/backends/imgui_impl_opengl3.cpp"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build",
+  "command": "/usr/bin/c++  -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glad-build/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include  -O0 -DIMGUI_IMPL_OPENGL_LOADER_GLAD -std=gnu++17 -o CMakeFiles/imgui.dir/_deps/imgui-src/backends/imgui_impl_glfw.cpp.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src/backends/imgui_impl_glfw.cpp",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src/backends/imgui_impl_glfw.cpp"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build",
+  "command": "/usr/bin/c++  -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glad-build/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include  -O0 -DIMGUI_IMPL_OPENGL_LOADER_GLAD -std=gnu++17 -o CMakeFiles/imgui.dir/_deps/imgui-src/misc/cpp/imgui_stdlib.cpp.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src/misc/cpp/imgui_stdlib.cpp",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src/misc/cpp/imgui_stdlib.cpp"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build",
+  "command": "/usr/bin/c++  -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glad-build/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src/backends -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src/misc/cpp  -O0 -std=gnu++17 -o CMakeFiles/stable-ui.dir/main.cpp.o -c /home/bryanp/Dev/projects/c++/stable-ui/main.cpp",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/main.cpp"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build",
+  "command": "/usr/bin/c++  -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glad-build/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src/backends -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/imgui-src/misc/cpp  -O0 -std=gnu++17 -o CMakeFiles/stable-ui.dir/src/Rendering/RenderManager.cpp.o -c /home/bryanp/Dev/projects/c++/stable-ui/src/Rendering/RenderManager.cpp",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/src/Rendering/RenderManager.cpp"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glad-build",
+  "command": "/usr/bin/cc  -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glad-build/include  -O0 -o CMakeFiles/glad.dir/src/glad.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glad-build/src/glad.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glad-build/src/glad.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/context.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/context.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/context.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/init.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/init.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/init.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/input.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/input.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/input.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/monitor.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/monitor.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/monitor.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/platform.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/platform.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/platform.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/vulkan.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/vulkan.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/vulkan.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/window.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/window.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/window.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/egl_context.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/egl_context.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/egl_context.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/osmesa_context.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/osmesa_context.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/osmesa_context.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/null_init.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/null_init.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/null_init.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/null_monitor.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/null_monitor.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/null_monitor.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/null_window.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/null_window.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/null_window.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -Wdeclaration-after-statement -o CMakeFiles/glfw.dir/null_joystick.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/null_joystick.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/null_joystick.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -o CMakeFiles/glfw.dir/posix_module.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/posix_module.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/posix_module.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -o CMakeFiles/glfw.dir/posix_time.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/posix_time.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/posix_time.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -o CMakeFiles/glfw.dir/posix_thread.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/posix_thread.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/posix_thread.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -o CMakeFiles/glfw.dir/x11_init.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/x11_init.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/x11_init.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -o CMakeFiles/glfw.dir/x11_monitor.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/x11_monitor.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/x11_monitor.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -o CMakeFiles/glfw.dir/x11_window.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/x11_window.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/x11_window.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -o CMakeFiles/glfw.dir/xkb_unicode.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/xkb_unicode.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/xkb_unicode.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -o CMakeFiles/glfw.dir/glx_context.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/glx_context.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/glx_context.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -o CMakeFiles/glfw.dir/linux_joystick.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/linux_joystick.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/linux_joystick.c"
+},
+{
+  "directory": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src",
+  "command": "/usr/bin/cc -D_DEFAULT_SOURCE -D_GLFW_X11 -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/include -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src -I/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-build/src  -O0 -fPIC -Wall -std=c99 -o CMakeFiles/glfw.dir/posix_poll.c.o -c /home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/posix_poll.c",
+  "file": "/home/bryanp/Dev/projects/c++/stable-ui/build/_deps/glfw-src/src/posix_poll.c"
+}
+]
