@@ -3,8 +3,8 @@
 #include <fstream>
 #include <imgui.h>
 
-#include "../QLogger.h"
-#include "QDisplay_Base.h"
+#include "../../QLogger.h"
+#include "../QDisplay_Base.h"
 
 class QDisplay_MenuBar : public QDisplay_Base {
 

@@ -3,12 +3,12 @@
 #include <fstream>
 #include <imgui.h>
 
-#include "../Display/ErrorHandler.h"
-#include "../QLogger.h"
-#include "../Rendering/RenderManager.h"
-#include "../Rendering/objects/Helper.h"
-#include "../config.h"
-#include "QDisplay_Base.h"
+#include "../../Display/ErrorHandler.h"
+#include "../../QLogger.h"
+#include "../../Rendering/RenderManager.h"
+#include "../../Rendering/objects/Helper.h"
+#include "../../config.h"
+#include "../QDisplay_Base.h"
 
 class QDisplay_MainWindow : public QDisplay_Base {
   GLuint m_image_texture = 0;

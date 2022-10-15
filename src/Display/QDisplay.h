@@ -11,9 +11,9 @@
 
 #include "../Rendering/RenderManager.h"
 #include "../config.h"
+#include "Menus/QDisplay_MainWindow.h"
+#include "Menus/QDisplay_MenuBar.h"
 #include "QDisplay_Base.h"
-#include "QDisplay_MainWindow.h"
-#include "QDisplay_MenuBar.h"
 
 // Singleton display class
 class QDisplay {
@@ -24,7 +24,14 @@ public:
   }
 
   // Attach a render manager instance
-  void AttachRenderManager(RenderManager *rm) { m_renderManager = rm; }
+  // This is necessary for sub menus to interact with the render manager
+  void AttachRenderManager(RenderManager *rm) {
+    m_renderManager = rm;
+
+    // Initialisation
+    m_submenus.emplace_back(new QDisplay_MenuBar(m_renderManager));
+    m_submenus.emplace_back(new QDisplay_MainWindow(m_renderManager));
+  }
 
   // Return currently active window
   GLFWwindow *getWindow() { return m_window; }
@@ -58,7 +65,7 @@ private:
   GLFWwindow *m_window;
   std::string m_glsl_version;
   std::vector<std::unique_ptr<QDisplay_Base>> m_submenus;
-  RenderManager *m_renderManager;
+  RenderManager *m_renderManager = 0;
 
   float backgroundR = 0.45f;
   float backgroundG = 0.44f;
@@ -78,12 +85,6 @@ private:
 
     glfwDestroyWindow(m_window);
     glfwTerminate();
-  }
-
-  // Initialisation
-  void init() {
-    m_submenus.emplace_back(new QDisplay_MenuBar(m_renderManager));
-    m_submenus.emplace_back(new QDisplay_MainWindow(m_renderManager));
   }
 
   QDisplay() {
@@ -171,9 +172,6 @@ private:
 
     // Set clear colour
     glClearColor(backgroundR, backgroundG, backgroundB, 1.0f);
-
-    // Additional init
-    init();
   }
 
   ~QDisplay() { cleanupDisplay(); }
