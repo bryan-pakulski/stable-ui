@@ -28,3 +28,9 @@ void RenderManager::key_callback(GLFWwindow *window, int key, int scancode,
   int width, height;
   glfwGetWindowSize(window, &width, &height);
 }
+
+// Create new canvas object
+void RenderManager::createCanvas(int x, int y) {
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Creating canvas %d x %d", x, y);
+  m_canvas.emplace_back(new Canvas(x, y));
+}

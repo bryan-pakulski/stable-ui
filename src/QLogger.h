@@ -23,12 +23,12 @@ enum class LOGLEVEL { INFO, WARN, ERR };
 class QLogger {
 
 public:
-  clock_t LAST_WRITE_TIME{};
-  std::thread myThread;
+  clock_t m_LAST_WRITE_TIME{};
+  std::thread m_Thread;
 
   static QLogger &GetInstance() {
-    static QLogger logger;
-    return logger;
+    static QLogger s_Logger;
+    return s_Logger;
   }
 
   /*
@@ -85,17 +85,17 @@ private:
   // Open file on instantiation
   QLogger() {
     log.open(QLOGGER_LOGFILE, std::ios_base::app);
-    myThread = std::thread(&QLogger::myThread, this);
+    m_Thread = std::thread(&QLogger::m_Thread, this);
   }
 
   ~QLogger() {
     log.close();
-    myThread.join();
+    m_Thread.join();
   }
 
   void updateLogTimestamp() {
     if (stat(QLOGGER_LOGFILE, &logStat) == 0) {
-      LAST_WRITE_TIME = clock();
+      m_LAST_WRITE_TIME = clock();
     }
   }
 

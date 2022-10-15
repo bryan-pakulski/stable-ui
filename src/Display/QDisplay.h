@@ -6,27 +6,36 @@
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <memory>
+#include <vector>
 
-#include "submenus/QDisplay_MenuBar.h"
-#include "submenus/QDisplay_img2img.h"
-#include "submenus/QDisplay_txt2img.h"
+#include "../Rendering/RenderManager.h"
+#include "../config.h"
+#include "QDisplay_Base.h"
+#include "QDisplay_MainWindow.h"
+#include "QDisplay_MenuBar.h"
 
 // Singleton display class
 class QDisplay {
 public:
   static QDisplay &GetInstance() {
-    static QDisplay display;
-    return display;
+    static QDisplay s_display;
+    return s_display;
   }
 
+  // Attach a render manager instance
+  void AttachRenderManager(RenderManager *rm) { m_renderManager = rm; }
+
   // Return currently active window
-  GLFWwindow *getWindow() { return window; }
+  GLFWwindow *getWindow() { return m_window; }
 
   // Draw all submenus
   void drawMenus() {
-    QDisplay_MainMenu();
-    QDisplay_Txt2Img();
-    QDisplay_Img2Img();
+
+    // Dynamically render all windows
+    for (auto &menu : m_submenus) {
+      menu->render();
+    }
   }
 
   // Clears frame
@@ -46,13 +55,10 @@ public:
   }
 
 private:
-  GLFWwindow *window;
-  std::string glsl_version;
-
-  std::string programName = "stable-ui";
-  float highDPIscaleFactor = 1.0;
-  int windowWidth = 1200;
-  int windowHeight = 800;
+  GLFWwindow *m_window;
+  std::string m_glsl_version;
+  std::vector<std::unique_ptr<QDisplay_Base>> m_submenus;
+  RenderManager *m_renderManager;
 
   float backgroundR = 0.45f;
   float backgroundG = 0.44f;
@@ -70,11 +76,16 @@ private:
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    glfwDestroyWindow(window);
+    glfwDestroyWindow(m_window);
     glfwTerminate();
   }
 
   // Initialisation
+  void init() {
+    m_submenus.emplace_back(new QDisplay_MenuBar(m_renderManager));
+    m_submenus.emplace_back(new QDisplay_MainWindow(m_renderManager));
+  }
+
   QDisplay() {
 
     if (!glfwInit()) {
@@ -91,19 +102,19 @@ private:
 
 #ifdef __APPLE__
     // GL 3.2 + GLSL 150
-    glsl_version = "#version 150";
+    m_glsl_version = "#version 150";
     glfwWindowHint( // required on Mac OS
         GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 #elif __linux__
     // GL 3.2 + GLSL 150
-    glsl_version = "#version 150";
+    m_glsl_version = "#version 150";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 #elif _WIN32
     // GL 3.0 + GLSL 130
-    glsl_version = "#version 130";
+    m_glsl_version = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 #endif
@@ -114,7 +125,7 @@ private:
     float xscale, yscale;
     glfwGetMonitorContentScale(monitor, &xscale, &yscale);
     if (xscale > 1 || yscale > 1) {
-      highDPIscaleFactor = xscale;
+      CONFIG::HIGH_DPI_SCALE_FACTOR = xscale;
       glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
     }
 #elif __APPLE__
@@ -122,18 +133,18 @@ private:
     glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
 #endif
 
-    window = glfwCreateWindow(windowWidth, windowHeight, programName.c_str(),
-                              nullptr, nullptr);
+    m_window = glfwCreateWindow(CONFIG::WINDOW_WIDTH, CONFIG::WINDOW_WIDTH,
+                                CONFIG::PROGRAM_NAME, nullptr, nullptr);
 
-    if (!window) {
+    if (!m_window) {
       QLogger::GetInstance().Log(LOGLEVEL::ERR,
                                  "Couldn't create a GLFW window");
       cleanupDisplay();
     }
 
     // Catch window resizing
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
+    glfwMakeContextCurrent(m_window);
 
     // VSync
     glfwSwapInterval(1);
@@ -148,8 +159,8 @@ private:
     ImGui::StyleColorsDark();
 
     // Setup Platform/Renderer backends
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init(glsl_version.c_str());
+    ImGui_ImplGlfw_InitForOpenGL(m_window, true);
+    ImGui_ImplOpenGL3_Init(m_glsl_version.c_str());
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
       QLogger::GetInstance().Log(LOGLEVEL::ERR, "Couldn't initialize GLAD");
@@ -160,6 +171,9 @@ private:
 
     // Set clear colour
     glClearColor(backgroundR, backgroundG, backgroundB, 1.0f);
+
+    // Additional init
+    init();
   }
 
   ~QDisplay() { cleanupDisplay(); }

@@ -5,6 +5,7 @@
 #pragma once
 
 #include "../QLogger.h"
+#include "objects/Canvas.h"
 
 #include <glad/glad.h>
 
@@ -24,8 +25,12 @@ public:
   // Main update loop
   void update();
 
+  // Create new canvas object for rendering
+  void createCanvas(int x, int y);
+
 private:
   GLFWwindow &window;
+  std::vector<std::unique_ptr<Canvas>> m_canvas;
 
   static void key_callback(GLFWwindow *window, int key, int scancode,
                            int action, int mods);

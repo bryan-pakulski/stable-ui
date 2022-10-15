@@ -4,7 +4,10 @@
 
 int main() {
 
+  // Intialise Render manager & attach to Display
   RenderManager rm(*QDisplay::GetInstance().getWindow());
+  QDisplay::GetInstance().AttachRenderManager(&rm);
+
   while (!glfwWindowShouldClose(QDisplay::GetInstance().getWindow())) {
 
     QDisplay::clearFrame();

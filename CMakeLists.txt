@@ -3,7 +3,7 @@ project(stable-ui)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g")
 
 # for clangd language server
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -99,7 +99,7 @@ find_package(OpenGL REQUIRED)  # for Dear ImGui
 find_package(Threads REQUIRED) # for GLFW
 find_package(X11 REQUIRED)     # for GLFW
 
-add_executable(stable-ui main.cpp src/Rendering/RenderManager.cpp src/Rendering/RenderManager.h)
+add_executable(stable-ui main.cpp src/Rendering/RenderManager.cpp src/Rendering/objects/Canvas.cpp)
 
 target_include_directories(
         stable-ui PRIVATE
