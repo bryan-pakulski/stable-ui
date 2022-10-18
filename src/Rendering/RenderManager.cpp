@@ -5,10 +5,8 @@ RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager initialized");
   glfwSetKeyCallback(&m_window, key_callback);
 
-  m_mainWindow = new MainWindow(
-      std::pair<int, int>{CONFIG::WINDOW_WIDTH, CONFIG::WINDOW_HEIGHT},
-      std::pair<int, int>{CONFIG::WINDOW_WIDTH, CONFIG::WINDOW_HEIGHT},
-      &m_window);
+  m_mainWindow = new MainWindow(std::pair<int, int>{CONFIG::WINDOW_WIDTH, CONFIG::WINDOW_HEIGHT},
+                                std::pair<int, int>{CONFIG::WINDOW_WIDTH, CONFIG::WINDOW_HEIGHT}, &m_window);
 
   m_windowSelection = new WindowSelection(std::pair<int, int>{0, 0}, &m_window);
 
@@ -55,8 +53,7 @@ void RenderManager::renderLoop() {
 }
 
 // Key callback function to map keypresses / actions to object instantiation
-void RenderManager::key_callback(GLFWwindow *window, int key, int scancode,
-                                 int action, int mods) {
+void RenderManager::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
   int width, height;
   glfwGetWindowSize(window, &width, &height);
 }
@@ -85,17 +82,10 @@ std::shared_ptr<Canvas> RenderManager::getActiveCanvas() {
 }
 
 // Callback to log GL errors
-void RenderManager::GLFWErrorCallBack(int, const char *err_str) {
-  QLogger::GetInstance().Log(LOGLEVEL::ERR, err_str);
-}
+void RenderManager::GLFWErrorCallBack(int, const char *err_str) { QLogger::GetInstance().Log(LOGLEVEL::ERR, err_str); }
 
-void GLAPIENTRY RenderManager::MessageCallback(GLenum source, GLenum type,
-                                               GLuint id, GLenum severity,
-                                               GLsizei length,
-                                               const GLchar *message,
-                                               const void *userParam) {
-  fprintf(stderr,
-          "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
-          (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity,
-          message);
+void GLAPIENTRY RenderManager::MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+                                               const GLchar *message, const void *userParam) {
+  fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+          (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, message);
 }

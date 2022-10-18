@@ -19,8 +19,7 @@ private:
   std::pair<int, int> screen{}; // Screen size
 
 public:
-  WindowSelection(std::pair<int, int> pc, GLFWwindow *w)
-      : BaseObject(pc), m_pc{pc} {
+  WindowSelection(std::pair<int, int> pc, GLFWwindow *w) : BaseObject(pc), m_pc{pc} {
     int success;
     m_window = w;
 
@@ -40,21 +39,16 @@ public:
         1, 2, 3  // second triangle
     };
 
-    std::string vShaderSource =
-        readShader("data/shaders/WindowSelection_V.glsl");
-    std::string fShaderSource =
-        readShader("data/shaders/WindowSelection_F.glsl");
+    std::string vShaderSource = readShader("data/shaders/WindowSelection_V.glsl");
+    std::string fShaderSource = readShader("data/shaders/WindowSelection_F.glsl");
 
-    unsigned int vertexShader =
-        initVertexShader(vShaderSource.c_str(), success);
-    unsigned int fragmentShader =
-        initFragmentShader(fShaderSource.c_str(), success);
+    unsigned int vertexShader = initVertexShader(vShaderSource.c_str(), success);
+    unsigned int fragmentShader = initFragmentShader(fShaderSource.c_str(), success);
 
     linkShaders(vertexShader, fragmentShader, success);
     setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices));
 
-    GLHELPER::LoadTextureFromFile("data/images/selection.png", &m_texture,
-                                  &m_width, &m_height);
+    GLHELPER::LoadTextureFromFile("data/images/selection.png", &m_texture, &m_width, &m_height);
   }
 
   void updateLogic() override {
@@ -76,8 +70,7 @@ public:
     glm::mat4 trans = glm::mat4(1.0f);
     trans = glm::scale(trans, glm::vec3(m_scale, m_scale, m_scale));
     trans = glm::translate(trans, glm::vec3(m_mousePosX, m_mousePosY, 0.0f));
-    unsigned int transformLoc =
-        glGetUniformLocation(shaderProgram, "transform");
+    unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
     // Draw code

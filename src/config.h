@@ -11,6 +11,8 @@ static YAML::Node config_file = YAML::LoadFile("data/config.yaml");
 // StableDiffusion configuration
 static const int PROMPT_LENGTH_LIMIT = config_file["PROMPT_LENGTH_LIMIT"].as<int>();
 static const std::string STABLE_DIFFUSION_PATH = config_file["STABLE_DIFFUSION_PATH"].as<std::string>();
+static const int CANVAS_SIZE_X_LIMIT = config_file["CANVAS_SIZE_X_LIMIT"].as<int>();
+static const int CANVAS_SIZE_Y_LIMIT = config_file["CANVAS_SIZE_Y_LIMIT"].as<int>();
 
 // ImGui configuration
 static const char *PROGRAM_NAME = "stable-ui";

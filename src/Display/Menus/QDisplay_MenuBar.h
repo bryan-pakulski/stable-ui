@@ -52,8 +52,7 @@ private:
 
       // Move to bottom of screen
       if (logUpdated) {
-        ImGui::SetScrollY(ImGui::GetScrollMaxY() +
-                          ImGui::GetStyle().ItemSpacing.y * 2);
+        ImGui::SetScrollY(ImGui::GetScrollMaxY() + ImGui::GetStyle().ItemSpacing.y * 2);
         logUpdated = false;
       }
 
@@ -100,15 +99,12 @@ private:
       int width = 512;
       int height = 512;
 
-      std::shared_ptr<Canvas> canvas =
-          m_renderManager->createCanvas(width, height);
+      std::shared_ptr<Canvas> canvas = m_renderManager->createCanvas(width, height);
 
-      bool ret = GLHELPER::LoadTextureFromFile(
-          filename.c_str(), &canvas->m_canvas, &width, &height);
+      bool ret = GLHELPER::LoadTextureFromFile(filename.c_str(), &canvas->m_canvas, &width, &height);
       if (!ret) {
         ErrorHandler::GetInstance().setError("Failed to load texture file");
-        QLogger::GetInstance().Log(LOGLEVEL::ERR,
-                                   "Failed to load texture file");
+        QLogger::GetInstance().Log(LOGLEVEL::ERR, "Failed to load texture file");
       } else {
         QLogger::GetInstance().Log(LOGLEVEL::INFO, "loaded texture file");
       }
@@ -124,8 +120,7 @@ private:
         if (ImGui::BeginListBox("Canvas in Memory")) {
           for (auto &item : m_renderManager->m_canvas) {
             const char *item_name = item->m_name.c_str();
-            int index = std::addressof(item) -
-                        std::addressof(m_renderManager->m_canvas.front());
+            int index = std::addressof(item) - std::addressof(m_renderManager->m_canvas.front());
             const bool is_selected = index == m_renderManager->m_active;
 
             if (ImGui::Selectable(item_name, is_selected)) {

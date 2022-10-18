@@ -45,18 +45,15 @@ public:
 
   // Error callback for GLFW logging
   static void GLFWErrorCallBack(int, const char *err_str);
-  static void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id,
-                                         GLenum severity, GLsizei length,
-                                         const GLchar *message,
-                                         const void *userParam);
+  static void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+                                         const GLchar *message, const void *userParam);
 
 private:
   GLFWwindow &m_window;
   MainWindow *m_mainWindow;
   WindowSelection *m_windowSelection;
 
-  static void key_callback(GLFWwindow *window, int key, int scancode,
-                           int action, int mods);
+  static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
   // Process inputs
   void logicLoop();

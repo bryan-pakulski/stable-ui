@@ -81,10 +81,7 @@ private:
   float backgroundB = 0.48f;
 
   // Window resize callback
-  static void framebuffer_size_callback(GLFWwindow *window, int width,
-                                        int height) {
-    glViewport(0, 0, width, height);
-  }
+  static void framebuffer_size_callback(GLFWwindow *window, int width, int height) { glViewport(0, 0, width, height); }
 
   // Cleans up all GL variables for clean exit
   void cleanupDisplay() {
@@ -143,12 +140,10 @@ private:
     glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
 #endif
 
-    m_window = glfwCreateWindow(CONFIG::WINDOW_WIDTH, CONFIG::WINDOW_WIDTH,
-                                CONFIG::PROGRAM_NAME, nullptr, nullptr);
+    m_window = glfwCreateWindow(CONFIG::WINDOW_WIDTH, CONFIG::WINDOW_WIDTH, CONFIG::PROGRAM_NAME, nullptr, nullptr);
 
     if (!m_window) {
-      QLogger::GetInstance().Log(LOGLEVEL::ERR,
-                                 "Couldn't create a GLFW window");
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, "Couldn't create a GLFW window");
       cleanupDisplay();
     }
 

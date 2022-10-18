@@ -47,15 +47,12 @@ public:
     }
   }
 
-  template <typename T, typename... Args>
-  void Log(LOGLEVEL logLevel, T message, Args... args) {
+  template <typename T, typename... Args> void Log(LOGLEVEL logLevel, T message, Args... args) {
     if (logLevel == LOGLEVEL::INFO) {
-      log << std::string(getDateTime()).append(" - [INFO]: ") << message
-          << ", ";
+      log << std::string(getDateTime()).append(" - [INFO]: ") << message << ", ";
       Info(args...);
     } else if (logLevel == LOGLEVEL::WARN) {
-      log << std::string(getDateTime()).append(" - [WARN]: ") << message
-          << ", ";
+      log << std::string(getDateTime()).append(" - [WARN]: ") << message << ", ";
       Warning(args...);
     } else if (logLevel == LOGLEVEL::ERR) {
       log << std::string(getDateTime()).append(" - [ERR]: ") << message << ", ";
@@ -106,8 +103,7 @@ private:
   }
 
   template <typename T> void Warning(T message) { log << message << std::endl; }
-  template <typename T, typename... Args>
-  void Warning(T message, Args... args) {
+  template <typename T, typename... Args> void Warning(T message, Args... args) {
     log << message << ", ";
     Warning(args...);
   }
@@ -132,8 +128,7 @@ private:
     time_t _tm = time(nullptr);
     struct tm *curtime = localtime(&_tm);
     std::string strTime = std::string(asctime(curtime));
-    strTime.erase(std::remove(strTime.begin(), strTime.end(), '\n'),
-                  strTime.end());
+    strTime.erase(std::remove(strTime.begin(), strTime.end(), '\n'), strTime.end());
 
     return strTime;
   }

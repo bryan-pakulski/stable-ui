@@ -15,8 +15,7 @@ private:
   GLuint *m_texture_id = 0;
 
 public:
-  MainWindow(std::pair<int, int> pc, std::pair<int, int>, GLFWwindow *w)
-      : BaseObject(pc), m_pc{pc} {
+  MainWindow(std::pair<int, int> pc, std::pair<int, int>, GLFWwindow *w) : BaseObject(pc), m_pc{pc} {
     int success;
     m_window = w;
 
@@ -40,18 +39,14 @@ public:
     std::string vShaderSource = readShader("data/shaders/MainWindow_V.glsl");
     std::string fShaderSource = readShader("data/shaders/MainWindow_F.glsl");
 
-    unsigned int vertexShader =
-        initVertexShader(vShaderSource.c_str(), success);
-    unsigned int fragmentShader =
-        initFragmentShader(fShaderSource.c_str(), success);
+    unsigned int vertexShader = initVertexShader(vShaderSource.c_str(), success);
+    unsigned int fragmentShader = initFragmentShader(fShaderSource.c_str(), success);
 
     linkShaders(vertexShader, fragmentShader, success);
     setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices));
   }
 
-  void updateLogic() override {
-    glfwGetFramebufferSize(m_window, &screen.first, &screen.second);
-  }
+  void updateLogic() override { glfwGetFramebufferSize(m_window, &screen.first, &screen.second); }
 
   void updateVisual() override {
     glUseProgram(shaderProgram);
@@ -63,8 +58,7 @@ public:
 
     // Transformation code
     glm::mat4 trans = glm::mat4(1.0f);
-    unsigned int transformLoc =
-        glGetUniformLocation(shaderProgram, "transform");
+    unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
     glBindVertexArray(VAO);

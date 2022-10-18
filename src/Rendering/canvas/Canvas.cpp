@@ -14,10 +14,7 @@ Canvas::Canvas(int width, int height, std::string name) : c_width(width), c_heig
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-               GL_UNSIGNED_BYTE, nullptr);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
-  QLogger::GetInstance().Log(
-      LOGLEVEL::INFO,
-      "Successfully created blank canvas with dimensions: ", c_width, c_height);
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Successfully created blank canvas with dimensions: ", c_width, c_height);
 }

@@ -23,16 +23,13 @@ public:
     ImGui::Begin("Canvas");
 
     if (!m_canvas) {
-      ImGui::TextUnformatted(
-          "Generate Text to image here, right click to copy contents "
-          "into selection box");
+      ImGui::TextUnformatted("Generate Text to image here, right click to copy contents "
+                             "into selection box");
     }
 
     if (m_canvas) {
-      ImGui::Text("canvas width: %d canvas height:%d", m_canvas->c_width,
-                  m_canvas->c_height);
-      ImGui::Image((void *)(intptr_t)m_canvas->m_canvas,
-                   ImVec2(m_canvas->c_width, m_canvas->c_height));
+      ImGui::Text("canvas width: %d canvas height:%d", m_canvas->c_width, m_canvas->c_height);
+      ImGui::Image((void *)(intptr_t)m_canvas->m_canvas, ImVec2(m_canvas->c_width, m_canvas->c_height));
     } else {
       ImGui::Text("...");
     }
@@ -40,7 +37,7 @@ public:
     // Generate new canvas
     if (ImGui::Button("Generate")) {
       delete m_canvas;
-      m_canvas = new Canvas(512, 512, "generated");
+      m_canvas = new Canvas(CONFIG::CANVAS_SIZE_X_LIMIT, CONFIG::CANVAS_SIZE_Y_LIMIT, "generated");
     }
     // TODO: loading bar, once finished load image into GLuint
 

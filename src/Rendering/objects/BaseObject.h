@@ -22,8 +22,7 @@ protected:
 
 public:
   BaseObject(std::pair<int, int> pixelCoords) : pixelCoords{pixelCoords} {
-    QLogger::GetInstance().Log(LOGLEVEL::INFO, "Object initialized at",
-                               pixelCoords.first, pixelCoords.second);
+    QLogger::GetInstance().Log(LOGLEVEL::INFO, "Object initialized at", pixelCoords.first, pixelCoords.second);
   }
 
   virtual ~BaseObject() {
@@ -41,8 +40,7 @@ public:
     std::ifstream fileStream(filePath, std::ios::in);
 
     if (!fileStream.is_open()) {
-      QLogger::GetInstance().Log(
-          LOGLEVEL::ERR, "Could not read file, file doesn't exist: ", filePath);
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, "Could not read file, file doesn't exist: ", filePath);
       return "";
     }
 
@@ -54,13 +52,10 @@ public:
   }
 
   // Linear convert X/Y coordinates to local coordinates (-1, 1.0)
-  static float getLC(const int &pixelCoord, const int &max) {
-    return (((float)pixelCoord / (float)max) * 2) - 1;
-  }
+  static float getLC(const int &pixelCoord, const int &max) { return (((float)pixelCoord / (float)max) * 2) - 1; }
 
   // Initialise vertex shader for GLFW
-  static unsigned int initVertexShader(const char *vertexShaderSource,
-                                       int &success) {
+  static unsigned int initVertexShader(const char *vertexShaderSource, int &success) {
     char errorInfo[512] = "";
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
@@ -70,17 +65,14 @@ public:
 
     if (!success) {
       glGetShaderInfoLog(vertexShader, 512, nullptr, errorInfo);
-      QLogger::GetInstance().Log(LOGLEVEL::ERR,
-                                 "ERROR::VERTEX::SHADER::COMPILATION_FAILED\n",
-                                 errorInfo);
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, "ERROR::VERTEX::SHADER::COMPILATION_FAILED\n", errorInfo);
     }
 
     return vertexShader;
   }
 
   // Initialise fragment shader for GLFW
-  static unsigned int initFragmentShader(const char *fragmentShaderSource,
-                                         int &success) {
+  static unsigned int initFragmentShader(const char *fragmentShaderSource, int &success) {
     char errorInfo[512] = "";
     unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
@@ -90,17 +82,14 @@ public:
 
     if (!success) {
       glGetShaderInfoLog(fragmentShader, 512, nullptr, errorInfo);
-      QLogger::GetInstance().Log(
-          LOGLEVEL::ERR, "ERROR::FRAGMENT::SHADER::COMPILATION_FAILED\n",
-          errorInfo);
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, "ERROR::FRAGMENT::SHADER::COMPILATION_FAILED\n", errorInfo);
     }
 
     return fragmentShader;
   }
 
   // Link shaders
-  void linkShaders(unsigned int vertexShader, unsigned int fragmentShader,
-                   int &success) {
+  void linkShaders(unsigned int vertexShader, unsigned int fragmentShader, int &success) {
     char errorInfo[512] = "";
     shaderProgram = glCreateProgram();
 
@@ -111,8 +100,7 @@ public:
 
     if (!success) {
       glGetProgramInfoLog(shaderProgram, 512, nullptr, errorInfo);
-      QLogger::GetInstance().Log(LOGLEVEL::ERR,
-                                 "ERROR::PROGRAM::LINKING_FAILED\n", errorInfo);
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, "ERROR::PROGRAM::LINKING_FAILED\n", errorInfo);
     }
 
     // delete shaders after linking
@@ -121,8 +109,7 @@ public:
   }
 
   // Set shader buffers
-  void setShaderBuffers(float *vertices, int sv, unsigned int *indices,
-                        int si) {
+  void setShaderBuffers(float *vertices, int sv, unsigned int *indices, int si) {
     // Set vertex buffer object and vertex array object and element buffer
     // objects
     glGenVertexArrays(1, &VAO);
@@ -142,18 +129,15 @@ public:
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, si, indices, GL_STATIC_DRAW);
 
     // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                          (void *)nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)nullptr);
     glEnableVertexAttribArray(0);
 
     // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                          (void *)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
     // texture coord attribute
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                          (void *)(6 * sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
     // unbind the VAO
