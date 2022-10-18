@@ -2,7 +2,7 @@
 #include "../../QLogger.h"
 #include <cstddef>
 
-Canvas::Canvas(int width, int height) : c_width(width), c_height(height) {
+Canvas::Canvas(int width, int height, std::string name) : c_width(width), c_height(height), m_name(name) {
 
   glGenTextures(1, &m_canvas);
   glBindTexture(GL_TEXTURE_2D, m_canvas);

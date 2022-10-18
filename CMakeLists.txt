@@ -10,12 +10,19 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(FetchContent)
 
+# Download and fetch GLM
+FetchContent_Declare(
+        glm
+        GIT_REPOSITORY https://github.com/g-truc/glm.git
+        GIT_TAG 0.9.9.8
+)
+
 # download and configure the glad project
 FetchContent_Declare(
         glad
         GIT_REPOSITORY https://github.com/Dav1dde/glad.git
 )
-FetchContent_MakeAvailable(glad)
+FetchContent_MakeAvailable(glad glm)
 FetchContent_GetProperties(glad)
 if(NOT glad_POPULATED)
     FetchContent_Populate(glad)
@@ -98,8 +105,7 @@ target_include_directories(
 find_package(OpenGL REQUIRED)  # for Dear ImGui
 find_package(Threads REQUIRED) # for GLFW
 find_package(X11 REQUIRED)     # for GLFW
-
-add_executable(stable-ui main.cpp src/Rendering/RenderManager.cpp src/Rendering/objects/Canvas.cpp)
+add_executable(stable-ui main.cpp src/Rendering/RenderManager.cpp src/Rendering/canvas/Canvas.cpp src/Rendering/Helper.cpp)
 
 target_include_directories(
         stable-ui PRIVATE
@@ -109,6 +115,7 @@ target_include_directories(
         ${imgui_SOURCE_DIR}
         ${imgui_SOURCE_DIR}/backends
         ${imgui_SOURCE_DIR}/misc/cpp
+        ${glm_SOURCE_DIR}/src
 )
 
 target_link_libraries(
@@ -116,5 +123,6 @@ target_link_libraries(
         imgui
         glad
         glfw
+        glm
         ${OPENGL_LIBRARY}
 )

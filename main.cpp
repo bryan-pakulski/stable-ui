@@ -23,7 +23,7 @@ int main() {
     // Rendering loop for objects
     rm.update();
 
-    // Render and catch events
+    // Process and catch events
     QDisplay::processFrameAndEvents();
   }
 

@@ -1,15 +1,9 @@
-#pragma once
-#include <glad/glad.h>
-
-#include <GLFW/glfw3.h>
-
 #define STB_IMAGE_IMPLEMENTATION
-#include "../../Third Party/stb/stb_image.h"
 
-// Simple helper function to load an image into a OpenGL texture with common
-// settings
-inline bool LoadTextureFromFile(const char *filename, GLuint *out_texture,
-                                int *out_width, int *out_height) {
+#include "Helper.h"
+
+bool GLHELPER::LoadTextureFromFile(const char *filename, GLuint *out_texture,
+                                   int *out_width, int *out_height) {
   // Load from file
   int image_width = 0;
   int image_height = 0;

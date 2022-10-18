@@ -6,20 +6,46 @@
 #include "../../Display/ErrorHandler.h"
 #include "../../QLogger.h"
 #include "../../Rendering/RenderManager.h"
-#include "../../Rendering/objects/Helper.h"
 #include "../../config.h"
 #include "../QDisplay_Base.h"
 
 class QDisplay_MainWindow : public QDisplay_Base {
-  GLuint m_image_texture = 0;
-  int m_image_width = 0;
-  int m_image_height = 0;
-
-  char m_prompt[CONFIG::PROMPT_LENGTH_LIMIT];
+  // Initialise empty prompt
+  char *m_prompt = new char[CONFIG::PROMPT_LENGTH_LIMIT]();
+  Canvas *m_canvas = 0;
 
 public:
-  // Initialise render manager reference
+  // Initialise render manager references
   QDisplay_MainWindow(RenderManager *rm) : QDisplay_Base(rm) {}
+
+  void canvasWindow() {
+    ImGui::SetNextWindowBgAlpha(0.9f);
+    ImGui::Begin("Canvas");
+
+    if (!m_canvas) {
+      ImGui::TextUnformatted(
+          "Generate Text to image here, right click to copy contents "
+          "into selection box");
+    }
+
+    if (m_canvas) {
+      ImGui::Text("canvas width: %d canvas height:%d", m_canvas->c_width,
+                  m_canvas->c_height);
+      ImGui::Image((void *)(intptr_t)m_canvas->m_canvas,
+                   ImVec2(m_canvas->c_width, m_canvas->c_height));
+    } else {
+      ImGui::Text("...");
+    }
+
+    // Generate new canvas
+    if (ImGui::Button("Generate")) {
+      delete m_canvas;
+      m_canvas = new Canvas(512, 512, "generated");
+    }
+    // TODO: loading bar, once finished load image into GLuint
+
+    ImGui::End();
+  }
 
   void promptHelper() {
     ImGui::SetNextWindowBgAlpha(0.9f);
@@ -30,33 +56,7 @@ public:
 
   virtual void render() {
 
+    canvasWindow();
     promptHelper();
-
-    ImGui::SetNextWindowBgAlpha(0.9f);
-    ImGui::Begin("Paint Studio");
-
-    if (m_image_texture) {
-      ImGui::Text("size = %d x %d", m_image_width, m_image_height);
-      ImGui::Image((void *)(intptr_t)m_image_texture,
-                   ImVec2(m_image_width, m_image_height));
-    }
-
-    if (ImGui::Button("Load")) {
-
-      bool ret = LoadTextureFromFile("test.jpg", &m_image_texture,
-                                     &m_image_width, &m_image_height);
-      if (!ret) {
-        ErrorHandler::GetInstance().setError("Failed to load texture file");
-        QLogger::GetInstance().Log(LOGLEVEL::ERR,
-                                   "Failed to load texture file");
-      } else {
-        QLogger::GetInstance().Log(LOGLEVEL::INFO, "loaded texture file");
-      }
-    }
-
-    if (ImGui::Button("Save")) {
-    }
-
-    ImGui::End();
   }
 };

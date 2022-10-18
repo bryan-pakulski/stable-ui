@@ -1,5 +1,7 @@
 #pragma once
 
+#define ENABLE_GL_DEBUG 1
+
 namespace CONFIG {
 // StableDiffusion configuration
 static const int PROMPT_LENGTH_LIMIT = 2048;

@@ -3,7 +3,9 @@
 #include <fstream>
 #include <imgui.h>
 
+#include "../../Display/ErrorHandler.h"
 #include "../../QLogger.h"
+#include "../../Rendering/Helper.h"
 #include "../QDisplay_Base.h"
 
 class QDisplay_MenuBar : public QDisplay_Base {
@@ -12,6 +14,8 @@ private:
   // Window triggers
   bool newFileOpen = false;
   bool logFileOpen = false;
+  bool loadFileOpen = false;
+  bool selectCanvasOpen = false;
 
   // Log config
   std::ifstream logStream;
@@ -88,6 +92,63 @@ private:
     }
   }
 
+  void QDisplay_LoadFile() {
+    if (loadFileOpen) {
+
+      // Todo: input file path
+      std::string filename = "test.jpg";
+      int width = 512;
+      int height = 512;
+
+      std::shared_ptr<Canvas> canvas =
+          m_renderManager->createCanvas(width, height);
+
+      bool ret = GLHELPER::LoadTextureFromFile(
+          filename.c_str(), &canvas->m_canvas, &width, &height);
+      if (!ret) {
+        ErrorHandler::GetInstance().setError("Failed to load texture file");
+        QLogger::GetInstance().Log(LOGLEVEL::ERR,
+                                   "Failed to load texture file");
+      } else {
+        QLogger::GetInstance().Log(LOGLEVEL::INFO, "loaded texture file");
+      }
+
+      loadFileOpen = false;
+    }
+  }
+
+  void QDisplay_SelectCanvasOpen() {
+    if (selectCanvasOpen) {
+      ImGui::OpenPopup("SELECTCANVAS");
+      if (ImGui::BeginPopupModal("SELECTCANVAS")) {
+        if (ImGui::BeginListBox("Canvas in Memory")) {
+          for (auto &item : m_renderManager->m_canvas) {
+            const char *item_name = item->m_name.c_str();
+            int index = std::addressof(item) -
+                        std::addressof(m_renderManager->m_canvas.front());
+            const bool is_selected = index == m_renderManager->m_active;
+
+            if (ImGui::Selectable(item_name, is_selected)) {
+              m_renderManager->m_active = index;
+              selectCanvasOpen = false;
+            }
+
+            // Set the initial focus when opening the combo (scrolling +
+            // keyboard navigation focus)
+            if (is_selected) {
+              ImGui::SetItemDefaultFocus();
+            }
+          }
+          ImGui::EndListBox();
+        }
+      }
+      if (ImGui::Button("close")) {
+        selectCanvasOpen = false;
+      }
+      ImGui::EndPopup();
+    }
+  }
+
 public:
   // Initialise render manager reference
   QDisplay_MenuBar(RenderManager *rm) : QDisplay_Base(rm) {}
@@ -106,6 +167,10 @@ public:
           newFileOpen = true;
         }
 
+        if (ImGui::MenuItem("Load File")) {
+          loadFileOpen = true;
+        }
+
         if (ImGui::MenuItem("Open Log")) {
           logFileOpen = true;
         }
@@ -114,6 +179,11 @@ public:
       }
 
       if (ImGui::BeginMenu("Tools")) {
+
+        if (ImGui::MenuItem("Select Canvas")) {
+          selectCanvasOpen = true;
+        }
+
         ImGui::EndMenu();
       }
 
@@ -123,5 +193,7 @@ public:
     // These will only render if their corresponding flags are set
     QDisplay_LogFile();
     QDisplay_NewFile();
+    QDisplay_LoadFile();
+    QDisplay_SelectCanvasOpen();
   }
 };

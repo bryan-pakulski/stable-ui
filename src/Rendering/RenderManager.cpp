@@ -1,13 +1,31 @@
 #include "RenderManager.h"
 
 // Initialise render manager
-RenderManager::RenderManager(GLFWwindow &w) : window{w} {
+RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager initialized");
-  glfwSetKeyCallback(&window, key_callback);
+  glfwSetKeyCallback(&m_window, key_callback);
+
+  m_mainWindow = new MainWindow(
+      std::pair<int, int>{512, 512},
+      std::pair<int, int>{CONFIG::WINDOW_WIDTH, CONFIG::WINDOW_HEIGHT},
+      &m_window);
+
+  m_windowSelection = new WindowSelection(std::pair<int, int>{0, 0}, &m_window);
+
+  // Create initial canvas
+  createCanvas(CONFIG::WINDOW_WIDTH, CONFIG::WINDOW_HEIGHT);
 }
 
 // Destructor, destroy remaining instances
-RenderManager::~RenderManager() {}
+RenderManager::~RenderManager() {
+  for (auto &obj : objectList) {
+    delete obj;
+  }
+  objectList.clear();
+
+  delete m_mainWindow;
+  delete m_windowSelection;
+}
 
 // Main update function, checks for object cap before calling instance logic /
 // render loops
@@ -17,10 +35,24 @@ void RenderManager::update() {
 }
 
 // Update logic on instanced objects
-void RenderManager::logicLoop() {}
+void RenderManager::logicLoop() {
+  for (auto &obj : objectList) {
+    obj->updateLogic();
+  }
+
+  m_mainWindow->updateLogic();
+  m_windowSelection->updateLogic();
+}
 
 // Update visuals on instanced objects
-void RenderManager::renderLoop() {}
+void RenderManager::renderLoop() {
+  for (auto &obj : objectList) {
+    obj->updateVisual();
+  }
+
+  m_mainWindow->updateVisual();
+  m_windowSelection->updateVisual();
+}
 
 // Key callback function to map keypresses / actions to object instantiation
 void RenderManager::key_callback(GLFWwindow *window, int key, int scancode,
@@ -29,8 +61,41 @@ void RenderManager::key_callback(GLFWwindow *window, int key, int scancode,
   glfwGetWindowSize(window, &width, &height);
 }
 
-// Create new canvas object
-void RenderManager::createCanvas(int x, int y) {
+// Make a canvas active, pass texture to main window
+void RenderManager::selectCanvas(int id) {
+  m_active = id;
+  m_mainWindow->setMainWindowTexture(&m_canvas[m_active]->m_canvas);
+}
+
+// Create new canvas object & return a reference
+std::shared_ptr<Canvas> RenderManager::createCanvas(int x, int y) {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "Creating canvas %d x %d", x, y);
-  m_canvas.emplace_back(new Canvas(x, y));
+  m_canvas.emplace_back(new Canvas(x, y, std::to_string(m_canvas.size())));
+  selectCanvas(m_canvas.size() - 1);
+  return m_canvas.back();
+}
+
+// Get active canvas
+std::shared_ptr<Canvas> RenderManager::getActiveCanvas() {
+  if (m_canvas.size() > 0) {
+    return m_canvas[m_active];
+  } else {
+    return nullptr;
+  }
+}
+
+// Callback to log GL errors
+void RenderManager::GLFWErrorCallBack(int, const char *err_str) {
+  QLogger::GetInstance().Log(LOGLEVEL::ERR, err_str);
+}
+
+void GLAPIENTRY RenderManager::MessageCallback(GLenum source, GLenum type,
+                                               GLuint id, GLenum severity,
+                                               GLsizei length,
+                                               const GLchar *message,
+                                               const void *userParam) {
+  fprintf(stderr,
+          "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+          (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity,
+          message);
 }

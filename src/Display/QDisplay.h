@@ -31,6 +31,15 @@ public:
     // Initialisation
     m_submenus.emplace_back(new QDisplay_MenuBar(m_renderManager));
     m_submenus.emplace_back(new QDisplay_MainWindow(m_renderManager));
+
+    // Register error callback
+    glfwSetErrorCallback(m_renderManager->GLFWErrorCallBack);
+
+    // Enable debug output
+    if (ENABLE_GL_DEBUG == 1) {
+      glEnable(GL_DEBUG_OUTPUT);
+      glDebugMessageCallback(m_renderManager->MessageCallback, 0);
+    }
   }
 
   // Return currently active window
