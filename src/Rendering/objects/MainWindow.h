@@ -8,7 +8,7 @@
 class MainWindow : public BaseObject {
 private:
   std::pair<int, int> m_pc{};   // Pixel Coordinates (top left)
-  std::pair<int, int> m_size{}; // Size of display
+  std::pair<int, int> m_size{}; // Size of object in pixels
   std::pair<int, int> screen{}; // Screen size
 
   // Reference to texture for main window

@@ -124,5 +124,6 @@ target_link_libraries(
         glad
         glfw
         glm
+        ${CMAKE_HOME_DIRECTORY}/lib/libyaml-cpp.a
         ${OPENGL_LIBRARY}
 )

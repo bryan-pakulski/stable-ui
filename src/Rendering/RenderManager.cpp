@@ -6,7 +6,7 @@ RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
   glfwSetKeyCallback(&m_window, key_callback);
 
   m_mainWindow = new MainWindow(
-      std::pair<int, int>{512, 512},
+      std::pair<int, int>{CONFIG::WINDOW_WIDTH, CONFIG::WINDOW_HEIGHT},
       std::pair<int, int>{CONFIG::WINDOW_WIDTH, CONFIG::WINDOW_HEIGHT},
       &m_window);
 
