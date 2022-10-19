@@ -105,7 +105,12 @@ target_include_directories(
 find_package(OpenGL REQUIRED)  # for Dear ImGui
 find_package(Threads REQUIRED) # for GLFW
 find_package(X11 REQUIRED)     # for GLFW
-add_executable(stable-ui main.cpp src/Rendering/RenderManager.cpp src/Rendering/canvas/Canvas.cpp src/Rendering/Helper.cpp)
+
+# Embed python
+find_package (Python REQUIRED
+        COMPONENTS Interpreter Development)
+
+add_executable(stable-ui main.cpp src/Rendering/RenderManager.cpp src/Rendering/canvas/Canvas.cpp src/Rendering/Helper.cpp src/SDInterface/SDCommandsInterface.cpp src/SDInterface/py/SnakeHandler.cpp)
 
 target_include_directories(
         stable-ui PRIVATE
@@ -116,6 +121,12 @@ target_include_directories(
         ${imgui_SOURCE_DIR}/backends
         ${imgui_SOURCE_DIR}/misc/cpp
         ${glm_SOURCE_DIR}/src
+        ${Python_INCLUDE_DIRS}
+)
+
+target_link_directories(
+        stable-ui PRIVATE
+        ${Python_LIBRARY_DIRS}
 )
 
 target_link_libraries(
@@ -126,4 +137,5 @@ target_link_libraries(
         glm
         ${CMAKE_HOME_DIRECTORY}/lib/libyaml-cpp.a
         ${OPENGL_LIBRARY}
+        ${Python_LIBRARIES}
 )

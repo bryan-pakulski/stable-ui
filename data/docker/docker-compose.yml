@@ -1,0 +1,24 @@
+version: '3.3'
+
+services:
+  stable-diffusion:
+    image: "sd"
+    container_name: sd
+    tty: true 
+    build:
+      context: ${STABLE_DIFFUSION_PATH}
+      dockerfile: Dockerfile
+    env_file: .env_docker
+    volumes:
+      - /run/media/bryanp/Dev/projects/public/Stable Diffusion/stable-diffusion-cli:/sd
+      - /run/media/bryanp/Dev/projects/public/Stable Diffusion/stable-diffusion-cli/outputs:/sd/outputs
+      - conda_env:/opt/conda
+      - root_profile:/root
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+volumes:
+  conda_env:
+  root_profile:

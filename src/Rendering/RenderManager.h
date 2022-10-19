@@ -10,6 +10,7 @@
 #include "objects/BaseObject.h"
 #include "objects/MainWindow.h"
 #include "objects/WindowSelection.h"
+#include "../SDInterface/SDCommandsInterface.h"
 
 #include <glad/glad.h>
 
@@ -52,6 +53,7 @@ private:
   GLFWwindow &m_window;
   MainWindow *m_mainWindow;
   WindowSelection *m_windowSelection;
+  SDCommandsInterface sd_cmd;
 
   static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 

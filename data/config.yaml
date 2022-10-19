@@ -1,10 +1,16 @@
 # ImGUI Settings
 HIGH_DPI_SCALE_FACTOR: 1.0
-WINDOW_WIDTH: 1480
+WINDOW_WIDTH: 1280
 WINDOW_HEIGHT: 720
 
 # Stable Diffusion settings
-STABLE_DIFFUSION_PATH: "/run/media/sd/"
+STABLE_DIFFUSION_DOCKER_PATH: "/sd/"
+TXT_TO_IMG_PATH: "optimizedSD/optimized_txt2img.py"
+IMG_TO_IMG_PATH: "optimizedSD/optimized_img2img.py"
 PROMPT_LENGTH_LIMIT: 2048
 CANVAS_SIZE_X_LIMIT: 512
 CANVAS_SIZE_Y_LIMIT: 512
+
+# Program configuration
+PYTHON_CONFIG_PATH: "data/scripts/"
+ENABLE_OPENGL_DEBUG_OUTPUT: 0

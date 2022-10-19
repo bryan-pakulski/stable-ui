@@ -36,7 +36,7 @@ public:
     glfwSetErrorCallback(m_renderManager->GLFWErrorCallBack);
 
     // Enable debug output
-    if (ENABLE_GL_DEBUG == 1) {
+    if (CONFIG::ENABLE_GL_DEBUG == 1) {
       glEnable(GL_DEBUG_OUTPUT);
       glDebugMessageCallback(m_renderManager->MessageCallback, 0);
     }
