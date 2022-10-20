@@ -10,6 +10,9 @@ RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
 
   m_windowSelection = new WindowSelection(std::pair<int, int>{0, 0}, &m_window);
 
+  // Intialise python interface for calling commands
+  SDCommandsInterface::GetInstance();
+
   // Create initial canvas
   createCanvas(CONFIG::WINDOW_WIDTH, CONFIG::WINDOW_HEIGHT);
 }
@@ -50,6 +53,19 @@ void RenderManager::renderLoop() {
 
   m_mainWindow->updateVisual();
   m_windowSelection->updateVisual();
+}
+
+// Text to Image, render result to canvas
+void RenderManager::textToImage(Canvas &c, std::string prompt, int samples, int steps, int seed, int width, int height,
+                                bool &finishedFlag) {
+
+  // Generate & Retrieve newly generated image
+  SDCommandsInterface::GetInstance().textToImage(prompt, samples, steps, seed, width, height);
+
+  // Apply image to canvas as a texture
+
+  // Once finished set finished flag
+  finishedFlag = true;
 }
 
 // Key callback function to map keypresses / actions to object instantiation

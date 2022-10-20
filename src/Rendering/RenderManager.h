@@ -44,6 +44,13 @@ public:
   // Make a canvas active
   void selectCanvas(int id);
 
+  // Generate txt2img
+  void textToImage(Canvas &c, std::string prompt, int samples, int steps, int seed, int width, int height,
+                   bool &finishedFlag);
+
+  // Generate img2img
+  void imageToImage();
+
   // Error callback for GLFW logging
   static void GLFWErrorCallBack(int, const char *err_str);
   static void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
@@ -53,7 +60,6 @@ private:
   GLFWwindow &m_window;
   MainWindow *m_mainWindow;
   WindowSelection *m_windowSelection;
-  SDCommandsInterface sd_cmd;
 
   static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
