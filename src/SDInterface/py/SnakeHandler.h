@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <mutex>
 #include <vector>
 
 #define PY_SSIZE_T_CLEAN
@@ -50,11 +51,12 @@ class SnakeHandler {
 private:
     PyObject *m_pName, *m_pModule, *m_pFunc;
     PyObject *m_pArgs, *m_pValue;
+    std::mutex m_mutex;
     
     std::string m_filename;
 public:
     SnakeHandler(std::string filename);
     ~SnakeHandler();
 
-    bool callFunction(std::string &function, std::vector<std::unique_ptr<base_type>> &arguments);
+    bool callFunction(const std::string &function, const std::vector<std::unique_ptr<base_type>> &arguments, bool &finishedFlag);
 };

@@ -3,8 +3,6 @@
 SDCommandsInterface::SDCommandsInterface() {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "Initialising SDCommandsInterface");
 
-  m_Thread = std::thread(&SDCommandsInterface::m_Thread, this);
-
   std::string path = "sys.path.append(\"" + CONFIG::PYTHON_CONFIG_PATH + "\")";
 
   Py_Initialize();
@@ -16,14 +14,15 @@ SDCommandsInterface::SDCommandsInterface() {
   m_py_handle = std::unique_ptr<SnakeHandler>(new SnakeHandler("sd_commands"));
 }
 
-SDCommandsInterface::~SDCommandsInterface() { m_Thread.join(); }
+SDCommandsInterface::~SDCommandsInterface() { }
 
-void SDCommandsInterface::textToImage(std::string prompt, int samples, int steps, int seed, int width, int height) {
-  // Build arguments
-  std::vector<std::unique_ptr<base_type>> arguments;
+void SDCommandsInterface::textToImage(std::string prompt, int samples, int steps, int seed, int width, int height, bool &finishedFlag) {
+  // Free old arguments
+  arguments.clear();
 
   std::string functionName = "txt2image";
   std::string exec_path = CONFIG::STABLE_DIFFUSION_DOCKER_PATH + CONFIG::TXT_TO_IMG_PATH;
+  std::string out_dir = CONFIG::OUTPUT_DIRECTORY;
 
   arguments.emplace_back(std::unique_ptr<base_type>(new d_type<const char *>('s', "exec_path", exec_path.c_str(), 0)));
   arguments.emplace_back(std::unique_ptr<base_type>(new d_type<const char *>('s', "prompt", prompt.c_str(), 1)));
@@ -32,8 +31,11 @@ void SDCommandsInterface::textToImage(std::string prompt, int samples, int steps
   arguments.emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "seed", seed, 4)));
   arguments.emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "width", width, 5)));
   arguments.emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "height", height, 6)));
+  arguments.emplace_back(std::unique_ptr<base_type>(new d_type<const char *>('s', "out_dir", out_dir.c_str(), 7)));
 
-  m_py_handle->callFunction(functionName, arguments);
+  // Offload thread execution, image generation can take some time
+  m_Thread = std::thread(&SnakeHandler::callFunction, m_py_handle.get(), std::cref(functionName), std::cref(arguments), std::ref(finishedFlag));
+  m_Thread.detach();
 }
 
 void SDCommandsInterface::imageToImage() {}

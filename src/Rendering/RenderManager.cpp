@@ -60,12 +60,7 @@ void RenderManager::textToImage(Canvas &c, std::string prompt, int samples, int 
                                 bool &finishedFlag) {
 
   // Generate & Retrieve newly generated image
-  SDCommandsInterface::GetInstance().textToImage(prompt, samples, steps, seed, width, height);
-
-  // Apply image to canvas as a texture
-
-  // Once finished set finished flag
-  finishedFlag = true;
+  SDCommandsInterface::GetInstance().textToImage(prompt, samples, steps, seed, width, height, finishedFlag);
 }
 
 // Key callback function to map keypresses / actions to object instantiation

@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <thread>
+#include <mutex>
 
 #ifndef WIN32
 #include <unistd.h>
@@ -48,18 +49,8 @@ public:
   }
 
   template <typename T, typename... Args> void Log(LOGLEVEL logLevel, T message, Args... args) {
-    if (logLevel == LOGLEVEL::INFO) {
-      log << std::string(getDateTime()).append(" - [INFO]: ") << message << ", ";
-      Info(args...);
-    } else if (logLevel == LOGLEVEL::WARN) {
-      log << std::string(getDateTime()).append(" - [WARN]: ") << message << ", ";
-      Warning(args...);
-    } else if (logLevel == LOGLEVEL::ERR) {
-      log << std::string(getDateTime()).append(" - [ERR]: ") << message << ", ";
-      Error(args...);
-    }
-
-    updateLogTimestamp();
+    m_Thread = std::thread(&QLogger::_Log<T, Args...>, this, logLevel, message, args...);
+    m_Thread.detach();
   }
 
   void resetLog() {
@@ -78,22 +69,37 @@ private:
   // Output file
   std::ofstream log;
   struct stat logStat {};
+  std::mutex m_mutex;
 
   // Open file on instantiation
   QLogger() {
     log.open(QLOGGER_LOGFILE, std::ios_base::app);
-    m_Thread = std::thread(&QLogger::m_Thread, this);
   }
 
   ~QLogger() {
     log.close();
-    m_Thread.join();
   }
 
   void updateLogTimestamp() {
     if (stat(QLOGGER_LOGFILE, &logStat) == 0) {
       m_LAST_WRITE_TIME = clock();
     }
+  }
+
+  template <typename T, typename... Args> void _Log(LOGLEVEL logLevel, T message, Args... args) {
+    std::lock_guard<std::mutex> guard(m_mutex);
+    if (logLevel == LOGLEVEL::INFO) {
+      log << std::string(getDateTime()).append(" - [INFO]: ") << message << ", ";
+      Info(args...);
+    } else if (logLevel == LOGLEVEL::WARN) {
+      log << std::string(getDateTime()).append(" - [WARN]: ") << message << ", ";
+      Warning(args...);
+    } else if (logLevel == LOGLEVEL::ERR) {
+      log << std::string(getDateTime()).append(" - [ERR]: ") << message << ", ";
+      Error(args...);
+    }
+
+    updateLogTimestamp();
   }
 
   template <typename T> void Error(T message) { log << message << std::endl; }

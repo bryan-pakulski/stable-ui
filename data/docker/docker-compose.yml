@@ -11,7 +11,7 @@ services:
     env_file: .env_docker
     volumes:
       - /run/media/bryanp/Dev/projects/public/Stable Diffusion/stable-diffusion-cli:/sd
-      - /run/media/bryanp/Dev/projects/public/Stable Diffusion/stable-diffusion-cli/outputs:/sd/outputs
+      - data/output:/sd/output
       - conda_env:/opt/conda
       - root_profile:/root
     deploy:

@@ -3,4 +3,4 @@ cmake .. && make -j 16
 
 mv stable-ui bin/
 cp -r ../data bin/
-cp ../run.sh bin/
+cp ../start_docker.sh bin/

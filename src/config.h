@@ -23,4 +23,5 @@ static const int WINDOW_HEIGHT = config_file["WINDOW_HEIGHT"].as<int>();
 // Program configuration
 static const std::string PYTHON_CONFIG_PATH = config_file["PYTHON_CONFIG_PATH"].as<std::string>();
 static const u_int ENABLE_GL_DEBUG = config_file["ENABLE_OPENGL_DEBUG_OUTPUT"].as<u_int>();
+static const std::string OUTPUT_DIRECTORY = config_file["OUTPUT_DIRECTORY"].as<std::string>();
 } // namespace CONFIG

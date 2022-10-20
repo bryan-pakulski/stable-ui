@@ -14,6 +14,7 @@ class SDCommandsInterface {
 private:
   std::unique_ptr<SnakeHandler> m_py_handle;
   std::thread m_Thread;
+  std::vector<std::unique_ptr<base_type>> arguments;
 
   SDCommandsInterface();
   ~SDCommandsInterface();
@@ -28,7 +29,7 @@ public:
   SDCommandsInterface(SDCommandsInterface const &) = delete;
   void operator=(SDCommandsInterface const &) = delete;
 
-  void textToImage(std::string prompt, int samples, int steps, int seed, int width, int height);
+  void textToImage(std::string prompt, int samples, int steps, int seed, int width, int height, bool &finishedFlag);
 
   void imageToImage();
 };

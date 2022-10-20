@@ -2,7 +2,7 @@
 #include "../../QLogger.h"
 #include <cstddef>
 
-Canvas::Canvas(int width, int height, std::string name) : c_width(width), c_height(height), m_name(name) {
+Canvas::Canvas(int width, int height, std::string name) : m_width(width), m_height(height), m_name(name) {
 
   glGenTextures(1, &m_canvas);
   glBindTexture(GL_TEXTURE_2D, m_canvas);
@@ -16,5 +16,9 @@ Canvas::Canvas(int width, int height, std::string name) : c_width(width), c_heig
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Successfully created blank canvas with dimensions: ", c_width, c_height);
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Successfully created blank canvas with dimensions: ", m_width, m_height);
+}
+
+void Canvas::loadFromImage(std::string path) {
+  GLHELPER::LoadTextureFromFile(path.c_str(), &m_canvas, &m_width, &m_height);
 }

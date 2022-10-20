@@ -5,6 +5,7 @@ WINDOW_HEIGHT: 720
 
 # Stable Diffusion settings
 STABLE_DIFFUSION_DOCKER_PATH: "/sd/"
+OUTPUT_DIRECTORY: "/sd/output"
 TXT_TO_IMG_PATH: "optimizedSD/optimized_txt2img.py"
 IMG_TO_IMG_PATH: "optimizedSD/optimized_img2img.py"
 PROMPT_LENGTH_LIMIT: 2048

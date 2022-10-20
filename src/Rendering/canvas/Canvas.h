@@ -1,4 +1,5 @@
 #pragma once
+#include "../Helper.h"
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
@@ -8,10 +9,13 @@ class Canvas {
 
 public:
   GLuint m_canvas = 0;
+  bool rendered = true;
   std::string m_name;
-  const int c_width;
-  const int c_height;
+  int m_width;
+  int m_height;
 
   Canvas(int width, int height, std::string name);
   ~Canvas() = default;
+
+  void loadFromImage(std::string path);
 };

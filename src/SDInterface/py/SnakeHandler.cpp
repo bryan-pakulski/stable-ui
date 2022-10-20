@@ -26,7 +26,8 @@ SnakeHandler::~SnakeHandler() {
     }
 }
 
-bool SnakeHandler::callFunction(std::string &function, std::vector<std::unique_ptr<base_type>> &arguments) {
+bool SnakeHandler::callFunction(const std::string &function, const std::vector<std::unique_ptr<base_type>> &arguments, bool &finishedFlag) {
+    std::lock_guard<std::mutex> guard(m_mutex);
     /* pFunc is a new reference */
     m_pFunc = PyObject_GetAttrString(m_pModule, function.c_str());
 
@@ -50,6 +51,7 @@ bool SnakeHandler::callFunction(std::string &function, std::vector<std::unique_p
             if (!m_pValue) {
                 Py_DECREF(m_pArgs);
                 QLogger::GetInstance().Log(LOGLEVEL::ERR, m_filename, "Can't convert argument of type: ", arg->getType() );
+                finishedFlag = true;
                 return 0;
             }
 
@@ -60,10 +62,11 @@ bool SnakeHandler::callFunction(std::string &function, std::vector<std::unique_p
         m_pValue = PyObject_CallObject(m_pFunc, m_pArgs);
         Py_DECREF(m_pArgs);
 
-        if (m_pValue && PyLong_AsLong(m_pValue) >= 0) {
-            QLogger::GetInstance().Log(LOGLEVEL::INFO, m_filename, "Function call completed successfully for: ", function, "with result: ", PyLong_AsLong(m_pValue));
+        if (m_pValue) {
+            QLogger::GetInstance().Log(LOGLEVEL::INFO, m_filename, "Function call completed successfully for: ", function);
             Py_DECREF(m_pValue);
             Py_XDECREF(m_pFunc);
+            finishedFlag = true;
             return 1;
         }
         else {
@@ -71,6 +74,7 @@ bool SnakeHandler::callFunction(std::string &function, std::vector<std::unique_p
             PyErr_Print();
             QLogger::GetInstance().Log(LOGLEVEL::ERR, m_filename, "Function call failed for: ", function);
             ErrorHandler::GetInstance().setError("Docker function call execution failed, check that contains are running...");
+            finishedFlag = true;
             return 0;
         }
     }
@@ -82,5 +86,6 @@ bool SnakeHandler::callFunction(std::string &function, std::vector<std::unique_p
     }
     
     Py_DECREF(m_pFunc);
+    finishedFlag = true;
     return 0;
 }
