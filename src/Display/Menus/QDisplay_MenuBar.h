@@ -146,7 +146,7 @@ private:
 
 public:
   // Initialise render manager reference
-  QDisplay_MenuBar(RenderManager *rm) : QDisplay_Base(rm) {}
+  QDisplay_MenuBar(std::shared_ptr<RenderManager> rm) : QDisplay_Base(rm) {}
   /*
    * Main Menu renderer, contains logic for showing additional display items
    *

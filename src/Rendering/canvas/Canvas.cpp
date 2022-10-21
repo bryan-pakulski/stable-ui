@@ -21,4 +21,5 @@ Canvas::Canvas(int width, int height, std::string name) : m_width(width), m_heig
 
 void Canvas::loadFromImage(std::string path) {
   GLHELPER::LoadTextureFromFile(path.c_str(), &m_canvas, &m_width, &m_height);
+  m_image_source = path;
 }

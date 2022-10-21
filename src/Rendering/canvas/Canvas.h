@@ -12,6 +12,7 @@ public:
   bool rendered = true;
   bool textured = false;
   std::string m_name;
+  std::string m_image_source;
   int m_width;
   int m_height;
 

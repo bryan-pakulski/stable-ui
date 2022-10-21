@@ -44,6 +44,9 @@ public:
   // Make a canvas active
   void selectCanvas(int id);
 
+  // Create a copy of a passed canvas to set for the main window
+  void setCanvas(Canvas &c);
+
   // Generate txt2img
   void textToImage(Canvas &c, std::string prompt, int samples, int steps, int seed, int width, int height,
                    bool &finishedFlag, std::string model_name);

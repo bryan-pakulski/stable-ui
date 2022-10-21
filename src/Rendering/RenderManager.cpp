@@ -75,6 +75,12 @@ void RenderManager::selectCanvas(int id) {
   m_mainWindow->setMainWindowTexture(&m_canvas[m_active]->m_canvas);
 }
 
+// Create a new canvas from our generated one to set for the main window
+void RenderManager::setCanvas(Canvas &c) {
+  m_canvas[m_active]->m_image_source=c.m_image_source;
+  m_canvas[m_active]->loadFromImage(m_canvas[m_active]->m_image_source);
+}
+
 // Create new canvas object & return a reference
 std::shared_ptr<Canvas> RenderManager::createCanvas(int x, int y) {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "Creating canvas %d x %d", x, y);
