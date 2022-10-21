@@ -29,12 +29,12 @@ class QDisplay_MainWindow : public QDisplay_Base {
   std::string m_ckpt_path = "";
   std::vector<listItem> m_ckpt_files;
 
-  Canvas *m_canvas = 0;
+  std::unique_ptr<Canvas> m_canvas = 0;
   bool finishedRendering = false;
 
 public:
   // Initialise render manager references
-  QDisplay_MainWindow(RenderManager *rm) : QDisplay_Base(rm) {
+  QDisplay_MainWindow(std::shared_ptr<RenderManager> rm) : QDisplay_Base(rm) {
     m_prompt[0] = 0;
 
     // Load model files
@@ -59,8 +59,8 @@ public:
   }
 
   void renderCanvas() {
-    delete m_canvas;
-    m_canvas = new Canvas(CONFIG::CANVAS_SIZE_X_LIMIT, CONFIG::CANVAS_SIZE_Y_LIMIT, "generated");
+    m_canvas.reset();
+    m_canvas = std::unique_ptr<Canvas>(new Canvas(CONFIG::CANVAS_SIZE_X_LIMIT, CONFIG::CANVAS_SIZE_Y_LIMIT, "generated"));
     m_canvas->rendered = false;
     m_renderManager->textToImage(*m_canvas, m_prompt, 1, m_steps, m_seed, m_width, m_height, m_canvas->rendered, m_selected_model);
   }
@@ -81,6 +81,10 @@ public:
       // Once canvas is marked as rendered display on screen
       if (m_canvas->rendered) {
         ImGui::Text("canvas width: %d canvas height:%d", m_canvas->m_width, m_canvas->m_height);
+        if (ImGui::Button("Send to Canvas")) {
+          // Send to main window canvas
+          m_renderManager->setCanvas(*m_canvas);
+        }
 
         // Retrieve texture file
         if (!m_canvas->textured) {
@@ -110,10 +114,9 @@ public:
     if (ImGui::BeginCombo("models", m_selected_model.c_str(), ImGuiComboFlags_NoArrowButton)) {
       for (auto &item : m_ckpt_files)
       {
-        std::string& item_name = item.m_name;
-        if (ImGui::Selectable(item_name.c_str(), item.m_isSelected))
+        if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected))
         {
-          m_selected_model = item_name;
+          m_selected_model = item.m_name;
           
         }
         if (item.m_isSelected) {

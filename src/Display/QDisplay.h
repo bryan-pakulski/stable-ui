@@ -25,7 +25,7 @@ public:
 
   // Attach a render manager instance
   // This is necessary for sub menus to interact with the render manager
-  void AttachRenderManager(RenderManager *rm) {
+  void AttachRenderManager(std::shared_ptr<RenderManager> rm) {
     m_renderManager = rm;
 
     // Initialisation
@@ -74,7 +74,7 @@ private:
   GLFWwindow *m_window;
   std::string m_glsl_version;
   std::vector<std::unique_ptr<QDisplay_Base>> m_submenus;
-  RenderManager *m_renderManager = 0;
+  std::shared_ptr<RenderManager> m_renderManager = 0;
 
   float backgroundR = 0.45f;
   float backgroundG = 0.44f;

@@ -12,9 +12,9 @@
 class QDisplay_Base {
 
 protected:
-  RenderManager *m_renderManager;
+   std::shared_ptr<RenderManager> m_renderManager;
 
 public:
-  QDisplay_Base(RenderManager *rm) : m_renderManager(rm) {}
+  QDisplay_Base(std::shared_ptr<RenderManager> rm) : m_renderManager(rm) {}
   virtual void render() {}
 };

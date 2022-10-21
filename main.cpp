@@ -5,8 +5,8 @@
 int main() {
 
   // Intialise Render manager & attach to Display
-  RenderManager rm(*QDisplay::GetInstance().getWindow());
-  QDisplay::GetInstance().AttachRenderManager(&rm);
+  std::shared_ptr<RenderManager> rm(new RenderManager(*QDisplay::GetInstance().getWindow()));
+  QDisplay::GetInstance().AttachRenderManager(rm);
 
   while (!glfwWindowShouldClose(QDisplay::GetInstance().getWindow())) {
 
@@ -21,7 +21,7 @@ int main() {
     QDisplay::GetInstance().drawMenus();
 
     // Rendering loop for objects
-    rm.update();
+    rm->update();
 
     // Process and catch events
     QDisplay::processFrameAndEvents();
