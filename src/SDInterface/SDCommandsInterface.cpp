@@ -14,27 +14,28 @@ SDCommandsInterface::SDCommandsInterface() {
   m_py_handle = std::unique_ptr<SnakeHandler>(new SnakeHandler("sd_commands"));
 }
 
-SDCommandsInterface::~SDCommandsInterface() { }
+SDCommandsInterface::~SDCommandsInterface() {
+  delete arguments;
+}
 
-void SDCommandsInterface::textToImage(std::string prompt, int samples, int steps, int seed, int width, int height, bool &finishedFlag) {
-  // Free old arguments
-  arguments.clear();
-
+void SDCommandsInterface::textToImage(std::string prompt, int samples, int steps, int seed, int width, int height, bool &finishedFlag, std::string model_name) {
   std::string functionName = "txt2image";
   std::string exec_path = CONFIG::STABLE_DIFFUSION_DOCKER_PATH + CONFIG::TXT_TO_IMG_PATH;
   std::string out_dir = CONFIG::OUTPUT_DIRECTORY;
+  std::string model_path = "/models/" + model_name;
 
-  arguments.emplace_back(std::unique_ptr<base_type>(new d_type<const char *>('s', "exec_path", exec_path.c_str(), 0)));
-  arguments.emplace_back(std::unique_ptr<base_type>(new d_type<const char *>('s', "prompt", prompt.c_str(), 1)));
-  arguments.emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "samples", samples, 2)));
-  arguments.emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "steps", steps, 3)));
-  arguments.emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "seed", seed, 4)));
-  arguments.emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "width", width, 5)));
-  arguments.emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "height", height, 6)));
-  arguments.emplace_back(std::unique_ptr<base_type>(new d_type<const char *>('s', "out_dir", out_dir.c_str(), 7)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", exec_path, 0)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "prompt", prompt, 1)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "samples", samples, 2)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "steps", steps, 3)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "seed", seed, 4)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "width", width, 5)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "height", height, 6)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "out_dir", out_dir, 7)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "ckpt_name", model_path, 8)));
 
   // Offload thread execution, image generation can take some time
-  m_Thread = std::thread(&SnakeHandler::callFunction, m_py_handle.get(), std::cref(functionName), std::cref(arguments), std::ref(finishedFlag));
+  m_Thread = std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, std::ref(arguments), std::ref(finishedFlag));
   m_Thread.detach();
 }
 

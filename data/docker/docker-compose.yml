@@ -6,12 +6,13 @@ services:
     container_name: sd
     tty: true 
     build:
-      context: ${STABLE_DIFFUSION_PATH}
+      context: .
       dockerfile: Dockerfile
     env_file: .env_docker
     volumes:
-      - /run/media/bryanp/Dev/projects/public/Stable Diffusion/stable-diffusion-cli:/sd
-      - data/output:/sd/output
+      - /run/media/bryanp/Dev/projects/public/Stable Diffusion/ultimate-stable-diffusion:/sd
+      - /run/media/bryanp/Dev/projects/public/Stable Diffusion/stable-diffusion-weights:/models
+      - ../output:/output
       - conda_env:/opt/conda
       - root_profile:/root
     deploy:

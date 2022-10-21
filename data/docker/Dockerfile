@@ -22,5 +22,4 @@ COPY ./environment.yaml /home/
 COPY ./setup.py /home/
 
 RUN ["chmod", "+x", "/home/entrypoint.sh"]
-
-ENTRYPOINT ["/home/entrypoint.sh"]
+CMD sleep infinity

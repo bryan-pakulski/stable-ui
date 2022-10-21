@@ -9,6 +9,7 @@ static YAML::Node config_file = YAML::LoadFile("data/config.yaml");
 // StableDiffusion configuration
 static const int PROMPT_LENGTH_LIMIT = config_file["PROMPT_LENGTH_LIMIT"].as<int>();
 static const std::string STABLE_DIFFUSION_DOCKER_PATH = config_file["STABLE_DIFFUSION_DOCKER_PATH"].as<std::string>();
+static const std::string MODELS_DIRECTORY = config_file["MODELS_DIRECTORY"].as<std::string>();
 static const std::string TXT_TO_IMG_PATH = config_file["TXT_TO_IMG_PATH"].as<std::string>();
 static const std::string IMG_TO_IMG_PATH = config_file["TXT_TO_IMG_PATH"].as<std::string>();
 static const int CANVAS_SIZE_X_LIMIT = config_file["CANVAS_SIZE_X_LIMIT"].as<int>();

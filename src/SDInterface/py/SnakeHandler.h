@@ -58,5 +58,5 @@ public:
     SnakeHandler(std::string filename);
     ~SnakeHandler();
 
-    bool callFunction(const std::string &function, const std::vector<std::unique_ptr<base_type>> &arguments, bool &finishedFlag);
+    bool callFunction(const std::string function, std::vector<std::unique_ptr<base_type>> *arguments, bool &finishedFlag);
 };

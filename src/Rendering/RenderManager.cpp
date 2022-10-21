@@ -3,7 +3,7 @@
 // Initialise render manager
 RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager initialized");
-  glfwSetKeyCallback(&m_window, key_callback);
+  //glfwSetKeyCallback(&m_window, key_callback);
 
   m_mainWindow = new MainWindow(std::pair<int, int>{CONFIG::WINDOW_WIDTH, CONFIG::WINDOW_HEIGHT},
                                 std::pair<int, int>{CONFIG::WINDOW_WIDTH, CONFIG::WINDOW_HEIGHT}, &m_window);
@@ -57,10 +57,10 @@ void RenderManager::renderLoop() {
 
 // Text to Image, render result to canvas
 void RenderManager::textToImage(Canvas &c, std::string prompt, int samples, int steps, int seed, int width, int height,
-                                bool &finishedFlag) {
+                                bool &finishedFlag, std::string model_name) {
 
   // Generate & Retrieve newly generated image
-  SDCommandsInterface::GetInstance().textToImage(prompt, samples, steps, seed, width, height, finishedFlag);
+  SDCommandsInterface::GetInstance().textToImage(prompt, samples, steps, seed, width, height, finishedFlag, model_name);
 }
 
 // Key callback function to map keypresses / actions to object instantiation

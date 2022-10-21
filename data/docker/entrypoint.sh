@@ -38,3 +38,6 @@ fi
 . /opt/conda/etc/profile.d/conda.sh
 conda activate $ENV_NAME
 conda info | grep active
+
+cd /sd
+pip install -e .

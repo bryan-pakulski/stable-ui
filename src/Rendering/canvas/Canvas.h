@@ -10,6 +10,7 @@ class Canvas {
 public:
   GLuint m_canvas = 0;
   bool rendered = true;
+  bool textured = false;
   std::string m_name;
   int m_width;
   int m_height;
