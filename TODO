@@ -1,1 +1,4 @@
-# TODO: Thread python class manager so that calls don't block the gui
+# TODO: types.h
+initialise string with a maximum length, this is important as if we reload configuration by
+editing the string manually via ImGui we don't have the hooks to re-size memory and we risk overwriting if
+the initial string is too short
