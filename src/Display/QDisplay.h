@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "../Rendering/RenderManager.h"
-#include "../config.h"
+#include "../Config/config.h"
 #include "Menus/QDisplay_MainWindow.h"
 #include "Menus/QDisplay_MenuBar.h"
 #include "QDisplay_Base.h"
@@ -36,7 +36,7 @@ public:
     glfwSetErrorCallback(m_renderManager->GLFWErrorCallBack);
 
     // Enable debug output
-    if (CONFIG::ENABLE_GL_DEBUG == 1) {
+    if (CONFIG::ENABLE_GL_DEBUG.get() == 1) {
       glEnable(GL_DEBUG_OUTPUT);
       glDebugMessageCallback(m_renderManager->MessageCallback, 0);
     }
@@ -140,7 +140,8 @@ private:
     glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
 #endif
 
-    m_window = glfwCreateWindow(CONFIG::WINDOW_WIDTH, CONFIG::WINDOW_WIDTH, CONFIG::PROGRAM_NAME, nullptr, nullptr);
+    m_window = glfwCreateWindow(CONFIG::WINDOW_WIDTH.get(), CONFIG::WINDOW_WIDTH.get(), CONFIG::PROGRAM_NAME.c_str(),
+                                nullptr, nullptr);
 
     if (!m_window) {
       QLogger::GetInstance().Log(LOGLEVEL::ERR, "Couldn't create a GLFW window");

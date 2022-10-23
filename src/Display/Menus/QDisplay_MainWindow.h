@@ -7,7 +7,7 @@
 #include "../../Display/ErrorHandler.h"
 #include "../../QLogger.h"
 #include "../../Rendering/RenderManager.h"
-#include "../../config.h"
+#include "../../Config/config.h"
 #include "../QDisplay_Base.h"
 
 namespace fs = std::filesystem;
@@ -19,7 +19,7 @@ struct listItem {
 
 class QDisplay_MainWindow : public QDisplay_Base {
   // Initialise empty prompt
-  char *m_prompt = new char[CONFIG::PROMPT_LENGTH_LIMIT]();
+  char *m_prompt = new char[CONFIG::PROMPT_LENGTH_LIMIT.get()]();
   int m_width = 512;
   int m_height = 512;
   int m_steps = 50;
@@ -36,23 +36,33 @@ public:
   // Initialise render manager references
   QDisplay_MainWindow(std::shared_ptr<RenderManager> rm) : QDisplay_Base(rm) {
     m_prompt[0] = 0;
+    reloadModelFiles();
+  }
 
+  void reloadModelFiles() {
     // Load model files
-    for (const auto & entry : fs::directory_iterator(CONFIG::MODELS_DIRECTORY)) {
-        listItem i {.m_name = entry.path().filename()};
+    try {
+      for (const auto &entry : fs::directory_iterator(CONFIG::MODELS_DIRECTORY.get())) {
+        listItem i{.m_name = entry.path().filename()};
         m_ckpt_files.push_back(i);
+      }
+    } catch (fs::filesystem_error) {
+      ErrorHandler::GetInstance().setConfigError(CONFIG::MODELS_DIRECTORY, "MODELS_DIRECTORY");
     }
   }
 
   std::string getLatestFile() {
-
     std::string outfile = "";
     fs::file_time_type write_time;
 
-    for (const auto & entry : fs::directory_iterator("data/" + CONFIG::OUTPUT_DIRECTORY + "/samples")) {
-      if (entry.is_regular_file()) {
-        outfile = entry.path();
+    try {
+      for (const auto &entry : fs::directory_iterator("data/" + CONFIG::OUTPUT_DIRECTORY.get() + "/samples")) {
+        if (entry.is_regular_file()) {
+          outfile = entry.path();
+        }
       }
+    } catch (fs::filesystem_error) {
+      ErrorHandler::GetInstance().setConfigError(CONFIG::OUTPUT_DIRECTORY, "OUTPUT_DIRECTORY");
     }
 
     return outfile;
@@ -60,9 +70,11 @@ public:
 
   void renderCanvas() {
     m_canvas.reset();
-    m_canvas = std::unique_ptr<Canvas>(new Canvas(CONFIG::CANVAS_SIZE_X_LIMIT, CONFIG::CANVAS_SIZE_Y_LIMIT, "generated"));
+    m_canvas = std::unique_ptr<Canvas>(
+        new Canvas(CONFIG::CANVAS_SIZE_X_LIMIT.get(), CONFIG::CANVAS_SIZE_Y_LIMIT.get(), "generated"));
     m_canvas->rendered = false;
-    m_renderManager->textToImage(*m_canvas, m_prompt, 1, m_steps, m_seed, m_width, m_height, m_canvas->rendered, m_selected_model);
+    m_renderManager->textToImage(*m_canvas, m_prompt, 1, m_steps, m_seed, m_width, m_height, m_canvas->rendered,
+                                 m_selected_model);
   }
 
   void canvasWindow() {
@@ -105,19 +117,16 @@ public:
   void promptHelper() {
     ImGui::SetNextWindowBgAlpha(0.9f);
     ImGui::Begin("Prompt Designer");
-    ImGui::InputTextMultiline("prompt", m_prompt, CONFIG::PROMPT_LENGTH_LIMIT);
-    ImGui::SliderInt("width", &m_width, 0, CONFIG::CANVAS_SIZE_X_LIMIT);
-    ImGui::SliderInt("height", &m_height, 0, CONFIG::CANVAS_SIZE_Y_LIMIT);
+    ImGui::InputTextMultiline("prompt", m_prompt, CONFIG::PROMPT_LENGTH_LIMIT.get());
+    ImGui::SliderInt("width", &m_width, 0, CONFIG::CANVAS_SIZE_X_LIMIT.get());
+    ImGui::SliderInt("height", &m_height, 0, CONFIG::CANVAS_SIZE_Y_LIMIT.get());
     ImGui::InputInt("steps", &m_steps);
     ImGui::InputInt("seed", &m_seed);
 
     if (ImGui::BeginCombo("models", m_selected_model.c_str(), ImGuiComboFlags_NoArrowButton)) {
-      for (auto &item : m_ckpt_files)
-      {
-        if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected))
-        {
+      for (auto &item : m_ckpt_files) {
+        if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
           m_selected_model = item.m_name;
-          
         }
         if (item.m_isSelected) {
           ImGui::SetItemDefaultFocus();
@@ -125,7 +134,9 @@ public:
       }
       ImGui::EndCombo();
     }
-    
+    if (ImGui::Button("Reload Models")) {
+      reloadModelFiles();
+    }
 
     ImGui::End();
   }

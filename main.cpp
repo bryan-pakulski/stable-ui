@@ -12,16 +12,17 @@ int main() {
 
     QDisplay::clearFrame();
 
-    // Display any captured errors as a modal popup over the top of the screen
-    if (ErrorHandler::GetInstance().hasError()) {
-      ErrorHandler::GetInstance().displayError();
+    // Only render if no errors detected
+    if (!ErrorHandler::GetInstance().hasError()) {
+      // Sub menus rendering & logic
+      QDisplay::GetInstance().drawMenus();
+
+      // Rendering loop for objects
+      rm->update();
     }
 
-    // Sub menus rendering & logic
-    QDisplay::GetInstance().drawMenus();
-
-    // Rendering loop for objects
-    rm->update();
+    // Display any captured errors as a modal popup over the top of the screen
+    ErrorHandler::GetInstance().pollErrors();
 
     // Process and catch events
     QDisplay::processFrameAndEvents();

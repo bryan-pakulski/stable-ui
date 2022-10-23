@@ -3,7 +3,7 @@
 SDCommandsInterface::SDCommandsInterface() {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "Initialising SDCommandsInterface");
 
-  std::string path = "sys.path.append(\"" + CONFIG::PYTHON_CONFIG_PATH + "\")";
+  std::string path = "sys.path.append(\"" + CONFIG::PYTHON_CONFIG_PATH.get() + "\")";
 
   Py_Initialize();
   PyRun_SimpleString("import sys");
@@ -14,14 +14,13 @@ SDCommandsInterface::SDCommandsInterface() {
   m_py_handle = std::unique_ptr<SnakeHandler>(new SnakeHandler("sd_commands"));
 }
 
-SDCommandsInterface::~SDCommandsInterface() {
-  delete arguments;
-}
+SDCommandsInterface::~SDCommandsInterface() { delete arguments; }
 
-void SDCommandsInterface::textToImage(std::string prompt, int samples, int steps, int seed, int width, int height, bool &finishedFlag, std::string model_name) {
+void SDCommandsInterface::textToImage(std::string prompt, int samples, int steps, int seed, int width, int height,
+                                      bool &finishedFlag, std::string model_name) {
   std::string functionName = "txt2image";
-  std::string exec_path = CONFIG::STABLE_DIFFUSION_DOCKER_PATH + CONFIG::TXT_TO_IMG_PATH;
-  std::string out_dir = CONFIG::OUTPUT_DIRECTORY;
+  std::string exec_path = CONFIG::STABLE_DIFFUSION_DOCKER_PATH.get() + CONFIG::TXT_TO_IMG_PATH.get();
+  std::string out_dir = CONFIG::OUTPUT_DIRECTORY.get();
   std::string model_path = "/models/" + model_name;
 
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", exec_path, 0)));
@@ -35,7 +34,8 @@ void SDCommandsInterface::textToImage(std::string prompt, int samples, int steps
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "ckpt_name", model_path, 8)));
 
   // Offload thread execution, image generation can take some time
-  m_Thread = std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, std::ref(arguments), std::ref(finishedFlag));
+  m_Thread = std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, std::ref(arguments),
+                         std::ref(finishedFlag));
   m_Thread.detach();
 }
 

@@ -3,10 +3,11 @@
 // Initialise render manager
 RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager initialized");
-  //glfwSetKeyCallback(&m_window, key_callback);
+  // glfwSetKeyCallback(&m_window, key_callback);
 
-  m_mainWindow = new MainWindow(std::pair<int, int>{CONFIG::WINDOW_WIDTH, CONFIG::WINDOW_HEIGHT},
-                                std::pair<int, int>{CONFIG::WINDOW_WIDTH, CONFIG::WINDOW_HEIGHT}, &m_window);
+  m_mainWindow =
+      new MainWindow(std::pair<int, int>{CONFIG::WINDOW_WIDTH.get(), CONFIG::WINDOW_HEIGHT.get()},
+                     std::pair<int, int>{CONFIG::WINDOW_WIDTH.get(), CONFIG::WINDOW_HEIGHT.get()}, &m_window);
 
   m_windowSelection = new WindowSelection(std::pair<int, int>{0, 0}, &m_window);
 
@@ -14,7 +15,7 @@ RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
   SDCommandsInterface::GetInstance();
 
   // Create initial canvas
-  createCanvas(CONFIG::WINDOW_WIDTH, CONFIG::WINDOW_HEIGHT);
+  createCanvas(CONFIG::WINDOW_WIDTH.get(), CONFIG::WINDOW_HEIGHT.get());
 }
 
 // Destructor, destroy remaining instances
@@ -77,7 +78,7 @@ void RenderManager::selectCanvas(int id) {
 
 // Create a new canvas from our generated one to set for the main window
 void RenderManager::setCanvas(Canvas &c) {
-  m_canvas[m_active]->m_image_source=c.m_image_source;
+  m_canvas[m_active]->m_image_source = c.m_image_source;
   m_canvas[m_active]->loadFromImage(m_canvas[m_active]->m_image_source);
 }
 

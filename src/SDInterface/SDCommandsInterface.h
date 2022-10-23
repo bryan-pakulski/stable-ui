@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../config.h"
+#include "../Config/config.h"
 #include "../QLogger.h"
 
 #include "py/SnakeHandler.h"
@@ -29,7 +29,8 @@ public:
   SDCommandsInterface(SDCommandsInterface const &) = delete;
   void operator=(SDCommandsInterface const &) = delete;
 
-  void textToImage(std::string prompt, int samples, int steps, int seed, int width, int height, bool &finishedFlag, std::string model_name);
+  void textToImage(std::string prompt, int samples, int steps, int seed, int width, int height, bool &finishedFlag,
+                   std::string model_name);
 
   void imageToImage();
 };

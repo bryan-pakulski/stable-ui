@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../config.h"
+#include "../Config/config.h"
 #include "../QLogger.h"
 #include "canvas/Canvas.h"
 #include "objects/BaseObject.h"
