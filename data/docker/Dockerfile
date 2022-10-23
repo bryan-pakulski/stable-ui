@@ -20,6 +20,7 @@ ENV PATH=$CONDA_DIR/bin:$PATH
 COPY ./entrypoint.sh /home/
 COPY ./environment.yaml /home/
 COPY ./setup.py /home/
+COPY ./files/* /home/docker_files/
 
 RUN ["chmod", "+x", "/home/entrypoint.sh"]
 CMD sleep infinity

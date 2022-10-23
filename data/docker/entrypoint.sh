@@ -39,5 +39,8 @@ fi
 conda activate $ENV_NAME
 conda info | grep active
 
+# Link custom scripts
+ln -sf /home/docker_files/* /sd/scripts/
+
 cd /sd
 pip install -e .

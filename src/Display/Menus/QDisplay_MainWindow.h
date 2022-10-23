@@ -20,6 +20,7 @@ struct listItem {
 class QDisplay_MainWindow : public QDisplay_Base {
   // Initialise empty prompt
   char *m_prompt = new char[CONFIG::PROMPT_LENGTH_LIMIT.get()]();
+  char *m_negative_prompt = new char[CONFIG::PROMPT_LENGTH_LIMIT.get()]();
   int m_width = 512;
   int m_height = 512;
   int m_steps = 50;
@@ -36,6 +37,7 @@ public:
   // Initialise render manager references
   QDisplay_MainWindow(std::shared_ptr<RenderManager> rm) : QDisplay_Base(rm) {
     m_prompt[0] = 0;
+    m_negative_prompt[0] = 0;
     reloadModelFiles();
   }
 
@@ -73,7 +75,7 @@ public:
     m_canvas = std::unique_ptr<Canvas>(
         new Canvas(CONFIG::CANVAS_SIZE_X_LIMIT.get(), CONFIG::CANVAS_SIZE_Y_LIMIT.get(), "generated"));
     m_canvas->rendered = false;
-    m_renderManager->textToImage(*m_canvas, m_prompt, 1, m_steps, m_seed, m_width, m_height, m_canvas->rendered,
+    m_renderManager->textToImage(*m_canvas, m_prompt, m_negative_prompt, 1, m_steps, m_seed, m_width, m_height, m_canvas->rendered,
                                  m_selected_model);
   }
 
@@ -118,6 +120,7 @@ public:
     ImGui::SetNextWindowBgAlpha(0.9f);
     ImGui::Begin("Prompt Designer");
     ImGui::InputTextMultiline("prompt", m_prompt, CONFIG::PROMPT_LENGTH_LIMIT.get());
+    ImGui::InputTextMultiline("negative_prompt", m_negative_prompt, CONFIG::PROMPT_LENGTH_LIMIT.get());
     ImGui::SliderInt("width", &m_width, 0, CONFIG::CANVAS_SIZE_X_LIMIT.get());
     ImGui::SliderInt("height", &m_height, 0, CONFIG::CANVAS_SIZE_Y_LIMIT.get());
     ImGui::InputInt("steps", &m_steps);
