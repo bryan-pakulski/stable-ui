@@ -48,7 +48,7 @@ public:
   void setCanvas(Canvas &c);
 
   // Generate txt2img
-  void textToImage(Canvas &c, std::string prompt, std::string negative_prompt, int samples, int steps, int seed, int width, int height,
+  void textToImage(Canvas &c, std::string prompt, std::string negative_prompt, int samples, int steps, double cfg, int seed, int width, int height,
                    bool &finishedFlag, std::string model_name);
 
   // Generate img2img

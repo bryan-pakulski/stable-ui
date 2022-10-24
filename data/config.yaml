@@ -1,17 +1,17 @@
 # ImGUI Settings
 HIGH_DPI_SCALE_FACTOR: 1.0
-WINDOW_WIDTH: 1280
-WINDOW_HEIGHT: 720
+WINDOW_WIDTH: 1664
+WINDOW_HEIGHT: 936
 
 # Stable Diffusion settings
 STABLE_DIFFUSION_DOCKER_PATH: "/sd/"
 OUTPUT_DIRECTORY: "/output"
 MODELS_DIRECTORY: "/run/media/bryanp/Dev/projects/public/Stable Diffusion/stable-diffusion-weights"
-TXT_TO_IMG_PATH: "scripts/Qtxt2img.py"
-IMG_TO_IMG_PATH: "scripts/img2img.py"
+TXT_TO_IMG_PATH: "stable-ui-scripts/Qtxt2img.py"
+IMG_TO_IMG_PATH: "stable-ui-scripts/Qimg2img.py"
 PROMPT_LENGTH_LIMIT: 2048
-CANVAS_SIZE_X_LIMIT: 512
-CANVAS_SIZE_Y_LIMIT: 512
+CANVAS_SIZE_X_LIMIT: 762
+CANVAS_SIZE_Y_LIMIT: 762
 
 # Program configuration
 PYTHON_CONFIG_PATH: "data/scripts/"

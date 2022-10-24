@@ -10,11 +10,16 @@
 // QDisplay uses this base class as a reference via smart pointer, this is to
 // call the overloaded virtual render function
 class QDisplay_Base {
+  GLFWwindow *m_window;
 
 protected:
-   std::shared_ptr<RenderManager> m_renderManager;
+  std::shared_ptr<RenderManager> m_renderManager;
+
+  void getWindowSize(std::pair<int, int> &size) {
+    glfwGetFramebufferSize(m_window, &size.first, &size.second);
+  }
 
 public:
-  QDisplay_Base(std::shared_ptr<RenderManager> rm) : m_renderManager(rm) {}
+  QDisplay_Base(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : m_renderManager(rm), m_window(w) {}
   virtual void render() {}
 };

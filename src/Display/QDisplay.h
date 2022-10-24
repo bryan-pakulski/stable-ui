@@ -29,8 +29,8 @@ public:
     m_renderManager = rm;
 
     // Initialisation
-    m_submenus.emplace_back(new QDisplay_MenuBar(m_renderManager));
-    m_submenus.emplace_back(new QDisplay_MainWindow(m_renderManager));
+    m_submenus.emplace_back(new QDisplay_MenuBar(m_renderManager, m_window));
+    m_submenus.emplace_back(new QDisplay_MainWindow(m_renderManager, m_window));
 
     // Register error callback
     glfwSetErrorCallback(m_renderManager->GLFWErrorCallBack);

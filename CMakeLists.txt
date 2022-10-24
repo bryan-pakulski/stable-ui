@@ -8,6 +8,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g")
 # for clangd language server
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Enable caching of fetched content
+set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
+
 include(FetchContent)
 
 # Download and fetch GLM

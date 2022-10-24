@@ -57,11 +57,11 @@ void RenderManager::renderLoop() {
 }
 
 // Text to Image, render result to canvas
-void RenderManager::textToImage(Canvas &c, std::string prompt, std::string negative_prompt, int samples, int steps, int seed, int width, int height,
+void RenderManager::textToImage(Canvas &c, std::string prompt, std::string negative_prompt, int samples, int steps, double cfg, int seed, int width, int height,
                                 bool &finishedFlag, std::string model_name) {
 
   // Generate & Retrieve newly generated image
-  SDCommandsInterface::GetInstance().textToImage(prompt, negative_prompt, samples, steps, seed, width, height, finishedFlag, model_name);
+  SDCommandsInterface::GetInstance().textToImage(prompt, negative_prompt, samples, steps, cfg, seed, width, height, finishedFlag, model_name);
 }
 
 // Key callback function to map keypresses / actions to object instantiation
