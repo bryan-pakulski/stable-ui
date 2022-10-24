@@ -10,8 +10,8 @@ MODELS_DIRECTORY: "/run/media/bryanp/Dev/projects/public/Stable Diffusion/stable
 TXT_TO_IMG_PATH: "stable-ui-scripts/Qtxt2img.py"
 IMG_TO_IMG_PATH: "stable-ui-scripts/Qimg2img.py"
 PROMPT_LENGTH_LIMIT: 2048
-CANVAS_SIZE_X_LIMIT: 762
-CANVAS_SIZE_Y_LIMIT: 762
+CANVAS_SIZE_X_LIMIT: 768
+CANVAS_SIZE_Y_LIMIT: 768
 
 # Program configuration
 PYTHON_CONFIG_PATH: "data/scripts/"

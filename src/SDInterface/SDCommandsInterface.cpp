@@ -28,7 +28,7 @@ void SDCommandsInterface::textToImage(std::string prompt, std::string negative_p
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "negative_prompt", negative_prompt, 2)));
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "samples", samples, 3)));
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "steps", steps, 4)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<float>('f', "scale", cfg, 5)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<double>('f', "scale", cfg, 5)));
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "seed", seed, 6)));
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "width", width, 7)));
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "height", height, 8)));
