@@ -10,8 +10,7 @@ services:
       dockerfile: Dockerfile
     env_file: .env_docker
     volumes:
-      - /run/media/bryanp/Dev/projects/public/Stable Diffusion/ultimate-stable-diffusion:/sd
-      - /run/media/bryanp/Dev/projects/public/Stable Diffusion/stable-diffusion-weights:/models
+      - ../models:/models
       - ../output:/output
       - conda_env:/opt/conda
       - root_profile:/root
