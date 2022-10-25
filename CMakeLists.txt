@@ -113,7 +113,17 @@ find_package(X11 REQUIRED)     # for GLFW
 find_package (Python REQUIRED
         COMPONENTS Interpreter Development)
 
-add_executable(stable-ui main.cpp src/Rendering/RenderManager.cpp src/Rendering/canvas/Canvas.cpp src/Rendering/Helper.cpp src/SDInterface/SDCommandsInterface.cpp src/SDInterface/py/SnakeHandler.cpp)
+add_executable( stable-ui 
+                main.cpp 
+                src/Rendering/RenderManager.cpp 
+                src/Rendering/canvas/Canvas.cpp 
+                src/Rendering/Helper.cpp 
+                src/Rendering/objects/BaseObject.cpp 
+                src/Rendering/objects/MainWindow.cpp
+                src/Rendering/objects/WindowSelection.cpp
+                src/SDInterface/SDCommandsInterface.cpp 
+                src/SDInterface/py/SnakeHandler.cpp
+)
 
 target_include_directories(
         stable-ui PRIVATE
