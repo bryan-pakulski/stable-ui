@@ -1,12 +1,12 @@
 FROM nvidia/cuda:11.3.1-runtime-ubuntu20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
-WORKDIR /sd
+WORKDIR /
 
 SHELL ["/bin/bash", "-c"]
 
 RUN apt-get update && \
-    apt-get install -y libglib2.0-0 wget && \
+    apt-get install -y libglib2.0-0 wget git && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
