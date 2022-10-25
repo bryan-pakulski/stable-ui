@@ -177,6 +177,9 @@ private:
 
     // Set clear colour
     glClearColor(backgroundR, backgroundG, backgroundB, 1.0f);
+
+    // Disable ini file configuration from being generated
+    io.IniFilename = NULL;
   }
 
   ~QDisplay() { cleanupDisplay(); }
