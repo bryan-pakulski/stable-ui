@@ -49,7 +49,7 @@ public:
 
   // Generate txt2img
   void textToImage(Canvas &c, std::string prompt, std::string negative_prompt, int samples, int steps, double cfg, int seed, int width, int height,
-                   bool &finishedFlag, std::string model_name);
+                   bool &finishedFlag, std::string model_name, bool half_precision);
 
   // Generate img2img
   void imageToImage();

@@ -15,6 +15,8 @@
 #include "Menus/QDisplay_MenuBar.h"
 #include "QDisplay_Base.h"
 
+#include "Themes.h"
+
 // Singleton display class
 class QDisplay {
 public:
@@ -162,7 +164,8 @@ private:
     (void)io;
 
     // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
+    // TODO: make configurable?
+    embraceTheDarkness();
 
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(m_window, true);

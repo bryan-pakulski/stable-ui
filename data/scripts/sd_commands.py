@@ -9,11 +9,11 @@ def getContainer():
 
 # Example command
 # python optimizedSD/txt2img.py --prompt 'Cat on a roof' --n_samples 10 --n_iter 2 --ddim_steps 80 --seed 1234 --H 512 --W 512 --turbo"
-def txt2image(exec_path, prompt, negative_prompt, samples, steps, scale, seed, width, height, out_dir, ckpt_model):
+def txt2image(exec_path, prompt, negative_prompt, samples, steps, scale, seed, width, height, out_dir, ckpt_model, precision):
 	if (ckpt_model != ""):
-		command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt}' --negative_prompt '{negative_prompt}' --n_samples {samples} --n_iter 1 --ddim_steps {steps} --scale {scale} --seed {seed} --H {height} --W {width} --outdir {out_dir} --skip_grid --ckpt {ckpt_model}"
+		command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt}' --negative_prompt '{negative_prompt}' --n_samples {samples} --n_iter 1 --ddim_steps {steps} --scale {scale} --seed {seed} --H {height} --W {width} --outdir {out_dir} --skip_grid --ckpt {ckpt_model} --precision {precision}"
 	else:
-		command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt}' --negative_prompt '{negative_prompt}' --n_samples {samples} --n_iter 1 --ddim_steps {steps} --scale {scale} --seed {seed} --H {height} --W {width} --outdir {out_dir} --skip_grid"
+		command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt}' --negative_prompt '{negative_prompt}' --n_samples {samples} --n_iter 1 --ddim_steps {steps} --scale {scale} --seed {seed} --H {height} --W {width} --outdir {out_dir} --skip_grid --precision {precision}"
 	
 	print("Processing command: ", command)
 	_e, response = getContainer().exec_run(command, workdir="/sd", demux=True)
@@ -38,3 +38,17 @@ def img2img(exec_path, img_path, strength, prompt, samples, steps, seed, width, 
 	print("Processing command: ", command)
 	getContainer().exec_run(command, workdir="/sd")
 	return True
+
+def textualInversion(exec_path, base_config, model, run_name, dataset_path):
+	command = f"conda run -n ldm python '{exec_path}' --base '{base_config}' -t --actual_resume '{model}' -n {run_name} --gpus 0, --data_root {dataset_path}"
+
+	print("Processign command: ", command)
+	_e, response = getContainer().exec_run(command, workdir="/sd/textual-inversion", demux=True)
+	if (_e != 0):
+		print("Command failed with error code: ", _e)
+		print("==== STDOUT ====")
+		print(response[0])
+		print("==== STDERR ====")
+		print(response[1])
+	else:
+		print("Command success!")
