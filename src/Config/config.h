@@ -30,8 +30,8 @@ static CString STABLE_DIFFUSION_DOCKER_PATH(loadConfig<std::string>("STABLE_DIFF
 static CString MODELS_DIRECTORY(loadConfig<std::string>("MODELS_DIRECTORY", "/sd/models/"));
 static CString TXT_TO_IMG_PATH(loadConfig<std::string>("TXT_TO_IMG_PATH", "/sd/scripts/txt2img.py"));
 static CString IMG_TO_IMG_PATH(loadConfig<std::string>("IMG_TO_IMG_PATH", "/sd/scripts/img2img.py"));
-static CInt CANVAS_SIZE_X_LIMIT(loadConfig<int>("CANVAS_SIZE_X_LIMIT", 512));
-static CInt CANVAS_SIZE_Y_LIMIT(loadConfig<int>("CANVAS_SIZE_Y_LIMIT", 512));
+static CInt IMAGE_SIZE_X_LIMIT(loadConfig<int>("IMAGE_SIZE_X_LIMIT", 512));
+static CInt IMAGE_SIZE_Y_LIMIT(loadConfig<int>("IMAGE_SIZE_Y_LIMIT", 512));
 static CString OUTPUT_DIRECTORY(loadConfig<std::string>("OUTPUT_DIRECTORY", "/output"));
 
 // ImGui configuration

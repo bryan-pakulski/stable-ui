@@ -6,11 +6,11 @@
 
 #include "../Config/config.h"
 #include "../QLogger.h"
-#include "canvas/Canvas.h"
-#include "objects/BaseObject.h"
-#include "objects/MainWindow.h"
-#include "objects/WindowSelection.h"
 #include "../SDInterface/SDCommandsInterface.h"
+
+#include "objects/BaseObject.h"
+#include "objects/image/Image.h"
+#include "Canvas.h"
 
 #include <glad/glad.h>
 
@@ -29,14 +29,14 @@ public:
   static inline std::vector<BaseObject *> objectList;
   ~RenderManager();
 
-  int m_active = 0;
+  int m_activeId = 0;
   std::vector<std::shared_ptr<Canvas>> m_canvas;
 
   // Main update loop
   void update();
 
   // Create new canvas object for rendering
-  std::shared_ptr<Canvas> createCanvas(int x, int y);
+  std::shared_ptr<Canvas> createCanvas(int x, int y, const std::string &name);
 
   // Get current active canvas
   std::shared_ptr<Canvas> getActiveCanvas();
@@ -44,11 +44,11 @@ public:
   // Make a canvas active
   void selectCanvas(int id);
 
-  // Create a copy of a passed canvas to set for the main window
-  void setCanvas(Canvas &c);
+  // Create a new canvas with a base image
+  void createCanvasFromImage(Image &im);
 
   // Generate txt2img
-  void textToImage(Canvas &c, std::string prompt, std::string negative_prompt, int samples, int steps, double cfg, int seed, int width, int height,
+  void textToImage(std::string prompt, std::string negative_prompt, int samples, int steps, double cfg, int seed, int width, int height,
                    bool &finishedFlag, std::string model_name, bool half_precision);
 
   // Generate img2img
@@ -61,8 +61,6 @@ public:
 
 private:
   GLFWwindow &m_window;
-  MainWindow *m_mainWindow;
-  WindowSelection *m_windowSelection;
 
   static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 

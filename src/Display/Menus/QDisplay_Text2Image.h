@@ -32,7 +32,7 @@ class QDisplay_Text2Image : public QDisplay_Base {
   std::string m_selected_model = "";
   std::string m_ckpt_path = "";
   std::vector<listItem> m_ckpt_files;
-  std::unique_ptr<Canvas> m_canvas = 0;
+  std::unique_ptr<Image> m_image = 0;
   bool finishedRendering = false;
 
 public:
@@ -72,47 +72,47 @@ public:
     return outfile;
   }
 
-  void renderCanvas() {
-    m_canvas.reset();
-    m_canvas = std::unique_ptr<Canvas>(
-        new Canvas(CONFIG::CANVAS_SIZE_X_LIMIT.get(), CONFIG::CANVAS_SIZE_Y_LIMIT.get(), "generated"));
-    m_canvas->rendered = false;
-    m_renderManager->textToImage(*m_canvas, m_prompt, m_negative_prompt, 1, m_steps, m_cfg, m_seed, m_width, m_height, m_canvas->rendered,
+  void renderImage() {
+    m_image.reset();
+    m_image = std::unique_ptr<Image>(
+        new Image(CONFIG::IMAGE_SIZE_X_LIMIT.get(), CONFIG::IMAGE_SIZE_Y_LIMIT.get(), "generated"));
+    m_image->rendered = false;
+    m_renderManager->textToImage(m_prompt, m_negative_prompt, 1, m_steps, m_cfg, m_seed, m_width, m_height, m_image->rendered,
                                  m_selected_model, m_half_precision);
   }
 
-  void canvasWindow() {
+  void imageWindow() {
     ImGui::BeginChild("GL");
-    if (m_canvas) {
+    if (m_image) {
 
-      // Generate option only available whilst a canvas isn't pending
-      if (m_canvas->rendered) {
+      // Generate option only available whilst a image isn't pending
+      if (m_image->rendered) {
         if (ImGui::Button("Generate")) {
-          renderCanvas();
+          renderImage();
         }
       } else {
         ImGui::Text("Generating image...");
       }
 
-      // Once canvas is marked as rendered display on screen
-      if (m_canvas->rendered) {
-        ImGui::Text("canvas width: %d canvas height:%d", m_canvas->m_width, m_canvas->m_height);
-        if (ImGui::Button("Send to Canvas")) {
-          // Send to main window canvas
-          m_renderManager->setCanvas(*m_canvas);
+      // Once image is marked as rendered display on screen
+      if (m_image->rendered) {
+        ImGui::Text("image width: %d image height:%d", m_image->m_width, m_image->m_height);
+        if (ImGui::Button("Send to new Canvas")) {
+          // Send to a new window canvas
+          m_renderManager->createCanvasFromImage(*m_image);
         }
 
         // Retrieve texture file
-        if (!m_canvas->textured) {
-          m_canvas->loadFromImage(getLatestFile());
-          m_canvas->textured = true;
+        if (!m_image->textured) {
+          m_image->loadFromImage(getLatestFile());
+          m_image->textured = true;
         }
 
-        ImGui::Image((void *)(intptr_t)m_canvas->m_canvas, ImVec2(m_canvas->m_width * 0.3, m_canvas->m_height * 0.3));
+        ImGui::Image((void *)(intptr_t)m_image->m_texture, ImVec2(m_image->m_width * 0.3, m_image->m_height * 0.3));
       }
     } else {
       if (ImGui::Button("Generate")) {
-        renderCanvas();
+        renderImage();
       }
     }
 
@@ -131,14 +131,14 @@ public:
     ImGui::BeginChild("Prompt Config");
 
     ImGui::Checkbox("half precision", &m_half_precision);
-    ImGui::SliderInt("width", &m_width, 0, CONFIG::CANVAS_SIZE_X_LIMIT.get());
+    ImGui::SliderInt("width", &m_width, 0, CONFIG::IMAGE_SIZE_X_LIMIT.get());
     if (ImGui::BeginPopupContextItem("width"))
     {
         if (ImGui::MenuItem("Reset to default: 512"))
             m_width = 512;
         ImGui::EndPopup();
     }
-    ImGui::SliderInt("height", &m_height, 0, CONFIG::CANVAS_SIZE_Y_LIMIT.get());
+    ImGui::SliderInt("height", &m_height, 0, CONFIG::IMAGE_SIZE_Y_LIMIT.get());
     if (ImGui::BeginPopupContextItem("height"))
     {
         if (ImGui::MenuItem("Reset to default: 512"))
@@ -185,7 +185,7 @@ public:
     }
     ImGui::NextColumn();
     { 
-      canvasWindow();
+      imageWindow();
     }
   }
 };

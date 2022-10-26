@@ -3,19 +3,15 @@
 // Initialise render manager
 RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager initialized");
+  
+  // TODO: Key callback breaks imgui input
   // glfwSetKeyCallback(&m_window, key_callback);
 
-  m_mainWindow =
-      new MainWindow(std::pair<int, int>{CONFIG::WINDOW_WIDTH.get(), CONFIG::WINDOW_HEIGHT.get()},
-                     std::pair<int, int>{CONFIG::WINDOW_WIDTH.get(), CONFIG::WINDOW_HEIGHT.get()}, &m_window);
-
-  m_windowSelection = new WindowSelection(std::pair<int, int>{0, 0}, &m_window);
+  // Create initial canvas
+  m_canvas.push_back(std::shared_ptr<Canvas>(new Canvas(std::pair<int, int>{0, 0}, "default", &m_window)));
 
   // Intialise python interface for calling commands
   SDCommandsInterface::GetInstance();
-
-  // Create initial canvas
-  createCanvas(CONFIG::WINDOW_WIDTH.get(), CONFIG::WINDOW_HEIGHT.get());
 }
 
 // Destructor, destroy remaining instances
@@ -24,9 +20,6 @@ RenderManager::~RenderManager() {
     delete obj;
   }
   objectList.clear();
-
-  delete m_mainWindow;
-  delete m_windowSelection;
 }
 
 // Main update function, checks for object cap before calling instance logic /
@@ -42,8 +35,9 @@ void RenderManager::logicLoop() {
     obj->updateLogic();
   }
 
-  m_mainWindow->updateLogic();
-  m_windowSelection->updateLogic();
+  for (auto &canvas : m_canvas) {
+    canvas->updateLogic();
+  }
 }
 
 // Update visuals on instanced objects
@@ -52,12 +46,15 @@ void RenderManager::renderLoop() {
     obj->updateVisual();
   }
 
-  m_mainWindow->updateVisual();
-  m_windowSelection->updateVisual();
+  for (auto &canvas : m_canvas) {
+    if (canvas->m_active) {
+      canvas->updateVisual();
+    }
+  } 
 }
 
 // Text to Image, render result to canvas
-void RenderManager::textToImage(Canvas &c, std::string prompt, std::string negative_prompt, int samples, int steps, double cfg, int seed, int width, int height,
+void RenderManager::textToImage(std::string prompt, std::string negative_prompt, int samples, int steps, double cfg, int seed, int width, int height,
                                 bool &finishedFlag, std::string model_name, bool half_precision) {
 
   // Generate & Retrieve newly generated image
@@ -72,20 +69,20 @@ void RenderManager::key_callback(GLFWwindow *window, int key, int scancode, int 
 
 // Make a canvas active, pass texture to main window
 void RenderManager::selectCanvas(int id) {
-  m_active = id;
-  m_mainWindow->setMainWindowTexture(&m_canvas[m_active]->m_canvas);
-}
-
-// Create a new canvas from our generated one to set for the main window
-void RenderManager::setCanvas(Canvas &c) {
-  m_canvas[m_active]->m_image_source = c.m_image_source;
-  m_canvas[m_active]->loadFromImage(m_canvas[m_active]->m_image_source);
+  // Disable old canvas
+  if (getActiveCanvas()) {
+    m_canvas[m_activeId]->m_active = false;
+  }
+  
+  m_activeId = id;
+  // Set new canvas to active
+  m_canvas[m_activeId]->m_active = true;
 }
 
 // Create new canvas object & return a reference
-std::shared_ptr<Canvas> RenderManager::createCanvas(int x, int y) {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Creating canvas %d x %d", x, y);
-  m_canvas.emplace_back(new Canvas(x, y, std::to_string(m_canvas.size())));
+std::shared_ptr<Canvas> RenderManager::createCanvas(int x, int y, const std::string &name) {
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Creating new canvas");
+  m_canvas.emplace_back(new Canvas(std::pair<int, int>{x, y}, name, &m_window));
   selectCanvas(m_canvas.size() - 1);
   return m_canvas.back();
 }
@@ -93,10 +90,15 @@ std::shared_ptr<Canvas> RenderManager::createCanvas(int x, int y) {
 // Get active canvas
 std::shared_ptr<Canvas> RenderManager::getActiveCanvas() {
   if (m_canvas.size() > 0) {
-    return m_canvas[m_active];
+    return m_canvas[m_activeId];
   } else {
     return nullptr;
   }
+}
+
+// Create a new canvas with a base image
+void RenderManager::createCanvasFromImage(Image &im) {
+  // TODO: create new canvas with image
 }
 
 // Callback to log GL errors

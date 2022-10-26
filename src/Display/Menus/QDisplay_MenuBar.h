@@ -24,8 +24,7 @@ private:
   clock_t lastLogReadTime;
 
   // New file config
-  int x = 1920;
-  int y = 1080;
+  char m_canvasName[256] = "new";
 
   /*
    * Popup for displaying log file output
@@ -75,11 +74,10 @@ private:
       ImGui::OpenPopup("NEW_FILE");
       if (ImGui::BeginPopupModal("NEW_FILE")) {
 
-        ImGui::InputInt("canvas width", &x);
-        ImGui::InputInt("canvas height", &y);
+        ImGui::InputText("canvas name", m_canvasName, 256);
 
         if (ImGui::Button("Create Canvas")) {
-          m_renderManager->createCanvas(x, y);
+          m_renderManager->createCanvas(0, 0, std::string(m_canvasName));
           newFileOpen = false;
         }
 
@@ -94,20 +92,7 @@ private:
   void QDisplay_LoadFile() {
     if (loadFileOpen) {
 
-      // Todo: input file path
-      std::string filename = "test.jpg";
-      int width = 512;
-      int height = 512;
-
-      std::shared_ptr<Canvas> canvas = m_renderManager->createCanvas(width, height);
-
-      bool ret = GLHELPER::LoadTextureFromFile(filename.c_str(), &canvas->m_canvas, &width, &height);
-      if (!ret) {
-        ErrorHandler::GetInstance().setError("Failed to load texture file");
-        QLogger::GetInstance().Log(LOGLEVEL::ERR, "Failed to load texture file");
-      } else {
-        QLogger::GetInstance().Log(LOGLEVEL::INFO, "loaded texture file");
-      }
+      // Todo: Load file
 
       loadFileOpen = false;
     }
@@ -117,14 +102,14 @@ private:
     if (selectCanvasOpen) {
       ImGui::OpenPopup("SELECTCANVAS");
       if (ImGui::BeginPopupModal("SELECTCANVAS")) {
-        if (ImGui::BeginListBox("Canvas in Memory")) {
+        if (ImGui::BeginListBox("Canvas")) {
           for (auto &item : m_renderManager->m_canvas) {
             const char *item_name = item->m_name.c_str();
             int index = std::addressof(item) - std::addressof(m_renderManager->m_canvas.front());
-            const bool is_selected = index == m_renderManager->m_active;
+            const bool is_selected = index == m_renderManager->m_activeId;
 
             if (ImGui::Selectable(item_name, is_selected)) {
-              m_renderManager->m_active = index;
+              m_renderManager->m_activeId = index;
               selectCanvasOpen = false;
             }
 
@@ -182,6 +167,8 @@ public:
 
         ImGui::EndMenu();
       }
+
+      ImGui::MenuItem(m_renderManager->getActiveCanvas()->m_name.c_str());
 
       ImGui::EndMainMenuBar();
     }

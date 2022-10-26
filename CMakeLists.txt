@@ -116,11 +116,11 @@ find_package (Python REQUIRED
 add_executable( stable-ui 
                 main.cpp 
                 src/Rendering/RenderManager.cpp 
-                src/Rendering/canvas/Canvas.cpp 
+                src/Rendering/Canvas.cpp 
                 src/Rendering/Helper.cpp 
                 src/Rendering/objects/BaseObject.cpp 
-                src/Rendering/objects/MainWindow.cpp
-                src/Rendering/objects/WindowSelection.cpp
+                src/Rendering/objects/image/Image.cpp
+                src/Rendering/objects/grid/GridChunk.cpp
                 src/SDInterface/SDCommandsInterface.cpp 
                 src/SDInterface/py/SnakeHandler.cpp
 )

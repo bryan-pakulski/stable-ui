@@ -1,12 +1,12 @@
-#include "MainWindow.h"
+#include "Canvas.h"
 
-MainWindow::~MainWindow() {}
+Canvas::~Canvas() {}
 
-MainWindow::MainWindow(std::pair<int, int> pc, std::pair<int, int>, GLFWwindow *w) : BaseObject(pc), m_pc{pc} {
+Canvas::Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *w) : BaseObject(coords), m_coords{coords}, m_name{name} {
     int success;
     m_window = w;
 
-    glfwGetFramebufferSize(m_window, &screen.first, &screen.second);
+    glfwGetFramebufferSize(m_window, &m_screen.first, &m_screen.second);
 
     // Set vertex data
     float vertices[] = {
@@ -33,15 +33,24 @@ MainWindow::MainWindow(std::pair<int, int> pc, std::pair<int, int>, GLFWwindow *
     setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices));
 }
 
-void MainWindow::updateLogic() { glfwGetFramebufferSize(m_window, &screen.first, &screen.second); }
+void Canvas::updateLogic() { 
+    // Get updated screen size
+    glfwGetFramebufferSize(m_window, &m_screen.first, &m_screen.second); 
 
-void MainWindow::updateVisual() {
+    
+}
+
+void Canvas::updateVisual() {
     glUseProgram(shaderProgram);
 
     // Update texture information
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBindTexture(GL_TEXTURE_2D, *m_texture_id);
+
+    // Canvas may not yet have a texture assigned to it
+    if (m_texture_id) {
+        glBindTexture(GL_TEXTURE_2D, *m_texture_id);
+    }
 
     // Transformation code
     glm::mat4 trans = glm::mat4(1.0f);
@@ -50,6 +59,13 @@ void MainWindow::updateVisual() {
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+    // Check which chunks are in view and should be rendered
+    for (auto &chunk : m_editorGrid) {
+        if (chunk->visible(m_coords, m_screen)) {
+
+        }
+    }
 }
 
-void MainWindow::setMainWindowTexture(GLuint *id) { m_texture_id = id; }
+void Canvas::setTexture(GLuint *id) { m_texture_id = id; }

@@ -1,14 +1,14 @@
 #pragma once
-#include "../Helper.h"
+#include "../../Helper.h"
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
 #include <string>
 
-class Canvas {
+class Image {
 
 public:
-  GLuint m_canvas = 0;
+  GLuint m_texture = 0;
   bool rendered = true;
   bool textured = false;
   std::string m_name;
@@ -16,8 +16,8 @@ public:
   int m_width;
   int m_height;
 
-  Canvas(int width, int height, std::string name);
-  ~Canvas() = default;
+  Image(int width, int height, std::string name);
+  ~Image() = default;
 
   void loadFromImage(std::string path);
 };
