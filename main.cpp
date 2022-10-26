@@ -10,6 +10,7 @@ int main() {
 
   while (!glfwWindowShouldClose(QDisplay::GetInstance().getWindow())) {
 
+    // Clean OpenGL frame & imgui interface
     QDisplay::clearFrame();
 
     // Only render if no errors detected
@@ -17,7 +18,7 @@ int main() {
       // Sub menus rendering & logic
       QDisplay::GetInstance().drawMenus();
 
-      // Rendering loop for objects
+      // Rendering loop for canvas
       rm->update();
     }
 

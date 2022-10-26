@@ -20,6 +20,6 @@ Image::Image(int width, int height, std::string name) : m_width(width), m_height
 }
 
 void Image::loadFromImage(std::string path) {
-  GLHELPER::LoadTextureFromFile(path.c_str(), &m_texture, &m_width, &m_height);
+  GLHELPER::LoadTextureFromFile(path.c_str(), &m_texture, &m_width, &m_height, false);
   m_image_source = path;
 }

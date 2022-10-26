@@ -31,13 +31,15 @@ Canvas::Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *
 
     linkShaders(vertexShader, fragmentShader, success);
     setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices));
+
+    int imgX = 0;
+    int imgY = 0;
+    GLHELPER::LoadTextureFromFile("data/images/uv_grid.png", &m_texture_id, &imgX, &imgY, true);
 }
 
 void Canvas::updateLogic() { 
     // Get updated screen size
     glfwGetFramebufferSize(m_window, &m_screen.first, &m_screen.second); 
-
-    
 }
 
 void Canvas::updateVisual() {
@@ -46,11 +48,7 @@ void Canvas::updateVisual() {
     // Update texture information
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    // Canvas may not yet have a texture assigned to it
-    if (m_texture_id) {
-        glBindTexture(GL_TEXTURE_2D, *m_texture_id);
-    }
+    glBindTexture(GL_TEXTURE_2D, m_texture_id);
 
     // Transformation code
     glm::mat4 trans = glm::mat4(1.0f);
@@ -68,4 +66,4 @@ void Canvas::updateVisual() {
     }
 }
 
-void Canvas::setTexture(GLuint *id) { m_texture_id = id; }
+void Canvas::setTexture(GLuint *id) { m_texture_id = *id; }

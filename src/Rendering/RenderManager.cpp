@@ -8,7 +8,7 @@ RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
   // glfwSetKeyCallback(&m_window, key_callback);
 
   // Create initial canvas
-  m_canvas.push_back(std::shared_ptr<Canvas>(new Canvas(std::pair<int, int>{0, 0}, "default", &m_window)));
+  createCanvas(0, 0, "default");
 
   // Intialise python interface for calling commands
   SDCommandsInterface::GetInstance();

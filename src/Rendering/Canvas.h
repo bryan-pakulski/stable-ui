@@ -4,8 +4,9 @@
 #include <vector>
 
 #include "../QLogger.h"
-#include "objects/BaseObject.h"
+#include "Helper.h"
 
+#include "objects/BaseObject.h"
 #include "objects/grid/GridChunk.h"
 
 class Canvas : public BaseObject {
@@ -16,7 +17,7 @@ private:
   std::vector<std::unique_ptr<GridChunk>> m_editorGrid;
 
   // Reference to texture for main window
-  GLuint *m_texture_id = nullptr;
+  GLuint m_texture_id;
 
   void setTexture(GLuint *id);
 

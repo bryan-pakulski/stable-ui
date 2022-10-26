@@ -7,5 +7,5 @@
 
 class GLHELPER {
 public:
-  static bool LoadTextureFromFile(const char *filename, GLuint *out_texture, int *out_width, int *out_height);
+  static bool LoadTextureFromFile(const char *filename, GLuint *out_texture, int *out_width, int *out_height, bool tiled);
 };
