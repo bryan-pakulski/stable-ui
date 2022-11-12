@@ -10,11 +10,12 @@
 #include "../../Config/config.h"
 #include "../QDisplay_Base.h"
 #include "QDisplay_Text2Image.h"
-
+#include "QDisplay_Image2Image.h"
 
 class QDisplay_MainWindow : public QDisplay_Base {
 
   std::unique_ptr<QDisplay_Text2Image> Text2ImageWindow;
+  std::unique_ptr<QDisplay_Image2Image> Image2ImageWindow;
 
   // Window Options
   const std::string c_windowName = "Helper Window";
@@ -26,6 +27,15 @@ public:
   // Initialise render manager references
   QDisplay_MainWindow(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     Text2ImageWindow = std::unique_ptr<QDisplay_Text2Image>(new QDisplay_Text2Image(rm, w));
+    Image2ImageWindow = std::unique_ptr<QDisplay_Image2Image>(new QDisplay_Image2Image(rm, w));
+
+    // Set drag drop callback
+    glfwSetDropCallback(w, drop_callback);
+  }
+
+  // Drag Drop callback for use with img2img
+  static void drop_callback(GLFWwindow* window, int count, const char** paths) {
+    
   }
 
   virtual void render() {
@@ -56,6 +66,9 @@ public:
 
     if (tab == 0) {
       Text2ImageWindow->render();
+    }
+    if (tab == 1) {
+      Image2ImageWindow->render();
     }
 
     ImGui::End();

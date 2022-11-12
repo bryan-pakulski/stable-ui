@@ -9,6 +9,11 @@
 // Basic menu class
 // QDisplay uses this base class as a reference via smart pointer, this is to
 // call the overloaded virtual render function
+
+struct listItem {
+  std::string m_name;
+  bool m_isSelected = false;
+};
 class QDisplay_Base {
   GLFWwindow *m_window;
 

@@ -12,11 +12,6 @@
 
 namespace fs = std::filesystem;
 
-struct listItem {
-  std::string m_name;
-  bool m_isSelected = false;
-};
-
 class QDisplay_Text2Image : public QDisplay_Base {
 
   // Window variables & flags

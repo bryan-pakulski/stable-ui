@@ -20,6 +20,8 @@ Image::Image(int width, int height, std::string name) : m_width(width), m_height
 }
 
 void Image::loadFromImage(std::string path) {
-  GLHELPER::LoadTextureFromFile(path.c_str(), &m_texture, &m_width, &m_height, false);
+  if (!GLHELPER::LoadTextureFromFile(path.c_str(), &m_texture, &m_width, &m_height, false)) {
+    QLogger::GetInstance().Log(LOGLEVEL::ERR, "Failed to load image from file: ", path.c_str());
+  }
   m_image_source = path;
 }
