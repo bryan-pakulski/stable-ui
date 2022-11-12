@@ -18,11 +18,9 @@ class QDisplay_Image2Image : public QDisplay_Base {
   // Window variables & flags
   char *m_prompt = new char[CONFIG::PROMPT_LENGTH_LIMIT.get()]();
   char *m_negative_prompt = new char[CONFIG::PROMPT_LENGTH_LIMIT.get()]();
-  int m_width = 512;
-  int m_height = 512;
   int m_steps = 70;
   int m_seed = 0;
-  double m_cfg = 7.5;
+  float m_strength = 0.5;
   bool m_half_precision = false;
 
   std::string m_selected_model = "";
@@ -35,6 +33,7 @@ class QDisplay_Image2Image : public QDisplay_Base {
   const char* c_base_content_directory = "data/output";
   std::filesystem::path m_current_directory;
   std::filesystem::path m_selected_file;
+  std::string m_filepath;
   std::unique_ptr<Image> m_directory_icon;
   std::unique_ptr<Image> m_file_icon;
   std::unique_ptr<Image> m_preview_image;
@@ -88,7 +87,7 @@ public:
     m_image = std::unique_ptr<Image>(
         new Image(CONFIG::IMAGE_SIZE_X_LIMIT.get(), CONFIG::IMAGE_SIZE_Y_LIMIT.get(), "img2img"));
     m_image->rendered = false;
-    m_renderManager->textToImage(m_prompt, m_negative_prompt, 1, m_steps, m_cfg, m_seed, m_width, m_height, m_image->rendered,
+    m_renderManager->imageToImage(m_filepath, m_prompt, m_negative_prompt, 1, m_steps, m_strength, m_seed, m_image->rendered,
                                  m_selected_model, m_half_precision);
   }
 
@@ -181,6 +180,11 @@ public:
           m_preview_image.reset();
           m_preview_image = std::unique_ptr<Image>(new Image(512,512,"preview"));
           m_preview_image->loadFromImage(m_current_directory.string() + "/" + m_selected_file.string());
+
+          // Path must be relative to docker, remove local data prefix
+          m_filepath = m_current_directory.string() + "/" + m_selected_file.string();
+          m_filepath.replace(m_filepath.find("data"), sizeof("data") - 1, "");
+
           m_preview_image->textured = true;
       }
 
@@ -199,7 +203,7 @@ public:
   void previewWindow() {
     ImGui::BeginChild("Browser Preview");
     if (!m_selected_file.empty() && m_preview_image->textured) {
-      ImGui::Image((void *)(intptr_t)m_preview_image->m_texture, ImVec2(m_preview_image->m_width * 0.3, m_preview_image->m_height * 0.3));
+      ImGui::Image((void *)(intptr_t)m_preview_image->m_texture, ImVec2(m_preview_image->m_width * 0.4, m_preview_image->m_height * 0.4));
     }
     ImGui::EndChild();
   }
@@ -216,24 +220,9 @@ public:
     ImGui::BeginChild("Prompt Config");
 
     ImGui::Checkbox("half precision", &m_half_precision);
-    ImGui::SliderInt("width", &m_width, 0, CONFIG::IMAGE_SIZE_X_LIMIT.get());
-    if (ImGui::BeginPopupContextItem("width"))
-    {
-        if (ImGui::MenuItem("Reset to default: 512"))
-            m_width = 512;
-        ImGui::EndPopup();
-    }
-    ImGui::SliderInt("height", &m_height, 0, CONFIG::IMAGE_SIZE_Y_LIMIT.get());
-    if (ImGui::BeginPopupContextItem("height"))
-    {
-        if (ImGui::MenuItem("Reset to default: 512"))
-            m_height = 512;
-        ImGui::EndPopup();
-    }
-    
     ImGui::InputInt("steps", &m_steps);
     ImGui::InputInt("seed", &m_seed);
-    ImGui::InputDouble("cfg scale", &m_cfg, 0.1);
+    ImGui::SliderFloat("Strength", &m_strength, 0.0, 1.0, "%.2f");
 
     if (ImGui::BeginCombo("models", m_selected_model.c_str(), ImGuiComboFlags_NoArrowButton)) {
       for (auto &item : m_ckpt_files) {

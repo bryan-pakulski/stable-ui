@@ -43,4 +43,28 @@ void SDCommandsInterface::textToImage(std::string prompt, std::string negative_p
   m_Thread.detach();
 }
 
-void SDCommandsInterface::imageToImage() {}
+void SDCommandsInterface::imageToImage(std::string path, std::string prompt, std::string negative_prompt, int samples, int steps, double strength, int seed,
+                                      bool &finishedFlag, std::string model_name, bool half_precision) {
+  std::string functionName = "img2image";
+  std::string exec_path = CONFIG::STABLE_DIFFUSION_DOCKER_PATH.get() + CONFIG::IMG_TO_IMG_PATH.get();
+  std::string out_dir = CONFIG::OUTPUT_DIRECTORY.get();
+  std::string model_path = "/models/" + model_name;
+  std::string precision = half_precision ? "autocast" : "full";
+
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", exec_path, 0)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "img_path", path, 1)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "prompt", prompt, 2)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "negative_prompt", negative_prompt, 3)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "samples", samples, 4)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "steps", steps, 5)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<double>('f', "strength", strength, 6)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "seed", seed, 7)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "out_dir", out_dir, 8)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "ckpt_name", model_path, 9)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "precision", precision, 10)));
+
+  // Offload thread execution, image generation can take some time
+  m_Thread = std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, std::ref(arguments),
+                         std::ref(finishedFlag));
+  m_Thread.detach();                
+}

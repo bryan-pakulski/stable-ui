@@ -61,6 +61,15 @@ void RenderManager::textToImage(std::string prompt, std::string negative_prompt,
   SDCommandsInterface::GetInstance().textToImage(prompt, negative_prompt, samples, steps, cfg, seed, width, height, finishedFlag, model_name, half_precision);
 }
 
+// Image to Image, render result to canvas
+void RenderManager::imageToImage(std::string path, std::string prompt, std::string negative_prompt, int samples, int steps, double strength, int seed,
+                                bool &finishedFlag, std::string model_name, bool half_precision) {
+
+  // Generate & Retrieve newly generated image
+  SDCommandsInterface::GetInstance().imageToImage(path, prompt, negative_prompt, samples, steps, strength, seed, finishedFlag, model_name, half_precision);
+  
+}
+
 // Key callback function to map keypresses / actions to object instantiation
 void RenderManager::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
   int width, height;

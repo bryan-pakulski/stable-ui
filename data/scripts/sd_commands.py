@@ -29,15 +29,25 @@ def txt2image(exec_path, prompt, negative_prompt, samples, steps, scale, seed, w
 	# Error code response is used by cpp integration to check for success / failure status
 	return _e
 
-def img2img(exec_path, img_path, strength, prompt, samples, steps, seed, width, height, out_dir, ckpt_model):
+def img2image(exec_path, img_path, prompt, negative_prompt, samples, steps, strength, seed, out_dir, ckpt_model, precision):
 	if (ckpt_model != ""):
-		command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt}' --init-img {img_path} --strength {strength} --n_samples {samples} --n_iter 1 --ddim_steps {steps} --seed {seed} --H {height} --W {width} -outdir {out_dir} --skip_grid --ckpt {ckpt_model}"
+		command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt}' --negative_prompt '{negative_prompt}' --init-img {img_path} --strength {strength} --n_samples {samples} --n_iter 1 --ddim_steps {steps} --seed {seed} --outdir {out_dir} --skip_grid --ckpt {ckpt_model} --precision {precision}"
 	else:
-		command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt}' --init-img {img_path} --strength {strength} --n_samples {samples} --n_iter 1 --ddim_steps {steps} --seed {seed} --H {height} --W {width} -outdir {out_dir} --skip_grid"
+		command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt}' --negative_prompt '{negative_prompt}' --init-img {img_path} --strength {strength} --n_samples {samples} --n_iter 1 --ddim_steps {steps} --seed {seed} --outdir {out_dir} --skip_grid  --precision {precision}"
 
 	print("Processing command: ", command)
-	getContainer().exec_run(command, workdir="/sd")
-	return True
+	_e, response = getContainer().exec_run(command, workdir="/sd", demux=True)
+	if (_e != 0):
+		print("Command failed with error code: ", _e)
+		print("==== STDOUT ====")
+		print(response[0])
+		print("==== STDERR ====")
+		print(response[1])
+	else:
+		print("Command success!")
+
+	# Error code response is used by cpp integration to check for success / failure status
+	return _e
 
 def textualInversion(exec_path, base_config, model, run_name, dataset_path):
 	command = f"conda run -n ldm python '{exec_path}' --base '{base_config}' -t --actual_resume '{model}' -n {run_name} --gpus 0, --data_root {dataset_path}"
@@ -52,3 +62,6 @@ def textualInversion(exec_path, base_config, model, run_name, dataset_path):
 		print(response[1])
 	else:
 		print("Command success!")
+
+	# Error code response is used by cpp integration to check for success / failure status
+	return _e

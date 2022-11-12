@@ -69,6 +69,14 @@ def main():
     )
 
     parser.add_argument(
+        "--negative_prompt",
+        type=str,
+        nargs="?",
+        default="",
+        help="the negative prompt to apply to render"
+    )
+
+    parser.add_argument(
         "--init-img",
         type=str,
         nargs="?",
@@ -202,6 +210,9 @@ def main():
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     model = model.to(device)
 
+    if opt.precision == "autocast":
+        model.half()
+
     if opt.plms:
         raise NotImplementedError("PLMS sampler not (yet) supported")
         sampler = PLMSSampler(model)
@@ -215,6 +226,7 @@ def main():
     n_rows = opt.n_rows if opt.n_rows > 0 else batch_size
     if not opt.from_file:
         prompt = opt.prompt
+        negative_prompt = opt.negative_prompt
         assert prompt is not None
         data = [batch_size * [prompt]]
 
@@ -224,7 +236,7 @@ def main():
             data = f.read().splitlines()
             data = list(chunk(data, batch_size))
 
-    sample_path = os.path.join(outpath, "samples")
+    sample_path = os.path.join(outpath, "img2img")
     os.makedirs(sample_path, exist_ok=True)
     base_count = len(os.listdir(sample_path))
     grid_count = len(os.listdir(outpath)) - 1
@@ -249,8 +261,10 @@ def main():
                 for n in trange(opt.n_iter, desc="Sampling"):
                     for prompts in tqdm(data, desc="data"):
                         uc = None
-                        if opt.scale != 1.0:
+                        if opt.scale != 1.0 or negative_prompt == "":
                             uc = model.get_learned_conditioning(batch_size * [""])
+                        else:
+                            uc = model.get_learned_conditioning(len(prompts) * [negative_prompt])
                         if isinstance(prompts, tuple):
                             prompts = list(prompts)
                         c = model.get_learned_conditioning(prompts)

@@ -52,7 +52,8 @@ public:
                    bool &finishedFlag, std::string model_name, bool half_precision);
 
   // Generate img2img
-  void imageToImage();
+  void imageToImage(std::string path, std::string prompt, std::string negative_prompt, int samples, int steps, double strength, int seed,
+                   bool &finishedFlag, std::string model_name, bool half_precision);
 
   // Error callback for GLFW logging
   static void GLFWErrorCallBack(int, const char *err_str);
