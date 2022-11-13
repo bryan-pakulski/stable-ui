@@ -10,6 +10,7 @@
 
 #include "objects/BaseObject.h"
 #include "objects/image/Image.h"
+#include "Camera.h"
 #include "Canvas.h"
 
 #include <glad/glad.h>
@@ -31,6 +32,10 @@ public:
 
   int m_activeId = 0;
   std::vector<std::shared_ptr<Canvas>> m_canvas;
+
+  // Camera details
+  std::shared_ptr<Camera> m_camera;
+  bool m_cameraDrag;
 
   // Main update loop
   void update();
@@ -55,15 +60,16 @@ public:
   void imageToImage(std::string path, std::string prompt, std::string negative_prompt, int samples, int steps, double strength, int seed,
                    bool &finishedFlag, std::string model_name, bool half_precision);
 
-  // Error callback for GLFW logging
+  // Callbacks
+  static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+  static void mouse_callback(GLFWwindow *window, double xposIn, double yposIn);
+  static void mouse_btn_callback(GLFWwindow *window, int button, int action, int mods);
   static void GLFWErrorCallBack(int, const char *err_str);
   static void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
                                          const GLchar *message, const void *userParam);
 
 private:
   GLFWwindow &m_window;
-
-  static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
   // Process inputs
   void logicLoop();

@@ -2,9 +2,10 @@
 
 Canvas::~Canvas() {}
 
-Canvas::Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *w) : BaseObject(coords), m_coords{coords}, m_name{name} {
+Canvas::Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *w, std::shared_ptr<Camera> c) : BaseObject(coords), m_coords{coords}, m_name{name} {
     int success;
     m_window = w;
+    m_camera = std::shared_ptr<Camera>(c);
 
     glfwGetFramebufferSize(m_window, &m_screen.first, &m_screen.second);
 
@@ -45,15 +46,19 @@ void Canvas::updateLogic() {
 void Canvas::updateVisual() {
     glUseProgram(shaderProgram);
 
+    // Model code
+    glm::mat4x4 model = glm::mat4x4(1.0f);                                      // translation
+    model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0, 0.0, 1.0));  // rotation
+    model = glm::scale(model, glm::vec3(1500, 1000, 1));                        // scale
+    setMat4("model", model);
+
+    // Projection code to fix object not scaling correctly on window resize
+    setMat4("projection", m_camera->GetProjectionMatrix());
+
     // Update texture information
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBindTexture(GL_TEXTURE_2D, m_texture_id);
-
-    // Transformation code
-    glm::mat4 trans = glm::mat4(1.0f);
-    unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);

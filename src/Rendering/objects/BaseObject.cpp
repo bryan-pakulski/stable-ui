@@ -2,7 +2,7 @@
 
 BaseObject::BaseObject(std::pair<int, int> pixelCoords) : pixelCoords{pixelCoords} {
     QLogger::GetInstance().Log(LOGLEVEL::INFO, "Object initialized at", pixelCoords.first, pixelCoords.second);
-  }
+}
 
 BaseObject::~BaseObject() {
     glDeleteVertexArrays(1, &VAO);
@@ -83,4 +83,10 @@ void BaseObject::setShaderBuffers(float *vertices, int sv, unsigned int *indices
     // unbind the VAO
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+}
+
+// Set matrix coordinates for projection
+void BaseObject::setMat4(std::string uniformName, glm::mat4x4 mat) {
+    int location = glGetUniformLocation(shaderProgram, uniformName.c_str());
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat));
 }

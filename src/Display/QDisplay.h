@@ -34,9 +34,6 @@ public:
     m_submenus.emplace_back(new QDisplay_MenuBar(m_renderManager, m_window));
     m_submenus.emplace_back(new QDisplay_MainWindow(m_renderManager, m_window));
 
-    // Register error callback
-    glfwSetErrorCallback(m_renderManager->GLFWErrorCallBack);
-
     // Enable debug output
     if (CONFIG::ENABLE_GL_DEBUG.get() == 1) {
       glEnable(GL_DEBUG_OUTPUT);
@@ -156,6 +153,12 @@ private:
 
     // VSync
     glfwSwapInterval(1);
+
+    // Initialise callbacks for glfw *MUST BE DONE BEFORE IMGUI OTHERWISE IT WILL OVERRIDE THE CALLBACKS THERE*
+    glfwSetErrorCallback(RenderManager::GLFWErrorCallBack);
+    glfwSetKeyCallback(m_window, RenderManager::key_callback);
+    glfwSetCursorPosCallback(m_window, RenderManager::mouse_callback);
+    glfwSetMouseButtonCallback(m_window, RenderManager::mouse_btn_callback);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();

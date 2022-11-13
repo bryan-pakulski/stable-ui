@@ -1,11 +1,16 @@
 #include "RenderManager.h"
+#include "GLFW/glfw3.h"
+#include "imgui_impl_glfw.h"
 
 // Initialise render manager
 RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager initialized");
   
-  // TODO: Key callback breaks imgui input
-  // glfwSetKeyCallback(&m_window, key_callback);
+  // Allow access to camera variable through static callback function
+  glfwSetWindowUserPointer(&m_window, (void *)this);
+
+  // Create Camera
+  m_camera = std::shared_ptr<Camera>(new Camera(&m_window));
 
   // Create initial canvas
   createCanvas(0, 0, "default");
@@ -31,6 +36,8 @@ void RenderManager::update() {
 
 // Update logic on instanced objects
 void RenderManager::logicLoop() {
+  m_camera->updateLogic();
+
   for (auto &obj : objectList) {
     obj->updateLogic();
   }
@@ -42,6 +49,8 @@ void RenderManager::logicLoop() {
 
 // Update visuals on instanced objects
 void RenderManager::renderLoop() {
+  m_camera->updateVisual();
+
   for (auto &obj : objectList) {
     obj->updateVisual();
   }
@@ -76,6 +85,39 @@ void RenderManager::key_callback(GLFWwindow *window, int key, int scancode, int 
   glfwGetWindowSize(window, &width, &height);
 }
 
+// Mouse movement callback
+void RenderManager::mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
+  RenderManager *rm;
+  rm = (RenderManager*)glfwGetWindowUserPointer(window);
+
+  if (rm->m_cameraDrag) {
+    rm->m_camera->moveCameraPosition(static_cast<float>(yposIn) - rm->m_camera->prev_mouse.y, static_cast<float>(xposIn) - rm->m_camera->prev_mouse.x);
+    rm->m_camera->prev_mouse.x = xposIn;
+    rm->m_camera->prev_mouse.y = yposIn;
+  }
+
+  rm->m_camera->cur_mouse.x = xposIn;
+  rm->m_camera->cur_mouse.y = yposIn;
+}
+
+
+// Mouse button callback function for dragging camera and interacting with canvas
+void RenderManager::mouse_btn_callback(GLFWwindow *window, int button, int action, int mods) {
+  RenderManager *rm;
+  rm = (RenderManager*)glfwGetWindowUserPointer(window);
+
+  if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
+    if (GLFW_PRESS == action) {
+      rm->m_camera->prev_mouse.x = rm->m_camera->cur_mouse.x;
+      rm->m_camera->prev_mouse.y = rm->m_camera->cur_mouse.y;
+      rm->m_cameraDrag = true;
+    }
+    else if (GLFW_RELEASE == action) {
+      rm->m_cameraDrag = false;
+    }
+  }
+}
+
 // Make a canvas active, pass texture to main window
 void RenderManager::selectCanvas(int id) {
   // Disable old canvas
@@ -91,7 +133,7 @@ void RenderManager::selectCanvas(int id) {
 // Create new canvas object & return a reference
 std::shared_ptr<Canvas> RenderManager::createCanvas(int x, int y, const std::string &name) {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "Creating new canvas");
-  m_canvas.emplace_back(new Canvas(std::pair<int, int>{x, y}, name, &m_window));
+  m_canvas.emplace_back(new Canvas(std::pair<int, int>{x, y}, name, &m_window, m_camera));
   selectCanvas(m_canvas.size() - 1);
   return m_canvas.back();
 }

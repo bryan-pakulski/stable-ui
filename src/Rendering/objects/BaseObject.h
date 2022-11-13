@@ -36,8 +36,10 @@ public:
 
   // Set shader buffers
   void setShaderBuffers(float *vertices, int sv, unsigned int *indices, int si);
-};
 
+  // Set matrix coordinates for projection
+  void setMat4(std::string uniformName, glm::mat4x4 mat);
+};
 
 // Linear convert X/Y coordinates to local coordinates (-1, 1.0)
 static float getLC(const int &pixelCoord, const int &max) { return (((float)pixelCoord / (float)max) * 2) - 1; }

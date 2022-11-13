@@ -115,7 +115,8 @@ find_package (Python REQUIRED
 
 add_executable( stable-ui 
                 main.cpp 
-                src/Rendering/RenderManager.cpp 
+                src/Rendering/RenderManager.cpp
+                src/Rendering/Camera.cpp
                 src/Rendering/Canvas.cpp 
                 src/Rendering/Helper.cpp 
                 src/Rendering/objects/BaseObject.cpp 

@@ -1,13 +1,16 @@
 #pragma once
 
 #include <cmath>
+#include <memory>
 #include <vector>
 
 #include "../QLogger.h"
 #include "Helper.h"
+#include "Camera.h"
 
 #include "objects/BaseObject.h"
 #include "objects/grid/GridChunk.h"
+
 
 class Canvas : public BaseObject {
 private:
@@ -15,6 +18,7 @@ private:
   std::pair<int, int> m_screen{};   // Screen size
 
   std::vector<std::unique_ptr<GridChunk>> m_editorGrid;
+  std::shared_ptr<Camera> m_camera;
 
   // Reference to texture for main window
   GLuint m_texture_id;
@@ -25,7 +29,7 @@ public:
   bool m_active = false;
   std::string m_name;
 
-  Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *w);
+  Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *w, std::shared_ptr<Camera> c);
   virtual ~Canvas();
 
   void updateLogic() override;
