@@ -20,3 +20,6 @@ This UI environment spins up and manages a docker image for Stable-Diffusion. It
 
 # Adding models
 To add models to stable-ui copy your .ckpt files to the `data/models` folder
+
+# Controls
+- Middle mouse button to move the main window canvas
