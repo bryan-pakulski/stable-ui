@@ -46,14 +46,14 @@ void Canvas::updateLogic() {
 void Canvas::updateVisual() {
     glUseProgram(shaderProgram);
 
-    // Model code
-    glm::mat4x4 model = glm::mat4x4(1.0f);                                      // translation
-    model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0, 0.0, 1.0));  // rotation
-    model = glm::scale(model, glm::vec3(1500, 1000, 1));                        // scale
-    setMat4("model", model);
+    // View code
+    setMat4("viewProjection", m_camera->getViewProjectionMatrix());
 
-    // Projection code to fix object not scaling correctly on window resize
-    setMat4("projection", m_camera->GetProjectionMatrix());
+    // Model code
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f)) *                   // translation
+            glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *              // rotation
+            glm::scale(glm::mat4(1.0f), glm::vec3(100.0f, 100.0f, 1.0f));                    // scale
+    setMat4("model", model);
 
     // Update texture information
     glEnable(GL_BLEND);

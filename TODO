@@ -3,15 +3,11 @@ Split canvas window into 512x512 grid of textures expanding "infinitely"
 
 Allow for mouse interaction (zoom in / out)
 
-Allow for scrolling with middle mouse button clicks
-
 Allow for selection with mouse click (up to max pixel size i.e. 512x512 for img2img inpainting)
 
 Allow for right click and drag erase functionality (no undo support as of yet)
 
 Allow for saving to a file, using grid detection, grids should grow / shrink dynamically if they contain data or are empty
-
-Use wor;d coordinates system
 
 
 # TODO: types.h
@@ -19,6 +15,5 @@ initialise string with a maximum length, this is important as if we reload confi
 editing the string manually via ImGui we don't have the hooks to re-size memory and we risk overwriting if
 the initial string is too short
 
-Optional flag for half size generation (lower memory usage at the cost of longer inference time)
-
+# Additional
 Add support for textual inversion, see: https://towardsdatascience.com/how-to-fine-tune-stable-diffusion-using-textual-inversion-b995d7ecc095

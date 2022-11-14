@@ -91,7 +91,7 @@ void RenderManager::mouse_callback(GLFWwindow *window, double xposIn, double ypo
   rm = (RenderManager*)glfwGetWindowUserPointer(window);
 
   if (rm->m_cameraDrag) {
-    rm->m_camera->moveCameraPosition(static_cast<float>(yposIn) - rm->m_camera->prev_mouse.y, static_cast<float>(xposIn) - rm->m_camera->prev_mouse.x);
+    rm->m_camera->moveCameraPosition(static_cast<float>(xposIn) - rm->m_camera->prev_mouse.x, static_cast<float>(yposIn) - rm->m_camera->prev_mouse.y);
     rm->m_camera->prev_mouse.x = xposIn;
     rm->m_camera->prev_mouse.y = yposIn;
   }
