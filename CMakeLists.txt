@@ -120,6 +120,7 @@ add_executable( stable-ui
                 src/Rendering/Canvas.cpp 
                 src/Rendering/Helper.cpp 
                 src/Rendering/objects/BaseObject.cpp 
+                src/Rendering/objects/Selection.cpp
                 src/Rendering/objects/image/Image.cpp
                 src/Rendering/objects/grid/GridChunk.cpp
                 src/SDInterface/SDCommandsInterface.cpp 
