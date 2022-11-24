@@ -122,7 +122,7 @@ add_executable( stable-ui
                 src/Rendering/objects/BaseObject.cpp 
                 src/Rendering/objects/Selection.cpp
                 src/Rendering/objects/image/Image.cpp
-                src/Rendering/objects/grid/GridChunk.cpp
+                src/Rendering/objects/chunk/Chunk.cpp
                 src/SDInterface/SDCommandsInterface.cpp 
                 src/SDInterface/py/SnakeHandler.cpp
 )

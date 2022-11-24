@@ -12,6 +12,7 @@ services:
     volumes:
       - ../models:/models
       - ../output:/output
+      - ../module-data:/module-data
       - conda_env:/opt/conda
       - root_profile:/root
     deploy:

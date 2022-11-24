@@ -6,8 +6,8 @@ WINDOW_HEIGHT: 936
 # Docker Configuration
 STABLE_DIFFUSION_DOCKER_PATH: "/sd/"
 OUTPUT_DIRECTORY: "/output"
-TXT_TO_IMG_PATH: "stable-ui-scripts/Qtxt2img.py"
-IMG_TO_IMG_PATH: "stable-ui-scripts/Qimg2img.py"
+TXT_TO_IMG_PATH: "scripts/Qtxt2img.py"
+IMG_TO_IMG_PATH: "scripts/Qimg2img.py"
 
 # Stable Diffusion Configuration
 MODELS_DIRECTORY: "data/models"

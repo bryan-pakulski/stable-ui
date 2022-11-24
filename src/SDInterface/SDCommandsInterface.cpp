@@ -19,7 +19,7 @@ SDCommandsInterface::~SDCommandsInterface() { delete arguments; }
 void SDCommandsInterface::textToImage(std::string prompt, std::string negative_prompt, int samples, int steps, double cfg, int seed, int width, int height,
                                       bool &finishedFlag, std::string model_name, bool half_precision) {
   std::string functionName = "txt2image";
-  std::string exec_path = CONFIG::STABLE_DIFFUSION_DOCKER_PATH.get() + CONFIG::TXT_TO_IMG_PATH.get();
+  std::string exec_path = CONFIG::TXT_TO_IMG_PATH.get();
   std::string out_dir = CONFIG::OUTPUT_DIRECTORY.get();
   std::string model_path = "/models/" + model_name;
   std::string precision = half_precision ? "autocast" : "full";
@@ -46,7 +46,7 @@ void SDCommandsInterface::textToImage(std::string prompt, std::string negative_p
 void SDCommandsInterface::imageToImage(std::string path, std::string prompt, std::string negative_prompt, int samples, int steps, double strength, int seed,
                                       bool &finishedFlag, std::string model_name, bool half_precision) {
   std::string functionName = "img2image";
-  std::string exec_path = CONFIG::STABLE_DIFFUSION_DOCKER_PATH.get() + CONFIG::IMG_TO_IMG_PATH.get();
+  std::string exec_path = CONFIG::IMG_TO_IMG_PATH.get();
   std::string out_dir = CONFIG::OUTPUT_DIRECTORY.get();
   std::string model_path = "/models/" + model_name;
   std::string precision = half_precision ? "autocast" : "full";
