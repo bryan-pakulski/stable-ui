@@ -12,10 +12,10 @@ Canvas::Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *
     // Set vertex data
     float vertices[] = {
         // positions        // colors         // texture coords
-        1.0f,  1.0f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
-        1.0f,  -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+        1.0f,  1.0f,  0.0f, 1.0f, 0.0f, 0.0f, 160.0f, 160.0f, // top right
+        1.0f,  -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 160.0f, 0.0f, // bottom right
         -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-        -1.0f, 1.0f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
+        -1.0f, 1.0f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 160.0f  // top left
     };
 
     // Index buffer // Element Buffer Objects (EBO)
@@ -49,10 +49,10 @@ void Canvas::updateVisual() {
     // View code
     setMat4("viewProjection", m_camera->getViewProjectionMatrix());
 
-    // Model code
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f)) *                   // translation
-            glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *              // rotation
-            glm::scale(glm::mat4(1.0f), glm::vec3(100.0f, 100.0f, 1.0f));                    // scale
+    // Model code, default canvas scale is 16,000 x 16,000 pixels
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f)) *                         // translation
+            glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                    // rotation
+            glm::scale(glm::mat4(1.0f), glm::vec3(16000.0f, 16000.0f, 1.0f));                    // scale
     setMat4("model", model);
 
     // Update texture information
@@ -71,4 +71,15 @@ void Canvas::updateVisual() {
     }
 }
 
+// Set Canvas Texture
 void Canvas::setTexture(GLuint *id) { m_texture_id = *id; }
+
+// TODO: Build a texture based on the visible grid chunks
+void Canvas::updateMainWindowTexture() {
+
+}
+
+// TODO: Create a new grid chunk object/s based on provided image & coordinates
+void Canvas::createChunk(Image image, std::pair<int, int> chunk_coordinates) {
+    
+}

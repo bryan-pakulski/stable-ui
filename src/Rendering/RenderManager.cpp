@@ -12,6 +12,9 @@ RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
   // Create Camera
   m_camera = std::shared_ptr<Camera>(new Camera(&m_window));
 
+  // Create additional objects
+  m_selection = std::shared_ptr<Selection>(new Selection(std::pair<int,int>(0,0), &m_window, m_camera));
+
   // Create initial canvas
   createCanvas(0, 0, "default");
 
@@ -45,6 +48,8 @@ void RenderManager::logicLoop() {
   for (auto &canvas : m_canvas) {
     canvas->updateLogic();
   }
+
+  m_selection->updateLogic();
 }
 
 // Update visuals on instanced objects
@@ -60,6 +65,8 @@ void RenderManager::renderLoop() {
       canvas->updateVisual();
     }
   } 
+
+  m_selection->updateVisual();
 }
 
 // Text to Image, render result to canvas
@@ -147,10 +154,12 @@ std::shared_ptr<Canvas> RenderManager::getActiveCanvas() {
   }
 }
 
-// Create a new canvas with a base image
-void RenderManager::createCanvasFromImage(Image &im) {
+// Get image from canvas, based on selection coordinates
+void RenderManager::sendImageToCanvas(Image &im) {
   // TODO: create new canvas with image
 }
+
+// Build image from canvas, based on selection coordinates
 
 // Callback to log GL errors
 void RenderManager::GLFWErrorCallBack(int, const char *err_str) { QLogger::GetInstance().Log(LOGLEVEL::ERR, err_str); }

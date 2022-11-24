@@ -109,7 +109,7 @@ public:
         ImGui::Text("image width: %d image height:%d", m_image->m_width, m_image->m_height);
         if (ImGui::Button("Send to new Canvas")) {
           // Send to a new window canvas
-          m_renderManager->createCanvasFromImage(*m_image);
+          m_renderManager->sendImageToCanvas(*m_image);
         }
 
         // Retrieve texture file

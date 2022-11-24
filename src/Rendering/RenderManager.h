@@ -10,6 +10,7 @@
 
 #include "objects/BaseObject.h"
 #include "objects/image/Image.h"
+#include "objects/Selection.h"
 #include "Camera.h"
 #include "Canvas.h"
 
@@ -35,7 +36,10 @@ public:
 
   // Camera details
   std::shared_ptr<Camera> m_camera;
-  bool m_cameraDrag;
+  bool m_cameraDrag = false;
+
+  // Selection
+  std::shared_ptr<Selection> m_selection;
 
   // Main update loop
   void update();
@@ -50,7 +54,7 @@ public:
   void selectCanvas(int id);
 
   // Create a new canvas with a base image
-  void createCanvasFromImage(Image &im);
+  void sendImageToCanvas(Image &im);
 
   // Generate txt2img
   void textToImage(std::string prompt, std::string negative_prompt, int samples, int steps, double cfg, int seed, int width, int height,

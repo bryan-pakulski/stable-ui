@@ -25,17 +25,19 @@ Camera::~Camera() {
 
 // Offset camera
 void Camera::moveCameraPosition(float x, float y) {
-    m_position.x -= x;
-    m_position.y -= y;
+    m_position.x -= (x * 0.00005f);
+    m_position.y -= (y * 0.00005f);
 
     recalculateViewMatrix();
 }
 
+// Recalculate matrices
 void Camera::recalculateViewMatrix() {
     glfwGetFramebufferSize(m_window, &m_screen.first, &m_screen.second);
 
     glm::mat4 transform = glm::translate(glm::mat4(1.0f), m_position) * 
-        glm::rotate(glm::mat4(1.0f), m_rotation, glm::vec3(0, 0, 1));
+        glm::rotate(glm::mat4(1.0f), m_rotation, glm::vec3(0, 0, 1)) * 
+        glm::scale(glm::mat4(1.0f), glm::vec3(m_zoom));
 
     m_viewMatrix = glm::inverse(transform);
     m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
@@ -52,7 +54,19 @@ void Camera::updateVisual() {
     
     ImGui::Text("Camera X: %s", std::to_string(m_position.x).c_str());
     ImGui::Text("Camera Y: %s", std::to_string(m_position.y).c_str());
-    ImGui::Text("Camera Zoom: %s", std::to_string(m_zoom).c_str());
+    
+    // Almost all widgets return true when their value changes
+    if (ImGui::SliderFloat("Zoom", &m_zoom, 3.0f, 0.05, "")) {
+        recalculateViewMatrix();
+    }
+    if (ImGui::BeginPopupContextItem("Zoom"))
+    {
+        if (ImGui::MenuItem("Reset")) {
+            m_zoom = 1.0f;
+        }
+        ImGui::EndPopup();
+    }
+    
 
     ImGui::End();
 }

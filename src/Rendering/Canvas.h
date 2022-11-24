@@ -9,7 +9,8 @@
 #include "Camera.h"
 
 #include "objects/BaseObject.h"
-#include "objects/grid/GridChunk.h"
+#include "objects/chunk/Chunk.h"
+#include "objects/image/Image.h"
 
 
 class Canvas : public BaseObject {
@@ -17,7 +18,7 @@ private:
   std::pair<int, int> m_coords{};   // Pixel Coordinates (top left)
   std::pair<int, int> m_screen{};   // Screen size
 
-  std::vector<std::unique_ptr<GridChunk>> m_editorGrid;
+  std::vector<std::unique_ptr<Chunk>> m_editorGrid;
   std::shared_ptr<Camera> m_camera;
 
   // Reference to texture for main window
@@ -37,4 +38,7 @@ public:
 
   // Checks which grids are visible and creates a texture to apply to the main window
   void updateMainWindowTexture();
+
+  // Update or create new chunk for a given Image
+  void createChunk(Image image, std::pair<int, int> chunk_coordinates);
 };
