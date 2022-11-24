@@ -41,6 +41,9 @@ def getAdditionalConfig(ckpt_filepath):
 			except KeyError:
 				print("Model hash doesn't exist in model_config.yaml", hash)
 
+				# Use default configuration
+				data = yaml_dict["default"]
+				working_dir = data["module"]
 	else:
 		print("Command failed with error code: ", _e)
 		print("==== STDOUT ====")

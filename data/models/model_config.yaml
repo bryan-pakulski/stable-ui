@@ -2,6 +2,10 @@
 # Hash is computed using sha1sum command on the docker image i.e. `sha1sum /models/sd-v1-4.ckpt | aws '{print $1}'`
 # If a module is provided the model will be run using the custom module provided
 
+# Default configuration, do not delete or modify!!
+default:
+  module: "/modules/stable-ui-scripts"
+
 # Stable Diffusion v2 configuration parameters
 # 768-v-ema.ckpt
 47ad7f52d9da0293a546ac3609560d813be49796:

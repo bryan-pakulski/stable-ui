@@ -1,0 +1,6 @@
+working-directory: /modules/stable-ui-scripts
+
+# These files are copied after the git-repo is initialised
+filepaths: 
+  "files/Qimg2img.py": "/modules/stable-ui-scripts/scripts/Qimg2img.py"
+  "files/Qtxt2img.py": "/modules/stable-ui-scripts/scripts/Qtxt2img.py"

@@ -59,9 +59,6 @@ fi
 conda activate $ENV_NAME
 conda info | grep active
 
-# copy custom scripts
-cp -R /home/docker_files/* /sd/scripts/
-
 cd /sd
 pip install -e .
 
