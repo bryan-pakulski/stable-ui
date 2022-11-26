@@ -107,8 +107,8 @@ public:
       // Once image is marked as rendered display on screen
       if (m_image->rendered) {
         ImGui::Text("image width: %d image height:%d", m_image->m_width, m_image->m_height);
-        if (ImGui::Button("Send to new Canvas")) {
-          // Send to a new window canvas
+        if (ImGui::Button("Send to Canvas")) {
+          // Send image to be rendered on canvas at selection coordinates
           m_renderManager->sendImageToCanvas(*m_image);
         }
 
@@ -132,6 +132,7 @@ public:
   // Drag drop window
   void contentBrowser() {
     ImGui::BeginChild("Content Browser");
+    ImGui::Text("Content Browser");
     
     if (m_current_directory != std::filesystem::path(c_base_content_directory)) {
       if (ImGui::Button("<-")) {
@@ -155,7 +156,7 @@ public:
 
       // skip this item if it's not an image or directory
       if (!directoryEntry.is_directory() && (path.extension() != ".png" && path.extension() != ".jpg")) {
-        break;
+        continue;
       } 
       
       std::string filenameString = path.filename().string();

@@ -41,6 +41,10 @@ Selection::Selection(std::pair<int, int> coords, GLFWwindow *w, std::shared_ptr<
   GLHELPER::LoadTextureFromFile("data/images/selection.png", &m_texture_id, &imgX, &imgY, true);
 }
 
+std::pair<int, int> Selection::getCoordinates() {
+    return m_coords;
+}
+
 void Selection::updateLogic() { 
     // Get updated screen size
     glfwGetFramebufferSize(m_window, &m_screen.first, &m_screen.second); 

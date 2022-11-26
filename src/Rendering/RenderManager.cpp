@@ -156,7 +156,8 @@ std::shared_ptr<Canvas> RenderManager::getActiveCanvas() {
 
 // Get image from canvas, based on selection coordinates
 void RenderManager::sendImageToCanvas(Image &im) {
-  // TODO: create new canvas with image
+  // Create copy of image to send to canvas
+  m_canvas[m_activeId]->createChunk(std::shared_ptr<Image>(new Image(im)), m_selection->getCoordinates());
 }
 
 // Build image from canvas, based on selection coordinates

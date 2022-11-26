@@ -41,6 +41,11 @@ Canvas::Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *
 void Canvas::updateLogic() { 
     // Get updated screen size
     glfwGetFramebufferSize(m_window, &m_screen.first, &m_screen.second); 
+
+    // Check which chunks are in view and should be rendered
+    for (auto &chunk : m_editorGrid) {
+        chunk->updateLogic();
+    }
 }
 
 void Canvas::updateVisual() {
@@ -66,7 +71,7 @@ void Canvas::updateVisual() {
     // Check which chunks are in view and should be rendered
     for (auto &chunk : m_editorGrid) {
         if (chunk->visible(m_coords, m_screen)) {
-
+            chunk->updateVisual();
         }
     }
 }
@@ -80,6 +85,7 @@ void Canvas::updateMainWindowTexture() {
 }
 
 // TODO: Create a new grid chunk object/s based on provided image & coordinates
-void Canvas::createChunk(Image image, std::pair<int, int> chunk_coordinates) {
-    
+void Canvas::createChunk(std::shared_ptr<Image> image, std::pair<int, int> chunk_coordinates) {
+    QLogger::GetInstance().Log(LOGLEVEL::INFO, "Creating new image chunk at coordinates: ", chunk_coordinates.first, chunk_coordinates.second, "on canvas: ", m_name);
+    m_editorGrid.emplace_back(new Chunk(image, m_camera, chunk_coordinates.first, chunk_coordinates.second, m_editorGrid.size()));
 }

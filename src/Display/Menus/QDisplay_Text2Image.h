@@ -55,7 +55,7 @@ public:
     fs::file_time_type write_time;
 
     try {
-      for (const auto &entry : fs::directory_iterator("data/" + CONFIG::OUTPUT_DIRECTORY.get() + "/txt2img")) {
+      for (const auto &entry : fs::directory_iterator("data" + CONFIG::OUTPUT_DIRECTORY.get() + "/txt2img")) {
         if (entry.is_regular_file()) {
           outfile = entry.path();
         }

@@ -40,5 +40,5 @@ public:
   void updateMainWindowTexture();
 
   // Update or create new chunk for a given Image
-  void createChunk(Image image, std::pair<int, int> chunk_coordinates);
+  void createChunk(std::shared_ptr<Image>, std::pair<int, int> chunk_coordinates);
 };

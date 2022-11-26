@@ -21,6 +21,8 @@ public:
   Selection(std::pair<int, int> coords, GLFWwindow *w, std::shared_ptr<Camera> c);
   virtual ~Selection();
 
+  std::pair<int, int> getCoordinates();
+
   void updateLogic() override;
   void updateVisual() override;
 };
