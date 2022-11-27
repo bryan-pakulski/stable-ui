@@ -204,6 +204,11 @@ public:
   void previewWindow() {
     ImGui::BeginChild("Browser Preview");
     if (!m_selected_file.empty() && m_preview_image->textured) {
+      if (ImGui::Button("Send to Canvas")) {
+        // Send image to be rendered on canvas at selection coordinates
+        m_renderManager->sendImageToCanvas(*m_preview_image);
+      }
+
       ImGui::Image((void *)(intptr_t)m_preview_image->m_texture, ImVec2(m_preview_image->m_width * 0.4, m_preview_image->m_height * 0.4));
     }
     ImGui::EndChild();

@@ -16,7 +16,7 @@ Image::Image(int width, int height, std::string name) : m_width(width), m_height
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Successfully created blank image with dimensions: ", m_width, m_height);
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Successfully created blank texture", name);
 }
 
 void Image::loadFromImage(std::string path) {

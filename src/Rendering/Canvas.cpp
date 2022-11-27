@@ -12,10 +12,10 @@ Canvas::Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *
     // Set vertex data
     float vertices[] = {
         // positions        // colors         // texture coords
-        1.0f,  1.0f,  0.0f, 1.0f, 0.0f, 0.0f, 160.0f, 160.0f, // top right
-        1.0f,  -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 160.0f, 0.0f, // bottom right
-        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-        -1.0f, 1.0f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 160.0f  // top left
+        16000.0f,  16000.0f,  0.0f, 1.0f, 0.0f, 0.0f, 160.0f, 160.0f, // top right
+        16000.0f,  -16000.0f, 0.0f, 0.0f, 1.0f, 0.0f, 160.0f, 0.0f, // bottom right
+        -16000.0f, -16000.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+        -16000.0f, 16000.0f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 160.0f  // top left
     };
 
     // Index buffer // Element Buffer Objects (EBO)
@@ -57,7 +57,7 @@ void Canvas::updateVisual() {
     // Model code, default canvas scale is 16,000 x 16,000 pixels
     glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f)) *                         // translation
             glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                    // rotation
-            glm::scale(glm::mat4(1.0f), glm::vec3(16000.0f, 16000.0f, 1.0f));                    // scale
+            glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));                    // scale
     setMat4("model", model);
 
     // Update texture information
@@ -88,4 +88,8 @@ void Canvas::updateMainWindowTexture() {
 void Canvas::createChunk(std::shared_ptr<Image> image, std::pair<int, int> chunk_coordinates) {
     QLogger::GetInstance().Log(LOGLEVEL::INFO, "Creating new image chunk at coordinates: ", chunk_coordinates.first, chunk_coordinates.second, "on canvas: ", m_name);
     m_editorGrid.emplace_back(new Chunk(image, m_camera, chunk_coordinates.first, chunk_coordinates.second, m_editorGrid.size()));
+}
+
+void Canvas::deleteChunk(int index) {
+    m_editorGrid.erase(m_editorGrid.begin() + index);
 }

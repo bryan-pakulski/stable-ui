@@ -1,16 +1,17 @@
 #include "Chunk.h"
 
 Chunk::Chunk(std::shared_ptr<Image> im, std::shared_ptr<Camera> c, int x, int y, int id) : m_image{im}, c_coordinates{std::pair<int,int>(x,y)}, BaseObject(std::pair<int,int>(x,y)) {
-    int success;
+    int success = 0;
     m_camera = std::shared_ptr<Camera>(c);
+    m_image->loadFromImage(m_image->m_image_source.c_str());
 
     // Vertex data
     float vertices[] = {
         // positions        // colors         // texture coords
-        1.0f,  1.0f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
-        1.0f,  -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-        -1.0f, 1.0f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
+        (float)m_image->m_width,  (float)m_image->m_height,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
+        (float)m_image->m_width,  -(float)m_image->m_height, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+        -(float)m_image->m_width, -(float)m_image->m_height, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+        -(float)m_image->m_width, (float)m_image->m_height,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
     };
 
 
@@ -29,8 +30,9 @@ Chunk::Chunk(std::shared_ptr<Image> im, std::shared_ptr<Camera> c, int x, int y,
     linkShaders(vertexShader, fragmentShader, success);
     setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices));
 
-    GLHELPER::LoadTextureFromFile(m_image->m_image_source.c_str(), &m_image->m_texture, &m_image->m_width, &m_image->m_height, true);
-
+    if (!success) {
+        QLogger::GetInstance().Log(LOGLEVEL::ERR, "Error creating new chunk");
+    }
 }
 
 Chunk::~Chunk() {
@@ -64,9 +66,9 @@ void Chunk::updateVisual() {
     setMat4("viewProjection", m_camera->getViewProjectionMatrix());
 
     // Model code, default canvas scale is 16,000 x 16,000 pixels
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f)) *                                        // translation
-            glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                                   // rotation
-            glm::scale(glm::mat4(1.0f), glm::vec3((float)m_image->m_width, (float)m_image->m_height, 1.0f));    // scale
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3((float)c_coordinates.first, (float)c_coordinates.second, 0.0f)) *   // translation
+            glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                                                       // rotation
+            glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));                                                           // scale
     setMat4("model", model);
 
     // Update texture information

@@ -18,6 +18,7 @@ class Camera {
     glm::vec3 m_position;
     float m_rotation = 0.0f;
     float m_zoom = 1.0f;
+    float m_cameraSpeed = 2.0f;
 
     std::pair<int, int> m_screen{};   // Screen size
 

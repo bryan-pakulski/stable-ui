@@ -16,6 +16,10 @@ private:
   bool logFileOpen = false;
   bool loadFileOpen = false;
   bool selectCanvasOpen = false;
+  bool layerListOpen = false;
+
+  // Layer list config
+  int m_selectedLayerIndex = -1;
 
   // Log config
   std::ifstream logStream;
@@ -109,7 +113,7 @@ private:
             const bool is_selected = index == m_renderManager->m_activeId;
 
             if (ImGui::Selectable(item_name, is_selected)) {
-              m_renderManager->m_activeId = index;
+              m_renderManager->selectCanvas(index);
               selectCanvasOpen = false;
             }
 
@@ -126,6 +130,53 @@ private:
         selectCanvasOpen = false;
       }
       ImGui::EndPopup();
+    }
+  }
+
+  // Lists all images applied to canvas, allows details modification i.e. coordinates, rotation etc...
+  void QDisplay_LayerList() {
+    if (layerListOpen) {
+      ImGui::SetNextWindowBgAlpha(0.9f);
+      ImGui::Begin("Layer Manager");
+
+      if (ImGui::BeginListBox("Layers")) {
+        for (auto &item : m_renderManager->getActiveCanvas()->m_editorGrid) {
+          const char *item_name = item->m_image->m_image_source.c_str();
+          int index = std::addressof(item) - std::addressof(m_renderManager->getActiveCanvas()->m_editorGrid.front());
+          const bool is_selected = index == m_selectedLayerIndex;
+
+          // TODO: add visible / hidden button for each row, rendering code to be updated to support hidden flag
+
+          if (ImGui::Selectable(item_name, is_selected)) {
+            m_selectedLayerIndex = index;
+          }
+
+          // Set the initial focus when opening the combo (scrolling +
+          // keyboard navigation focus)
+          if (is_selected) {
+            ImGui::SetItemDefaultFocus();
+          }
+        }
+
+        ImGui::EndListBox();
+      }
+
+      if (m_selectedLayerIndex != -1) {
+        ImGui::Text("Layer Tools");
+
+
+        if (ImGui::Button("Delete Layer")) {
+          m_renderManager->getActiveCanvas()->deleteChunk(m_selectedLayerIndex);
+          m_selectedLayerIndex = -1;
+        }
+      }
+
+      if (ImGui::Button("Close")) {
+        m_selectedLayerIndex = 0;
+        layerListOpen = false;
+      }
+
+      ImGui::End();
     }
   }
 
@@ -165,6 +216,10 @@ public:
           selectCanvasOpen = true;
         }
 
+        if (ImGui::MenuItem("View Layers")) {
+          layerListOpen = true;
+        }
+
         ImGui::EndMenu();
       }
 
@@ -178,5 +233,6 @@ public:
     QDisplay_NewFile();
     QDisplay_LoadFile();
     QDisplay_SelectCanvasOpen();
+    QDisplay_LayerList();
   }
 };

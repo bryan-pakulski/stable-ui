@@ -25,8 +25,8 @@ Camera::~Camera() {
 
 // Offset camera
 void Camera::moveCameraPosition(float x, float y) {
-    m_position.x -= (x * 0.00005f);
-    m_position.y -= (y * 0.00005f);
+    m_position.x -= (x * m_cameraSpeed);
+    m_position.y -= (y * m_cameraSpeed);
 
     recalculateViewMatrix();
 }

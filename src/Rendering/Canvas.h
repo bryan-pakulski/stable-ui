@@ -18,7 +18,6 @@ private:
   std::pair<int, int> m_coords{};   // Pixel Coordinates (top left)
   std::pair<int, int> m_screen{};   // Screen size
 
-  std::vector<std::unique_ptr<Chunk>> m_editorGrid;
   std::shared_ptr<Camera> m_camera;
 
   // Reference to texture for main window
@@ -28,6 +27,7 @@ private:
 
 public:
   bool m_active = false;
+  std::vector<std::unique_ptr<Chunk>> m_editorGrid;
   std::string m_name;
 
   Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *w, std::shared_ptr<Camera> c);
@@ -41,4 +41,7 @@ public:
 
   // Update or create new chunk for a given Image
   void createChunk(std::shared_ptr<Image>, std::pair<int, int> chunk_coordinates);
+
+  // Delete chunk by index
+  void deleteChunk(int index);
 };

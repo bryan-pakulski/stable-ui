@@ -14,12 +14,13 @@
 // This class wraps an image class and contains some flags to check for visibility based on
 // Camera and world coordinates
 class Chunk : public BaseObject {
-  std::shared_ptr<Image> m_image;
 	const std::pair<int, int> c_coordinates;
   std::pair<int, int> m_screen{};   // Screen size
   std::shared_ptr<Camera> m_camera;
 
 public:
+  std::shared_ptr<Image> m_image;
+
   Chunk(std::shared_ptr<Image> im, std::shared_ptr<Camera> c, int x, int y, int id);
   ~Chunk();
 

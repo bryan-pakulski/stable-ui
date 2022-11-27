@@ -40,6 +40,8 @@ public:
 
   virtual void render() {
     getWindowSize(m_windowSize);
+
+    // Bottom helper bar
     ImGui::SetNextWindowPos(ImVec2(0, float(m_windowSize.second) - c_windowHeight));
     ImGui::SetNextWindowSize(ImVec2(float(m_windowSize.first), c_windowHeight));
 
