@@ -15,9 +15,7 @@ class Camera {
     glm::mat4 m_projectionMatrix;
     glm::mat4 m_viewMatrix;
     glm::mat4 m_viewProjectionMatrix;
-    glm::vec3 m_position;
     float m_rotation = 0.0f;
-    float m_zoom = 1.0f;
     float m_cameraSpeed = 2.0f;
 
     std::pair<int, int> m_screen{};   // Screen size
@@ -29,6 +27,8 @@ public:
     // Mouse positions for dragging across screen
     glm::vec2 prev_mouse;
     glm::vec2 cur_mouse;
+    float m_zoom = 1.0f;
+    glm::vec3 m_position;
 
     void updateLogic();
     void updateVisual();

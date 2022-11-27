@@ -4,15 +4,15 @@
 #include <imgui.h>
 #include <filesystem>
 
-#include "../../Display/ErrorHandler.h"
-#include "../../QLogger.h"
-#include "../../Rendering/RenderManager.h"
-#include "../../Config/config.h"
-#include "../QDisplay_Base.h"
+#include "../../../Display/ErrorHandler.h"
+#include "../../../QLogger.h"
+#include "../../../Rendering/RenderManager.h"
+#include "../../../Config/config.h"
+#include "../../QDisplay_Base.h"
 #include "QDisplay_Text2Image.h"
 #include "QDisplay_Image2Image.h"
 
-class QDisplay_MainWindow : public QDisplay_Base {
+class QDisplay_BottomBar : public QDisplay_Base {
 
   std::unique_ptr<QDisplay_Text2Image> Text2ImageWindow;
   std::unique_ptr<QDisplay_Image2Image> Image2ImageWindow;
@@ -20,12 +20,11 @@ class QDisplay_MainWindow : public QDisplay_Base {
   // Window Options
   const std::string c_windowName = "Helper Window";
   std::pair<int, int> m_windowSize {};
-  const float c_windowHeight = 320.0f;
   int tab = 0;
 
 public:
   // Initialise render manager references
-  QDisplay_MainWindow(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+  QDisplay_BottomBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     Text2ImageWindow = std::unique_ptr<QDisplay_Text2Image>(new QDisplay_Text2Image(rm, w));
     Image2ImageWindow = std::unique_ptr<QDisplay_Image2Image>(new QDisplay_Image2Image(rm, w));
 
@@ -42,8 +41,8 @@ public:
     getWindowSize(m_windowSize);
 
     // Bottom helper bar
-    ImGui::SetNextWindowPos(ImVec2(0, float(m_windowSize.second) - c_windowHeight));
-    ImGui::SetNextWindowSize(ImVec2(float(m_windowSize.first), c_windowHeight));
+    ImGui::SetNextWindowPos(ImVec2(0, float(m_windowSize.second) - CONFIG::IMGUI_BOTTOM_WINDOW_HEIGHT.get()));
+    ImGui::SetNextWindowSize(ImVec2(float(m_windowSize.first), CONFIG::IMGUI_BOTTOM_WINDOW_HEIGHT.get()));
 
     ImGui::SetNextWindowSizeConstraints(ImVec2(float(m_windowSize.first), 0.0f), ImVec2(float(m_windowSize.first), float(m_windowSize.second)));
     

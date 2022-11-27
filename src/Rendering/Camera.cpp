@@ -49,24 +49,5 @@ void Camera::updateLogic() {
 }
 
 void Camera::updateVisual() {
-    // Debug menu to view camera coordinates
-    ImGui::Begin("Camera");
-    
-    ImGui::Text("Camera X: %s", std::to_string(m_position.x).c_str());
-    ImGui::Text("Camera Y: %s", std::to_string(m_position.y).c_str());
-    
-    // Almost all widgets return true when their value changes
-    if (ImGui::SliderFloat("Zoom", &m_zoom, 3.0f, 0.05, "")) {
-        recalculateViewMatrix();
-    }
-    if (ImGui::BeginPopupContextItem("Zoom"))
-    {
-        if (ImGui::MenuItem("Reset")) {
-            m_zoom = 1.0f;
-        }
-        ImGui::EndPopup();
-    }
-    
 
-    ImGui::End();
 }

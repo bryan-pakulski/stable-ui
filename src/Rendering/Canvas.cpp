@@ -93,3 +93,12 @@ void Canvas::createChunk(std::shared_ptr<Image> image, std::pair<int, int> chunk
 void Canvas::deleteChunk(int index) {
     m_editorGrid.erase(m_editorGrid.begin() + index);
 }
+
+// Chunk visibility control
+void Canvas::hideChunk(int index) {
+    m_editorGrid[index]->m_renderFlag = false;
+}
+
+void Canvas::showChunk(int index) {
+    m_editorGrid[index]->m_renderFlag = true;
+}

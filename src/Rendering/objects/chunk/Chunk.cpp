@@ -1,6 +1,6 @@
 #include "Chunk.h"
 
-Chunk::Chunk(std::shared_ptr<Image> im, std::shared_ptr<Camera> c, int x, int y, int id) : m_image{im}, c_coordinates{std::pair<int,int>(x,y)}, BaseObject(std::pair<int,int>(x,y)) {
+Chunk::Chunk(std::shared_ptr<Image> im, std::shared_ptr<Camera> c, int x, int y, int id) : m_image{im}, m_coordinates{std::pair<int,int>(x,y)}, BaseObject(std::pair<int,int>(x,y)) {
     int success = 0;
     m_camera = std::shared_ptr<Camera>(c);
     m_image->loadFromImage(m_image->m_image_source.c_str());
@@ -43,10 +43,10 @@ Chunk::~Chunk() {
 bool Chunk::visible(const std::pair<int,int> &windowCoords, const std::pair<int,int> &windowSize) {
     // TODO: use simple box boundary check to see if 512x512 grid is within the window (offsetting the window for world coordinates)
     if (
-        c_coordinates.first < windowCoords.first + windowSize.first &&
-        c_coordinates.first + m_image->m_width > windowCoords.first &&
-        c_coordinates.second < windowCoords.second + windowSize.second &&
-        c_coordinates.second + m_image->m_height > windowCoords.second
+        m_coordinates.first < windowCoords.first + windowSize.first &&
+        m_coordinates.first + m_image->m_width > windowCoords.first &&
+        m_coordinates.second < windowCoords.second + windowSize.second &&
+        m_coordinates.second + m_image->m_height > windowCoords.second
     ) {
         return true;
     } else {
@@ -60,22 +60,24 @@ void Chunk::updateLogic() {
 
 // Render onto screen, offset based on world coordinates & window size
 void Chunk::updateVisual() {
-    glUseProgram(shaderProgram);
+    if (m_renderFlag) {
+        glUseProgram(shaderProgram);
 
-    // View code
-    setMat4("viewProjection", m_camera->getViewProjectionMatrix());
+        // View code
+        setMat4("viewProjection", m_camera->getViewProjectionMatrix());
 
-    // Model code, default canvas scale is 16,000 x 16,000 pixels
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3((float)c_coordinates.first, (float)c_coordinates.second, 0.0f)) *   // translation
-            glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                                                       // rotation
-            glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));                                                           // scale
-    setMat4("model", model);
+        // Model code, default canvas scale is 16,000 x 16,000 pixels
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3((float)m_coordinates.first, (float)m_coordinates.second, 0.0f)) *   // translation
+                glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                                                       // rotation
+                glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));                                                           // scale
+        setMat4("model", model);
 
-    // Update texture information
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBindTexture(GL_TEXTURE_2D, m_image->m_texture);
+        // Update texture information
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBindTexture(GL_TEXTURE_2D, m_image->m_texture);
 
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    }
 }

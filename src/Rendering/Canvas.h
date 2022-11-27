@@ -44,4 +44,8 @@ public:
 
   // Delete chunk by index
   void deleteChunk(int index);
+
+  // Hide chunk by index
+  void hideChunk(int index);
+  void showChunk(int index);
 };

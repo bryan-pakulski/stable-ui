@@ -3,12 +3,13 @@
 #include <fstream>
 #include <imgui.h>
 
-#include "../../Display/ErrorHandler.h"
-#include "../../QLogger.h"
-#include "../../Rendering/Helper.h"
-#include "../QDisplay_Base.h"
+#include "../../../Display/ErrorHandler.h"
+#include "../../../QLogger.h"
+#include "../../../Config/config.h"
+#include "../../../Rendering/Helper.h"
+#include "../../QDisplay_Base.h"
 
-class QDisplay_MenuBar : public QDisplay_Base {
+class QDisplay_TopBar : public QDisplay_Base {
 
 private:
   // Window triggers
@@ -16,10 +17,6 @@ private:
   bool logFileOpen = false;
   bool loadFileOpen = false;
   bool selectCanvasOpen = false;
-  bool layerListOpen = false;
-
-  // Layer list config
-  int m_selectedLayerIndex = -1;
 
   // Log config
   std::ifstream logStream;
@@ -133,64 +130,16 @@ private:
     }
   }
 
-  // Lists all images applied to canvas, allows details modification i.e. coordinates, rotation etc...
-  void QDisplay_LayerList() {
-    if (layerListOpen) {
-      ImGui::SetNextWindowBgAlpha(0.9f);
-      ImGui::Begin("Layer Manager");
-
-      if (ImGui::BeginListBox("Layers")) {
-        for (auto &item : m_renderManager->getActiveCanvas()->m_editorGrid) {
-          const char *item_name = item->m_image->m_image_source.c_str();
-          int index = std::addressof(item) - std::addressof(m_renderManager->getActiveCanvas()->m_editorGrid.front());
-          const bool is_selected = index == m_selectedLayerIndex;
-
-          // TODO: add visible / hidden button for each row, rendering code to be updated to support hidden flag
-
-          if (ImGui::Selectable(item_name, is_selected)) {
-            m_selectedLayerIndex = index;
-          }
-
-          // Set the initial focus when opening the combo (scrolling +
-          // keyboard navigation focus)
-          if (is_selected) {
-            ImGui::SetItemDefaultFocus();
-          }
-        }
-
-        ImGui::EndListBox();
-      }
-
-      if (m_selectedLayerIndex != -1) {
-        ImGui::Text("Layer Tools");
-
-
-        if (ImGui::Button("Delete Layer")) {
-          m_renderManager->getActiveCanvas()->deleteChunk(m_selectedLayerIndex);
-          m_selectedLayerIndex = -1;
-        }
-      }
-
-      if (ImGui::Button("Close")) {
-        m_selectedLayerIndex = 0;
-        layerListOpen = false;
-      }
-
-      ImGui::End();
-    }
-  }
-
 public:
   // Initialise render manager reference
-  QDisplay_MenuBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {}
+  QDisplay_TopBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+
+  }
 
   /*
    * Main Menu renderer, contains logic for showing additional display items
-   *
-   * @param dEngine - reference to DataEngine
    */
   virtual void render() {
-
     if (ImGui::BeginMainMenuBar()) {
 
       if (ImGui::BeginMenu("File")) {
@@ -216,10 +165,6 @@ public:
           selectCanvasOpen = true;
         }
 
-        if (ImGui::MenuItem("View Layers")) {
-          layerListOpen = true;
-        }
-
         ImGui::EndMenu();
       }
 
@@ -227,12 +172,11 @@ public:
 
       ImGui::EndMainMenuBar();
     }
-
+    
     // These will only render if their corresponding flags are set
     QDisplay_LogFile();
     QDisplay_NewFile();
     QDisplay_LoadFile();
     QDisplay_SelectCanvasOpen();
-    QDisplay_LayerList();
   }
 };

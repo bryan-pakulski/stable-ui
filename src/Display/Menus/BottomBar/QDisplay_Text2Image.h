@@ -4,11 +4,11 @@
 #include <imgui.h>
 #include <filesystem>
 
-#include "../../Display/ErrorHandler.h"
-#include "../../QLogger.h"
-#include "../../Rendering/RenderManager.h"
-#include "../../Config/config.h"
-#include "../QDisplay_Base.h"
+#include "../../../Display/ErrorHandler.h"
+#include "../../../QLogger.h"
+#include "../../../Rendering/RenderManager.h"
+#include "../../../Config/config.h"
+#include "../../QDisplay_Base.h"
 
 namespace fs = std::filesystem;
 
