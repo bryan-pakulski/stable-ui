@@ -11,10 +11,16 @@ def getContainer():
 
 # Runs the sha1sum function against a model file inside the docker container
 # The yaml configuration file found under data/models/model_config.yaml contains the hash mapping and custom configuration
+def loadConfig(data, key, default):
+	return data[key] if (key in data) else default
 def getAdditionalConfig(ckpt_filepath):
 	cmd = f"bash -c \"sha1sum {ckpt_filepath}" + " | awk '{print $1}'\""
-	extra_config = ""
-	working_dir = "/sd"
+
+	extra_conf = {
+		"config": "",
+		"working_dir": "/sd",
+		"trigger_prompt": ""
+	}
 	
 	print("Processing command: ", cmd)
 	_e, response = getContainer().exec_run(cmd, workdir="/", demux=True)
@@ -31,9 +37,9 @@ def getAdditionalConfig(ckpt_filepath):
 				print("Using additional configuration: ", data)
 
 				# Get data from yaml file
-				extra_config = data["config"] if ("config" in data) else extra_config
-				working_dir = data["module"] if ("module" in data) else working_dir
-
+				extra_conf["config"] = loadConfig(data, "config", "")
+				extra_conf["working_dir"] = loadConfig(data, "working_dir", "/sd")
+				extra_conf["trigger_prompt"] = loadConfig(data, "trigger_prompt", "")
 			except yaml.YAMLError as exc:
 				print(exc)
 				print("Invalid YAML for hash key: ", hash)
@@ -43,7 +49,7 @@ def getAdditionalConfig(ckpt_filepath):
 
 				# Use default configuration
 				data = yaml_dict["default"]
-				working_dir = data["module"]
+				extra_conf["working_dir"] = loadConfig(data, "working_dir", "/sd")
 	else:
 		print("Command failed with error code: ", _e)
 		print("==== STDOUT ====")
@@ -52,17 +58,15 @@ def getAdditionalConfig(ckpt_filepath):
 		print(response[1])
 		print("No additional configuration loaded for model: ", ckpt_filepath)
 	
-	return extra_config, working_dir
+	return extra_conf
 
-# Example command
 def txt2image(exec_path, prompt, negative_prompt, samples, steps, scale, seed, width, height, out_dir, ckpt_model, precision):
 	# Check if additional configuration is required for loaded ckpt
-	extra_config, working_dir = getAdditionalConfig(ckpt_model)
-
-	command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt}' --negative_prompt '{negative_prompt}' --n_samples {samples} --n_iter 1 --ddim_steps {steps} --scale {scale} --seed {seed} --H {height} --W {width} --outdir {out_dir} --skip_grid --ckpt {ckpt_model} --precision {precision} {extra_config}"
+	extra_conf = getAdditionalConfig(ckpt_model)
+	command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt}' --negative_prompt '{negative_prompt}' --n_samples {samples} --n_iter 1 --ddim_steps {steps} --scale {scale} --seed {seed} --H {height} --W {width} --outdir {out_dir} --skip_grid --ckpt {ckpt_model} --precision {precision} {extra_conf['config']}"
 
 	print("Processing command: ", command)
-	_e, response = getContainer().exec_run(command, workdir=working_dir, demux=True)
+	_e, response = getContainer().exec_run(command, workdir=extra_conf["working_dir"], demux=True)
 	if (_e != 0):
 		print("Command failed with error code: ", _e)
 		print("==== STDOUT ====")
@@ -77,12 +81,11 @@ def txt2image(exec_path, prompt, negative_prompt, samples, steps, scale, seed, w
 
 def img2image(exec_path, img_path, prompt, negative_prompt, samples, steps, strength, seed, out_dir, ckpt_model, precision):
 	# Check if additional configuration is required for loaded ckpt
-	extra_config, working_dir = getAdditionalConfig(ckpt_model)
-	
-	command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt}' --negative_prompt '{negative_prompt}' --init-img {img_path} --strength {strength} --n_samples {samples} --n_iter 1 --ddim_steps {steps} --seed {seed} --outdir {out_dir} --skip_grid --ckpt {ckpt_model} --precision {precision} {extra_config}"
+	extra_conf = getAdditionalConfig(ckpt_model)
+	command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt}' --negative_prompt '{negative_prompt}' --init-img {img_path} --strength {strength} --n_samples {samples} --n_iter 1 --ddim_steps {steps} --seed {seed} --outdir {out_dir} --skip_grid --ckpt {ckpt_model} --precision {precision} {extra_conf['config']}"
 
 	print("Processing command: ", command)
-	_e, response = getContainer().exec_run(command, workdir=working_dir, demux=True)
+	_e, response = getContainer().exec_run(command, workdir=extra_conf["working_dir"], demux=True)
 	if (_e != 0):
 		print("Command failed with error code: ", _e)
 		print("==== STDOUT ====")

@@ -45,7 +45,11 @@ void Camera::recalculateViewMatrix() {
 }
 
 void Camera::updateLogic() {
-
+    if (m_zoom < c_zoom_minmax.first) {
+        m_zoom = c_zoom_minmax.first;
+    } else if (m_zoom > c_zoom_minmax.second) {
+        m_zoom = c_zoom_minmax.second;
+    } 
 }
 
 void Camera::updateVisual() {

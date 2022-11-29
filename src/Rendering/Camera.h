@@ -19,6 +19,7 @@ class Camera {
     float m_cameraSpeed = 2.0f;
 
     std::pair<int, int> m_screen{};   // Screen size
+    std::pair<float, float> c_zoom_minmax {0.05f, 3.0f};
 
 public:
     Camera(GLFWwindow *w);
@@ -28,6 +29,7 @@ public:
     glm::vec2 prev_mouse;
     glm::vec2 cur_mouse;
     float m_zoom = 1.0f;
+    float m_zoomSpeed = 0.05f;
     glm::vec3 m_position;
 
     void updateLogic();
