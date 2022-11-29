@@ -66,11 +66,14 @@ void Chunk::updateVisual() {
         // View code
         setMat4("viewProjection", m_camera->getViewProjectionMatrix());
 
-        // Model code, default canvas scale is 16,000 x 16,000 pixels
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3((float)m_coordinates.first, (float)m_coordinates.second, 0.0f)) *   // translation
-                glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                                                       // rotation
-                glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));                                                           // scale
+        // Model projection code
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)) *   // translation
+                glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *          // rotation
+                glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));                  // scale
         setMat4("model", model);
+    
+        // Model x,y coordinate offset 
+        glUniform2f(glGetUniformLocation(shaderProgram, "offset"), (float)m_coordinates.first * 0.01, (float)m_coordinates.second * 0.01);
 
         // Update texture information
         glEnable(GL_BLEND);

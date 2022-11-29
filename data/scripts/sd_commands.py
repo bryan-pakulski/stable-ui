@@ -63,7 +63,7 @@ def getAdditionalConfig(ckpt_filepath):
 def txt2image(exec_path, prompt, negative_prompt, samples, steps, scale, seed, width, height, out_dir, ckpt_model, precision):
 	# Check if additional configuration is required for loaded ckpt
 	extra_conf = getAdditionalConfig(ckpt_model)
-	command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt}' --negative_prompt '{negative_prompt}' --n_samples {samples} --n_iter 1 --ddim_steps {steps} --scale {scale} --seed {seed} --H {height} --W {width} --outdir {out_dir} --skip_grid --ckpt {ckpt_model} --precision {precision} {extra_conf['config']}"
+	command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt + extra_conf['trigger_prompt']}' --negative_prompt '{negative_prompt}' --n_samples {samples} --n_iter 1 --ddim_steps {steps} --scale {scale} --seed {seed} --H {height} --W {width} --outdir {out_dir} --skip_grid --ckpt {ckpt_model} --precision {precision} {extra_conf['config']}"
 
 	print("Processing command: ", command)
 	_e, response = getContainer().exec_run(command, workdir=extra_conf["working_dir"], demux=True)
@@ -82,7 +82,7 @@ def txt2image(exec_path, prompt, negative_prompt, samples, steps, scale, seed, w
 def img2image(exec_path, img_path, prompt, negative_prompt, samples, steps, strength, seed, out_dir, ckpt_model, precision):
 	# Check if additional configuration is required for loaded ckpt
 	extra_conf = getAdditionalConfig(ckpt_model)
-	command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt}' --negative_prompt '{negative_prompt}' --init-img {img_path} --strength {strength} --n_samples {samples} --n_iter 1 --ddim_steps {steps} --seed {seed} --outdir {out_dir} --skip_grid --ckpt {ckpt_model} --precision {precision} {extra_conf['config']}"
+	command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt + extra_conf['trigger_prompt']}' --negative_prompt '{negative_prompt}' --init-img {img_path} --strength {strength} --n_samples {samples} --n_iter 1 --ddim_steps {steps} --seed {seed} --outdir {out_dir} --skip_grid --ckpt {ckpt_model} --precision {precision} {extra_conf['config']}"
 
 	print("Processing command: ", command)
 	_e, response = getContainer().exec_run(command, workdir=extra_conf["working_dir"], demux=True)

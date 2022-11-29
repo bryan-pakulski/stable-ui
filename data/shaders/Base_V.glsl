@@ -8,10 +8,13 @@ out vec2 TexCoord;
 
 uniform mat4 viewProjection;       // camera perspective
 uniform mat4 model;                // Object perspective i.e position / rotation / scale (where and how the shape is in our world)
+uniform vec2 offset;               // x,y offset 
 
 void main()
 {
-    gl_Position = model * viewProjection * vec4(aPos, 1.0);
+    vec4 totalOffset = vec4(offset.x, offset.y, 0.0, 0.0);
+
+    gl_Position = model * viewProjection * vec4(aPos, 1.0) + totalOffset;
     ourColor = aColor;
     TexCoord = aTexCoord;
 }

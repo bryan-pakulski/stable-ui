@@ -62,6 +62,7 @@ private:
     {
         if (ImGui::MenuItem("Reset")) {
             m_renderManager->m_camera->m_zoom = 1.0f;
+            m_renderManager->m_camera->recalculateViewMatrix();
         }
         ImGui::EndPopup();
     }
@@ -82,8 +83,9 @@ private:
             ImGui::ImageButton((void *)(intptr_t)icon.m_texture, { c_visibilityIconSize, c_visibilityIconSize }, { 1, 0 }, { 0, 1 });
             ImGui::PopStyleColor();
 
+            // Toggle item visibility flag
             if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-            item->m_renderFlag = !item->m_renderFlag;
+              item->m_renderFlag = !item->m_renderFlag;
             }
             ImGui::SameLine();
 

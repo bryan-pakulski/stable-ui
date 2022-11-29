@@ -126,16 +126,22 @@ public:
     ImGui::BeginChild("Prompt Config");
 
     ImGui::Checkbox("half precision", &m_half_precision);
-    ImGui::SliderInt("width", &m_width, 0, CONFIG::IMAGE_SIZE_X_LIMIT.get());
+
+    // Width control
+    ImGui::SliderInt("width", &m_width, 1, CONFIG::IMAGE_SIZE_X_LIMIT.get());
     if (ImGui::BeginPopupContextItem("width"))
     {
+        ImGui::InputInt("value", &m_width);
         if (ImGui::MenuItem("Reset to default: 512"))
             m_width = 512;
         ImGui::EndPopup();
     }
-    ImGui::SliderInt("height", &m_height, 0, CONFIG::IMAGE_SIZE_Y_LIMIT.get());
+
+    // Height control
+    ImGui::SliderInt("height", &m_height, 1, CONFIG::IMAGE_SIZE_Y_LIMIT.get());
     if (ImGui::BeginPopupContextItem("height"))
     {
+        ImGui::InputInt("value", &m_height);
         if (ImGui::MenuItem("Reset to default: 512"))
             m_height = 512;
         ImGui::EndPopup();
