@@ -63,16 +63,12 @@ cd /sd
 pip install -e .
 
 # Additional Modules Setup
-# TODO: this only fires the setup.py script once, unable to detect extra modules when they are added
 if [ ! -d "/modules" ]
 then
     mkdir -p /modules
-
     echo "Setting up modules..."
     cd /module-data && python setup.py
 else
-    echo "Checking for updates to modules..."
-    cd /module-data
-
-    # TODO: Loop through each directory and call the update.sh script
+    echo "Updating modules..."
+    cd /module-data && python setup.py
 fi

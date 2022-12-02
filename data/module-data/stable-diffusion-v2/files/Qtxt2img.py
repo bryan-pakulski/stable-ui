@@ -1,4 +1,7 @@
-import argparse, os, sys, glob
+import argparse
+import os
+import sys
+import glob
 import torch
 import numpy as np
 from omegaconf import OmegaConf
@@ -15,6 +18,7 @@ from contextlib import contextmanager, nullcontext
 from ldm.util import instantiate_from_config
 from ldm.models.diffusion.ddim import DDIMSampler
 from ldm.models.diffusion.plms import PLMSSampler
+from ldm.models.diffusion.dpm_solver import DPMSolverSampler
 
 
 def chunk(it, size):
@@ -37,7 +41,8 @@ def load_model_from_config(config, ckpt, verbose=False):
         print("unexpected keys:")
         print(u)
 
-    model.cuda()
+    if torch.cuda.is_available():
+        model.cuda()
     model.eval()
     return model
 
@@ -81,6 +86,12 @@ def main():
         type=int,
         default=50,
         help="number of ddim sampling steps",
+    )
+    parser.add_argument(
+        "--dpm_solver",
+        action='store_true',
+        default=True,
+        help="use dpm_solver sampling",
     )
     parser.add_argument(
         "--plms",
@@ -194,13 +205,16 @@ def main():
     config = OmegaConf.load(f"{opt.config}")
     model = load_model_from_config(config, f"{opt.ckpt}")
 
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    device = torch.device(
+        "cuda") if torch.cuda.is_available() else torch.device("cpu")
     model = model.to(device)
 
     if opt.precision == "autocast":
         model.half()
 
-    if opt.plms:
+    if opt.dpm_solver:
+        sampler = DPMSolverSampler(model)
+    elif opt.plms:
         sampler = PLMSSampler(model)
     else:
         sampler = DDIMSampler(model)
@@ -229,9 +243,10 @@ def main():
 
     start_code = None
     if opt.fixed_code:
-        start_code = torch.randn([opt.n_samples, opt.C, opt.H // opt.f, opt.W // opt.f], device=device)
+        start_code = torch.randn(
+            [opt.n_samples, opt.C, opt.H // opt.f, opt.W // opt.f], device=device)
 
-    precision_scope = autocast if opt.precision=="autocast" else nullcontext
+    precision_scope = autocast if opt.precision == "autocast" else nullcontext
     with torch.no_grad():
         with precision_scope("cuda"):
             with model.ema_scope():
@@ -241,9 +256,11 @@ def main():
                     for prompts in tqdm(data, desc="data"):
                         uc = None
                         if opt.scale != 1.0 or negative_prompt == "":
-                            uc = model.get_learned_conditioning(batch_size * [""])
+                            uc = model.get_learned_conditioning(
+                                batch_size * [""])
                         else:
-                            uc = model.get_learned_conditioning(len(prompts) * [negative_prompt])
+                            uc = model.get_learned_conditioning(
+                                len(prompts) * [negative_prompt])
                         if isinstance(prompts, tuple):
                             prompts = list(prompts)
                         c = model.get_learned_conditioning(prompts)
@@ -259,11 +276,14 @@ def main():
                                                          x_T=start_code)
 
                         x_samples_ddim = model.decode_first_stage(samples_ddim)
-                        x_samples_ddim = torch.clamp((x_samples_ddim + 1.0) / 2.0, min=0.0, max=1.0)
+                        x_samples_ddim = torch.clamp(
+                            (x_samples_ddim + 1.0) / 2.0, min=0.0, max=1.0)
 
                         if not opt.skip_save:
                             for x_sample in x_samples_ddim:
-                                x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
+                                x_sample = 255. * \
+                                    rearrange(x_sample.cpu().numpy(),
+                                              'c h w -> h w c')
                                 Image.fromarray(x_sample.astype(np.uint8)).save(
                                     os.path.join(sample_path, f"{base_count:05}.png"))
                                 base_count += 1
@@ -278,8 +298,10 @@ def main():
                     grid = make_grid(grid, nrow=n_rows)
 
                     # to image
-                    grid = 255. * rearrange(grid, 'c h w -> h w c').cpu().numpy()
-                    Image.fromarray(grid.astype(np.uint8)).save(os.path.join(outpath, f'grid-{grid_count:04}.png'))
+                    grid = 255. * \
+                        rearrange(grid, 'c h w -> h w c').cpu().numpy()
+                    Image.fromarray(grid.astype(np.uint8)).save(
+                        os.path.join(outpath, f'grid-{grid_count:04}.png'))
                     grid_count += 1
 
                 toc = time.time()

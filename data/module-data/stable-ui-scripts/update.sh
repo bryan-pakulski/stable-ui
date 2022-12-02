@@ -1,1 +1,1 @@
-cd /modules/stable-diffusion-v2 && git pull
+cd /modules/stable-ui-scripts && git pull

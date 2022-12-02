@@ -1,5 +1,5 @@
 mkdir -p build/bin && cd build
-cmake .. && make -j 16 
+cmake .. -G 'Unix Makefiles' && make -j 16 
 
 mv stable-ui bin/
 cp -ruv ../data bin/
