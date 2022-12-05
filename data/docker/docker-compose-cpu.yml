@@ -1,0 +1,20 @@
+version: '3.3'
+
+services:
+  stable-diffusion:
+    image: "sd"
+    container_name: sd
+    tty: true 
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env_docker
+    volumes:
+      - ../models:/models
+      - ../output:/output
+      - ../module-data:/module-data
+      - conda_env:/opt/conda
+      - root_profile:/root
+volumes:
+  conda_env:
+  root_profile:

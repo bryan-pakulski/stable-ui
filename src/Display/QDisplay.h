@@ -82,7 +82,18 @@ private:
   float backgroundB = 0.48f;
 
   // Window resize callback
-  static void framebuffer_size_callback(GLFWwindow *window, int width, int height) { glViewport(0, 0, width, height); }
+  static void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
+    // TODO: fix issue with aspect ratio, if this code is moved to an alternative render function the aspect ratio is
+    // correctly applide Set up the orthographic projection matrix
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glViewport(0, 0, width, height);
+    glOrtho(0, width, 0, height, -1.0, 1.0);
+
+    // Set the modelview matrix
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+  }
 
   // Cleans up all GL variables for clean exit
   void cleanupDisplay() {
