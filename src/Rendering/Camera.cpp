@@ -39,9 +39,9 @@ void Camera::recalculateViewMatrix() {
         glm::rotate(glm::mat4(1.0f), m_rotation, glm::vec3(0, 0, 1)) * 
         glm::scale(glm::mat4(1.0f), glm::vec3(m_zoom));
 
+    // Don't apply view matrix for 2d rendering
     m_viewMatrix = glm::inverse(transform);
     m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
-
 }
 
 void Camera::updateLogic() {
@@ -53,5 +53,9 @@ void Camera::updateLogic() {
 }
 
 void Camera::updateVisual() {
+    glOrtho(0, m_screen.first, 0, m_screen.second, 0.1, 100.0);
+}
 
+std::pair<int, int> Camera::getScreenSize() {
+    return m_screen;
 }

@@ -50,12 +50,11 @@ bool Chunk::visible(const std::pair<int,int> &windowCoords, const std::pair<int,
     ) {
         return true;
     } else {
-        return false;
+        return true;
     }
 }
 
 void Chunk::updateLogic() {
-
 }
 
 // Render onto screen, offset based on world coordinates & window size
@@ -72,8 +71,9 @@ void Chunk::updateVisual() {
                 glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));                  // scale
         setMat4("model", model);
     
-        // Model x,y coordinate offset 
-        glUniform2f(glGetUniformLocation(shaderProgram, "offset"), (float)m_coordinates.first * 0.01, (float)m_coordinates.second * 0.01);
+        // Shader uniforms
+        glUniform2f(glGetUniformLocation(shaderProgram, "offset"), (float)m_coordinates.first, (float)m_coordinates.second);
+        glUniform2f(glGetUniformLocation(shaderProgram, "uViewportSize"), (float)m_camera->getScreenSize().first, (float)m_camera->getScreenSize().second);
 
         // Update texture information
         glEnable(GL_BLEND);

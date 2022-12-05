@@ -12,9 +12,8 @@ uniform vec2 offset;               // x,y offset
 
 void main()
 {
-    vec4 totalOffset = vec4(offset.x, offset.y, 0.0, 0.0);
-
-    gl_Position = model * viewProjection * vec4(aPos, 1.0) + totalOffset;
+    vec2 offset_mod = offset * 2;
+    gl_Position = (model * viewProjection * vec4(aPos.x, aPos.y, aPos.z, 1.0)) + (viewProjection * vec4(offset_mod.x, offset_mod.y, 0.0, 1.0));
     ourColor = aColor;
     TexCoord = aTexCoord;
 }

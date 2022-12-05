@@ -40,4 +40,6 @@ public:
     glm::mat4 getViewProjectionMatrix() { return m_viewProjectionMatrix; }
     glm::mat4 getProjectionMatrix() { return m_projectionMatrix; }
     glm::mat4 getViewMatrix() { return m_viewMatrix; }
+
+    std::pair<int, int> getScreenSize();
 };
