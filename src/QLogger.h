@@ -72,13 +72,9 @@ private:
   std::mutex m_mutex;
 
   // Open file on instantiation
-  QLogger() {
-    log.open(QLOGGER_LOGFILE, std::ios_base::app);
-  }
+  QLogger() { log.open(QLOGGER_LOGFILE, std::ios_base::app); }
 
-  ~QLogger() {
-    log.close();
-  }
+  ~QLogger() { log.close(); }
 
   void updateLogTimestamp() {
     if (stat(QLOGGER_LOGFILE, &logStat) == 0) {

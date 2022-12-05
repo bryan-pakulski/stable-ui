@@ -29,9 +29,9 @@ public:
   SDCommandsInterface(SDCommandsInterface const &) = delete;
   void operator=(SDCommandsInterface const &) = delete;
 
-  void textToImage(std::string prompt, std::string negative_prompt, int samples, int steps, double cfg, int seed, int width, int height, bool &finishedFlag,
-                   std::string model_name, bool half_precision);
+  void textToImage(std::string prompt, std::string negative_prompt, int samples, int steps, double cfg, int seed,
+                   int width, int height, bool &finishedFlag, std::string model_name, bool half_precision);
 
-  void imageToImage(std::string path, std::string prompt, std::string negative_prompt, int samples, int steps, double strength, int seed,
-                   bool &finishedFlag, std::string model_name, bool half_precision);
+  void imageToImage(std::string path, std::string prompt, std::string negative_prompt, int samples, int steps,
+                    double strength, int seed, bool &finishedFlag, std::string model_name, bool half_precision);
 };

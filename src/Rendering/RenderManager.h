@@ -57,12 +57,12 @@ public:
   void sendImageToCanvas(Image &im);
 
   // Generate txt2img
-  void textToImage(std::string prompt, std::string negative_prompt, int samples, int steps, double cfg, int seed, int width, int height,
-                   bool &finishedFlag, std::string model_name, bool half_precision);
+  void textToImage(std::string prompt, std::string negative_prompt, int samples, int steps, double cfg, int seed,
+                   int width, int height, bool &finishedFlag, std::string model_name, bool half_precision);
 
   // Generate img2img
-  void imageToImage(std::string path, std::string prompt, std::string negative_prompt, int samples, int steps, double strength, int seed,
-                   bool &finishedFlag, std::string model_name, bool half_precision);
+  void imageToImage(std::string path, std::string prompt, std::string negative_prompt, int samples, int steps,
+                    double strength, int seed, bool &finishedFlag, std::string model_name, bool half_precision);
 
   // Callbacks
   static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);

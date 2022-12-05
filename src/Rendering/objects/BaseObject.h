@@ -46,34 +46,34 @@ static float getLC(const int &pixelCoord, const int &max) { return (((float)pixe
 
 // Initialise vertex shader for GLFW
 static unsigned int initVertexShader(const char *vertexShaderSource, int &success) {
-    char errorInfo[512] = "";
-    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+  char errorInfo[512] = "";
+  unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
-    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
-    glCompileShader(vertexShader);
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+  glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+  glCompileShader(vertexShader);
+  glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 
-    if (!success) {
-        glGetShaderInfoLog(vertexShader, 512, nullptr, errorInfo);
-        QLogger::GetInstance().Log(LOGLEVEL::ERR, "ERROR::VERTEX::SHADER::COMPILATION_FAILED\n", errorInfo);
-    }
+  if (!success) {
+    glGetShaderInfoLog(vertexShader, 512, nullptr, errorInfo);
+    QLogger::GetInstance().Log(LOGLEVEL::ERR, "ERROR::VERTEX::SHADER::COMPILATION_FAILED\n", errorInfo);
+  }
 
-    return vertexShader;
+  return vertexShader;
 }
 
 // Initialise fragment shader for GLFW
 static unsigned int initFragmentShader(const char *fragmentShaderSource, int &success) {
-    char errorInfo[512] = "";
-    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+  char errorInfo[512] = "";
+  unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
-    glCompileShader(fragmentShader);
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+  glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
+  glCompileShader(fragmentShader);
+  glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
 
-    if (!success) {
-        glGetShaderInfoLog(fragmentShader, 512, nullptr, errorInfo);
-        QLogger::GetInstance().Log(LOGLEVEL::ERR, "ERROR::FRAGMENT::SHADER::COMPILATION_FAILED\n", errorInfo);
-    }
+  if (!success) {
+    glGetShaderInfoLog(fragmentShader, 512, nullptr, errorInfo);
+    QLogger::GetInstance().Log(LOGLEVEL::ERR, "ERROR::FRAGMENT::SHADER::COMPILATION_FAILED\n", errorInfo);
+  }
 
-    return fragmentShader;
+  return fragmentShader;
 }

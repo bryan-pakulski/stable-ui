@@ -19,7 +19,7 @@ class QDisplay_BottomBar : public QDisplay_Base {
 
   // Window Options
   const std::string c_windowName = "Helper Window";
-  std::pair<int, int> m_windowSize {};
+  std::pair<int, int> m_windowSize{};
   int tab = 0;
 
 public:
@@ -33,9 +33,7 @@ public:
   }
 
   // Drag Drop callback for use with img2img
-  static void drop_callback(GLFWwindow* window, int count, const char** paths) {
-    
-  }
+  static void drop_callback(GLFWwindow *window, int count, const char **paths) {}
 
   virtual void render() {
     getWindowSize(m_windowSize);
@@ -44,9 +42,10 @@ public:
     ImGui::SetNextWindowPos(ImVec2(0, float(m_windowSize.second) - CONFIG::IMGUI_BOTTOM_WINDOW_HEIGHT.get()));
     ImGui::SetNextWindowSize(ImVec2(float(m_windowSize.first), CONFIG::IMGUI_BOTTOM_WINDOW_HEIGHT.get()));
 
-    ImGui::SetNextWindowSizeConstraints(ImVec2(float(m_windowSize.first), 0.0f), ImVec2(float(m_windowSize.first), float(m_windowSize.second)));
-    
-    ImGui::Begin(c_windowName.c_str(), 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse );
+    ImGui::SetNextWindowSizeConstraints(ImVec2(float(m_windowSize.first), 0.0f),
+                                        ImVec2(float(m_windowSize.first), float(m_windowSize.second)));
+
+    ImGui::Begin(c_windowName.c_str(), 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 
     // Tabbed menu
     {

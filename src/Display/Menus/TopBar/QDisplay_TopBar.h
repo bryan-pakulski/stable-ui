@@ -132,9 +132,7 @@ private:
 
 public:
   // Initialise render manager reference
-  QDisplay_TopBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
-
-  }
+  QDisplay_TopBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {}
 
   /*
    * Main Menu renderer, contains logic for showing additional display items
@@ -172,7 +170,7 @@ public:
 
       ImGui::EndMainMenuBar();
     }
-    
+
     // These will only render if their corresponding flags are set
     QDisplay_LogFile();
     QDisplay_NewFile();

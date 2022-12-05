@@ -16,8 +16,9 @@ SDCommandsInterface::SDCommandsInterface() {
 
 SDCommandsInterface::~SDCommandsInterface() { delete arguments; }
 
-void SDCommandsInterface::textToImage(std::string prompt, std::string negative_prompt, int samples, int steps, double cfg, int seed, int width, int height,
-                                      bool &finishedFlag, std::string model_name, bool half_precision) {
+void SDCommandsInterface::textToImage(std::string prompt, std::string negative_prompt, int samples, int steps,
+                                      double cfg, int seed, int width, int height, bool &finishedFlag,
+                                      std::string model_name, bool half_precision) {
   std::string functionName = "txt2image";
   std::string exec_path = CONFIG::TXT_TO_IMG_PATH.get();
   std::string out_dir = CONFIG::OUTPUT_DIRECTORY.get();
@@ -26,7 +27,8 @@ void SDCommandsInterface::textToImage(std::string prompt, std::string negative_p
 
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", exec_path, 0)));
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "prompt", prompt, 1)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "negative_prompt", negative_prompt, 2)));
+  arguments->emplace_back(
+      std::unique_ptr<base_type>(new d_type<std::string>('s', "negative_prompt", negative_prompt, 2)));
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "samples", samples, 3)));
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "steps", steps, 4)));
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<double>('f', "scale", cfg, 5)));
@@ -43,8 +45,9 @@ void SDCommandsInterface::textToImage(std::string prompt, std::string negative_p
   m_Thread.detach();
 }
 
-void SDCommandsInterface::imageToImage(std::string path, std::string prompt, std::string negative_prompt, int samples, int steps, double strength, int seed,
-                                      bool &finishedFlag, std::string model_name, bool half_precision) {
+void SDCommandsInterface::imageToImage(std::string path, std::string prompt, std::string negative_prompt, int samples,
+                                       int steps, double strength, int seed, bool &finishedFlag, std::string model_name,
+                                       bool half_precision) {
   std::string functionName = "img2image";
   std::string exec_path = CONFIG::IMG_TO_IMG_PATH.get();
   std::string out_dir = CONFIG::OUTPUT_DIRECTORY.get();
@@ -54,7 +57,8 @@ void SDCommandsInterface::imageToImage(std::string path, std::string prompt, std
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", exec_path, 0)));
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "img_path", path, 1)));
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "prompt", prompt, 2)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "negative_prompt", negative_prompt, 3)));
+  arguments->emplace_back(
+      std::unique_ptr<base_type>(new d_type<std::string>('s', "negative_prompt", negative_prompt, 3)));
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "samples", samples, 4)));
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "steps", steps, 5)));
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<double>('f', "strength", strength, 6)));
@@ -66,5 +70,5 @@ void SDCommandsInterface::imageToImage(std::string path, std::string prompt, std
   // Offload thread execution, image generation can take some time
   m_Thread = std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, std::ref(arguments),
                          std::ref(finishedFlag));
-  m_Thread.detach();                
+  m_Thread.detach();
 }

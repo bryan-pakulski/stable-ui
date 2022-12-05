@@ -44,7 +44,6 @@ static CFloat IMGUI_BOTTOM_WINDOW_HEIGHT(loadConfig("IMGUI_BOTTOM_WINDOW_HEIGHT"
 static CFloat IMGUI_LEFT_WINDOW_WIDTH(loadConfig("IMGUI_LEFT_WINDOW_WIDTH", 320.0f));
 static CFloat IMGUI_TOP_WINDOW_HEIGHT(loadConfig("IMGUI_TOP_WINDOW_HEIGHT", 18.0f));
 
-
 // Program configuration
 static CString PYTHON_CONFIG_PATH(loadConfig<std::string>("PYTHON_CONFIG_PATH", "data/scripts"));
 static CInt ENABLE_GL_DEBUG(loadConfig<int>("ENABLE_OPENGL_DEBUG_OUTPUT", 0));

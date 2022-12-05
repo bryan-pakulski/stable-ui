@@ -2,7 +2,8 @@
 
 #include "Helper.h"
 
-bool GLHELPER::LoadTextureFromFile(const char *filename, GLuint *out_texture, int *out_width, int *out_height, bool tiled) {
+bool GLHELPER::LoadTextureFromFile(const char *filename, GLuint *out_texture, int *out_width, int *out_height,
+                                   bool tiled) {
   // Load from file
   int image_width = 0;
   int image_height = 0;
@@ -26,7 +27,6 @@ bool GLHELPER::LoadTextureFromFile(const char *filename, GLuint *out_texture, in
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
   }
-
 
   // Upload pixels into texture
 #if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)

@@ -12,11 +12,10 @@
 #include "objects/chunk/Chunk.h"
 #include "objects/image/Image.h"
 
-
 class Canvas : public BaseObject {
 private:
-  std::pair<int, int> m_coords{};   // Pixel Coordinates (top left)
-  std::pair<int, int> m_screen{};   // Screen size
+  std::pair<int, int> m_coords{}; // Pixel Coordinates (top left)
+  std::pair<int, int> m_screen{}; // Screen size
 
   std::shared_ptr<Camera> m_camera;
 

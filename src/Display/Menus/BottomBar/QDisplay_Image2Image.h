@@ -30,7 +30,7 @@ class QDisplay_Image2Image : public QDisplay_Base {
   bool finishedRendering = false;
 
   // Content Browser Config
-  const char* c_base_content_directory = "data/output";
+  const char *c_base_content_directory = "data/output";
   std::filesystem::path m_current_directory;
   std::filesystem::path m_selected_file;
   std::string m_filepath;
@@ -45,9 +45,9 @@ public:
     m_negative_prompt[0] = 0;
     reloadModelFiles();
 
-    // Initialise content browser 
-    m_directory_icon = std::unique_ptr<Image>(new Image(256,256,"dir_icon"));
-    m_file_icon = std::unique_ptr<Image>(new Image(256,256,"file_icon"));
+    // Initialise content browser
+    m_directory_icon = std::unique_ptr<Image>(new Image(256, 256, "dir_icon"));
+    m_file_icon = std::unique_ptr<Image>(new Image(256, 256, "file_icon"));
     m_directory_icon->loadFromImage("data/images/directory_icon.png");
     m_file_icon->loadFromImage("data/images/file_icon.png");
     m_current_directory = std::filesystem::path(c_base_content_directory);
@@ -87,8 +87,8 @@ public:
     m_image = std::unique_ptr<Image>(
         new Image(CONFIG::IMAGE_SIZE_X_LIMIT.get(), CONFIG::IMAGE_SIZE_Y_LIMIT.get(), "img2img"));
     m_image->rendered = false;
-    m_renderManager->imageToImage(m_filepath, m_prompt, m_negative_prompt, 1, m_steps, m_strength, m_seed, m_image->rendered,
-                                 m_selected_model, m_half_precision);
+    m_renderManager->imageToImage(m_filepath, m_prompt, m_negative_prompt, 1, m_steps, m_strength, m_seed,
+                                  m_image->rendered, m_selected_model, m_half_precision);
   }
 
   void imageWindow() {
@@ -128,12 +128,18 @@ public:
 
     ImGui::EndChild();
   }
-  
+
+  void maskingWindow() {
+    ImGui::BeginChild("GLMask");
+
+    ImGui::EndChild();
+  }
+
   // Drag drop window
   void contentBrowser() {
     ImGui::BeginChild("Content Browser");
     ImGui::Text("Content Browser");
-    
+
     if (m_current_directory != std::filesystem::path(c_base_content_directory)) {
       if (ImGui::Button("<-")) {
         m_current_directory = m_current_directory.parent_path();
@@ -151,22 +157,22 @@ public:
 
     ImGui::Columns(columnCount, 0, false);
 
-    for (auto& directoryEntry : std::filesystem::directory_iterator(m_current_directory)) {
-      const auto& path = directoryEntry.path();
+    for (auto &directoryEntry : std::filesystem::directory_iterator(m_current_directory)) {
+      const auto &path = directoryEntry.path();
 
       // skip this item if it's not an image or directory
       if (!directoryEntry.is_directory() && (path.extension() != ".png" && path.extension() != ".jpg")) {
         continue;
-      } 
-      
+      }
+
       std::string filenameString = path.filename().string();
-      
+
       ImGui::PushID(filenameString.c_str());
       Image icon = directoryEntry.is_directory() ? *m_directory_icon : *m_file_icon;
 
       // Create texture
       ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-      ImGui::ImageButton((void *)(intptr_t)icon.m_texture, { thumbnailSize, thumbnailSize }, { 1, 0 }, { 0, 1 });
+      ImGui::ImageButton((void *)(intptr_t)icon.m_texture, {thumbnailSize, thumbnailSize}, {1, 0}, {0, 1});
       ImGui::PopStyleColor();
 
       if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
@@ -175,18 +181,18 @@ public:
         }
       }
       if (!directoryEntry.is_directory() && ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-          m_selected_file = path.filename();
-          
-          // Create new texture
-          m_preview_image.reset();
-          m_preview_image = std::unique_ptr<Image>(new Image(512,512,"preview"));
-          m_preview_image->loadFromImage(m_current_directory.string() + "/" + m_selected_file.string());
+        m_selected_file = path.filename();
 
-          // Path must be relative to docker, remove local data prefix
-          m_filepath = m_current_directory.string() + "/" + m_selected_file.string();
-          m_filepath.replace(m_filepath.find("data"), sizeof("data") - 1, "");
+        // Create new texture
+        m_preview_image.reset();
+        m_preview_image = std::unique_ptr<Image>(new Image(512, 512, "preview"));
+        m_preview_image->loadFromImage(m_current_directory.string() + "/" + m_selected_file.string());
 
-          m_preview_image->textured = true;
+        // Path must be relative to docker, remove local data prefix
+        m_filepath = m_current_directory.string() + "/" + m_selected_file.string();
+        m_filepath.replace(m_filepath.find("data"), sizeof("data") - 1, "");
+
+        m_preview_image->textured = true;
       }
 
       ImGui::TextWrapped("%s", filenameString.c_str());
@@ -209,12 +215,13 @@ public:
         m_renderManager->sendImageToCanvas(*m_preview_image);
       }
 
-      ImGui::Image((void *)(intptr_t)m_preview_image->m_texture, ImVec2(m_preview_image->m_width * 0.4, m_preview_image->m_height * 0.4));
+      ImGui::Image((void *)(intptr_t)m_preview_image->m_texture,
+                   ImVec2(m_preview_image->m_width * 0.4, m_preview_image->m_height * 0.4));
     }
     ImGui::EndChild();
   }
-  
-  // Prompt 
+
+  // Prompt
   void promptHelper() {
     ImGui::BeginChild("Prompt Helper");
     ImGui::InputTextMultiline("prompt", m_prompt, CONFIG::PROMPT_LENGTH_LIMIT.get());
@@ -248,29 +255,18 @@ public:
     ImGui::EndChild();
   }
 
-
   virtual void render() {
     ImGui::Columns(5);
     ImGui::SetColumnOffset(1, 320.0f);
     ImGui::SetColumnOffset(2, 600.0f);
-    {
-      contentBrowser();
-    }
+    { contentBrowser(); }
     ImGui::NextColumn();
-    {
-      previewWindow();
-    }
+    { previewWindow(); }
     ImGui::NextColumn();
-    {
-      promptHelper();
-    }
+    { promptHelper(); }
     ImGui::NextColumn();
-    {
-      promptConfig();
-    }
+    { promptConfig(); }
     ImGui::NextColumn();
-    { 
-      imageWindow();
-    }
+    { imageWindow(); }
   }
 };

@@ -7,8 +7,8 @@ class Selection : public BaseObject {
 
 private:
   std::shared_ptr<Camera> m_camera;
-  std::pair<float, float> m_coords{};   // Translation Coordinates
-  std::pair<int, int> m_screen{};       // Screen size
+  std::pair<float, float> m_coords{}; // Translation Coordinates
+  std::pair<int, int> m_screen{};     // Screen size
 
   float m_scale;
 

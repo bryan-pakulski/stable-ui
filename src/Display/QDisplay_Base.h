@@ -20,9 +20,7 @@ class QDisplay_Base {
 protected:
   std::shared_ptr<RenderManager> m_renderManager;
 
-  void getWindowSize(std::pair<int, int> &size) {
-    glfwGetFramebufferSize(m_window, &size.first, &size.second);
-  }
+  void getWindowSize(std::pair<int, int> &size) { glfwGetFramebufferSize(m_window, &size.first, &size.second); }
 
 public:
   QDisplay_Base(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : m_renderManager(rm), m_window(w) {}

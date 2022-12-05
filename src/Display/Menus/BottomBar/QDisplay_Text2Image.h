@@ -72,8 +72,8 @@ public:
     m_image = std::unique_ptr<Image>(
         new Image(CONFIG::IMAGE_SIZE_X_LIMIT.get(), CONFIG::IMAGE_SIZE_Y_LIMIT.get(), "txt2img"));
     m_image->rendered = false;
-    m_renderManager->textToImage(m_prompt, m_negative_prompt, 1, m_steps, m_cfg, m_seed, m_width, m_height, m_image->rendered,
-                                 m_selected_model, m_half_precision);
+    m_renderManager->textToImage(m_prompt, m_negative_prompt, 1, m_steps, m_cfg, m_seed, m_width, m_height,
+                                 m_image->rendered, m_selected_model, m_half_precision);
   }
 
   void imageWindow() {
@@ -113,8 +113,8 @@ public:
 
     ImGui::EndChild();
   }
-  
-  // Prompt 
+
+  // Prompt
   void promptHelper() {
     ImGui::BeginChild("Prompt Helper");
     ImGui::InputTextMultiline("prompt", m_prompt, CONFIG::PROMPT_LENGTH_LIMIT.get());
@@ -129,24 +129,22 @@ public:
 
     // Width control
     ImGui::SliderInt("width", &m_width, 1, CONFIG::IMAGE_SIZE_X_LIMIT.get());
-    if (ImGui::BeginPopupContextItem("width"))
-    {
-        ImGui::InputInt("value", &m_width);
-        if (ImGui::MenuItem("Reset to default: 512"))
-            m_width = 512;
-        ImGui::EndPopup();
+    if (ImGui::BeginPopupContextItem("width")) {
+      ImGui::InputInt("value", &m_width);
+      if (ImGui::MenuItem("Reset to default: 512"))
+        m_width = 512;
+      ImGui::EndPopup();
     }
 
     // Height control
     ImGui::SliderInt("height", &m_height, 1, CONFIG::IMAGE_SIZE_Y_LIMIT.get());
-    if (ImGui::BeginPopupContextItem("height"))
-    {
-        ImGui::InputInt("value", &m_height);
-        if (ImGui::MenuItem("Reset to default: 512"))
-            m_height = 512;
-        ImGui::EndPopup();
+    if (ImGui::BeginPopupContextItem("height")) {
+      ImGui::InputInt("value", &m_height);
+      if (ImGui::MenuItem("Reset to default: 512"))
+        m_height = 512;
+      ImGui::EndPopup();
     }
-    
+
     ImGui::InputInt("steps", &m_steps);
     ImGui::InputInt("seed", &m_seed);
     ImGui::InputDouble("cfg scale", &m_cfg, 0.1);
@@ -169,21 +167,14 @@ public:
     ImGui::EndChild();
   }
 
-
   virtual void render() {
     ImGui::Columns(3);
     ImGui::SetColumnOffset(1, 420.0f);
     ImGui::SetColumnOffset(2, 740.0f);
-    {
-      promptHelper();
-    }
+    { promptHelper(); }
     ImGui::NextColumn();
-    {
-      promptConfig();
-    }
+    { promptConfig(); }
     ImGui::NextColumn();
-    { 
-      imageWindow();
-    }
+    { imageWindow(); }
   }
 };
