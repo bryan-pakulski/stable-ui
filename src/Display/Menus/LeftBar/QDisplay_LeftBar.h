@@ -36,6 +36,10 @@ public:
     layerHelper();
     ImGui::Separator();
 
+    ImGui::Text("Selection");
+    selectionPreview();
+    ImGui::Separator();
+
     ImGui::End();
   }
 
@@ -50,6 +54,15 @@ private:
   std::unique_ptr<Image> m_hidden_icon;
   float c_visibilityIconSize = 12.0f;
 
+  // Selection preview
+  void selectionPreview() {
+    if (m_renderManager->m_selection->m_selection_texture_buffer) {
+      ImGui::Image(
+          (void *)(intptr_t)m_renderManager->m_selection->m_selection_texture_buffer,
+          ImVec2(m_renderManager->m_selection->m_size.first * 0.4, m_renderManager->m_selection->m_size.second * 0.4));
+    }
+  }
+
   // Camera helper
   void cameraHelper() {
     // Debug menu to view camera coordinates
@@ -57,13 +70,10 @@ private:
     ImGui::Text("Camera Y: %s", std::to_string(m_renderManager->m_camera->m_position.y).c_str());
 
     // Almost all widgets return true when their value changes
-    if (ImGui::SliderFloat("Zoom", &m_renderManager->m_camera->m_zoom, 3.0f, 0.05f, "")) {
-      m_renderManager->m_camera->recalculateViewMatrix();
-    }
+    ImGui::SliderFloat("Zoom", &m_renderManager->m_camera->m_zoom, 3.0f, 0.05f, "");
     if (ImGui::BeginPopupContextItem("Zoom")) {
       if (ImGui::MenuItem("Reset")) {
         m_renderManager->m_camera->m_zoom = 1.0f;
-        m_renderManager->m_camera->recalculateViewMatrix();
       }
       ImGui::EndPopup();
     }

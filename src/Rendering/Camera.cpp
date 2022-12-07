@@ -25,8 +25,6 @@ Camera::~Camera() {}
 void Camera::moveCameraPosition(float x, float y) {
   m_position.x -= (x * m_cameraSpeed);
   m_position.y -= (y * m_cameraSpeed);
-
-  recalculateViewMatrix();
 }
 
 // Recalculate matrices
@@ -52,6 +50,8 @@ void Camera::updateLogic() {
 
 void Camera::updateVisual() {
   // Set up the orthographic projection matrix
+  recalculateViewMatrix();
+
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glViewport(0, 0, m_screen.first, m_screen.second);

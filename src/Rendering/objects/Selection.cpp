@@ -5,7 +5,6 @@ Selection::~Selection() {}
 Selection::Selection(std::pair<int, int> coords, GLFWwindow *w, std::shared_ptr<Camera> c) : BaseObject(coords) {
   int success;
   m_window = w;
-  m_scale = 100.0f;
   m_camera = std::shared_ptr<Camera>(c);
 
   glfwGetFramebufferSize(m_window, &m_screen.first, &m_screen.second);
@@ -36,16 +35,55 @@ Selection::Selection(std::pair<int, int> coords, GLFWwindow *w, std::shared_ptr<
   linkShaders(vertexShader, fragmentShader, success);
   setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices));
 
-  int imgX = 0;
-  int imgY = 0;
-  GLHELPER::LoadTextureFromFile("data/images/selection.png", &m_texture_id, &imgX, &imgY, true);
+  GLHELPER::LoadTextureFromFile("data/images/selection.png", &m_texture_id, &m_size.first, &m_size.second, true);
+
+  // Initialise selection buffer texture
+  glGenTextures(1, &m_selection_texture_buffer);
 }
 
 std::pair<int, int> Selection::getCoordinates() { return m_coords; }
 
+// Set drag start coordinates
+void Selection::dragStart(int x, int y) {
+  m_listening = true;
+  m_dragCoords.first.first = x;
+  m_dragCoords.first.second = y;
+}
+
+// Set drag end coordinates
+void Selection::dragStop(int x, int y) {
+  m_listening = false;
+  m_dragCoords.second.first = x;
+  m_dragCoords.second.second = y;
+}
+
+// Basic check to see if we actually have performed a dragging action
+bool Selection::isDragged() {
+  m_listening = false;
+  // Check if the mouse was dragged
+  int xdiff = abs(m_dragCoords.second.first - m_dragCoords.first.first);
+  int ydiff = abs(m_dragCoords.second.second - m_dragCoords.first.second);
+  if (xdiff > c_drag_trigger && ydiff > c_drag_trigger) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+// Updates the selection texture buffer with a selection of given screen coordinates
+void Selection::makeSelection() {
+
+  // Make selection from screen buffer
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Making selection at coordinates: ", m_dragCoords.first.first,
+                             m_dragCoords.first.second, "and", m_dragCoords.second.first, m_dragCoords.second.second);
+
+  // Reset drag values
+  m_dragCoords.first = {0, 0};
+  m_dragCoords.second = {0, 0};
+}
+
 void Selection::updateLogic() {
-  // Get updated screen size
-  glfwGetFramebufferSize(m_window, &m_screen.first, &m_screen.second);
+  // TODO: Check if selection was updated? if so trigger texture to be regenerated?
 }
 
 void Selection::updateVisual() {

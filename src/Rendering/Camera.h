@@ -21,6 +21,8 @@ class Camera {
   std::pair<int, int> m_screen{}; // Screen size
   std::pair<float, float> c_zoom_minmax{0.05f, 3.0f};
 
+  void recalculateViewMatrix();
+
 public:
   Camera(GLFWwindow *w);
   ~Camera();
@@ -36,7 +38,6 @@ public:
   void updateVisual();
 
   void moveCameraPosition(float x, float y);
-  void recalculateViewMatrix();
   glm::mat4 getViewProjectionMatrix() { return m_viewProjectionMatrix; }
   glm::mat4 getProjectionMatrix() { return m_projectionMatrix; }
   glm::mat4 getViewMatrix() { return m_viewMatrix; }

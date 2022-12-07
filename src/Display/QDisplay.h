@@ -188,6 +188,7 @@ private:
 
     // Disable ini file configuration from being generated
     io.IniFilename = NULL;
+    io.ConfigWindowsMoveFromTitleBarOnly = true;
   }
 
   ~QDisplay() { cleanupDisplay(); }

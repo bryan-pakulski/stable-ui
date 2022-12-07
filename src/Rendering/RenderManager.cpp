@@ -109,6 +109,20 @@ void RenderManager::mouse_callback(GLFWwindow *window, double xposIn, double ypo
 
   rm->m_camera->cur_mouse.x = xposIn;
   rm->m_camera->cur_mouse.y = yposIn;
+
+  // Check if we are making a selection
+  if (rm->m_selection->m_listening) {
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE) {
+
+      // Store the final x,y coordinates
+      rm->m_selection->dragStop(xposIn, yposIn);
+
+      // Check if our action was an actual drag event
+      if (rm->m_selection->isDragged()) {
+        rm->m_selection->makeSelection();
+      }
+    }
+  }
 }
 
 // Mouse button callback function for dragging camera and interacting with canvas
@@ -124,6 +138,13 @@ void RenderManager::mouse_btn_callback(GLFWwindow *window, int button, int actio
     } else if (GLFW_RELEASE == action) {
       rm->m_cameraDrag = false;
     }
+  }
+
+  // Start dragging
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
+    rm->m_selection->dragStart(xpos, ypos);
   }
 }
 

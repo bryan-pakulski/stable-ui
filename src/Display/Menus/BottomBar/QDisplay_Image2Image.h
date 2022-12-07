@@ -23,10 +23,13 @@ class QDisplay_Image2Image : public QDisplay_Base {
   float m_strength = 0.5;
   bool m_half_precision = false;
 
+  bool m_draw_mask_window = false;
+
   std::string m_selected_model = "";
   std::string m_ckpt_path = "";
   std::vector<listItem> m_ckpt_files;
   std::unique_ptr<Image> m_image = 0;
+  std::unique_ptr<Image> m_image_mask = 0;
   bool finishedRendering = false;
 
   // Content Browser Config
@@ -129,10 +132,19 @@ public:
     ImGui::EndChild();
   }
 
-  void maskingWindow() {
-    ImGui::BeginChild("GLMask");
+  void selectImage(const std::filesystem::path &path) {
+    m_selected_file = path.filename();
 
-    ImGui::EndChild();
+    // Create new texture
+    m_preview_image.reset();
+    m_preview_image = std::unique_ptr<Image>(new Image(512, 512, "preview"));
+    m_preview_image->loadFromImage(m_current_directory.string() + "/" + m_selected_file.string());
+
+    // Path must be relative to docker, remove local data prefix
+    m_filepath = m_current_directory.string() + "/" + m_selected_file.string();
+    m_filepath.replace(m_filepath.find("data"), sizeof("data") - 1, "");
+
+    m_preview_image->textured = true;
   }
 
   // Drag drop window
@@ -178,21 +190,14 @@ public:
       if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
         if (directoryEntry.is_directory()) {
           m_current_directory /= path.filename();
+        } else {
+          // Send image to be rendered on canvas at selection coordinates
+          selectImage(path);
+          m_renderManager->sendImageToCanvas(*m_preview_image);
         }
       }
       if (!directoryEntry.is_directory() && ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-        m_selected_file = path.filename();
-
-        // Create new texture
-        m_preview_image.reset();
-        m_preview_image = std::unique_ptr<Image>(new Image(512, 512, "preview"));
-        m_preview_image->loadFromImage(m_current_directory.string() + "/" + m_selected_file.string());
-
-        // Path must be relative to docker, remove local data prefix
-        m_filepath = m_current_directory.string() + "/" + m_selected_file.string();
-        m_filepath.replace(m_filepath.find("data"), sizeof("data") - 1, "");
-
-        m_preview_image->textured = true;
+        selectImage(path);
       }
 
       ImGui::TextWrapped("%s", filenameString.c_str());
@@ -206,13 +211,48 @@ public:
     ImGui::EndChild();
   }
 
+  void drawMaskWindow() {
+    if (m_draw_mask_window) {
+      ImGui::Begin("GLMask");
+      ImGui::Text("Masking");
+
+      // We will draw over the top of this with our mask
+      if (!m_selected_file.empty() && m_preview_image->textured) {
+        ImGui::Image((void *)(intptr_t)m_preview_image->m_texture,
+                     ImVec2(m_preview_image->m_width, m_preview_image->m_height));
+      }
+
+      // Capture mouse input???
+      m_image_mask->drawMaskToTexture(0, 0, 1.0f);
+
+      if (ImGui::Button("Save Mask")) {
+        m_draw_mask_window = false;
+      }
+      ImGui::SameLine();
+      if (ImGui::Button("Reset Mask")) {
+        m_image_mask.reset();
+        m_image_mask =
+            std::unique_ptr<Image>(new Image(m_preview_image->m_width, m_preview_image->m_height, "image_mask"));
+      }
+      ImGui::SameLine();
+      if (ImGui::Button("Close")) {
+        m_draw_mask_window = false;
+      }
+      ImGui::End();
+    }
+  }
+
   // Preview window for files selected in content browser
   void previewWindow() {
     ImGui::BeginChild("Browser Preview");
+    ImGui::Text("Preview");
     if (!m_selected_file.empty() && m_preview_image->textured) {
-      if (ImGui::Button("Send to Canvas")) {
-        // Send image to be rendered on canvas at selection coordinates
-        m_renderManager->sendImageToCanvas(*m_preview_image);
+      if (ImGui::Button("Draw Mask")) {
+        if (!m_image_mask) {
+          m_image_mask =
+              std::unique_ptr<Image>(new Image(m_preview_image->m_width, m_preview_image->m_height, "image_mask"));
+        }
+        m_draw_mask_window = true;
       }
 
       ImGui::Image((void *)(intptr_t)m_preview_image->m_texture,
@@ -221,9 +261,27 @@ public:
     ImGui::EndChild();
   }
 
+  // Mask preview
+  void maskPreviewWindow() {
+    ImGui::BeginChild("Mask Preview");
+    ImGui::Text("Mask Preview");
+
+    if (m_image_mask) {
+      if (ImGui::Button("Delete Mask")) {
+        m_image_mask.reset();
+      } else {
+        ImGui::Image((void *)(intptr_t)m_image_mask->m_texture,
+                     ImVec2(m_image_mask->m_width * 0.4, m_image_mask->m_height * 0.4));
+      }
+    }
+
+    ImGui::EndChild();
+  }
+
   // Prompt
   void promptHelper() {
     ImGui::BeginChild("Prompt Helper");
+    ImGui::Text("Prompt Helper");
     ImGui::InputTextMultiline("prompt", m_prompt, CONFIG::PROMPT_LENGTH_LIMIT.get());
     ImGui::InputTextMultiline("negative prompt", m_negative_prompt, CONFIG::PROMPT_LENGTH_LIMIT.get());
     ImGui::EndChild();
@@ -231,6 +289,7 @@ public:
 
   void promptConfig() {
     ImGui::BeginChild("Prompt Config");
+    ImGui::Text("Prompt Config");
 
     ImGui::Checkbox("half precision", &m_half_precision);
     ImGui::InputInt("steps", &m_steps);
@@ -256,17 +315,22 @@ public:
   }
 
   virtual void render() {
-    ImGui::Columns(5);
+    ImGui::Columns(6);
     ImGui::SetColumnOffset(1, 320.0f);
     ImGui::SetColumnOffset(2, 600.0f);
     { contentBrowser(); }
     ImGui::NextColumn();
     { previewWindow(); }
     ImGui::NextColumn();
+    { maskPreviewWindow(); }
+    ImGui::NextColumn();
     { promptHelper(); }
     ImGui::NextColumn();
     { promptConfig(); }
     ImGui::NextColumn();
     { imageWindow(); }
+
+    // Only render if flags are enabled
+    drawMaskWindow();
   }
 };
