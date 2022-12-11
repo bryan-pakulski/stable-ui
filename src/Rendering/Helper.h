@@ -3,7 +3,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "../Third Party/stb/stb_image.h"
+#include "../ThirdParty/stb/stb_image.h"
 
 class GLHELPER {
 public:
