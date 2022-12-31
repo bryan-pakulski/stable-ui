@@ -198,8 +198,12 @@ def main():
     config = OmegaConf.load(f"{opt.config}")
     model = load_model_from_config(config, f"{opt.ckpt}")
 
-    device = torch.device(
-        "cuda") if torch.cuda.is_available() else torch.device("cpu")
+    if (torch.cuda.is_available()):
+        print("Using GPU...")
+        device = torch.device("cuda")
+    else:
+        print("Using CPU...")
+        torch.device("cpu")
     model = model.to(device)
 
     if opt.precision == "autocast":

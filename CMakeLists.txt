@@ -113,6 +113,9 @@ find_package(X11 REQUIRED)     # for GLFW
 find_package (Python REQUIRED
         COMPONENTS Interpreter Development)
 
+# Yaml-cpp
+add_subdirectory(${CMAKE_HOME_DIRECTORY}/src/ThirdParty/yaml-cpp)
+
 add_executable( stable-ui 
                 main.cpp 
                 src/Rendering/RenderManager.cpp
@@ -137,6 +140,7 @@ target_include_directories(
         ${imgui_SOURCE_DIR}/misc/cpp
         ${glm_SOURCE_DIR}/src
         ${Python_INCLUDE_DIRS}
+        ${CMAKE_HOME_DIRECTORY}/src/ThirdParty/yaml-cpp/include
 )
 
 target_link_directories(
@@ -150,7 +154,7 @@ target_link_libraries(
         glad
         glfw
         glm
-        ${CMAKE_HOME_DIRECTORY}/lib/libyaml-cpp.a
+        yaml-cpp
         ${OPENGL_LIBRARY}
         ${Python_LIBRARIES}
 )

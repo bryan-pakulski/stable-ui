@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Third Party/yaml-cpp/yaml.h"
+#include <yaml-cpp/yaml.h>
 #include <yaml-cpp/exceptions.h>
 #include <imgui.h>
 

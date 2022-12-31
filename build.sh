@@ -1,3 +1,6 @@
+# Retrieve third party submodules & any updates
+git submodule update --init --recursive
+
 mkdir -p build/bin && cd build
 cmake .. -G 'Unix Makefiles' && make -j 16 
 
