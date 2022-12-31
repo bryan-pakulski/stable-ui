@@ -70,7 +70,7 @@ private:
     ImGui::Text("Camera Y: %s", std::to_string(m_renderManager->m_camera->m_position.y).c_str());
 
     // Almost all widgets return true when their value changes
-    ImGui::SliderFloat("Zoom", &m_renderManager->m_camera->m_zoom, 3.0f, 0.05f, "");
+    ImGui::SliderFloat("Zoom", &m_renderManager->m_camera->m_zoom, 1.0f, 0.05f, "");
     if (ImGui::BeginPopupContextItem("Zoom")) {
       if (ImGui::MenuItem("Reset")) {
         m_renderManager->m_camera->m_zoom = 1.0f;

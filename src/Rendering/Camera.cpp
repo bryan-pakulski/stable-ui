@@ -8,13 +8,13 @@ Camera::Camera(GLFWwindow *w) : m_window(w) {
 
   m_position = glm::vec3(0.0f);
 
-  // Camera bounds
-  float left = -m_screen.first / 2.0f;
-  float right = m_screen.first / 2.0f;
-  float top = -m_screen.second / 2.0f;
-  float bottom = m_screen.second / 2.0f;
+  // Get the aspect ratio by dividing the width and height of the viewport
+  float aspectRatio = (float)m_screen.first / (float)m_screen.second;
 
-  m_projectionMatrix = glm::ortho(left, right, bottom, top, -1.0f, 1.0f);
+  // Generate the orthographic projection matrix
+  m_projectionMatrix = glm::ortho(-m_screen.first * aspectRatio, m_screen.second * aspectRatio, (float)-m_screen.first,
+                                  (float)m_screen.second, -1.0f, 1.0f);
+
   m_viewMatrix = glm::mat4(1.0f);
   m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
 }
@@ -37,6 +37,7 @@ void Camera::recalculateViewMatrix() {
 
   // Don't apply view matrix for 2d rendering
   m_viewMatrix = glm::inverse(transform);
+  float aspectRatio = (float)m_screen.first / (float)m_screen.second;
   m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
 }
 
@@ -52,10 +53,13 @@ void Camera::updateVisual() {
   // Set up the orthographic projection matrix
   recalculateViewMatrix();
 
+  float aspectRatio = (float)m_screen.first / (float)m_screen.second;
+
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glViewport(0, 0, m_screen.first, m_screen.second);
-  glOrtho(0, m_screen.first, 0, m_screen.second, -1.0, 1.0);
+  m_projectionMatrix = glm::ortho(-m_screen.first * aspectRatio, m_screen.second * aspectRatio, (float)-m_screen.first,
+                                  (float)m_screen.second, -1.0f, 1.0f);
 
   // Set the modelview matrix
   glMatrixMode(GL_MODELVIEW);

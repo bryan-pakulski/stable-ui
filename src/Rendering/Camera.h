@@ -30,7 +30,7 @@ public:
   // Mouse positions for dragging across screen
   glm::vec2 prev_mouse;
   glm::vec2 cur_mouse;
-  float m_zoom = 1.0f;
+  float m_zoom = 0.5f; // Acceptable range is from 1.0f - 0.05f
   float m_zoomSpeed = 0.05f;
   glm::vec3 m_position;
 
