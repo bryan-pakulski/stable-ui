@@ -5,7 +5,7 @@
 # List of available functions:
 # 'working_dir' - Module path, used as working directory when model is loaded
 # 'config' - Additional config passed to SD commands when model is run i.e. yaml config path
-# 'trigger_prompt' - Inserts trigger keywords for a given model into the prompt when run  
+# 'trigger_prompt' - Inserts trigger keywords for a given model into the prompt when run
 
 # Default configuration, do not delete or modify!!
 default:
@@ -23,16 +23,15 @@ e6c9ec9de027154701e962605add2bf51e43da2c:
   config: "--config /modules/stable-diffusion-v2/configs/stable-diffusion/v2-inference.yaml"
 
 # 512-depth-ema.ckpt
-a81e98c0f932a55d8dd08058c1b9ce68525ac6a5: 
+a81e98c0f932a55d8dd08058c1b9ce68525ac6a5:
   working_dir: "/modules/stable-diffusion-v2"
   config: "--config /modules/stable-diffusion-v2/configs/stable-diffusion/v2-midas-inference.yaml"
-  
 
 # 512-inpainting-ema.ckpt
 0f6ea658d012497008edbd7eaa884f3c5f7ac2a7:
   working_dir: "/modules/stable-diffusion-v2"
   config: "--config /modules/stable-diffusion-v2/configs/stable-diffusion/v2-inpainting-inference.yaml"
-  
+
 # x4-upscaler-ema.ckpt
 b4cf7c78d371625f37ba6ba79c18a73c604fd422:
   working_dir: "/modules/stable-diffusion-v2"
@@ -47,3 +46,8 @@ b4cf7c78d371625f37ba6ba79c18a73c604fd422:
 35aacf4186870dc72b41bbf0a989505a874ec374:
   working_dir: "/modules/stable-ui-scripts"
   trigger_prompt: "SKSKS art style"
+
+# Inkpunk diffusion v2
+26b039fb0c9bd39f86cc54f6777ca88c7a989ea0:
+  working_dir: "modules/stable-ui-scripts"
+  trigger_prompt: "nvinkpunk"
