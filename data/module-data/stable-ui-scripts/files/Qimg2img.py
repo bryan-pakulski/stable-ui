@@ -217,7 +217,7 @@ def main():
         device = torch.device("cuda")
     else:
         print("Using CPU...")
-        torch.device("cpu")
+        device = torch.device("cpu")
     model = model.to(device)
 
     if opt.precision == "autocast":

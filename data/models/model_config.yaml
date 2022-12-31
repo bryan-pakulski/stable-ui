@@ -49,5 +49,5 @@ b4cf7c78d371625f37ba6ba79c18a73c604fd422:
 
 # Inkpunk diffusion v2
 26b039fb0c9bd39f86cc54f6777ca88c7a989ea0:
-  working_dir: "modules/stable-ui-scripts"
+  working_dir: "/modules/stable-ui-scripts"
   trigger_prompt: "nvinkpunk"
