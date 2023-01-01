@@ -9,10 +9,10 @@ Chunk::Chunk(std::shared_ptr<Image> im, std::shared_ptr<Camera> c, int x, int y,
   // Vertex data
   float vertices[] = {
       // positions        // colors         // texture coords
-      (float)m_image->m_width,  (float)m_image->m_height,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
-      (float)m_image->m_width,  -(float)m_image->m_height, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-      -(float)m_image->m_width, -(float)m_image->m_height, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-      -(float)m_image->m_width, (float)m_image->m_height,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
+      (float)m_image->m_width,  (float)m_image->m_height,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top right
+      (float)m_image->m_width,  -(float)m_image->m_height, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, // bottom right
+      -(float)m_image->m_width, -(float)m_image->m_height, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, // bottom left
+      -(float)m_image->m_width, (float)m_image->m_height,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f  // top left
   };
 
   // Index buffer // Element Buffer Objects (EBO)

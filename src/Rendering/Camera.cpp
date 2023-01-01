@@ -23,7 +23,7 @@ Camera::~Camera() {}
 
 // Offset camera
 void Camera::moveCameraPosition(float x, float y) {
-  m_position.x -= (x * m_cameraSpeed);
+  m_position.x -= -(x * m_cameraSpeed);
   m_position.y -= (y * m_cameraSpeed);
 }
 
@@ -31,7 +31,7 @@ void Camera::moveCameraPosition(float x, float y) {
 void Camera::recalculateViewMatrix() {
   glfwGetFramebufferSize(m_window, &m_screen.first, &m_screen.second);
 
-  glm::mat4 transform = glm::translate(glm::mat4(1.0f), m_position) *
+  glm::mat4 transform = glm::translate(glm::mat4(1.0f), -m_position) *
                         glm::rotate(glm::mat4(1.0f), m_rotation, glm::vec3(0, 0, 1)) *
                         glm::scale(glm::mat4(1.0f), glm::vec3(m_zoom));
 
