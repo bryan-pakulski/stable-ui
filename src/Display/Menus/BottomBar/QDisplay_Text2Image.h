@@ -42,7 +42,7 @@ public:
     // Load model files
     try {
       for (const auto &entry : fs::directory_iterator(CONFIG::MODELS_DIRECTORY.get())) {
-        listItem i{.m_name = entry.path().filename()};
+        listItem i{.m_name = entry.path().filename().string()};
         m_ckpt_files.push_back(i);
       }
     } catch (fs::filesystem_error) {
@@ -57,7 +57,7 @@ public:
     try {
       for (const auto &entry : fs::directory_iterator("data" + CONFIG::OUTPUT_DIRECTORY.get() + "/txt2img")) {
         if (entry.is_regular_file()) {
-          outfile = entry.path();
+          outfile = entry.path().string();
         }
       }
     } catch (fs::filesystem_error) {

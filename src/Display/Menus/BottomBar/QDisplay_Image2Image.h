@@ -60,7 +60,7 @@ public:
     // Load model files
     try {
       for (const auto &entry : fs::directory_iterator(CONFIG::MODELS_DIRECTORY.get())) {
-        listItem i{.m_name = entry.path().filename()};
+        listItem i{.m_name = entry.path().filename().string()};
         m_ckpt_files.push_back(i);
       }
     } catch (fs::filesystem_error) {
@@ -75,7 +75,7 @@ public:
     try {
       for (const auto &entry : fs::directory_iterator("data/" + CONFIG::OUTPUT_DIRECTORY.get() + "/img2img")) {
         if (entry.is_regular_file()) {
-          outfile = entry.path();
+          outfile = entry.path().string();
         }
       }
     } catch (fs::filesystem_error) {
@@ -223,7 +223,7 @@ public:
       }
 
       // Capture mouse input???
-      m_image_mask->drawMaskToTexture(0, 0, 1.0f);
+      m_image_mask->drawMaskToTexture(1, 1, 4.0f);
 
       if (ImGui::Button("Save Mask")) {
         m_draw_mask_window = false;

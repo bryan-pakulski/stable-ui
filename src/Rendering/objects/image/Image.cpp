@@ -34,15 +34,24 @@ void Image::drawMaskToTexture(int xPos, int yPos, float size) {
   // Set up framebuffer for additional rendering
   glGenFramebuffers(1, &m_framebuffer);
   glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
-  // Attach texture1 to the framebuffer
+
+  // Attach texture to the framebuffer
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texture, 0);
-  // Set up the viewport
-  glViewport(0, 0, m_width, m_height);
+
   // Clear the framebuffer
-  glClear(GL_COLOR_BUFFER_BIT);
+  //glClear(GL_COLOR_BUFFER_BIT);
 
   // TODO: Draw whatever you want directly onto texture1 here
-  // ...
+  // Draw a pixel at the mouse coordinates
+  glBegin(GL_POINTS);
+  glColor3f(1.0f, 1.0f, 1.0f);
+  glVertex2f(xPos, yPos);
+  glEnd();
 
+  // Save the framebuffer
+  glBindTexture(GL_TEXTURE_2D, m_texture);
+  //glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, m_width, m_height, 0);
+
+  // unbind the framebuffer
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
