@@ -1,5 +1,5 @@
 # Requirements
-- Python 3.8+ 
+- Python 3.10.0 
 - pip (see rquirements.txt for libraries, can be installed with `pip install -r requirements.txt`)
 - Docker see: https://github.com/NVIDIA/nvidia-docker#quickstart
 - nvidia-container-toolkit
