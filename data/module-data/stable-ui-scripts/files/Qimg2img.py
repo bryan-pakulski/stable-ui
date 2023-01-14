@@ -33,9 +33,14 @@ def load_model_from_config(config, ckpt, verbose=False):
     pl_sd = torch.load(ckpt, map_location="cpu")
     if "global_step" in pl_sd:
         print(f"Global Step: {pl_sd['global_step']}")
-    sd = pl_sd["state_dict"]
+    #sd = pl_sd["state_dict"]
     model = instantiate_from_config(config.model)
-    m, u = model.load_state_dict(sd, strict=False)
+
+    state_dict = model.state_dict()     
+    for k1, k2 in zip(state_dict.keys(), pl_sd.keys()):         
+        state_dict[k1] = pl_sd[k2]     
+        m, u = model.load_state_dict(state_dict)
+
     if len(m) > 0 and verbose:
         print("missing keys:")
         print(m)
@@ -183,7 +188,7 @@ def main():
     parser.add_argument(
         "--config",
         type=str,
-        default="/sd/configs/stable-diffusion/v1-inference.yaml",
+        default="/sd/configs/stable-diffusion/v2-inference.yaml",
         help="path to config which constructs model",
     )
     parser.add_argument(

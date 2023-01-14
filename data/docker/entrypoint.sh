@@ -4,7 +4,8 @@
 if [ ! -d "/sd" ] 
 then
     echo "Setting up Stable Diffusion git repository" 
-    git clone https://github.com/CompVis/stable-diffusion.git /sd/
+    #git clone https://github.com/CompVis/stable-diffusion.git /sd/
+    git clone https://github.com/Stability-AI/stablediffusion.git /sd/
 else
     echo "Checking for updates to Stable Diffusion"
     cd /sd && git pull

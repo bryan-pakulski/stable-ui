@@ -4,9 +4,4 @@ working-directory: /modules/stable-ui-scripts
 filepaths:
   "files/Qimg2img.py": "/modules/stable-ui-scripts/scripts/Qimg2img.py"
   "files/Qtxt2img.py": "/modules/stable-ui-scripts/scripts/Qtxt2img.py"
-  "files/ldm/models/diffusion/ddim.py": "/sd/ldm/models/diffusion/ddim.py"
-  "files/ldm/models/diffusion/ddpm.py": "/sd/ldm/models/diffusion/ddpm.py"
-  "files/ldm/models/diffusion/plms.py": "/sd/ldm/models/diffusion/plms.py"
-  "files/ldm/models/diffusion/dpm_solver/dpm_solver.py": "/sd/ldm/models/diffusion/dpm_solver/dpm_solver.py"
-  "files/ldm/models/diffusion/dpm_solver/sampler.py": "/sd/ldm/models/diffusion/dpm_solver/sampler.py"
-  "files/ldm/modules/encoders/modules.py": "/sd/ldm/modules/encoders/modules.py"
+  "files/configs/v1-inference.yaml": "/modules/stable-ui-scripts/configs/v1-inference.yaml"
