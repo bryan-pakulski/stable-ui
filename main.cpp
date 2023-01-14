@@ -2,6 +2,7 @@
 #include "src/Display/QDisplay.h"
 #include "src/Rendering/RenderManager.h"
 #include <imgui_impl_glfw.h>
+
 int main() {
 
   // Intialise Render manager & attach to Display

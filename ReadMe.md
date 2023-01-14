@@ -12,10 +12,10 @@
 # Features
 - TXT2IMG generation
 - IMG2IMG generation
+- Custom module extension
 - Inpainting & Outpainting (TODO)
 - Textual Inversion training (TODO)
 - Stable Diffusion v2 support (TODO)
-- Custom module extension (TODO)
 
 # Details
 This UI environment spins up and manages a docker image for Stable-Diffusion. It interfaces with this using python scripts to run SD commands to generate images.
@@ -33,3 +33,13 @@ Functionality of the application can be extended by loading custom modules, see 
 
 # Controls
 - Middle mouse button to move the main window canvas
+
+# Building
+- Linux:
+Compiler: GCC
+Additional libraries: Python 3.8+ dev libraries & debug symbols
+Building: Run the `build.sh` script or add the project to any ide that supports cmake projects
+
+- Windows:
+Compiler: VSCC
+Additional libraries: Python debug symbols & Debug binaries

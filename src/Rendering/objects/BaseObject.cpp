@@ -1,4 +1,5 @@
 #include "BaseObject.h"
+#include <sstream>
 
 BaseObject::BaseObject(std::pair<int, int> pixelCoords) : pixelCoords{pixelCoords} {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "Object initialized at", pixelCoords.first, pixelCoords.second);
