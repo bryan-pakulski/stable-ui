@@ -19,38 +19,15 @@ from ldm.util import instantiate_from_config
 from ldm.models.diffusion.ddim import DDIMSampler
 from ldm.models.diffusion.plms import PLMSSampler
 
+from common import sd_model
+
 
 def chunk(it, size):
     it = iter(it)
     return iter(lambda: tuple(islice(it, size)), ())
 
 
-def load_model_from_config(config, ckpt, verbose=False):
-    print(f"Loading model from {ckpt}")
-    pl_sd = torch.load(ckpt, map_location="cpu")
-    if "global_step" in pl_sd:
-        print(f"Global Step: {pl_sd['global_step']}")
-    #sd = pl_sd["state_dict"]
-    model = instantiate_from_config(config.model)
-
-    state_dict = model.state_dict()     
-    for k1, k2 in zip(state_dict.keys(), checkpoint.keys()):         
-        state_dict[k1] = checkpoint[k2]     
-        m, u = model.load_state_dict(state_dict)
-
-    if len(m) > 0 and verbose:
-        print("missing keys:")
-        print(m)
-    if len(u) > 0 and verbose:
-        print("unexpected keys:")
-        print(u)
-
-    if torch.cuda.is_available():
-        model.cuda()
-    model.eval()
-    return model
-
-
+@torch.no_grad()
 def main():
     parser = argparse.ArgumentParser()
 
@@ -201,7 +178,7 @@ def main():
     seed_everything(opt.seed)
 
     config = OmegaConf.load(f"{opt.config}")
-    model = load_model_from_config(config, f"{opt.ckpt}")
+    model = sd_model.load_model(config, f"{opt.ckpt}", opt.precision)
 
     if (torch.cuda.is_available()):
         print("Using GPU...")
@@ -210,9 +187,6 @@ def main():
         print("Using CPU...")
         device = torch.device("cpu")
     model = model.to(device)
-
-    if opt.precision == "autocast":
-        model.half()
 
     if opt.plms:
         sampler = PLMSSampler(model)

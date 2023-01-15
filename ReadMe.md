@@ -29,7 +29,7 @@ You can specify this in the `data/models/model_config.yaml` folder. This contain
 
 # Custom Modules
 Functionality of the application can be extended by loading custom modules, see `data/modules/ReadMe.md` for additional information, default modules include:
-- `stable-diffusion-v2`: SD v2 support 
+- `stable-ui-scripts`: SD V2 support base image/text generation scripts
 
 # Controls
 - Middle mouse button to move the main window canvas

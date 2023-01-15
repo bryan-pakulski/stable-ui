@@ -9,6 +9,10 @@ Allow for right click and drag erase functionality (no undo support as of yet)
 
 Allow for saving to a file, using grid detection, grids should grow / shrink dynamically if they contain data or are empty
 
+Load models through application, store hash & .yaml configurations attached to a data structure, allow modification 
+
+Delete files
+
 
 # TODO: types.h
 initialise string with a maximum length, this is important as if we reload configuration by

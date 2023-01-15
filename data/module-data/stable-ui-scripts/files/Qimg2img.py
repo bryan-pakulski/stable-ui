@@ -22,6 +22,8 @@ from ldm.util import instantiate_from_config
 from ldm.models.diffusion.ddim import DDIMSampler
 from ldm.models.diffusion.plms import PLMSSampler
 
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+import commmon.sd_model
 
 def chunk(it, size):
     it = iter(it)
@@ -67,6 +69,7 @@ def load_img(path):
     return 2.*image - 1.
 
 
+@torch.no_grad()
 def main():
     parser = argparse.ArgumentParser()
 
@@ -163,7 +166,7 @@ def main():
     )
     parser.add_argument(
         "--n_rows",
-        type=int,
+        type=int,checkpoint
         default=0,
         help="rows in the grid (default: n_samples)",
     )
@@ -215,7 +218,7 @@ def main():
     seed_everything(opt.seed)
 
     config = OmegaConf.load(f"{opt.config}")
-    model = load_model_from_config(config, f"{opt.ckpt}")
+    model = sd_model.load_model(config, f"{opt.ckpt}")
 
     if (torch.cuda.is_available()):
         print("Using GPU...")
