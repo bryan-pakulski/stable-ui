@@ -34,7 +34,23 @@ private:
 
     if (logFileOpen) {
       ImGui::SetNextWindowBgAlpha(0.9f);
+      ImGui::SetNextWindowSize(ImVec2(CONFIG::IMGUI_LOG_WINDOW_WIDTH.get(), CONFIG::IMGUI_LOG_WINDOW_HEIGHT.get()));
       ImGui::Begin("Log");
+
+      if (ImGui::Button("Close")) {
+        logFileOpen = false;
+      }
+
+      ImGui::SameLine();
+
+      if (ImGui::Button("Clear")) {
+        logStream.close();
+        QLogger::GetInstance().resetLog();
+      }
+
+      ImGui::Separator();
+
+      ImGui::BeginChild("ScrollingLog");
 
       // Only update text if required
       if (QLogger::GetInstance().m_LAST_WRITE_TIME != lastLogReadTime) {
@@ -45,6 +61,7 @@ private:
 
         lastLogReadTime = QLogger::GetInstance().m_LAST_WRITE_TIME;
         logFileBuffer << logStream.rdbuf();
+        logStream.close();
         logUpdated = true;
       }
 
@@ -55,17 +72,8 @@ private:
         ImGui::SetScrollY(ImGui::GetScrollMaxY() + ImGui::GetStyle().ItemSpacing.y * 2);
         logUpdated = false;
       }
-
-      if (ImGui::Button("Close")) {
-        logFileOpen = false;
-      }
-
-      if (ImGui::Button("Clear")) {
-        logStream.close();
-        QLogger::GetInstance().resetLog();
-      }
-
-      logStream.close();
+      ImGui::EndChild();
+      
       ImGui::End();
     }
   }

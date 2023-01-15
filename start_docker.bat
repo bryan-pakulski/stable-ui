@@ -1,5 +1,5 @@
 @echo off
-pushd data/docker
+pushd data\docker
 echo Building docker image, this may take some time...
 docker build -t sd .
 

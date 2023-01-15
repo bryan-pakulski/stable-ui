@@ -164,4 +164,14 @@ target_link_libraries(
 # Copy data directory after a successful build
 add_custom_command(TARGET stable-ui POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
-                       ${CMAKE_SOURCE_DIR}/data $<TARGET_FILE_DIR:stable-ui>/data)
+                       ${CMAKE_SOURCE_DIR}/data $<TARGET_FILE_DIR:stable-ui>/bin/data
+                   COMMAND ${CMAKE_COMMAND} -E copy
+                       $<TARGET_FILE:stable-ui> $<TARGET_FILE_DIR:stable-ui>/bin/
+                   COMMAND ${CMAKE_COMMAND} -E copy
+                       ${CMAKE_SOURCE_DIR}/start_docker.bat $<TARGET_FILE_DIR:stable-ui>/bin/
+                   COMMAND ${CMAKE_COMMAND} -E copy
+                       ${CMAKE_SOURCE_DIR}/start_docker.sh $<TARGET_FILE_DIR:stable-ui>/bin/
+                   COMMAND ${CMAKE_COMMAND} -E copy
+                       ${CMAKE_SOURCE_DIR}/requirements.txt $<TARGET_FILE_DIR:stable-ui>/bin/
+                   COMMAND ${CMAKE_COMMAND} -E copy
+                       ${CMAKE_SOURCE_DIR}/ReadMe.md $<TARGET_FILE_DIR:stable-ui>/bin/)

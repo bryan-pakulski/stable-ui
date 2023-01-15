@@ -15,27 +15,27 @@ default:
 # 768-v-ema.ckpt
 47ad7f52d9da0293a546ac3609560d813be49796:
   working_dir: "/modules/stable-ui-scripts"
-  config: "--config /modules/stable-diffusion-v2/configs/stable-diffusion/v2-inference-v.yaml"
+  config: "--config /sd/configs/stable-diffusion/v2-inference-v.yaml"
 
 # 512-base-ema.ckpt
 e6c9ec9de027154701e962605add2bf51e43da2c:
   working_dir: "/modules/stable-ui-scripts"
-  config: "--config /modules/stable-diffusion-v2/configs/stable-diffusion/v2-inference.yaml"
+  config: "--config /sd/configs/stable-diffusion/v2-inference.yaml"
 
 # 512-depth-ema.ckpt
 a81e98c0f932a55d8dd08058c1b9ce68525ac6a5:
   working_dir: "/modules/stable-ui-scripts"
-  config: "--config /modules/stable-diffusion-v2/configs/stable-diffusion/v2-midas-inference.yaml"
+  config: "--config /sd/configs/stable-diffusion/v2-midas-inference.yaml"
 
 # 512-inpainting-ema.ckpt
 0f6ea658d012497008edbd7eaa884f3c5f7ac2a7:
   working_dir: "/modules/stable-ui-scripts"
-  config: "--config /modules/stable-diffusion-v2/configs/stable-diffusion/v2-inpainting-inference.yaml"
+  config: "--config /sd/configs/stable-diffusion/v2-inpainting-inference.yaml"
 
 # x4-upscaler-ema.ckpt
 b4cf7c78d371625f37ba6ba79c18a73c604fd422:
   working_dir: "/modules/stable-ui-scripts"
-  config: "--config /modules/stable-diffusion-v2/configs/stable-diffusion/x4-upscaling.yaml"
+  config: "--config /sd/configs/stable-diffusion/x4-upscaling.yaml"
 
 # modernDisney-v1-pruned.ckpt
 4e29ec5262b3ec9b7e93c6b2b9a058a55f7582bd:
@@ -64,4 +64,4 @@ f9e581f3b9f587eaebe32e9f9b412dfa15a7e623:
 abe0ac44b4af6914e651438eccaa6f01983a8d4c:
   working_dir: "/modules/stable-ui-scripts"
   trigger_prompt: ""
-  config: "--config /modules/stable-diffusion-v2/configs/stable-diffusion/v2-inference-v.yaml"
+  config: "--config /sd/configs/stable-diffusion/v2-inference-v.yaml"
