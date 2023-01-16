@@ -8,10 +8,10 @@
             "name": "Debug C++ Project",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/bin/stable-ui",
+            "program": "${workspaceFolder}/build/stable-ui-bin/stable-ui",
             //"args": ["arg1", "arg2"],
             //"environment": [{ "name": "config", "value": "Debug" }],
-            "cwd": "${workspaceFolder}/build/bin/"
+            "cwd": "${workspaceFolder}/build/stable-ui-bin/"
         }
     ]
 }

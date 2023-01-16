@@ -2,8 +2,6 @@
 
 #include <yaml-cpp/yaml.h>
 #include <yaml-cpp/exceptions.h>
-#include <imgui.h>
-
 #include "types.h"
 
 namespace CONFIG {
@@ -51,4 +49,11 @@ static CFloat IMGUI_LOG_WINDOW_WIDTH(loadConfig("IMGUI_LOG_WINDOW_WIDTH", 620.0f
 static CString PYTHON_CONFIG_PATH(loadConfig<std::string>("PYTHON_CONFIG_PATH", "data/scripts"));
 static CInt ENABLE_GL_DEBUG(loadConfig<int>("ENABLE_OPENGL_DEBUG_OUTPUT", 0));
 static CInt DEFAULT_BUFFER_LENGTH(loadConfig("DEFAULT_BUFFER_LENGTH", 200));
+static CString MODEL_CONFIGURATIONS_DIRECTORY(loadConfig<std::string>("MODEL_CONFIGURATIONS_DIRECTORY",
+                                                                      "data/models/configs"));
+static CString MODELS_CONFIGURATION_FILE(loadConfig<std::string>("MODELS_CONFIGURATION_FILE",
+                                                                 "data/models/configs/model_config.yaml"));
+static CString MODULES_CONFIGURATION_FILE(loadConfig<std::string>("MODULES_CONFIGURATION_FILE",
+                                                                  "data/models/configs/module_config.yaml"));
+
 } // namespace CONFIG

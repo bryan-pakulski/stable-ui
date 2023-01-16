@@ -3,11 +3,14 @@
 #include <fstream>
 #include <imgui.h>
 
-#include "../../../Display/ErrorHandler.h"
-#include "../../../QLogger.h"
 #include "../../../Config/config.h"
+#include "../../../QLogger.h"
 #include "../../../Rendering/Helper.h"
+
+#include "../../../Display/ErrorHandler.h"
 #include "../../QDisplay_Base.h"
+#include "QDisplay_ConfigureModel.h"
+#include "QDisplay_ConfigureModules.h"
 
 class QDisplay_TopBar : public QDisplay_Base {
 
@@ -17,6 +20,10 @@ private:
   bool logFileOpen = false;
   bool loadFileOpen = false;
   bool selectCanvasOpen = false;
+  bool configureModelOpen = false;
+
+  std::unique_ptr<QDisplay_ConfigureModel> m_configureModelWindow;
+  std::unique_ptr<QDisplay_ConfigureModules> m_configureModulesWindow;
 
   // Log config
   std::ifstream logStream;
@@ -73,7 +80,7 @@ private:
         logUpdated = false;
       }
       ImGui::EndChild();
-      
+
       ImGui::End();
     }
   }
@@ -140,7 +147,10 @@ private:
 
 public:
   // Initialise render manager reference
-  QDisplay_TopBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {}
+  QDisplay_TopBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+    m_configureModelWindow = std::unique_ptr<QDisplay_ConfigureModel>(new QDisplay_ConfigureModel(rm, w));
+    m_configureModulesWindow = std::unique_ptr<QDisplay_ConfigureModules>(new QDisplay_ConfigureModules(rm, w));
+  }
 
   /*
    * Main Menu renderer, contains logic for showing additional display items
@@ -171,6 +181,14 @@ public:
           selectCanvasOpen = true;
         }
 
+        if (ImGui::MenuItem("Import Model")) {
+          m_configureModelWindow->openWindow();
+        }
+
+        if (ImGui::MenuItem("Configure Modules")) {
+          m_configureModulesWindow->openWindow();
+        }
+
         ImGui::EndMenu();
       }
 
@@ -184,5 +202,9 @@ public:
     QDisplay_NewFile();
     QDisplay_LoadFile();
     QDisplay_SelectCanvasOpen();
+
+    // Render additional windows
+    m_configureModelWindow->render();
+    m_configureModulesWindow->render();
   }
 };

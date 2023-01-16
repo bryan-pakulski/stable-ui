@@ -24,7 +24,7 @@ This UI environment spins up and manages a docker image for Stable-Diffusion. It
 To add models to stable-ui copy your .ckpt files to the `data/models` folder, if a model requires additional configuration i.e. the stable diffusion v2 models
 require using custom config i.e. `--config v2-inpainting-inference.yaml` 
 
-You can specify this in the `data/models/model_config.yaml` folder. This contains a
+You can specify this in the `data/models/configs/model_config.yaml` folder. This contains a
 `sha1sum` hash of the model files and a corresponding configuration, some popular ones are included by default.
 
 # Custom Modules

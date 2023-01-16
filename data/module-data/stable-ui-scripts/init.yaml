@@ -1,12 +1,13 @@
-working-directory: /modules/stable-ui-scripts
+# Basic module that serves as the default txt2img / img2img handler for stable-ui
+module:
+  name: stable-ui-scripts
+  working-directory: /modules/stable-ui-scripts
 
-# These files are copied after the git-repo is initialised
-filepaths:
-  "files/Qimg2img.py": "/modules/stable-ui-scripts/scripts/Qimg2img.py"
-  "files/Qtxt2img.py": "/modules/stable-ui-scripts/scripts/Qtxt2img.py"
-  "files/common/__init__.py": "/modules/stable-ui-scripts/scripts/common/__init__.py"
-  "files/common/devices.py": "/modules/stable-ui-scripts/scripts/common/devices.py"
-  "files/common/lowvram.py": "/modules/stable-ui-scripts/scripts/common/lowvram.py"
-  "files/common/sd_model.py": "/modules/stable-ui-scripts/scripts/common/sd_model.py"
-  
-  "files/configs/v1-inference.yaml": "/modules/stable-ui-scripts/configs/v1-inference.yaml"
+  # Note files are copied after git repositories are initialised
+  filepaths:
+    "files/Qimg2img.py": "/modules/stable-ui-scripts/scripts/Qimg2img.py"
+    "files/Qtxt2img.py": "/modules/stable-ui-scripts/scripts/Qtxt2img.py"
+    "files/common/__init__.py": "/modules/stable-ui-scripts/scripts/common/__init__.py"
+    "files/common/devices.py": "/modules/stable-ui-scripts/scripts/common/devices.py"
+    "files/common/lowvram.py": "/modules/stable-ui-scripts/scripts/common/lowvram.py"
+    "files/common/sd_model.py": "/modules/stable-ui-scripts/scripts/common/sd_model.py"

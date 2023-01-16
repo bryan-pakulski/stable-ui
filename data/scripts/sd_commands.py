@@ -10,9 +10,10 @@ def getContainer():
 	return client.containers.get('sd')
 
 # Runs the sha1sum function against a model file inside the docker container
-# The yaml configuration file found under data/models/model_config.yaml contains the hash mapping and custom configuration
+# The yaml configuration file found under data/models/configs/model_config.yaml contains the hash mapping and custom configuration
 def loadConfig(data, key, default):
 	return data[key] if (key in data) else default
+	
 def getAdditionalConfig(ckpt_filepath):
 	cmd = f"bash -c \"sha1sum {ckpt_filepath}" + " | awk '{print $1}'\""
 
@@ -29,11 +30,11 @@ def getAdditionalConfig(ckpt_filepath):
 		hash = response[0].decode("utf-8").strip()
 		print("Checking model hash: ", hash)
 
-		with open("data/models/model_config.yaml", "r") as stream:
+		with open("data/models/configs/model_config.yaml", "r") as stream:
 			# Load extra config
 			try:
 				yaml_dict = yaml.safe_load(stream)
-				data = yaml_dict[hash]
+				data = yaml_dict["models"][hash]
 				print("Using additional configuration: ", data)
 
 				# Get data from yaml file
@@ -48,7 +49,7 @@ def getAdditionalConfig(ckpt_filepath):
 				print("Model hash doesn't exist in model_config.yaml", hash)
 
 				# Use default configuration
-				data = yaml_dict["default"]
+				data = yaml_dict["models"]["default"]
 				extra_conf["working_dir"] = loadConfig(data, "working_dir", "/sd")
 	else:
 		print("Command failed with error code: ", _e)
