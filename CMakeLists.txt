@@ -119,7 +119,7 @@ find_package(PythonLibs 3.10.0 REQUIRED)
 add_subdirectory(${CMAKE_HOME_DIRECTORY}/src/ThirdParty/yaml-cpp)
 
 add_executable( stable-ui 
-                main.cpp 
+                src/main.cpp 
                 src/Rendering/RenderManager.cpp
                 src/Rendering/Camera.cpp
                 src/Rendering/Canvas.cpp 
