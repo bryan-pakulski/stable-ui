@@ -1,0 +1,13 @@
+# For a given model hash we can define custom parameters
+# Hash is computed using sha1sum command on the docker image i.e. `sha1sum /models/sd-v1-4.ckpt | aws '{print $1}'`
+# If a module is provided the model will be run using the custom module provided
+
+# List of available functions:
+# 'working_dir' - Module path, used as working directory when model is loaded
+# 'config' - Additional config passed to SD commands when model is run i.e. yaml config path
+# 'trigger_prompt' - Inserts trigger keywords for a given model into the prompt when run
+models:
+  # Default configuration, do not delete or modify!!
+  default:
+    working_dir: "/modules/stable-ui-scripts"
+    config: "--config /modules/stable-ui-scripts/configs/v1-inference.yaml"

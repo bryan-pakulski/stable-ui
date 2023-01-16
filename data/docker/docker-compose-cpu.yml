@@ -13,6 +13,7 @@ services:
       - ../models:/models
       - ../output:/output
       - ../module-data:/module-data
+      - ../shared-config:/shared-config
       - conda_env:/opt/conda
       - root_profile:/root
 volumes:

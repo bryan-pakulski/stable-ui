@@ -13,6 +13,8 @@ set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
 
 include(FetchContent)
 
+find_package(OpenSSL REQUIRED)
+
 # Download and fetch GLM
 FetchContent_Declare(
         glm
@@ -159,4 +161,5 @@ target_link_libraries(
         yaml-cpp
         ${OPENGL_LIBRARY}
         ${Python_LIBRARIES}
+        OpenSSL::SSL
 )

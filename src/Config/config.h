@@ -52,8 +52,8 @@ static CInt DEFAULT_BUFFER_LENGTH(loadConfig("DEFAULT_BUFFER_LENGTH", 200));
 static CString MODEL_CONFIGURATIONS_DIRECTORY(loadConfig<std::string>("MODEL_CONFIGURATIONS_DIRECTORY",
                                                                       "data/models/configs"));
 static CString MODELS_CONFIGURATION_FILE(loadConfig<std::string>("MODELS_CONFIGURATION_FILE",
-                                                                 "data/models/configs/model_config.yaml"));
+                                                                 "data/shared-config/model_config.yaml"));
 static CString MODULES_CONFIGURATION_FILE(loadConfig<std::string>("MODULES_CONFIGURATION_FILE",
-                                                                  "data/models/configs/module_config.yaml"));
+                                                                  "data/shared-config/module_config.yaml"));
 
 } // namespace CONFIG
