@@ -1,17 +1,9 @@
 # Main canvas window
-Split canvas window into 512x512 grid of textures expanding "infinitely"
-
-Allow for mouse interaction (zoom in / out)
-
 Allow for selection with mouse click (up to max pixel size i.e. 512x512 for img2img inpainting)
 
 Allow for right click and drag erase functionality (no undo support as of yet)
 
 Allow for saving to a file, using grid detection, grids should grow / shrink dynamically if they contain data or are empty
-
-Load models through application, store hash & .yaml configurations attached to a data structure, allow modification 
-
-Delete files
 
 
 # TODO: types.h
@@ -21,3 +13,8 @@ the initial string is too short
 
 # Additional
 Add support for textual inversion, see: https://towardsdatascience.com/how-to-fine-tune-stable-diffusion-using-textual-inversion-b995d7ecc095
+
+Fix issues with SD V2, full precision not supported, error:
+- RuntimeError: Input type (torch.cuda.HalfTensor) and weight type (torch.cuda.FloatTensor) should be the same\n\nE
+
+Delete models & configurations
