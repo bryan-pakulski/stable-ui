@@ -41,6 +41,7 @@ public:
   void reloadModelFiles() {
     // Load model files
     try {
+      m_ckpt_files.clear();
       for (const auto &entry : fs::directory_iterator(CONFIG::MODELS_DIRECTORY.get())) {
         listItem i{.m_name = entry.path().filename().string()};
         m_ckpt_files.push_back(i);

@@ -40,11 +40,17 @@ Functionality of the application can be extended by loading custom modules, see 
 
 # Building
 
-- Linux:
-  Compiler: GCC
-  Additional libraries: Python 3.8+ dev libraries & debug symbols
-  Building: Run the `build.sh` script or add the project to any ide that supports cmake projects
+## Linux:
+  * Compiler: 
+    - GCC
+  * Additional libraries: 
+    - Python 3.8+ dev libraries
+    - Python 3.8+ debug symbols
+  * Building: 
+    - Run a cmake build and then the `./scripts/package.sh` shell script
+    - Build is stored in `build/stable-ui/bin`
 
-- Windows:
-  Compiler: VSCC
-  Additional libraries: Python debug symbols & Debug binaries
+## Windows:
+  * Compiler: VSCC
+  * Additional libraries: Python debug symbols & Debug binaries
+  * Building: Run a cmake build and then the `.\scripts\package.bat` batch script

@@ -187,7 +187,7 @@ private:
     glClearColor(backgroundR, backgroundG, backgroundB, 1.0f);
 
     // Disable ini file configuration from being generated
-    io.IniFilename = NULL;
+    // io.IniFilename = NULL;
     io.ConfigWindowsMoveFromTitleBarOnly = true;
   }
 

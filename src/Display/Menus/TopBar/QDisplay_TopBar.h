@@ -10,7 +10,7 @@
 #include "../../../Display/ErrorHandler.h"
 #include "../../QDisplay_Base.h"
 #include "QDisplay_ConfigureModel.h"
-#include "QDisplay_ConfigureModules.h"
+#include "QDisplay_ImportModel.h"
 
 class QDisplay_TopBar : public QDisplay_Base {
 
@@ -23,7 +23,7 @@ private:
   bool configureModelOpen = false;
 
   std::unique_ptr<QDisplay_ConfigureModel> m_configureModelWindow;
-  std::unique_ptr<QDisplay_ConfigureModules> m_configureModulesWindow;
+  std::unique_ptr<QDisplay_ImportModel> m_importModelWindow;
 
   // Log config
   std::ifstream logStream;
@@ -149,7 +149,7 @@ public:
   // Initialise render manager reference
   QDisplay_TopBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     m_configureModelWindow = std::unique_ptr<QDisplay_ConfigureModel>(new QDisplay_ConfigureModel(rm, w));
-    m_configureModulesWindow = std::unique_ptr<QDisplay_ConfigureModules>(new QDisplay_ConfigureModules(rm, w));
+    m_importModelWindow = std::unique_ptr<QDisplay_ImportModel>(new QDisplay_ImportModel(rm, w));
   }
 
   /*
@@ -168,6 +168,10 @@ public:
           loadFileOpen = true;
         }
 
+        if (ImGui::MenuItem("Import Model")) {
+          m_importModelWindow->openWindow();
+        }
+
         if (ImGui::MenuItem("Open Log")) {
           logFileOpen = true;
         }
@@ -181,12 +185,8 @@ public:
           selectCanvasOpen = true;
         }
 
-        if (ImGui::MenuItem("Import Model")) {
+        if (ImGui::MenuItem("Configure Models")) {
           m_configureModelWindow->openWindow();
-        }
-
-        if (ImGui::MenuItem("Configure Modules")) {
-          m_configureModulesWindow->openWindow();
         }
 
         ImGui::EndMenu();
@@ -205,6 +205,6 @@ public:
 
     // Render additional windows
     m_configureModelWindow->render();
-    m_configureModulesWindow->render();
+    m_importModelWindow->render();
   }
 };
