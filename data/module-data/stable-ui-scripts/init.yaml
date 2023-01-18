@@ -5,10 +5,16 @@ module:
 
   # Note files are copied after git repositories are initialised
   filepaths:
-    "files/Qimg2img.py": "/modules/stable-ui-scripts/scripts/Qimg2img.py"
-    "files/Qtxt2img.py": "/modules/stable-ui-scripts/scripts/Qtxt2img.py"
-    "files/__init__.py": "/modules/stable-ui-scripts/scripts/__init__.py"
+    "files/sd_model_server.py": "/modules/stable-ui-scripts/scripts/sd_model_server.py"
+
+    # Common scripts
     "files/common/__init__.py": "/modules/stable-ui-scripts/scripts/common/__init__.py"
     "files/common/devices.py": "/modules/stable-ui-scripts/scripts/common/devices.py"
     "files/common/lowvram.py": "/modules/stable-ui-scripts/scripts/common/lowvram.py"
-    "files/common/sd_model.py": "/modules/stable-ui-scripts/scripts/common/sd_model.py"
+
+    # Sampler scripts
+
+    # SD Scripts
+    "files/sd/__init__.py": "/modules/stable-ui-scripts/scripts/sd/__init__.py"
+    "files/sd/sd_base_process.py": "/modules/stable-ui-scripts/scripts/sd/sd_base_process.py"
+    "files/sd/sd_model.py": "/modules/stable-ui-scripts/scripts/sd/sd_model.py"

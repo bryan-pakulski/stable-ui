@@ -25,16 +25,14 @@ def extract_device_id(args, name):
 
 
 def get_cuda_device_string():
-
-    return "cuda"
+    if torch.cuda.is_available():
+        return "cuda"
+    return "cpu"
 
 
 def get_optimal_device():
     if torch.cuda.is_available():
         return torch.device(get_cuda_device_string())
-
-    if has_mps():
-        return torch.device("mps")
 
     return cpu
 
@@ -64,7 +62,7 @@ def enable_tf32():
         torch.backends.cuda.matmul.allow_tf32 = True
         torch.backends.cudnn.allow_tf32 = True
 
-
+enable_tf32()
 
 cpu = torch.device("cpu")
 device = device_interrogate = device_gfpgan = device_esrgan = device_codeformer = None
@@ -90,7 +88,7 @@ def autocast(disable=False, precision="full"):
     if disable:
         return contextlib.nullcontext()
 
-    if dtype == torch.float32 or precision == "full":
+    if devices.dtype == torch.float32 or precision == "full":
         return contextlib.nullcontext()
 
     return torch.autocast("cuda")
@@ -132,17 +130,3 @@ def cumsum_fix(input, cumsum_func, *args, **kwargs):
         if any(output_dtype == broken_dtype for broken_dtype in [torch.bool, torch.int8, torch.int16, torch.int64]):
             return cumsum_func(input.cpu(), *args, **kwargs).to(input.device)
     return cumsum_func(input, *args, **kwargs)
-
-
-if has_mps():
-    if version.parse(torch.__version__) < version.parse("1.13"):
-        # PyTorch 1.13 doesn't need these fixes but unfortunately is slower and has regressions that prevent training from working
-        torch.Tensor.to = tensor_to_fix
-        torch.nn.functional.layer_norm = layer_norm_fix
-        torch.Tensor.numpy = numpy_fix
-    elif version.parse(torch.__version__) > version.parse("1.13.1"):
-        if not torch.Tensor([1,2]).to(torch.device("mps")).equal(torch.Tensor([1,1]).to(torch.device("mps")).cumsum(0, dtype=torch.int16)):
-            torch.cumsum = lambda input, *args, **kwargs: ( cumsum_fix(input, orig_cumsum, *args, **kwargs) )
-            torch.Tensor.cumsum = lambda self, *args, **kwargs: ( cumsum_fix(self, orig_Tensor_cumsum, *args, **kwargs) )
-        orig_narrow = torch.narrow
-        torch.narrow = lambda *args, **kwargs: ( orig_narrow(*args, **kwargs).clone() )

@@ -12,11 +12,8 @@ def getContainer():
 
 # Runs the sha1sum function against a model file inside the docker container
 # The yaml configuration file found under data/shared-config/model_config.yaml contains the hash mapping and custom configuration
-
-
 def loadConfig(data, key, default):
     return data[key] if (key in data) else default
-
 
 def getAdditionalConfig(ckpt_filepath):
     cmd = f"bash -c \"sha1sum {ckpt_filepath}" + " | awk '{print $1}'\""
@@ -73,6 +70,26 @@ def getAdditionalConfig(ckpt_filepath):
     return extra_conf
 
 
+# Start SD_Model server
+def launchSDModelServer(exec_path):
+    command = f"conda run -n ldm python '{exec_path}'"
+    print("Starting server with command: ", command)
+    _e, response = getContainer().exec_run(
+        command, workdir="/modules/stable-ui-scripts/scripts", demux=True)
+    if (_e != 0):
+        print("Command failed with error code: ", _e)
+        print("==== STDOUT ====")
+        print(response[0])
+        print("==== STDERR ====")
+        print(response[1])
+    else:
+        print("Command success!")
+
+    # Error code response is used by cpp integration to check for success / failure status
+    return _e
+
+
+# Default txt2image command
 def txt2image(exec_path, prompt, negative_prompt, samples, steps, scale, seed, width, height, out_dir, ckpt_model, precision):
     # Check if additional configuration is required for loaded ckpt
     extra_conf = getAdditionalConfig(ckpt_model)
@@ -94,6 +111,7 @@ def txt2image(exec_path, prompt, negative_prompt, samples, steps, scale, seed, w
     return _e
 
 
+# Default img2img commnad
 def img2image(exec_path, img_path, prompt, negative_prompt, samples, steps, strength, seed, out_dir, ckpt_model, precision):
     # Check if additional configuration is required for loaded ckpt
     extra_conf = getAdditionalConfig(ckpt_model)

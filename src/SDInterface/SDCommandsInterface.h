@@ -15,6 +15,9 @@ private:
   std::unique_ptr<SnakeHandler> m_py_handle;
   std::thread m_Thread;
   std::vector<std::unique_ptr<base_type>> *arguments = new std::vector<std::unique_ptr<base_type>>;
+  bool serverFinished = false;
+
+  void launchSDModelServer();
 
   SDCommandsInterface();
   ~SDCommandsInterface();

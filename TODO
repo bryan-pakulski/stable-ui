@@ -11,6 +11,8 @@ initialise string with a maximum length, this is important as if we reload confi
 editing the string manually via ImGui we don't have the hooks to re-size memory and we risk overwriting if
 the initial string is too short
 
+This can potentially be resolved by using std::string as a resizable datatype, see imgui_stdlib.h
+
 # Additional
 Add support for textual inversion, see: https://towardsdatascience.com/how-to-fine-tune-stable-diffusion-using-textual-inversion-b995d7ecc095
 
@@ -20,3 +22,9 @@ Fix issues with SD V2, full precision not supported, error:
 Delete models & configurations
 
 Save output to temporary folder - "gen??" This way you can generate multiple item etc.. and move them automatically after generation is finished to an output folder
+
+
+# Bugs
+- Using custom vae and full precision causes error: `RuntimeError: expected scalar type Half but found Float`
+- Using SDv2 and full precision causes similar error: `return F.linear(input, self.weight, self.bias)\nRuntimeError: expected scalar type Half but found Float`
+- Using SDv1.4 and full precision causes the same error: ` attn_output = torch.bmm(attn_probs, value_states)\nRuntimeError: expected scalar type Half but found Float`
