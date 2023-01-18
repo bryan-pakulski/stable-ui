@@ -6,7 +6,7 @@
 
 #include "../../../Display/ErrorHandler.h"
 #include "../../../QLogger.h"
-#include "../../../Rendering/RenderManager.h"
+#include "../../../Rendering/StableManager.h"
 #include "../../../Config/config.h"
 #include "../../QDisplay_Base.h"
 #include "../../../Rendering/objects/image/Image.h"
@@ -43,7 +43,7 @@ class QDisplay_Image2Image : public QDisplay_Base {
 
 public:
   // Initialise render manager references
-  QDisplay_Image2Image(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+  QDisplay_Image2Image(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     m_prompt[0] = 0;
     m_negative_prompt[0] = 0;
     reloadModelFiles();
@@ -90,7 +90,7 @@ public:
     m_image = std::unique_ptr<Image>(
         new Image(CONFIG::IMAGE_SIZE_X_LIMIT.get(), CONFIG::IMAGE_SIZE_Y_LIMIT.get(), "img2img"));
     m_image->rendered = false;
-    m_renderManager->imageToImage(m_filepath, m_prompt, m_negative_prompt, 1, m_steps, m_strength, m_seed,
+    m_stableManager->imageToImage(m_filepath, m_prompt, m_negative_prompt, 1, m_steps, m_strength, m_seed,
                                   m_image->rendered, m_selected_model, m_half_precision);
   }
 
@@ -112,7 +112,7 @@ public:
         ImGui::Text("image width: %d image height:%d", m_image->m_width, m_image->m_height);
         if (ImGui::Button("Send to Canvas")) {
           // Send image to be rendered on canvas at selection coordinates
-          m_renderManager->sendImageToCanvas(*m_image);
+          m_stableManager->sendImageToCanvas(*m_image);
         }
 
         // Retrieve texture file
@@ -193,7 +193,7 @@ public:
         } else {
           // Send image to be rendered on canvas at selection coordinates
           selectImage(path);
-          m_renderManager->sendImageToCanvas(*m_preview_image);
+          m_stableManager->sendImageToCanvas(*m_preview_image);
         }
       }
       if (!directoryEntry.is_directory() && ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {

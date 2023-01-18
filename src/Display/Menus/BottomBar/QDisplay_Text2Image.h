@@ -6,7 +6,7 @@
 
 #include "../../../Display/ErrorHandler.h"
 #include "../../../QLogger.h"
-#include "../../../Rendering/RenderManager.h"
+#include "../../../Rendering/StableManager.h"
 #include "../../../Config/config.h"
 #include "../../QDisplay_Base.h"
 
@@ -32,7 +32,7 @@ class QDisplay_Text2Image : public QDisplay_Base {
 
 public:
   // Initialise render manager references
-  QDisplay_Text2Image(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+  QDisplay_Text2Image(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     m_prompt[0] = 0;
     m_negative_prompt[0] = 0;
     reloadModelFiles();
@@ -73,7 +73,7 @@ public:
     m_image = std::unique_ptr<Image>(
         new Image(CONFIG::IMAGE_SIZE_X_LIMIT.get(), CONFIG::IMAGE_SIZE_Y_LIMIT.get(), "txt2img"));
     m_image->rendered = false;
-    m_renderManager->textToImage(m_prompt, m_negative_prompt, 1, m_steps, m_cfg, m_seed, m_width, m_height,
+    m_stableManager->textToImage(m_prompt, m_negative_prompt, 1, m_steps, m_cfg, m_seed, m_width, m_height,
                                  m_image->rendered, m_selected_model, m_half_precision);
   }
 
@@ -95,7 +95,7 @@ public:
         ImGui::Text("image width: %d image height:%d", m_image->m_width, m_image->m_height);
         if (ImGui::Button("Send to Canvas")) {
           // Send image to be rendered on canvas at selection coordinates
-          m_renderManager->sendImageToCanvas(*m_image);
+          m_stableManager->sendImageToCanvas(*m_image);
         }
 
         // Retrieve texture file

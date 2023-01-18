@@ -95,7 +95,7 @@ private:
         ImGui::InputText("canvas name", m_canvasName, 256);
 
         if (ImGui::Button("Create Canvas")) {
-          m_renderManager->createCanvas(0, 0, std::string(m_canvasName));
+          m_stableManager->createCanvas(0, 0, std::string(m_canvasName));
           newFileOpen = false;
         }
 
@@ -121,13 +121,13 @@ private:
       ImGui::OpenPopup("SELECTCANVAS");
       if (ImGui::BeginPopupModal("SELECTCANVAS")) {
         if (ImGui::BeginListBox("Canvas")) {
-          for (auto &item : m_renderManager->m_canvas) {
+          for (auto &item : m_stableManager->m_canvas) {
             const char *item_name = item->m_name.c_str();
-            int index = std::addressof(item) - std::addressof(m_renderManager->m_canvas.front());
-            const bool is_selected = index == m_renderManager->m_activeId;
+            int index = std::addressof(item) - std::addressof(m_stableManager->m_canvas.front());
+            const bool is_selected = index == m_stableManager->m_activeId;
 
             if (ImGui::Selectable(item_name, is_selected)) {
-              m_renderManager->selectCanvas(index);
+              m_stableManager->selectCanvas(index);
               selectCanvasOpen = false;
             }
 
@@ -149,7 +149,7 @@ private:
 
 public:
   // Initialise render manager reference
-  QDisplay_TopBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+  QDisplay_TopBar(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     m_configureModelWindow = std::unique_ptr<QDisplay_ConfigureModel>(new QDisplay_ConfigureModel(rm, w));
     m_importModelWindow = std::unique_ptr<QDisplay_ImportModel>(new QDisplay_ImportModel(rm, w));
     m_importVAEWindow = std::unique_ptr<QDisplay_ImportVAE>(new QDisplay_ImportVAE(rm, w));
@@ -199,7 +199,7 @@ public:
         ImGui::EndMenu();
       }
 
-      ImGui::MenuItem(m_renderManager->getActiveCanvas()->m_name.c_str());
+      ImGui::MenuItem(m_stableManager->getActiveCanvas()->m_name.c_str());
 
       ImGui::EndMainMenuBar();
     }

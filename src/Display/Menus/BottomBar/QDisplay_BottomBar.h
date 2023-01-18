@@ -6,7 +6,7 @@
 
 #include "../../../Display/ErrorHandler.h"
 #include "../../../QLogger.h"
-#include "../../../Rendering/RenderManager.h"
+#include "../../../Rendering/StableManager.h"
 #include "../../../Config/config.h"
 #include "../../QDisplay_Base.h"
 #include "QDisplay_Text2Image.h"
@@ -24,7 +24,7 @@ class QDisplay_BottomBar : public QDisplay_Base {
 
 public:
   // Initialise render manager references
-  QDisplay_BottomBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+  QDisplay_BottomBar(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     Text2ImageWindow = std::unique_ptr<QDisplay_Text2Image>(new QDisplay_Text2Image(rm, w));
     Image2ImageWindow = std::unique_ptr<QDisplay_Image2Image>(new QDisplay_Image2Image(rm, w));
 

@@ -180,7 +180,7 @@ public:
     reloadFiles();
   };
 
-  QDisplay_ImportModel(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+  QDisplay_ImportModel(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     fileDialog.SetTitle("Import Models");
     fileDialog.SetTypeFilters({".ckpt", ".safetensor"});
 

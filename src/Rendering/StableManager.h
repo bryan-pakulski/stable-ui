@@ -25,11 +25,11 @@ const int MAX_OBJECTS = 100;
 const int MIN_OBJECTS = 5;
 }; // namespace rm
 
-class RenderManager {
+class StableManager {
 public:
-  explicit RenderManager(GLFWwindow &w);
+  explicit StableManager(GLFWwindow &w);
   static inline std::vector<BaseObject *> objectList;
-  ~RenderManager();
+  ~StableManager();
 
   int m_activeId = 0;
   std::vector<std::shared_ptr<Canvas>> m_canvas;

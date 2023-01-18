@@ -1,10 +1,10 @@
-#include "RenderManager.h"
+#include "StableManager.h"
 #include "GLFW/glfw3.h"
 #include "imgui_impl_glfw.h"
 
 // Initialise render manager
-RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager initialized");
+StableManager::StableManager(GLFWwindow &w) : m_window{w} {
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableManager initialized");
 
   // Allow access to camera variable through static callback function
   glfwSetWindowUserPointer(&m_window, (void *)this);
@@ -23,7 +23,7 @@ RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
 }
 
 // Destructor, destroy remaining instances
-RenderManager::~RenderManager() {
+StableManager::~StableManager() {
   for (auto &obj : objectList) {
     delete obj;
   }
@@ -32,13 +32,13 @@ RenderManager::~RenderManager() {
 
 // Main update function, checks for object cap before calling instance logic /
 // render loops
-void RenderManager::update() {
+void StableManager::update() {
   logicLoop();
   renderLoop();
 }
 
 // Update logic on instanced objects
-void RenderManager::logicLoop() {
+void StableManager::logicLoop() {
   m_camera->updateLogic();
 
   for (auto &obj : objectList) {
@@ -53,7 +53,7 @@ void RenderManager::logicLoop() {
 }
 
 // Update visuals on instanced objects
-void RenderManager::renderLoop() {
+void StableManager::renderLoop() {
   m_camera->updateVisual();
 
   for (auto &obj : objectList) {
@@ -70,7 +70,7 @@ void RenderManager::renderLoop() {
 }
 
 // Text to Image, render result to canvas
-void RenderManager::textToImage(std::string prompt, std::string negative_prompt, int samples, int steps, double cfg,
+void StableManager::textToImage(std::string prompt, std::string negative_prompt, int samples, int steps, double cfg,
                                 int seed, int width, int height, bool &finishedFlag, std::string model_name,
                                 bool half_precision) {
 
@@ -80,7 +80,7 @@ void RenderManager::textToImage(std::string prompt, std::string negative_prompt,
 }
 
 // Image to Image, render result to canvas
-void RenderManager::imageToImage(std::string path, std::string prompt, std::string negative_prompt, int samples,
+void StableManager::imageToImage(std::string path, std::string prompt, std::string negative_prompt, int samples,
                                  int steps, double strength, int seed, bool &finishedFlag, std::string model_name,
                                  bool half_precision) {
 
@@ -90,15 +90,15 @@ void RenderManager::imageToImage(std::string path, std::string prompt, std::stri
 }
 
 // Key callback function to map keypresses / actions to object instantiation
-void RenderManager::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+void StableManager::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
   int width, height;
   glfwGetWindowSize(window, &width, &height);
 }
 
 // Mouse movement callback
-void RenderManager::mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
-  RenderManager *rm;
-  rm = (RenderManager *)glfwGetWindowUserPointer(window);
+void StableManager::mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
+  StableManager *rm;
+  rm = (StableManager *)glfwGetWindowUserPointer(window);
 
   if (rm->m_cameraDrag) {
     rm->m_camera->moveCameraPosition(static_cast<float>(xposIn) - rm->m_camera->prev_mouse.x,
@@ -126,9 +126,9 @@ void RenderManager::mouse_callback(GLFWwindow *window, double xposIn, double ypo
 }
 
 // Mouse button callback function for dragging camera and interacting with canvas
-void RenderManager::mouse_btn_callback(GLFWwindow *window, int button, int action, int mods) {
-  RenderManager *rm;
-  rm = (RenderManager *)glfwGetWindowUserPointer(window);
+void StableManager::mouse_btn_callback(GLFWwindow *window, int button, int action, int mods) {
+  StableManager *rm;
+  rm = (StableManager *)glfwGetWindowUserPointer(window);
 
   if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
     if (GLFW_PRESS == action) {
@@ -149,7 +149,7 @@ void RenderManager::mouse_btn_callback(GLFWwindow *window, int button, int actio
 }
 
 // Make a canvas active, pass texture to main window
-void RenderManager::selectCanvas(int id) {
+void StableManager::selectCanvas(int id) {
   // Disable old canvas
   if (getActiveCanvas()) {
     m_canvas[m_activeId]->m_active = false;
@@ -161,7 +161,7 @@ void RenderManager::selectCanvas(int id) {
 }
 
 // Create new canvas object & return a reference
-std::shared_ptr<Canvas> RenderManager::createCanvas(int x, int y, const std::string &name) {
+std::shared_ptr<Canvas> StableManager::createCanvas(int x, int y, const std::string &name) {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "Creating new canvas");
   m_canvas.emplace_back(new Canvas(std::pair<int, int>{x, y}, name, &m_window, m_camera));
   selectCanvas(m_canvas.size() - 1);
@@ -169,7 +169,7 @@ std::shared_ptr<Canvas> RenderManager::createCanvas(int x, int y, const std::str
 }
 
 // Get active canvas
-std::shared_ptr<Canvas> RenderManager::getActiveCanvas() {
+std::shared_ptr<Canvas> StableManager::getActiveCanvas() {
   if (m_canvas.size() > 0) {
     return m_canvas[m_activeId];
   } else {
@@ -178,7 +178,7 @@ std::shared_ptr<Canvas> RenderManager::getActiveCanvas() {
 }
 
 // Get image from canvas, based on selection coordinates
-void RenderManager::sendImageToCanvas(Image &im) {
+void StableManager::sendImageToCanvas(Image &im) {
   // Create copy of image to send to canvas
   m_canvas[m_activeId]->createChunk(std::shared_ptr<Image>(new Image(im)), m_selection->getCoordinates());
 }
@@ -186,9 +186,9 @@ void RenderManager::sendImageToCanvas(Image &im) {
 // Build image from canvas, based on selection coordinates
 
 // Callback to log GL errors
-void RenderManager::GLFWErrorCallBack(int, const char *err_str) { QLogger::GetInstance().Log(LOGLEVEL::ERR, err_str); }
+void StableManager::GLFWErrorCallBack(int, const char *err_str) { QLogger::GetInstance().Log(LOGLEVEL::ERR, err_str); }
 
-void GLAPIENTRY RenderManager::MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+void GLAPIENTRY StableManager::MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
                                                const GLchar *message, const void *userParam) {
   fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
           (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, message);

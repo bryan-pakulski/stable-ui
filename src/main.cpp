@@ -1,13 +1,13 @@
 #include "Display/ErrorHandler.h"
 #include "Display/QDisplay.h"
-#include "Rendering/RenderManager.h"
+#include "Rendering/StableManager.h"
 #include <imgui_impl_glfw.h>
 
 int main() {
 
   // Intialise Render manager & attach to Display
-  std::shared_ptr<RenderManager> rm(new RenderManager(*QDisplay::GetInstance().getWindow()));
-  QDisplay::GetInstance().AttachRenderManager(rm);
+  std::shared_ptr<StableManager> rm(new StableManager(*QDisplay::GetInstance().getWindow()));
+  QDisplay::GetInstance().AttachManager(rm);
 
   while (!glfwWindowShouldClose(QDisplay::GetInstance().getWindow())) {
 

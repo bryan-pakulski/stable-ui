@@ -122,7 +122,7 @@ add_subdirectory(${CMAKE_HOME_DIRECTORY}/src/ThirdParty/yaml-cpp)
 
 add_executable( stable-ui 
                 src/main.cpp 
-                src/Rendering/RenderManager.cpp
+                src/Rendering/StableManager.cpp
                 src/Rendering/Camera.cpp
                 src/Rendering/Canvas.cpp 
                 src/Rendering/Helper.cpp 
