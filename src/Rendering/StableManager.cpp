@@ -20,15 +20,11 @@ StableManager::StableManager(GLFWwindow &w) : m_window{w} {
 
   // Intialise python interface for calling commands
   SDCommandsInterface::GetInstance();
+  SDCommandsInterface::GetInstance().launchSDModelServer();
 }
 
 // Destructor, destroy remaining instances
-StableManager::~StableManager() {
-  for (auto &obj : objectList) {
-    delete obj;
-  }
-  objectList.clear();
-}
+StableManager::~StableManager() {}
 
 // Main update function, checks for object cap before calling instance logic /
 // render loops
@@ -41,10 +37,6 @@ void StableManager::update() {
 void StableManager::logicLoop() {
   m_camera->updateLogic();
 
-  for (auto &obj : objectList) {
-    obj->updateLogic();
-  }
-
   for (auto &canvas : m_canvas) {
     canvas->updateLogic();
   }
@@ -56,10 +48,6 @@ void StableManager::logicLoop() {
 void StableManager::renderLoop() {
   m_camera->updateVisual();
 
-  for (auto &obj : objectList) {
-    obj->updateVisual();
-  }
-
   for (auto &canvas : m_canvas) {
     if (canvas->m_active) {
       canvas->updateVisual();
@@ -67,6 +55,47 @@ void StableManager::renderLoop() {
   }
 
   m_selection->updateVisual();
+}
+
+// Make a canvas active, pass texture to main window
+void StableManager::selectCanvas(int id) {
+  // Disable old canvas
+  if (getActiveCanvas()) {
+    m_canvas[m_activeId]->m_active = false;
+  }
+
+  m_activeId = id;
+  // Set new canvas to active
+  m_canvas[m_activeId]->m_active = true;
+}
+
+// Create new canvas object & return a reference
+std::shared_ptr<Canvas> StableManager::createCanvas(int x, int y, const std::string &name) {
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Creating new canvas");
+  m_canvas.emplace_back(new Canvas(std::pair<int, int>{x, y}, name, &m_window, m_camera));
+  selectCanvas(m_canvas.size() - 1);
+  return m_canvas.back();
+}
+
+// Get active canvas
+std::shared_ptr<Canvas> StableManager::getActiveCanvas() {
+  if (m_canvas.size() > 0) {
+    return m_canvas[m_activeId];
+  } else {
+    return nullptr;
+  }
+}
+
+// Get image from canvas, based on selection coordinates
+void StableManager::sendImageToCanvas(Image &im) {
+  // Create copy of image to send to canvas
+  m_canvas[m_activeId]->createChunk(std::shared_ptr<Image>(new Image(im)), m_selection->getCoordinates());
+}
+
+// STABLE DIFFUSION SERVER COMMANDS
+void StableManager::attachModel(YAML::Node model) {
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Attaching model: ", model["name"].as<std::string>(),
+                             " to Stable Diffusion Docker Server");
 }
 
 // Text to Image, render result to canvas
@@ -146,41 +175,6 @@ void StableManager::mouse_btn_callback(GLFWwindow *window, int button, int actio
     glfwGetCursorPos(window, &xpos, &ypos);
     rm->m_selection->dragStart(xpos, ypos);
   }
-}
-
-// Make a canvas active, pass texture to main window
-void StableManager::selectCanvas(int id) {
-  // Disable old canvas
-  if (getActiveCanvas()) {
-    m_canvas[m_activeId]->m_active = false;
-  }
-
-  m_activeId = id;
-  // Set new canvas to active
-  m_canvas[m_activeId]->m_active = true;
-}
-
-// Create new canvas object & return a reference
-std::shared_ptr<Canvas> StableManager::createCanvas(int x, int y, const std::string &name) {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Creating new canvas");
-  m_canvas.emplace_back(new Canvas(std::pair<int, int>{x, y}, name, &m_window, m_camera));
-  selectCanvas(m_canvas.size() - 1);
-  return m_canvas.back();
-}
-
-// Get active canvas
-std::shared_ptr<Canvas> StableManager::getActiveCanvas() {
-  if (m_canvas.size() > 0) {
-    return m_canvas[m_activeId];
-  } else {
-    return nullptr;
-  }
-}
-
-// Get image from canvas, based on selection coordinates
-void StableManager::sendImageToCanvas(Image &im) {
-  // Create copy of image to send to canvas
-  m_canvas[m_activeId]->createChunk(std::shared_ptr<Image>(new Image(im)), m_selection->getCoordinates());
 }
 
 // Build image from canvas, based on selection coordinates

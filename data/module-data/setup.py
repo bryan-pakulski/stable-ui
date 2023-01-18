@@ -70,7 +70,10 @@ for module_folder in next(os.walk("."))[1]:
                 src = f"{module_folder}/{src}"
                 print("Copying file: ", src, "to: ", dst)
                 try:
-                    shutil.copyfile(src, dst)
+                    if (os.path.isfile(src)):
+                        shutil.copyfile(src, dst)
+                    else:
+                        shutil.copytree(src, dst, dirs_exist_ok=True)
                 except IOError as e:
                     # ENOENT(2): file does not exist, raised also on missing dest parent dir
                     if e.errno != errno.ENOENT:
@@ -79,7 +82,6 @@ for module_folder in next(os.walk("."))[1]:
                     os.makedirs(os.path.dirname(dst))
                     shutil.copy(src, dst)
 
-            # TODO: fix file permissions
             os.system(f"./{module_folder}/init.sh")
 
         except yaml.YAMLError as exc:

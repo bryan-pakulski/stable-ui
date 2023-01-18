@@ -22,7 +22,6 @@
 - Inpainting & Outpainting (TODO)
 - Textual Inversion training (TODO)
 
-
 # Details
 
 This UI environment spins up and manages a docker image for Stable-Diffusion. It interfaces with this using python scripts to run SD commands to generate images.
@@ -33,9 +32,9 @@ To add models to stable-ui select `tools -> import model` files will automatical
 
 # Custom Modules
 
-Functionality of the application can be extended by loading custom modules, see `data/modules/ReadMe.md` for additional information, default modules include:
+Functionality of the application can be extended by loading custom modules, see `data/modules/ReadMe.md` for additional information, default module:
 
-- `stable-ui-scripts`: SD V2 support base image/text generation scripts
+- `stable-ui`: SD V2 support base image/text generation scripts, runs the sd generation server, critical component and should not be removed
 
 # Controls
 
@@ -44,16 +43,18 @@ Functionality of the application can be extended by loading custom modules, see 
 # Building
 
 ## Linux:
-  * Compiler: 
-    - GCC
-  * Additional libraries: 
-    - Python 3.8+ dev libraries
-    - Python 3.8+ debug symbols
-  * Building: 
-    - Run a cmake build and then the `./scripts/package.sh` shell script
-    - Build is stored in `build/stable-ui/bin`
+
+- Compiler:
+  - GCC
+- Additional libraries:
+  - Python 3.8+ dev libraries
+  - Python 3.8+ debug symbols
+- Building:
+  - Run a cmake build and then the `./scripts/package.sh` shell script
+  - Build is stored in `build/stable-ui/bin`
 
 ## Windows:
-  * Compiler: VSCC
-  * Additional libraries: Python debug symbols & Debug binaries
-  * Building: Run a cmake build and then the `.\scripts\package.bat` batch script
+
+- Compiler: VSCC
+- Additional libraries: Python debug symbols & Debug binaries
+- Building: Run a cmake build and then the `.\scripts\package.bat` batch script

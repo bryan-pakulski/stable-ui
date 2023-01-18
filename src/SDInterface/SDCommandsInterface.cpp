@@ -13,7 +13,6 @@ SDCommandsInterface::SDCommandsInterface() {
 
   // sd_commands.py is the script that handles all incoming calls from the stable-ui application
   m_py_handle = std::unique_ptr<SnakeHandler>(new SnakeHandler("sd_commands"));
-  launchSDModelServer();
 }
 
 SDCommandsInterface::~SDCommandsInterface() { delete arguments; }
@@ -22,7 +21,7 @@ SDCommandsInterface::~SDCommandsInterface() { delete arguments; }
 void SDCommandsInterface::launchSDModelServer() {
   std::string functionName = "launchSDModelServer";
   arguments->emplace_back(std::unique_ptr<base_type>(
-      new d_type<std::string>('s', "exec_path", "/modules/stable-ui-scripts/scripts/sd_model_server.py", 0)));
+      new d_type<std::string>('s', "exec_path", "/modules/stable-ui/sd_server/sd_model_server.py", 0)));
 
   // Offload thread execution, image generation can take some time
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "Starting up SD Model Server...");
@@ -30,6 +29,9 @@ void SDCommandsInterface::launchSDModelServer() {
                          std::ref(serverFinished));
   m_Thread.detach();
 }
+
+// Connect a new model to SD Server
+void SDCommandsInterface::attachModelToServer() {}
 
 // Calls text to image command from client -> sd model server
 void SDCommandsInterface::textToImage(std::string prompt, std::string negative_prompt, int samples, int steps,

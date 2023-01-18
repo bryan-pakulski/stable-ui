@@ -12,8 +12,11 @@ def getContainer():
 
 # Runs the sha1sum function against a model file inside the docker container
 # The yaml configuration file found under data/shared-config/model_config.yaml contains the hash mapping and custom configuration
+
+
 def loadConfig(data, key, default):
     return data[key] if (key in data) else default
+
 
 def getAdditionalConfig(ckpt_filepath):
     cmd = f"bash -c \"sha1sum {ckpt_filepath}" + " | awk '{print $1}'\""
@@ -75,7 +78,7 @@ def launchSDModelServer(exec_path):
     command = f"conda run -n ldm python '{exec_path}'"
     print("Starting server with command: ", command)
     _e, response = getContainer().exec_run(
-        command, workdir="/modules/stable-ui-scripts/scripts", demux=True)
+        command, workdir="/modules/stable-ui/sd_server", demux=True)
     if (_e != 0):
         print("Command failed with error code: ", _e)
         print("==== STDOUT ====")
@@ -87,6 +90,11 @@ def launchSDModelServer(exec_path):
 
     # Error code response is used by cpp integration to check for success / failure status
     return _e
+
+
+# Launch a client command
+def launchSDClientCommand(exec_path, command):
+    pass
 
 
 # Default txt2image command

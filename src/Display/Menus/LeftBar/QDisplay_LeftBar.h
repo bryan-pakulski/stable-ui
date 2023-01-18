@@ -17,36 +17,42 @@ public:
     m_hidden_icon->loadFromImage("data/images/hidden.png");
   }
 
+  // Toggle window visibility
+  void visible(bool visibility) { m_windowVisisble = visibility; }
+
   virtual void render() {
-    getWindowSize(m_windowSize);
+    if (m_windowVisisble) {
+      getWindowSize(m_windowSize);
 
-    // Helper on left side, make sure to position around the bottom / top window bars
-    ImGui::SetNextWindowPos(ImVec2(0, CONFIG::IMGUI_TOP_WINDOW_HEIGHT.get()));
-    ImGui::SetNextWindowSize(ImVec2(CONFIG::IMGUI_LEFT_WINDOW_WIDTH.get(),
-                                    float(m_windowSize.second) - CONFIG::IMGUI_BOTTOM_WINDOW_HEIGHT.get() -
-                                        CONFIG::IMGUI_TOP_WINDOW_HEIGHT.get()));
-    ImGui::SetNextWindowBgAlpha(0.9f);
-    ImGui::Begin(c_windowName.c_str(), 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+      // Helper on left side, make sure to position around the bottom / top window bars
+      ImGui::SetNextWindowPos(ImVec2(0, CONFIG::IMGUI_TOP_WINDOW_HEIGHT.get()));
+      ImGui::SetNextWindowSize(ImVec2(CONFIG::IMGUI_LEFT_WINDOW_WIDTH.get(),
+                                      float(m_windowSize.second) - CONFIG::IMGUI_BOTTOM_WINDOW_HEIGHT.get() -
+                                          CONFIG::IMGUI_TOP_WINDOW_HEIGHT.get()));
+      ImGui::SetNextWindowBgAlpha(0.9f);
+      ImGui::Begin(c_windowName.c_str(), 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 
-    ImGui::Text("Camera");
-    cameraHelper();
-    ImGui::Separator();
+      ImGui::Text("Camera");
+      cameraHelper();
+      ImGui::Separator();
 
-    ImGui::Text("Layer Helper");
-    layerHelper();
-    ImGui::Separator();
+      ImGui::Text("Layer Helper");
+      layerHelper();
+      ImGui::Separator();
 
-    ImGui::Text("Selection");
-    selectionPreview();
-    ImGui::Separator();
+      ImGui::Text("Selection");
+      selectionPreview();
+      ImGui::Separator();
 
-    ImGui::End();
+      ImGui::End();
+    }
   }
 
 private:
   // Window Options
   const std::string c_windowName = "Tools Window";
   std::pair<int, int> m_windowSize{};
+  bool m_windowVisisble = true;
 
   // Layer options
   int m_selectedLayerIndex = -1;

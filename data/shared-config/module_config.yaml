@@ -1,11 +1,11 @@
 modules:
-  stable-ui-scripts:
+  stable-ui:
     filepaths:
-      files/Qimg2img.py: /modules/stable-ui-scripts/scripts/Qimg2img.py
-      files/Qtxt2img.py: /modules/stable-ui-scripts/scripts/Qtxt2img.py
-      files/common/__init__.py: /modules/stable-ui-scripts/scripts/common/__init__.py
-      files/common/devices.py: /modules/stable-ui-scripts/scripts/common/devices.py
-      files/common/lowvram.py: /modules/stable-ui-scripts/scripts/common/lowvram.py
-      files/common/sd_model.py: /modules/stable-ui-scripts/scripts/common/sd_model.py
-    name: stable-ui-scripts
-    working-directory: /modules/stable-ui-scripts
+      files/Qimg2img.py: /modules/stable-ui/scripts/Qimg2img.py
+      files/Qtxt2img.py: /modules/stable-ui/scripts/Qtxt2img.py
+      files/common/__init__.py: /modules/stable-ui/scripts/common/__init__.py
+      files/common/devices.py: /modules/stable-ui/scripts/common/devices.py
+      files/common/lowvram.py: /modules/stable-ui/scripts/common/lowvram.py
+      files/common/sd_model.py: /modules/stable-ui/scripts/common/sd_model.py
+    name: stable-ui
+    working-directory: /modules/stable-ui

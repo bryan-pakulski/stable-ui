@@ -12,6 +12,7 @@
 #include "QDisplay_ConfigureModel.h"
 #include "QDisplay_ImportModel.h"
 #include "QDisplay_ImportVAE.h"
+#include "QDisplay_LoadModel.h"
 
 class QDisplay_TopBar : public QDisplay_Base {
 
@@ -26,6 +27,7 @@ private:
   std::unique_ptr<QDisplay_ConfigureModel> m_configureModelWindow;
   std::unique_ptr<QDisplay_ImportModel> m_importModelWindow;
   std::unique_ptr<QDisplay_ImportVAE> m_importVAEWindow;
+  std::unique_ptr<QDisplay_LoadModel> m_loadModelWindow;
 
   // Log config
   std::ifstream logStream;
@@ -153,6 +155,7 @@ public:
     m_configureModelWindow = std::unique_ptr<QDisplay_ConfigureModel>(new QDisplay_ConfigureModel(rm, w));
     m_importModelWindow = std::unique_ptr<QDisplay_ImportModel>(new QDisplay_ImportModel(rm, w));
     m_importVAEWindow = std::unique_ptr<QDisplay_ImportVAE>(new QDisplay_ImportVAE(rm, w));
+    m_loadModelWindow = std::unique_ptr<QDisplay_LoadModel>(new QDisplay_LoadModel(rm, w));
   }
 
   /*
@@ -163,11 +166,11 @@ public:
 
       if (ImGui::BeginMenu("File")) {
 
-        if (ImGui::MenuItem("New File")) {
+        if (ImGui::MenuItem("New Canvas")) {
           newFileOpen = true;
         }
 
-        if (ImGui::MenuItem("Load File")) {
+        if (ImGui::MenuItem("Load Canvas")) {
           loadFileOpen = true;
         }
 
@@ -175,8 +178,8 @@ public:
           m_importModelWindow->openWindow();
         }
 
-        if (ImGui::MenuItem("Open Log")) {
-          logFileOpen = true;
+        if (ImGui::MenuItem("Import VAE")) {
+          m_importVAEWindow->openWindow();
         }
 
         ImGui::EndMenu();
@@ -188,12 +191,16 @@ public:
           selectCanvasOpen = true;
         }
 
-        if (ImGui::MenuItem("Import VAE")) {
-          m_importVAEWindow->openWindow();
+        if (ImGui::MenuItem("Activate Model")) {
+          m_loadModelWindow->openWindow();
         }
 
         if (ImGui::MenuItem("Configure Models")) {
           m_configureModelWindow->openWindow();
+        }
+
+        if (ImGui::MenuItem("Open Log")) {
+          logFileOpen = true;
         }
 
         ImGui::EndMenu();
@@ -214,5 +221,6 @@ public:
     m_configureModelWindow->render();
     m_importModelWindow->render();
     m_importVAEWindow->render();
+    m_loadModelWindow->render();
   }
 };

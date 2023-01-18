@@ -28,15 +28,15 @@ const int MIN_OBJECTS = 5;
 class StableManager {
 public:
   explicit StableManager(GLFWwindow &w);
-  static inline std::vector<BaseObject *> objectList;
   ~StableManager();
 
+  // Actively rendered canvas
   int m_activeId = 0;
   std::vector<std::shared_ptr<Canvas>> m_canvas;
 
   // Camera details
-  std::shared_ptr<Camera> m_camera;
   bool m_cameraDrag = false;
+  std::shared_ptr<Camera> m_camera;
 
   // Selection
   std::shared_ptr<Selection> m_selection;
@@ -55,6 +55,9 @@ public:
 
   // Create a new canvas with a base image
   void sendImageToCanvas(Image &im);
+
+  // Attach model to server
+  void attachModel(YAML::Node model);
 
   // Generate txt2img
   void textToImage(std::string prompt, std::string negative_prompt, int samples, int steps, double cfg, int seed,
