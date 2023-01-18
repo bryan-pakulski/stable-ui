@@ -8,6 +8,26 @@ from . import devices
 
 # Courtesy of Automatic111; https://github.com/AUTOMATIC1111/stable-diffusion-webui/blob/master/modules/sd_models.py
 
+MODELS_PATH = "/models/"
+
+vae_ignore_keys = {"model_ema.decay", "model_ema.num_updates"}
+
+def load_vae(model, vae_file=None, vae_source="from unknown source"):
+
+    if vae_file:
+        assert os.path.isfile(vae_file), f"VAE {vae_source} doesn't exist: {vae_file}"
+        print(f"Loading VAE weights {vae_source}: {vae_file}")
+
+        vae_ckpt = read_state_dict(vae_file, map_location=devices.weight_load_location)
+        vae_dict = {k: v for k, v in vae_ckpt.items() if k[0:4] != "loss" and k not in vae_ignore_keys}
+        _load_vae_dict(model, vae_dict)
+
+
+# don't call this from outside
+def _load_vae_dict(model, vae_dict):
+    model.first_stage_model.load_state_dict(vae_dict)
+    model.first_stage_model.to(devices.dtype_vae)
+
 def transform_checkpoint_dict_key(k):
     chckpoint_dict_replacements = {
         'cond_stage_model.transformer.embeddings.': 'cond_stage_model.transformer.text_model.embeddings.',
@@ -55,7 +75,7 @@ def read_state_dict(checkpoint_file, print_global_state=False, map_location=None
     sd = get_state_dict_from_checkpoint(pl_sd)
     return sd
 
-def load_model_weights(model, ckpt, no_half):
+def load_model_weights(model, ckpt, precision, vae_file=None):
     # load from file
     print(f"Loading weights from {ckpt}")
 
@@ -63,39 +83,40 @@ def load_model_weights(model, ckpt, no_half):
     model.load_state_dict(sd, strict=False)
     del sd
     
-    if not no_half:
+    if precision == "full":
         vae = model.first_stage_model
 
         model.half()
         model.first_stage_model = vae
 
-    dtype = torch.float32 if no_half else torch.float16
-    dtype_vae = torch.float32 if no_half else torch.float16
+    dtype = torch.float32 if precision == "full" else torch.float16
+    dtype_vae = torch.float32 if precision == "full" else torch.float16
 
     model.first_stage_model.to(dtype_vae)
 
+    if vae_file != None:
+        print(f"Loading additional VAE: {vae_file}")
+        load_vae(model, vae_file)
 
-def load_model(checkpoint_config, ckpt, precision):
+
+def load_model(checkpoint_config, ckpt, precision, vae_file=None):
     from common import lowvram
-    sd_model = instantiate_from_config(checkpoint_config.model)
+    model = instantiate_from_config(checkpoint_config.model)
 
-    if sd_model is None:
+    if model is None:
         print('Failed to create model', file=sys.stderr)
         exit(1)
 
-    if precision == "autocast":
-        load_model_weights(sd_model, ckpt, False)
-    else:
-        load_model_weights(sd_model, ckpt, True)
+    load_model_weights(model, ckpt, precision, vae_file)
 
     #if shared.cmd_opts.lowvram or shared.cmd_opts.medvram:
-    #    lowvram.setup_for_low_vram(sd_model, shared.cmd_opts.medvram)
+    #    lowvram.setup_for_low_vram(model, shared.cmd_opts.medvram)
     #else:
-    #    sd_model.to(shared.device)
+    #    model.to(shared.device)
 
-    sd_model.to(devices.get_cuda_device_string() if torch.cuda.is_available() else "cpu")
-    sd_model.eval()
+    model.to(devices.get_cuda_device_string() if torch.cuda.is_available() else "cpu")
+    model.eval()
 
     print(f"Model loaded..")
 
-    return sd_model
+    return model

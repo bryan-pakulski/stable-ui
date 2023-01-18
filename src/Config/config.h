@@ -55,5 +55,6 @@ static CString MODELS_CONFIGURATION_FILE(loadConfig<std::string>("MODELS_CONFIGU
                                                                  "data/shared-config/model_config.yaml"));
 static CString MODULES_CONFIGURATION_FILE(loadConfig<std::string>("MODULES_CONFIGURATION_FILE",
                                                                   "data/shared-config/module_config.yaml"));
+static CString VAE_FOLDER_PATH(loadConfig<std::string>("VAE_FOLDER_PATH", "data/models/vae"));
 
 } // namespace CONFIG

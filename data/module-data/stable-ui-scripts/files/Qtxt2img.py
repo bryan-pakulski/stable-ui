@@ -167,6 +167,12 @@ def main():
         choices=["full", "autocast"],
         default="autocast"
     )
+    parser.add_argument(
+        "--vae",
+        type=str,
+        help="additional VAE file path, can be left blank",
+        default=None
+    )
     opt = parser.parse_args()
 
     if opt.laion400m:
@@ -178,7 +184,7 @@ def main():
     seed_everything(opt.seed)
 
     config = OmegaConf.load(f"{opt.config}")
-    model = sd_model.load_model(config, f"{opt.ckpt}", opt.precision)
+    model = sd_model.load_model(config, f"{opt.ckpt}", opt.precision, opt.vae)
 
     if (torch.cuda.is_available()):
         print("Using GPU...")

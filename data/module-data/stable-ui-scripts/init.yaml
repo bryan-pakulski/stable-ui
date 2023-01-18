@@ -7,6 +7,7 @@ module:
   filepaths:
     "files/Qimg2img.py": "/modules/stable-ui-scripts/scripts/Qimg2img.py"
     "files/Qtxt2img.py": "/modules/stable-ui-scripts/scripts/Qtxt2img.py"
+    "files/__init__.py": "/modules/stable-ui-scripts/scripts/__init__.py"
     "files/common/__init__.py": "/modules/stable-ui-scripts/scripts/common/__init__.py"
     "files/common/devices.py": "/modules/stable-ui-scripts/scripts/common/devices.py"
     "files/common/lowvram.py": "/modules/stable-ui-scripts/scripts/common/lowvram.py"

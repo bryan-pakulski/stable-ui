@@ -1,16 +1,18 @@
 #pragma once
 
 #include <imgui.h>
-#include <filesystem>
 #include "../../../Helpers/SHA1.h"
 #include "../../../Display/ErrorHandler.h"
 #include "../../../ThirdParty/imgui/imfilebrowser.h"
 #include "../../QDisplay_Base.h"
 
+#include <imgui_stdlib.h>
+
 #include "yaml-cpp/emittermanip.h"
 #include <yaml-cpp/yaml.h>
 #include <yaml-cpp/exceptions.h>
 
+#include <filesystem>
 #include <thread>
 
 namespace fs = std::filesystem;
@@ -24,13 +26,22 @@ private:
 
   std::string m_selected_model_config = "";
   std::string m_selected_module = "";
+  std::string m_selected_vae = "";
+  std::string m_triggerWords = "";
   std::vector<listItem> m_ModulesList;
   std::vector<listItem> m_ModelConfigList;
+  std::vector<listItem> m_VAEList;
 
   void clear() {
     fileDialog.ClearSelected();
     m_ModulesList.clear();
     m_ModelConfigList.clear();
+    m_VAEList.clear();
+
+    m_triggerWords = "";
+    m_selected_model_config = "";
+    m_selected_module = "";
+    m_selected_vae = "";
   }
 
   void reloadFiles() {
@@ -58,11 +69,21 @@ private:
                                  "Failed to parse yaml file: ", CONFIG::MODULES_CONFIGURATION_FILE.get());
       return;
     }
+
+    // Load VAE List
+    try {
+      for (const auto &entry : fs::directory_iterator(CONFIG::VAE_FOLDER_PATH.get())) {
+        listItem i{.m_name = entry.path().filename().string()};
+        m_VAEList.push_back(i);
+      }
+    } catch (fs::filesystem_error) {
+      ErrorHandler::GetInstance().setConfigError(CONFIG::VAE_FOLDER_PATH, "VAE_FOLDER_PATH");
+    }
   }
 
   // Save model configuration to model config file
   static void saveModelConfiguration(std::string filepath, std::string module_name, std::string model_config_file,
-                                     std::shared_ptr<bool> m_saving) {
+                                     std::shared_ptr<bool> m_saving, std::string trigger_words, std::string vae) {
     std::filesystem::path modelPath(filepath);
 
     // Build yaml node to attach to model configuration file
@@ -71,6 +92,10 @@ private:
     model_node["working_dir"] = "/modules/" + module_name;
     model_node["config"] = "--config /models/configs/" + model_config_file;
     model_node["name"] = modelPath.filename().string();
+    model_node["trigger_prompt"] = trigger_words;
+    if (vae != "") {
+      model_node["vae"] = "/models/vae/" + vae;
+    }
 
     // Retrieve root node and dump back to file
     YAML::Node node, _baseNode = YAML::LoadFile(CONFIG::MODELS_CONFIGURATION_FILE.get());
@@ -117,6 +142,20 @@ private:
       ImGui::EndCombo();
     }
 
+    if (ImGui::BeginCombo("Custom VAE", m_selected_vae.c_str(), ImGuiComboFlags_NoArrowButton)) {
+      for (auto &item : m_VAEList) {
+        if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
+          m_selected_vae = item.m_name;
+        }
+        if (item.m_isSelected) {
+          ImGui::SetItemDefaultFocus();
+        }
+      }
+      ImGui::EndCombo();
+    }
+
+    ImGui::InputText("Trigger Words: ", &m_triggerWords);
+
     if (ImGui::Button("Cancel")) {
       clear();
     } else if (m_selected_module != "" && m_selected_model_config != "" && !*m_saving) {
@@ -126,7 +165,7 @@ private:
         // track completion
         *m_saving = true;
         std::thread t(saveModelConfiguration, fileDialog.GetSelected().string(), m_selected_module,
-                      m_selected_model_config, m_saving);
+                      m_selected_model_config, m_saving, std::string(m_triggerWords), m_selected_vae);
         t.detach();
         clear();
       }

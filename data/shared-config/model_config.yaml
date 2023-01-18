@@ -7,9 +7,11 @@
 # 'config' - Additional config passed to SD commands when model is run i.e. yaml config path
 # 'trigger_prompt' - Inserts trigger keywords for a given model into the prompt when run
 # 'name' - Name of model
+# 'vae'  - Path to a vae 
 models:
   # Default configuration, do not delete or modify!!
   default:
     working_dir: "/modules/stable-ui-scripts"
     config: "--config /modules/stable-ui-scripts/configs/v1-inference.yaml"
     name: "default"
+    trigger_prompt: ""

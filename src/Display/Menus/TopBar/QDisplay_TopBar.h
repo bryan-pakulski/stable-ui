@@ -11,6 +11,7 @@
 #include "../../QDisplay_Base.h"
 #include "QDisplay_ConfigureModel.h"
 #include "QDisplay_ImportModel.h"
+#include "QDisplay_ImportVAE.h"
 
 class QDisplay_TopBar : public QDisplay_Base {
 
@@ -24,6 +25,7 @@ private:
 
   std::unique_ptr<QDisplay_ConfigureModel> m_configureModelWindow;
   std::unique_ptr<QDisplay_ImportModel> m_importModelWindow;
+  std::unique_ptr<QDisplay_ImportVAE> m_importVAEWindow;
 
   // Log config
   std::ifstream logStream;
@@ -150,6 +152,7 @@ public:
   QDisplay_TopBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     m_configureModelWindow = std::unique_ptr<QDisplay_ConfigureModel>(new QDisplay_ConfigureModel(rm, w));
     m_importModelWindow = std::unique_ptr<QDisplay_ImportModel>(new QDisplay_ImportModel(rm, w));
+    m_importVAEWindow = std::unique_ptr<QDisplay_ImportVAE>(new QDisplay_ImportVAE(rm, w));
   }
 
   /*
@@ -185,6 +188,10 @@ public:
           selectCanvasOpen = true;
         }
 
+        if (ImGui::MenuItem("Import VAE")) {
+          m_importVAEWindow->openWindow();
+        }
+
         if (ImGui::MenuItem("Configure Models")) {
           m_configureModelWindow->openWindow();
         }
@@ -206,5 +213,6 @@ public:
     // Render additional windows
     m_configureModelWindow->render();
     m_importModelWindow->render();
+    m_importVAEWindow->render();
   }
 };

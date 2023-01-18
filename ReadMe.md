@@ -1,7 +1,7 @@
 # Requirements
 
-- Python 3.10.0
-- pip (see rquirements.txt for libraries, can be installed with `pip install -r requirements.txt`)
+- Python 3.8.0+
+- pip (see requirements.txt for libraries, can be installed with `pip install -r requirements.txt`)
 - Docker see: https://github.com/NVIDIA/nvidia-docker#quickstart
 - nvidia-container-toolkit
 
@@ -16,9 +16,12 @@
 - TXT2IMG generation
 - IMG2IMG generation
 - Custom module extension
+- VAE Support
+- Stable Diffusion v2 support
+- Low VRAM Support (TODO)
 - Inpainting & Outpainting (TODO)
 - Textual Inversion training (TODO)
-- Stable Diffusion v2 support (TODO)
+
 
 # Details
 

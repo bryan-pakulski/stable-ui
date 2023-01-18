@@ -43,10 +43,14 @@ def getAdditionalConfig(ckpt_filepath):
 
                 # Get data from yaml file
                 extra_conf["config"] = loadConfig(data, "config", "")
+                extra_conf["vae"] = loadConfig(data, "vae", "")
                 extra_conf["working_dir"] = loadConfig(
                     data, "working_dir", "/sd")
                 extra_conf["trigger_prompt"] = loadConfig(
                     data, "trigger_prompt", "")
+
+                if extra_conf["vae"] != "":
+                    extra_conf["vae"] = f"--vae {extra_conf['vae']}"
             except yaml.YAMLError as exc:
                 print(exc)
                 print("Invalid YAML for hash key: ", hash)
@@ -72,7 +76,7 @@ def getAdditionalConfig(ckpt_filepath):
 def txt2image(exec_path, prompt, negative_prompt, samples, steps, scale, seed, width, height, out_dir, ckpt_model, precision):
     # Check if additional configuration is required for loaded ckpt
     extra_conf = getAdditionalConfig(ckpt_model)
-    command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt + extra_conf['trigger_prompt']}' --negative_prompt '{negative_prompt}' --n_samples {samples} --n_iter 1 --ddim_steps {steps} --scale {scale} --seed {seed} --H {height} --W {width} --outdir {out_dir} --skip_grid --ckpt {ckpt_model} --precision {precision} {extra_conf['config']}"
+    command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt + ' ' + extra_conf['trigger_prompt']}' --negative_prompt '{negative_prompt}' --n_samples {samples} --n_iter 1 --ddim_steps {steps} --scale {scale} --seed {seed} --H {height} --W {width} --outdir {out_dir} --skip_grid --ckpt {ckpt_model} --precision {precision} {extra_conf['vae']} {extra_conf['config']}"
 
     print("Processing command: ", command)
     _e, response = getContainer().exec_run(
@@ -93,7 +97,7 @@ def txt2image(exec_path, prompt, negative_prompt, samples, steps, scale, seed, w
 def img2image(exec_path, img_path, prompt, negative_prompt, samples, steps, strength, seed, out_dir, ckpt_model, precision):
     # Check if additional configuration is required for loaded ckpt
     extra_conf = getAdditionalConfig(ckpt_model)
-    command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt + extra_conf['trigger_prompt']}' --negative_prompt '{negative_prompt}' --init-img {img_path} --strength {strength} --n_samples {samples} --n_iter 1 --ddim_steps {steps} --seed {seed} --outdir {out_dir} --skip_grid --ckpt {ckpt_model} --precision {precision} {extra_conf['config']}"
+    command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt + extra_conf['trigger_prompt']}' --negative_prompt '{negative_prompt}' --init-img {img_path} --strength {strength} --n_samples {samples} --n_iter 1 --ddim_steps {steps} --seed {seed} --outdir {out_dir} --skip_grid --ckpt {ckpt_model} --precision {precision} {extra_conf['vae']} {extra_conf['config']}"
 
     print("Processing command: ", command)
     _e, response = getContainer().exec_run(

@@ -18,3 +18,5 @@ Fix issues with SD V2, full precision not supported, error:
 - RuntimeError: Input type (torch.cuda.HalfTensor) and weight type (torch.cuda.FloatTensor) should be the same\n\nE
 
 Delete models & configurations
+
+Save output to temporary folder - "gen??" This way you can generate multiple item etc.. and move them automatically after generation is finished to an output folder
