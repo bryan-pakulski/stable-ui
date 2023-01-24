@@ -28,8 +28,10 @@ class Command():
         command_and_args = command.split(":")
         self.command = command_and_args[0]
 
+        print(command_and_args)
         if (len(command_and_args) > 1):
             for pair in command_and_args[1:]:
+                print(pair)
                 arg, val = pair.split("=")
                 self.arguments[arg] = val
 

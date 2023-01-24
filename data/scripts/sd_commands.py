@@ -100,8 +100,13 @@ def terminateSDModelServer(exec_path):
 
 
 # Launch a client command
-def attachSDModelToServer(exec_path, ckpt_path, config_path, vae_path, precision):
-    msg = f"loadModel:checkpoint_path={ckpt_path}:checkpoint_config_path:{config_path}:vae_path={vae_path}:precision={precision}"
+def attachSDModelToServer(exec_path, ckpt_path, config_path, vae_path="", precision=""):
+    msg = f"loadModel:checkpoint_path={ckpt_path}:checkpoint_config_path={config_path}"
+
+    # Optionals
+    msg += f":vae_path={vae_path}" if vae_path != "" else ""
+    msg += f":precision={precision}" if precision != "" else ""
+
     command = f"conda run -n ldm python '{exec_path}' {msg}"
 
     print("Starting client with command: ", command)
@@ -123,8 +128,10 @@ def attachSDModelToServer(exec_path, ckpt_path, config_path, vae_path, precision
 def txt2img(sd_model_path, exec_path, prompt, negative_prompt, samples, steps, scale, seed, width, height, out_dir, n_iter):
     # Check if additional configuration is required for loaded ckpt
     extra_conf = getAdditionalConfig(sd_model_path)
-    msg = f"txt2img:prompt={prompt + ', ' + extra_conf['trigger_prompt']}:negative_prompt={negative_prompt}:samples={samples}:n_iter={n_iter}:steps={steps}:scale={scale}:seed={seed}:height={height}:width={width}:outdir={out_dir}"
-    command = f"conda run -n ldm python '{exec_path}' {msg}"
+    if (extra_conf['trigger_prompt'] != ""):
+        prompt += f", {extra_conf['trigger_prompt']}"
+    msg = f"txt2img:prompt={prompt}:negative_prompt={negative_prompt}:samples={samples}:n_iter={n_iter}:steps={steps}:cfg_scale={scale}:seed={seed}:height={height}:width={width}:outpath_samples={out_dir}"
+    command = f"conda run -n ldm python '{exec_path}' '{msg}'"
     
     print("Processing command: ", command)
     _e, response = getContainer().exec_run(
@@ -145,8 +152,10 @@ def txt2img(sd_model_path, exec_path, prompt, negative_prompt, samples, steps, s
 # Default img2img commnad
 # TODO: Remember to include  --skip_grid 
 def img2image(exec_path, img_path, prompt, negative_prompt, samples, steps, strength, seed, out_dir, n_iter):
-    msg = f"img2img:prompt={prompt + ', ' + extra_conf['trigger_prompt']},negative_prompt={negative_prompt},init-img={img_path},samples={samples},strength={strength},n_iter={n_iter},steps={steps},seed={seed},height={height},width={width},outdir={out_dir}"
-    command = f"conda run -n ldm python '{exec_path}' {msg}"
+    if (extra_conf['trigger_prompt'] != ""):
+        prompt += f", {extra_conf['trigger_prompt']}"
+    msg = f"img2img:prompt={prompt}:negative_prompt={negative_prompt}:init-img={img_path}:samples={samples}:strength={strength}:n_iter={n_iter}:steps={steps}:seed={seed}:height={height}:width={width}:outdir={out_dir}"
+    command = f"conda run -n ldm python '{exec_path}' '{msg}'"
     
     print("Processing command: ", command)
     _e, response = getContainer().exec_run(

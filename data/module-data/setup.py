@@ -6,9 +6,8 @@ import shutil
 
 MODULE_CONFIG_PATH = "/shared-config/module_config.yaml"
 
+
 # Set up a new module in the MODULE_CONFIG_PATH file, updates existing entries
-
-
 def update_module_config(name, filepath, module_yaml):
     stream = open(filepath, 'r')
     module_config = yaml.safe_load(stream)
@@ -20,9 +19,8 @@ def update_module_config(name, filepath, module_yaml):
     with open(filepath, 'w') as yaml_file:
         yaml_file.write(yaml.dump(module_config, default_flow_style=False))
 
+
 # Deletes inactive modules from yaml config
-
-
 def purge_inactive_modules(filepath, active_modules):
     stream = open(filepath, 'r')
     module_config = yaml.safe_load(stream)
