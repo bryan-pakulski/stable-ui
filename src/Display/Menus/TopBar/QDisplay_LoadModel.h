@@ -44,7 +44,7 @@ private:
     YAML::Node node, _baseNode = YAML::LoadFile(CONFIG::MODELS_CONFIGURATION_FILE.get());
     YAML::Node model = _baseNode["models"][m_selected_hash];
 
-    m_stableManager->attachModel(model);
+    m_stableManager->attachModel(model, m_selected_hash);
     visible = false;
   }
 

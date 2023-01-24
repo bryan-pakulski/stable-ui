@@ -93,7 +93,7 @@ void StableManager::sendImageToCanvas(Image &im) {
 }
 
 // STABLE DIFFUSION SERVER COMMANDS
-void StableManager::attachModel(YAML::Node model) {
+void StableManager::attachModel(YAML::Node model, std::string hash) {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "Attaching model: ", model["name"].as<std::string>(),
                              " to Stable Diffusion Docker Server");
   // Optional parameters
@@ -101,6 +101,11 @@ void StableManager::attachModel(YAML::Node model) {
   if (model["vae"]) {
     model["vae"].as<std::string>();
   }
+
+  // Build model struct
+  m_model.name = model["name"].as<std::string>();
+  m_model.hash = hash;
+  m_model.path = model["path"].as<std::string>();
 
   SDCommandsInterface::GetInstance().attachModelToServer(model["path"].as<std::string>(),
                                                          model["config"].as<std::string>(), vae, "full", m_modelLoaded);
@@ -113,8 +118,8 @@ void StableManager::textToImage(std::string prompt, std::string negative_prompt,
                                 int seed, int width, int height, int &renderState) {
 
   // Generate & Retrieve newly generated image
-  SDCommandsInterface::GetInstance().textToImage(prompt, negative_prompt, samples, steps, cfg, seed, width, height,
-                                                 renderState);
+  SDCommandsInterface::GetInstance().textToImage(m_model.path, prompt, negative_prompt, samples, steps, cfg, seed,
+                                                 width, height, renderState);
 }
 
 // Image to Image, render result to canvas

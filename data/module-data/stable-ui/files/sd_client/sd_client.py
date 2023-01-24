@@ -4,7 +4,7 @@ import logging
 
 def usage():
     print("Error: No parameter provided")
-    print("Format of message should be \"<command_name>:<arg1>=<val1>,<arg2>=<val2>...\"")
+    print("Format of message should be \"<command_name>:<arg1>=<val1>:<arg2>=<val2>...\"")
     sys.exit()
 
 if __name__ == "__main__":

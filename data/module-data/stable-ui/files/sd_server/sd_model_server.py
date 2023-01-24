@@ -14,6 +14,7 @@ context = zmq.Context()
 socket = context.socket(zmq.REP)
 socket.bind("tcp://*:5555")
 
+from sd import txt2img as txt2img
 
 class Command():
 
@@ -28,12 +29,8 @@ class Command():
         self.command = command_and_args[0]
 
         if (len(command_and_args) > 1):
-            # Split the argument/value pairs
-            args_and_vals = command_and_args[1].split(",")
-
-            # Create a dictionary entry for each argument/value pair
-            for arg_val_pair in args_and_vals:
-                arg, val = arg_val_pair.split("=")
+            for pair in command_and_args[1:]:
+                arg, val = pair.split("=")
                 self.arguments[arg] = val
 
 
@@ -76,7 +73,57 @@ class SDModelServer():
             },
             "txt2img": {
                 "help": "Generate Text to Image",
-                "arguments": None
+                "arguments": {
+                    "outpath_samples": {
+                        "help": "Base output folder",
+                        "required": True
+                    },
+                    "subfolder_name": {
+                        "help": "Subfolder name to save images into",
+                        "required": False
+                    },
+                    "prompt": {
+                        "help": "txt2img prompt",
+                        "required": True
+                    },
+                    "negative_prompt": {
+                        "help": "txt2img negative prompt",
+                        "required": False
+                    },
+                    "seed": {
+                        "help": "seed to generate against",
+                        "required": True
+                    },
+                    "sampler_name": {
+                        "help": "Sampler to use for image generation, defaults to PLMS",
+                        "required": False
+                    },
+                    "batch_size": {
+                        "help": "Number of images to generate concurrently",
+                        "required": False
+                    },
+                    "n_iter": {
+                        "help": "Number of images to create",
+                        "required": False
+                    },
+                    "steps": {
+                        "help": "Number of steps to run image generation over",
+                        "required": True
+                    },
+                    "cfg_scale": {
+                        "help": "The degree of freedom sd gets when following a prompt",
+                        "required": True
+                    },
+                    "width": {
+                        "help": "Generated image width",
+                        "required": True
+                    },
+                    "height": {
+                        "help": "Generated image height",
+                        "required": True
+                    }
+                },
+                "function": self.__text2image
             },
             "img2img": {
                 "help": "Generate Image to Image",
@@ -156,13 +203,18 @@ class SDModelServer():
         # Free the old model if it exists and recover resources
         if (self.model != None):
             logging.info(f"Freeing old model & recovering resource: {self.model.checkpoint_path}")
-            del self.model
+            self.model.clean()
 
         self.model = sd_model.StableDiffusionModel(
             cmd.arguments['checkpoint_path'], cmd.arguments['vae_path'], cmd.arguments['checkpoint_config_path'], cmd.arguments['precision'])
         self.model.load_model()
 
         return f"Model loaded... {cmd.arguments['checkpoint_path']}"
+
+    def __text2image(self, cmd):
+        result = txt2img.generate()
+        
+        return f"{result}"
 
     # Main loop
     def main(self):

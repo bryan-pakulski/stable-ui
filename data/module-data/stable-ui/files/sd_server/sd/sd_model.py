@@ -136,3 +136,7 @@ class StableDiffusionModel():
             self.model.to(devices.get_cuda_device_string())
 
         self.model.eval()
+
+    def clean(self):
+        if self.model:
+            devices.torch_gc()

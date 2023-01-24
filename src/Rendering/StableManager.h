@@ -26,6 +26,12 @@ const int MAX_OBJECTS = 100;
 const int MIN_OBJECTS = 5;
 }; // namespace rm
 
+struct model {
+  std::string name;
+  std::string hash;
+  std::string path;
+};
+
 class StableManager {
 public:
   explicit StableManager(GLFWwindow &w);
@@ -57,7 +63,7 @@ public:
   // MODEL SERVER INTERACTION
 
   // Attach model to server
-  void attachModel(YAML::Node model);
+  void attachModel(YAML::Node model, std::string hash);
   // Return model state
   int getModelState();
 
@@ -83,6 +89,7 @@ private:
   GLFWwindow &m_window;
 
   int m_modelLoaded = EXECUTION_STATE::PENDING;
+  model m_model;
 
   // Process inputs
   void logicLoop();

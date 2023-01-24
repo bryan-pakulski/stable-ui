@@ -5,7 +5,6 @@ import docker
 import subprocess
 import yaml
 
-
 def getContainer():
     client = docker.from_env()
     return client.containers.get('sd')
@@ -102,7 +101,7 @@ def terminateSDModelServer(exec_path):
 
 # Launch a client command
 def attachSDModelToServer(exec_path, ckpt_path, config_path, vae_path, precision):
-    msg = f"loadModel:checkpoint_path={ckpt_path},checkpoint_config_path={config_path},vae_path={vae_path},precision={precision}"
+    msg = f"loadModel:checkpoint_path={ckpt_path}:checkpoint_config_path:{config_path}:vae_path={vae_path}:precision={precision}"
     command = f"conda run -n ldm python '{exec_path}' {msg}"
 
     print("Starting client with command: ", command)
@@ -121,14 +120,15 @@ def attachSDModelToServer(exec_path, ckpt_path, config_path, vae_path, precision
     return _e
 
 # Default txt2image command
-def txt2image(exec_path, prompt, negative_prompt, samples, steps, scale, seed, width, height, out_dir, ckpt_model, precision):
+def txt2img(sd_model_path, exec_path, prompt, negative_prompt, samples, steps, scale, seed, width, height, out_dir, n_iter):
     # Check if additional configuration is required for loaded ckpt
-    extra_conf = getAdditionalConfig(ckpt_model)
-    command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt + ' ' + extra_conf['trigger_prompt']}' --negative_prompt '{negative_prompt}' --n_samples {samples} --n_iter 1 --ddim_steps {steps} --scale {scale} --seed {seed} --H {height} --W {width} --outdir {out_dir} --skip_grid --ckpt {ckpt_model} --precision {precision} {extra_conf['vae']} {extra_conf['config']}"
-
+    extra_conf = getAdditionalConfig(sd_model_path)
+    msg = f"txt2img:prompt={prompt + ', ' + extra_conf['trigger_prompt']}:negative_prompt={negative_prompt}:samples={samples}:n_iter={n_iter}:steps={steps}:scale={scale}:seed={seed}:height={height}:width={width}:outdir={out_dir}"
+    command = f"conda run -n ldm python '{exec_path}' {msg}"
+    
     print("Processing command: ", command)
     _e, response = getContainer().exec_run(
-        command, workdir=extra_conf["working_dir"], demux=True)
+        command, workdir="/modules/stable-ui/sd_client", demux=True)
     if (_e != 0):
         print("Command failed with error code: ", _e)
         print("==== STDOUT ====")
@@ -143,14 +143,14 @@ def txt2image(exec_path, prompt, negative_prompt, samples, steps, scale, seed, w
 
 
 # Default img2img commnad
-def img2image(exec_path, img_path, prompt, negative_prompt, samples, steps, strength, seed, out_dir, ckpt_model, precision):
-    # Check if additional configuration is required for loaded ckpt
-    extra_conf = getAdditionalConfig(ckpt_model)
-    command = f"conda run -n ldm python '{exec_path}' --prompt '{prompt + extra_conf['trigger_prompt']}' --negative_prompt '{negative_prompt}' --init-img {img_path} --strength {strength} --n_samples {samples} --n_iter 1 --ddim_steps {steps} --seed {seed} --outdir {out_dir} --skip_grid --ckpt {ckpt_model} --precision {precision} {extra_conf['vae']} {extra_conf['config']}"
-
+# TODO: Remember to include  --skip_grid 
+def img2image(exec_path, img_path, prompt, negative_prompt, samples, steps, strength, seed, out_dir, n_iter):
+    msg = f"img2img:prompt={prompt + ', ' + extra_conf['trigger_prompt']},negative_prompt={negative_prompt},init-img={img_path},samples={samples},strength={strength},n_iter={n_iter},steps={steps},seed={seed},height={height},width={width},outdir={out_dir}"
+    command = f"conda run -n ldm python '{exec_path}' {msg}"
+    
     print("Processing command: ", command)
     _e, response = getContainer().exec_run(
-        command, workdir=extra_conf["working_dir"], demux=True)
+        command, workdir="/modules/stable-ui/sd_client", demux=True)
     if (_e != 0):
         print("Command failed with error code: ", _e)
         print("==== STDOUT ====")
