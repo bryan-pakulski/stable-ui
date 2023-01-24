@@ -153,6 +153,11 @@ class SDModelServer():
     def __load_model(self, cmd):
         logging.info(f"Loading model: {cmd.arguments['checkpoint_path']}")
 
+        # Free the old model if it exists and recover resources
+        if (self.model != None):
+            logging.info(f"Freeing old model & recovering resource: {self.model.checkpoint_path}")
+            del self.model
+
         self.model = sd_model.StableDiffusionModel(
             cmd.arguments['checkpoint_path'], cmd.arguments['vae_path'], cmd.arguments['checkpoint_config_path'], cmd.arguments['precision'])
         self.model.load_model()
@@ -171,11 +176,15 @@ class SDModelServer():
             logging.info("SD Server Received request: %s" % message)
 
             # Break down message, message format is as follows: command:var1=val1,var2=val2 ...
-            cmd = self.parseMessage(message)
-            if (self.validateCommand(cmd)):
-                response = self.hookCommand(cmd)
-            else:
-                response = "Invalid command"
+            try:
+                cmd = self.parseMessage(message)
+                if (self.validateCommand(cmd)):
+                    response = self.hookCommand(cmd)
+                else:
+                    response = "Invalid command"
+            except Exception as e:
+                logging.error(traceback.format_exc())
+                response = f"Exception: {traceback.format_exc()}"
 
             #  Send reply back to client
             time.sleep(0.5)

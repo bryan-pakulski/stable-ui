@@ -6,6 +6,8 @@ Allow for right click and drag erase functionality (no undo support as of yet)
 
 Allow for saving to a file, using grid detection, grids should grow / shrink dynamically if they contain data or are empty
 
+Load module progress bar
+
 # TODO: types.h
 
 initialise string with a maximum length, this is important as if we reload configuration by
@@ -28,6 +30,7 @@ Save output to temporary folder - "gen??" This way you can generate multiple ite
 
 # Bugs
 
+- Unable to load model into memory when using a VAE, infinite loading after unpacking vae weights
 - Using custom vae and full precision causes error: `RuntimeError: expected scalar type Half but found Float`
 - Using SDv2 and full precision causes similar error: `return F.linear(input, self.weight, self.bias)\nRuntimeError: expected scalar type Half but found Float`
 - Using SDv1.4 and full precision causes the same error: ` attn_output = torch.bmm(attn_probs, value_states)\nRuntimeError: expected scalar type Half but found Float`

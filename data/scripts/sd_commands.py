@@ -44,11 +44,11 @@ def getAdditionalConfig(ckpt_filepath):
                 # Get data from yaml file
                 extra_conf["config"] = loadConfig(data, "config", "")
                 extra_conf["vae"] = loadConfig(data, "vae", "")
-                extra_conf["working_dir"] = loadConfig(
-                    data, "working_dir", "/sd")
-                extra_conf["trigger_prompt"] = loadConfig(
-                    data, "trigger_prompt", "")
-
+                extra_conf["working_dir"] = loadConfig(data, "working_dir", "/sd")
+                extra_conf["trigger_prompt"] = loadConfig(data, "trigger_prompt", "")
+                
+                if extra_conf["config"] != "":
+                    extra_conf["config"] = f"--config {extra_conf['config']}"
                 if extra_conf["vae"] != "":
                     extra_conf["vae"] = f"--vae {extra_conf['vae']}"
             except yaml.YAMLError as exc:
@@ -77,8 +77,16 @@ def getAdditionalConfig(ckpt_filepath):
 def launchSDModelServer(exec_path):
     command = f"conda run -n ldm python '{exec_path}'"
     print("Starting server with command: ", command)
-    _e, response = getContainer().exec_run(
-        command, workdir="/modules/stable-ui/sd_server", demux=True)
+    getContainer().exec_run(
+        command, workdir="/modules/stable-ui/sd_server", demux=True, detach=True)
+    return 0
+
+# Terminate SD_Model server on shutdown
+def terminateSDModelServer(exec_path):
+    command = f"conda run -n ldm python 'exec_path' quit"
+    getContainer().exec_run(
+        command, workdir="/modules/stable-ui/sd_client", demux=True)
+
     if (_e != 0):
         print("Command failed with error code: ", _e)
         print("==== STDOUT ====")
@@ -93,9 +101,24 @@ def launchSDModelServer(exec_path):
 
 
 # Launch a client command
-def launchSDClientCommand(exec_path, command):
-    pass
+def attachSDModelToServer(exec_path, ckpt_path, config_path, vae_path, precision):
+    msg = f"loadModel:checkpoint_path={ckpt_path},checkpoint_config_path={config_path},vae_path={vae_path},precision={precision}"
+    command = f"conda run -n ldm python '{exec_path}' {msg}"
 
+    print("Starting client with command: ", command)
+    _e, response = getContainer().exec_run(
+        command, workdir="/modules/stable-ui/sd_client", demux=True)
+    if (_e != 0):
+        print("Command failed with error code: ", _e)
+        print("==== STDOUT ====")
+        print(response[0])
+        print("==== STDERR ====")
+        print(response[1])
+    else:
+        print("Command success!")
+
+    # Error code response is used by cpp integration to check for success / failure status
+    return _e
 
 # Default txt2image command
 def txt2image(exec_path, prompt, negative_prompt, samples, steps, scale, seed, width, height, out_dir, ckpt_model, precision):

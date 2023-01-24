@@ -24,7 +24,7 @@ StableManager::StableManager(GLFWwindow &w) : m_window{w} {
 }
 
 // Destructor, destroy remaining instances
-StableManager::~StableManager() {}
+StableManager::~StableManager() { SDCommandsInterface::GetInstance().terminateSDModelServer(); }
 
 // Main update function, checks for object cap before calling instance logic /
 // render loops
@@ -96,26 +96,34 @@ void StableManager::sendImageToCanvas(Image &im) {
 void StableManager::attachModel(YAML::Node model) {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "Attaching model: ", model["name"].as<std::string>(),
                              " to Stable Diffusion Docker Server");
+  // Optional parameters
+  std::string vae = "";
+  if (model["vae"]) {
+    model["vae"].as<std::string>();
+  }
+
+  SDCommandsInterface::GetInstance().attachModelToServer(model["path"].as<std::string>(),
+                                                         model["config"].as<std::string>(), vae, "full", m_modelLoaded);
 }
+
+int StableManager::getModelState() { return m_modelLoaded; }
 
 // Text to Image, render result to canvas
 void StableManager::textToImage(std::string prompt, std::string negative_prompt, int samples, int steps, double cfg,
-                                int seed, int width, int height, bool &finishedFlag, std::string model_name,
-                                bool half_precision) {
+                                int seed, int width, int height, int &renderState) {
 
   // Generate & Retrieve newly generated image
   SDCommandsInterface::GetInstance().textToImage(prompt, negative_prompt, samples, steps, cfg, seed, width, height,
-                                                 finishedFlag, model_name, half_precision);
+                                                 renderState);
 }
 
 // Image to Image, render result to canvas
-void StableManager::imageToImage(std::string path, std::string prompt, std::string negative_prompt, int samples,
-                                 int steps, double strength, int seed, bool &finishedFlag, std::string model_name,
-                                 bool half_precision) {
+void StableManager::imageToImage(std::string imgPath, std::string prompt, std::string negative_prompt, int samples,
+                                 int steps, double strength, int seed, int &renderState) {
 
   // Generate & Retrieve newly generated image
-  SDCommandsInterface::GetInstance().imageToImage(path, prompt, negative_prompt, samples, steps, strength, seed,
-                                                  finishedFlag, model_name, half_precision);
+  SDCommandsInterface::GetInstance().imageToImage(imgPath, prompt, negative_prompt, samples, steps, strength, seed,
+                                                  renderState);
 }
 
 // Key callback function to map keypresses / actions to object instantiation

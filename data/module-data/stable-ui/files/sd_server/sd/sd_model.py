@@ -46,8 +46,6 @@ class StableDiffusionModel():
 
     def load_vae(self):
         if self.vae_path != "" and self.model != None:
-            assert os.path.isfile(
-                self.vae_path), f"VAE doesn't exist: {self.vae_path}"
             logging.info(f"Loading VAE weights from: {self.vae_path}")
 
             vae_ckpt = self.read_state_dict(

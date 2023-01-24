@@ -48,27 +48,35 @@ public:
     ImGui::Begin(c_windowName.c_str(), 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 
     // Tabbed menu
-    {
-      ImGui::SameLine();
-      if (ImGui::Button("Text To Image")) {
-        tab = 0;
+    if (m_stableManager->getModelState() == EXECUTION_STATE::SUCCESS) {
+      {
+        ImGui::SameLine();
+        if (ImGui::Button("Text To Image")) {
+          tab = 0;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Image To Image")) {
+          tab = 1;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Textual Inversion")) {
+          tab = 2;
+        }
       }
-      ImGui::SameLine();
-      if (ImGui::Button("Image To Image")) {
-        tab = 1;
-      }
-      ImGui::SameLine();
-      if (ImGui::Button("Textual Inversion")) {
-        tab = 2;
-      }
-    }
-    ImGui::Separator();
+      ImGui::Separator();
 
-    if (tab == 0) {
-      Text2ImageWindow->render();
-    }
-    if (tab == 1) {
-      Image2ImageWindow->render();
+      if (tab == 0) {
+        Text2ImageWindow->render();
+      }
+      if (tab == 1) {
+        Image2ImageWindow->render();
+      }
+    } else if (m_stableManager->getModelState() == EXECUTION_STATE::PENDING) {
+      ImGui::Text("Please import and load a model first!");
+    } else if (m_stableManager->getModelState() == EXECUTION_STATE::LOADING) {
+      ImGui::Text("Please wait for model to finish loading...");
+    } else if (m_stableManager->getModelState() == EXECUTION_STATE::FAILED) {
+      ImGui::Text("Model failed to load, please check application logs");
     }
 
     ImGui::End();

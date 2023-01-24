@@ -56,5 +56,9 @@ static CString MODELS_CONFIGURATION_FILE(loadConfig<std::string>("MODELS_CONFIGU
 static CString MODULES_CONFIGURATION_FILE(loadConfig<std::string>("MODULES_CONFIGURATION_FILE",
                                                                   "data/shared-config/module_config.yaml"));
 static CString VAE_FOLDER_PATH(loadConfig<std::string>("VAE_FOLDER_PATH", "data/models/vae"));
+static CString SD_SERVER_CLIENT(loadConfig<std::string>("SD_SERVER_CLIENT",
+                                                        "/modules/stable-ui/sd_client/sd_client.py"));
+static CString SD_MODEL_SERVER(loadConfig<std::string>("SD_MODEL_SERVER",
+                                                       "/modules/stable-ui/sd_server/sd_model_server.py"));
 
 } // namespace CONFIG

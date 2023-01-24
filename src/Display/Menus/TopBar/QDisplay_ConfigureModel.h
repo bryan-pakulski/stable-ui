@@ -99,8 +99,9 @@ private:
     // Build yaml node to attach to model configuration file
     YAML::Node model_node;
     model_node["working_dir"] = "/modules/" + module_name;
-    model_node["config"] = "--config /models/configs/" + model_config_file;
+    model_node["config"] = "/models/configs/" + model_config_file;
     model_node["name"] = model_name;
+    model_node["path"] = "/models/" + model_name;
     model_node["trigger_prompt"] = trigger_words;
     if (vae != "") {
       model_node["vae"] = "/models/vae/" + vae;

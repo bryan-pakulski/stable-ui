@@ -21,13 +21,8 @@ class QDisplay_Image2Image : public QDisplay_Base {
   int m_steps = 70;
   int m_seed = 0;
   float m_strength = 0.5;
-  bool m_half_precision = false;
 
   bool m_draw_mask_window = false;
-
-  std::string m_selected_model = "";
-  std::string m_ckpt_path = "";
-  std::vector<listItem> m_ckpt_files;
   std::unique_ptr<Image> m_image = 0;
   std::unique_ptr<Image> m_image_mask = 0;
   bool finishedRendering = false;
@@ -46,7 +41,6 @@ public:
   QDisplay_Image2Image(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     m_prompt[0] = 0;
     m_negative_prompt[0] = 0;
-    reloadModelFiles();
 
     // Initialise content browser
     m_directory_icon = std::unique_ptr<Image>(new Image(256, 256, "dir_icon"));
@@ -54,18 +48,6 @@ public:
     m_directory_icon->loadFromImage("data/images/directory_icon.png");
     m_file_icon->loadFromImage("data/images/file_icon.png");
     m_current_directory = std::filesystem::path(c_base_content_directory);
-  }
-
-  void reloadModelFiles() {
-    // Load model files
-    try {
-      for (const auto &entry : fs::directory_iterator(CONFIG::MODELS_DIRECTORY.get())) {
-        listItem i{.m_name = entry.path().filename().string()};
-        m_ckpt_files.push_back(i);
-      }
-    } catch (fs::filesystem_error) {
-      ErrorHandler::GetInstance().setConfigError(CONFIG::MODELS_DIRECTORY, "MODELS_DIRECTORY");
-    }
   }
 
   std::string getLatestFile() {
@@ -89,9 +71,8 @@ public:
     m_image.reset();
     m_image = std::unique_ptr<Image>(
         new Image(CONFIG::IMAGE_SIZE_X_LIMIT.get(), CONFIG::IMAGE_SIZE_Y_LIMIT.get(), "img2img"));
-    m_image->rendered = false;
     m_stableManager->imageToImage(m_filepath, m_prompt, m_negative_prompt, 1, m_steps, m_strength, m_seed,
-                                  m_image->rendered, m_selected_model, m_half_precision);
+                                  m_image->renderState);
   }
 
   void imageWindow() {
@@ -99,7 +80,7 @@ public:
     if (m_image) {
 
       // Generate option only available whilst a image isn't pending
-      if (m_image->rendered) {
+      if (m_image->renderState != EXECUTION_STATE::LOADING) {
         if (ImGui::Button("Generate")) {
           renderImage();
         }
@@ -108,7 +89,7 @@ public:
       }
 
       // Once image is marked as rendered display on screen
-      if (m_image->rendered) {
+      if (m_image->renderState == EXECUTION_STATE::SUCCESS) {
         ImGui::Text("image width: %d image height:%d", m_image->m_width, m_image->m_height);
         if (ImGui::Button("Send to Canvas")) {
           // Send image to be rendered on canvas at selection coordinates
@@ -116,9 +97,9 @@ public:
         }
 
         // Retrieve texture file
-        if (!m_image->textured) {
+        if (!m_image->textured == EXECUTION_STATE::SUCCESS) {
           m_image->loadFromImage(getLatestFile());
-          m_image->textured = true;
+          m_image->textured = EXECUTION_STATE::SUCCESS;
         }
 
         ImGui::Image((void *)(intptr_t)m_image->m_texture, ImVec2(m_image->m_width * 0.3, m_image->m_height * 0.3));
@@ -280,9 +261,13 @@ public:
 
   // Prompt
   void promptHelper() {
-    ImGui::BeginChild("Prompt Helper");
-    ImGui::Text("Prompt Helper");
+    ImGui::BeginChild("Prompt");
     ImGui::InputTextMultiline("prompt", m_prompt, CONFIG::PROMPT_LENGTH_LIMIT.get());
+    ImGui::EndChild();
+
+    ImGui::NextColumn();
+
+    ImGui::BeginChild("Negative Prompt");
     ImGui::InputTextMultiline("negative prompt", m_negative_prompt, CONFIG::PROMPT_LENGTH_LIMIT.get());
     ImGui::EndChild();
   }
@@ -291,33 +276,17 @@ public:
     ImGui::BeginChild("Prompt Config");
     ImGui::Text("Prompt Config");
 
-    ImGui::Checkbox("half precision", &m_half_precision);
     ImGui::InputInt("steps", &m_steps);
     ImGui::InputInt("seed", &m_seed);
     ImGui::SliderFloat("Strength", &m_strength, 0.0, 1.0, "%.2f");
-
-    if (ImGui::BeginCombo("models", m_selected_model.c_str(), ImGuiComboFlags_NoArrowButton)) {
-      for (auto &item : m_ckpt_files) {
-        if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
-          m_selected_model = item.m_name;
-        }
-        if (item.m_isSelected) {
-          ImGui::SetItemDefaultFocus();
-        }
-      }
-      ImGui::EndCombo();
-    }
-    if (ImGui::Button("Reload Models")) {
-      reloadModelFiles();
-    }
-
     ImGui::EndChild();
   }
 
   virtual void render() {
-    ImGui::Columns(6);
+    ImGui::Columns(7);
     ImGui::SetColumnOffset(1, 320.0f);
-    ImGui::SetColumnOffset(2, 600.0f);
+    ImGui::SetColumnOffset(2, 640.0f);
+    ImGui::SetColumnOffset(3, 960.0f);
     { contentBrowser(); }
     ImGui::NextColumn();
     { previewWindow(); }

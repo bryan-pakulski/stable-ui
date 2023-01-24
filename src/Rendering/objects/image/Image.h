@@ -1,5 +1,6 @@
 #pragma once
 #include "../../Helper.h"
+#include "../../../Helpers/States.h"
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
@@ -10,8 +11,8 @@ class Image {
 public:
   GLuint m_texture = 0;
   GLuint m_framebuffer = 0;
-  bool rendered = true;
-  bool textured = false;
+  int renderState = EXECUTION_STATE::PENDING;
+  bool textured = EXECUTION_STATE::PENDING;
   std::string m_name;
   std::string m_image_source;
   int m_width;

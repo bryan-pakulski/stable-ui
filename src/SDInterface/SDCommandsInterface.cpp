@@ -1,5 +1,7 @@
 #include "SDCommandsInterface.h"
 
+#include "../Helpers/States.h"
+
 SDCommandsInterface::SDCommandsInterface() {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "Initialising SDCommandsInterface");
 
@@ -20,23 +22,54 @@ SDCommandsInterface::~SDCommandsInterface() { delete arguments; }
 // Starts up SD Model Server
 void SDCommandsInterface::launchSDModelServer() {
   std::string functionName = "launchSDModelServer";
-  arguments->emplace_back(std::unique_ptr<base_type>(
-      new d_type<std::string>('s', "exec_path", "/modules/stable-ui/sd_server/sd_model_server.py", 0)));
+  arguments->emplace_back(
+      std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", CONFIG::SD_MODEL_SERVER.get(), 0)));
+  m_dockerState = EXECUTION_STATE::LOADING;
 
   // Offload thread execution, image generation can take some time
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "Starting up SD Model Server...");
   m_Thread = std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, std::ref(arguments),
-                         std::ref(serverFinished));
+                         std::ref(m_dockerState));
   m_Thread.detach();
 }
 
+// Terminates SD Model Server
+void SDCommandsInterface::terminateSDModelServer() {
+  std::string functionName = "terminateSDModelServer";
+  arguments->emplace_back(
+      std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", CONFIG::SD_SERVER_CLIENT.get(), 0)));
+  m_dockerState = EXECUTION_STATE::LOADING;
+
+  // Wait for thread execution to finish
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Shutting down SD Model Server...");
+  m_Thread = std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, std::ref(arguments),
+                         std::ref(m_dockerState));
+  m_Thread.join();
+}
+
 // Connect a new model to SD Server
-void SDCommandsInterface::attachModelToServer() {}
+void SDCommandsInterface::attachModelToServer(std::string ckpt_path, std::string config_path, std::string vae_path,
+                                              std::string precision, int &state) {
+  std::string functionName = "attachSDModelToServer";
+  std::string execPath = CONFIG::SD_SERVER_CLIENT.get();
+  state = EXECUTION_STATE::LOADING;
+
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", execPath, 0)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "ckpt_path", ckpt_path, 1)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "config_path", config_path, 2)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "vae_path", vae_path, 3)));
+  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "precision", precision, 4)));
+
+  // Offload thread execution, image generation can take some time
+  m_Thread =
+      std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, std::ref(arguments), std::ref(state));
+  m_Thread.detach();
+}
 
 // Calls text to image command from client -> sd model server
 void SDCommandsInterface::textToImage(std::string prompt, std::string negative_prompt, int samples, int steps,
-                                      double cfg, int seed, int width, int height, bool &finishedFlag,
-                                      std::string model_name, bool half_precision) {
+                                      double cfg, int seed, int width, int height, int &renderState) {
+  /*
   std::string functionName = "txt2image";
   std::string exec_path = CONFIG::TXT_TO_IMG_PATH.get();
   std::string out_dir = CONFIG::OUTPUT_DIRECTORY.get();
@@ -61,11 +94,12 @@ void SDCommandsInterface::textToImage(std::string prompt, std::string negative_p
   m_Thread = std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, std::ref(arguments),
                          std::ref(finishedFlag));
   m_Thread.detach();
+*/
 }
 
 void SDCommandsInterface::imageToImage(std::string path, std::string prompt, std::string negative_prompt, int samples,
-                                       int steps, double strength, int seed, bool &finishedFlag, std::string model_name,
-                                       bool half_precision) {
+                                       int steps, double strength, int seed, int &renderState) {
+  /*
   std::string functionName = "img2image";
   std::string exec_path = CONFIG::IMG_TO_IMG_PATH.get();
   std::string out_dir = CONFIG::OUTPUT_DIRECTORY.get();
@@ -89,4 +123,5 @@ void SDCommandsInterface::imageToImage(std::string path, std::string prompt, std
   m_Thread = std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, std::ref(arguments),
                          std::ref(finishedFlag));
   m_Thread.detach();
+*/
 }

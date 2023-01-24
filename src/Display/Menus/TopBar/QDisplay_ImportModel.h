@@ -90,8 +90,9 @@ private:
     YAML::Node model_node;
     std::string hash = getFileHash(filepath.c_str());
     model_node["working_dir"] = "/modules/" + module_name;
-    model_node["config"] = "--config /models/configs/" + model_config_file;
+    model_node["config"] = "/models/configs/" + model_config_file;
     model_node["name"] = modelPath.filename().string();
+    model_node["path"] = "/models/" + modelPath.filename().string();
     model_node["trigger_prompt"] = trigger_words;
     if (vae != "") {
       model_node["vae"] = "/models/vae/" + vae;
