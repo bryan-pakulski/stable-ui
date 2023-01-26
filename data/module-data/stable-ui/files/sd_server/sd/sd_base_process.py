@@ -13,6 +13,8 @@ from ldm.util import instantiate_from_config
 import logging
 
 from common import samplers
+from common import devices
+from common import lowvram
 
 """
  Supported Samplers:
@@ -75,60 +77,66 @@ class StableDiffusionBaseProcess():
 
 class StableDiffusionTxt2Img(StableDiffusionBaseProcess):
 
-    def __init__(self, outpath_samples: str = "", subfolder_name: str = "", prompt: str = "", negative_prompt: str = "", seed: int = -1, sampler_name: str = "", batch_size: int = 1, n_iter: int = 1, steps: int = 50, cfg_scale: float = 7.0, width: int = 512, height: int = 512, model: object = None):
+    def __init__(self, outpath_samples: str = "", subfolder_name: str = "", prompt: str = "", negative_prompt: str = "", seed: int = -1, sampler_name: str = "", batch_size: int = 1, n_iter: int = 1, steps: int = 50, cfg_scale: float = 7.0, width: int = 512, height: int = 512, model: object = None, precision : str = ""):
         super().__init__(outpath_samples, prompt, negative_prompt, seed,
                          sampler_name, batch_size, n_iter, steps, cfg_scale, width, height, model)
 
         self.create_sub_folder(subfolder_name, "txt2img")
         self.data = [self.batch_size * [self.prompt]]
+        self.precision = precision
 
     def sample(self):
-        seed_everything(self.seed)
-        # autocast if opt.precision == "autocast" else nullcontext
-        precision_scope = nullcontext
-        with torch.no_grad():
-            with precision_scope("cuda"):
-                with self.model.ema_scope():
-                    for n in trange(self.n_iter, desc="Sampling"):
-                        for prompts in tqdm(self.data, desc="data"):
-                            unconditional_conditioning = None
-                            if self.cfg_scale != 1.0 or self.negative_prompt == "":
-                                unconditional_conditioning = self.model.get_learned_conditioning(
-                                    self.batch_size * [""])
-                            else:
-                                unconditional_conditioning = self.model.get_learned_conditioning(
-                                    len(prompts) * [self.negative_prompt])
+        with torch.no_grad(), self.model.ema_scope():
+            with devices.autocast(precision=self.precision):
+                seed_everything(self.seed)
 
-                            if isinstance(prompts, tuple):
-                                prompts = list(prompts)
+                for n in trange(self.n_iter, desc="Sampling"):
+                    for prompts in tqdm(self.data, desc="data"):
+                        unconditional_conditioning = None
+                        if self.cfg_scale != 1.0 or self.negative_prompt == "":
+                            unconditional_conditioning = self.model.get_learned_conditioning(
+                                self.batch_size * [""])
+                        else:
+                            unconditional_conditioning = self.model.get_learned_conditioning(
+                                len(prompts) * [self.negative_prompt])
 
-                            conditioning = self.model.get_learned_conditioning(
-                                prompts)
-                            shape = [self.latent_channels, self.height //
-                                     self.downsampling_factor, self.width // self.downsampling_factor]
-                            samples_ddim, _ = self.sampler.sample(S=self.steps,
-                                                                  conditioning=conditioning,
-                                                                  batch_size=self.batch_size,
-                                                                  shape=shape,
-                                                                  verbose=False,
-                                                                  unconditional_guidance_scale=self.cfg_scale,
-                                                                  unconditional_conditioning=unconditional_conditioning,
-                                                                  eta=self.ddim_eta,
-                                                                  x_T=None)
+                        if isinstance(prompts, tuple):
+                            prompts = list(prompts)
 
-                            x_samples_ddim = self.model.decode_first_stage(
-                                samples_ddim)
-                            x_samples_ddim = torch.clamp(
-                                (x_samples_ddim + 1.0) / 2.0, min=0.0, max=1.0)
+                        conditioning = self.model.get_learned_conditioning(
+                            prompts)
+                        shape = [self.latent_channels, self.height //
+                                 self.downsampling_factor, self.width // self.downsampling_factor]
+                        samples_ddim, _ = self.sampler.sample(S=self.steps,
+                                                                conditioning=conditioning,
+                                                                batch_size=self.batch_size,
+                                                                shape=shape,
+                                                                verbose=False,
+                                                                unconditional_guidance_scale=self.cfg_scale,
+                                                                unconditional_conditioning=unconditional_conditioning,
+                                                                eta=self.ddim_eta,
+                                                                x_T=None)
 
-                            for x_sample in x_samples_ddim:
-                                x_sample = 255. * \
-                                    rearrange(x_sample.cpu().numpy(),
-                                              'c h w -> h w c')
-                                base_count = len(
-                                    os.listdir(self.outpath_samples))
-                                Image.fromarray(x_sample.astype(np.uint8)).save(
-                                    os.path.join(self.outpath_samples, f"{base_count:05}.png"))
+                        x_samples_ddim = self.model.decode_first_stage(
+                            samples_ddim)
+                        x_samples_ddim = torch.clamp(
+                            (x_samples_ddim + 1.0) / 2.0, min=0.0, max=1.0)
+
+                        del samples_ddim
+                        
+                        if (self.precision == "low") or (self.precision == "med"):
+                            lowvram.send_everything_to_cpu()
+
+                        for x_sample in x_samples_ddim:
+                            x_sample = 255. * \
+                                rearrange(x_sample.cpu().numpy(),
+                                            'c h w -> h w c')
+                            base_count = len(
+                                os.listdir(self.outpath_samples))
+                            Image.fromarray(x_sample.astype(np.uint8)).save(
+                                os.path.join(self.outpath_samples, f"{base_count:05}.png"))
+
+                    
 
 
 class StableDiffusionImg2Img(StableDiffusionBaseProcess):

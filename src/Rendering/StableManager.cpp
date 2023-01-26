@@ -93,7 +93,7 @@ void StableManager::sendImageToCanvas(Image &im) {
 }
 
 // STABLE DIFFUSION SERVER COMMANDS
-void StableManager::attachModel(YAML::Node model, std::string hash) {
+void StableManager::attachModel(YAML::Node model, std::string &hash, std::string &precision) {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "Attaching model: ", model["name"].as<std::string>(),
                              " to Stable Diffusion Docker Server");
   // Optional parameters
@@ -107,8 +107,8 @@ void StableManager::attachModel(YAML::Node model, std::string hash) {
   m_model.hash = hash;
   m_model.path = model["path"].as<std::string>();
 
-  SDCommandsInterface::GetInstance().attachModelToServer(model["path"].as<std::string>(),
-                                                         model["config"].as<std::string>(), vae, "full", m_modelLoaded);
+  SDCommandsInterface::GetInstance().attachModelToServer(
+      model["path"].as<std::string>(), model["config"].as<std::string>(), vae, precision, m_modelLoaded);
 }
 
 int StableManager::getModelState() { return m_modelLoaded; }

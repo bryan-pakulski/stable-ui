@@ -25,6 +25,7 @@ class StableDiffusionModel():
         logging.addLevelName(logging.ERROR, "ERR")
 
         self.MODELS_PATH = "/models/"  # Path on docker
+        self.no_half_vae = True
         self.vae_ignore_keys = {"model_ema.decay", "model_ema.num_updates"}
         self.precision_list = ["full", "mid", "low", "autocast"]
 
@@ -106,6 +107,10 @@ class StableDiffusionModel():
         # TODO: additional logic here for different precision options
         if self.get_precision() != "full":
             vae = self.model.first_stage_model
+            # with --no-half-vae, remove VAE from model when doing half() to prevent its weights from being converted to float16
+            if self.no_half_vae:
+                self.model.first_stage_model = None
+
             self.model.half()
             self.model.first_stage_model = vae
 
@@ -129,13 +134,15 @@ class StableDiffusionModel():
 
         self.load_model_weights()
 
-        if self.get_precision() != "full":
-            lowvram.setup_for_low_vram(self.model, self.get_precision())
+        if self.get_precision() == "low" or self.get_precision() == "med":
+            lowvram.setup_for_low_vram(self.model, True if (self.get_precision() == "med") else False)
         else:
             self.model.to(devices.get_cuda_device_string())
 
         self.model.eval()
 
     def clean(self):
-        if self.model:
-            devices.torch_gc()
+        devices.torch_gc()
+
+        if (self.model is not None):
+            del self.model

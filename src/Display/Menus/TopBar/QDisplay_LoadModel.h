@@ -12,15 +12,18 @@ class QDisplay_LoadModel : public QDisplay_Base {
 
 private:
   std::vector<listItem> m_ModelList;
+  std::vector<listItem> m_precisionList;
 
   std::string m_selected_model = "";
   std::string m_selected_hash = "";
+  std::string m_selected_precision = "full";
   bool visible = false;
 
   void clear() {
     m_ModelList.clear();
     m_selected_model = "";
     m_selected_hash = "";
+    m_selected_precision = "";
   }
 
   void reloadFiles() {
@@ -44,12 +47,22 @@ private:
     YAML::Node node, _baseNode = YAML::LoadFile(CONFIG::MODELS_CONFIGURATION_FILE.get());
     YAML::Node model = _baseNode["models"][m_selected_hash];
 
-    m_stableManager->attachModel(model, m_selected_hash);
+    m_stableManager->attachModel(model, m_selected_hash, m_selected_precision);
     visible = false;
   }
 
 public:
-  QDisplay_LoadModel(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {}
+  QDisplay_LoadModel(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+    listItem i{.m_name = "full"};
+    listItem j{.m_name = "mid"};
+    listItem k{.m_name = "low"};
+    listItem l{.m_name = "autocast"};
+
+    m_precisionList.push_back(i);
+    m_precisionList.push_back(j);
+    m_precisionList.push_back(k);
+    m_precisionList.push_back(l);
+  }
 
   void openWindow() {
     clear();
@@ -65,6 +78,18 @@ public:
           if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
             m_selected_model = item.m_name;
             m_selected_hash = item.m_key;
+          }
+          if (item.m_isSelected) {
+            ImGui::SetItemDefaultFocus();
+          }
+        }
+        ImGui::EndCombo();
+      }
+
+      if (ImGui::BeginCombo("Precision", m_selected_precision.c_str(), ImGuiComboFlags_NoArrowButton)) {
+        for (auto &item : m_precisionList) {
+          if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
+            m_selected_precision = item.m_name;
           }
           if (item.m_isSelected) {
             ImGui::SetItemDefaultFocus();

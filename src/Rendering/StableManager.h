@@ -63,7 +63,7 @@ public:
   // MODEL SERVER INTERACTION
 
   // Attach model to server
-  void attachModel(YAML::Node model, std::string hash);
+  void attachModel(YAML::Node model, std::string &hash, std::string &precision);
   // Return model state
   int getModelState();
 

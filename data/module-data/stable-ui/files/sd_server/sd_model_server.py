@@ -234,7 +234,7 @@ class SDModelServer():
 
     def __text2image(self, cmd):
         result = txt2img.generate(
-            **cmd.arguments, model=self.model.model)
+            **cmd.arguments, model=self.model.model, precision=self.model.get_precision())
         return f"{result}"
 
     # Main loop

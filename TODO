@@ -20,7 +20,7 @@ This can potentially be resolved by using std::string as a resizable datatype, s
 
 Add support for textual inversion, see: https://towardsdatascience.com/how-to-fine-tune-stable-diffusion-using-textual-inversion-b995d7ecc095
 
-Fix issues with SD V2, full precision not supported, error:
+Fix issues with SD V2, half precision not supported, error:
 
 - RuntimeError: Input type (torch.cuda.HalfTensor) and weight type (torch.cuda.FloatTensor) should be the same\n\nE
 
@@ -34,8 +34,5 @@ Add input sanitisation on sd_client on messages being sent, delimit or convert "
 
 # Bugs
 
-- Unable to load model into memory when using a VAE, infinite loading after unpacking vae weights
-- Using custom vae and full precision causes error: `RuntimeError: expected scalar type Half but found Float`
-- Using SDv2 and full precision causes similar error: `return F.linear(input, self.weight, self.bias)\nRuntimeError: expected scalar type Half but found Float`
-- Using SDv1.4 and full precision causes the same error: ` attn_output = torch.bmm(attn_probs, value_states)\nRuntimeError: expected scalar type Half but found Float`
 - Close sd_server when app closes
+- Fix img2img code
