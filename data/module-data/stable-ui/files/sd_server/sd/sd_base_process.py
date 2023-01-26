@@ -53,10 +53,10 @@ class StableDiffusionBaseProcess():
 class StableDiffusionTxt2Img(StableDiffusionBaseProcess):
     sampler = None
 
-    def __init__(self, canvas_name, outpath_samples, subfolder_name, prompt, negative_prompt, seed, sampler_name, batch_size, n_iter, steps, cfg_scale, width, height):
-        super().__init__(**kwargs)
+    def __init__(self, outpath_samples, subfolder_name, prompt, negative_prompt, seed, sampler_name, batch_size, n_iter, steps, cfg_scale, width, height):
+        super().__init__(outpath_samples, prompt, negative_prompt, seed, sampler_name, batch_size, n_iter, steps, cfg_scale, width, height)
         
-        self.create_sub_folder(canvas_name, "txt2img")
+        self.create_sub_folder(subfolder_name, "txt2img")
         self.data = [self.batch_size * [self.prompt]]
 
     def sample():

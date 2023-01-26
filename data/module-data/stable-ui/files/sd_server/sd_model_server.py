@@ -214,7 +214,12 @@ class SDModelServer():
         return f"Model loaded... {cmd.arguments['checkpoint_path']}"
 
     def __text2image(self, cmd):
-        result = txt2img.generate()
+        result = txt2img.generate(cmd.arguments['subfolder_name'], cmd.arguments['outpath_samples'],
+                                  cmd.arguments['prompt'], cmd.arguments['negative_prompt'],
+                                  cmd.arguments['seed'], cmd.arguments['sampler_name'], 
+                                  cmd.arguments['batch_size'], cmd.arguments['n_iter'],
+                                  cmd.arguments['steps'], cmd.arguments['cfg_scale'],
+                                  cmd.arguments['width'], cmd.arguments['height'])
         
         return f"{result}"
 
