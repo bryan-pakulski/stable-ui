@@ -70,8 +70,8 @@ public:
   // IMAGE GENERATION
 
   // Generate txt2img
-  void textToImage(std::string prompt, std::string negative_prompt, int samples, int steps, double cfg, int seed,
-                   int width, int height, int &renderState);
+  void textToImage(std::string prompt, std::string negative_prompt, std::string &sampler_name, int samples, int steps,
+                   double cfg, int seed, int width, int height, int &renderState);
 
   // Generate img2img
   void imageToImage(std::string imgPath, std::string prompt, std::string negative_prompt, int samples, int steps,

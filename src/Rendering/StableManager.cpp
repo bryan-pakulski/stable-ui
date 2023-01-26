@@ -114,12 +114,12 @@ void StableManager::attachModel(YAML::Node model, std::string hash) {
 int StableManager::getModelState() { return m_modelLoaded; }
 
 // Text to Image, render result to canvas
-void StableManager::textToImage(std::string prompt, std::string negative_prompt, int samples, int steps, double cfg,
-                                int seed, int width, int height, int &renderState) {
+void StableManager::textToImage(std::string prompt, std::string negative_prompt, std::string &samplerName, int samples,
+                                int steps, double cfg, int seed, int width, int height, int &renderState) {
 
   // Generate & Retrieve newly generated image
-  SDCommandsInterface::GetInstance().textToImage(m_model.path, prompt, negative_prompt, samples, steps, cfg, seed,
-                                                 width, height, renderState);
+  SDCommandsInterface::GetInstance().textToImage(m_model.path, getActiveCanvas()->m_name, prompt, negative_prompt,
+                                                 samplerName, samples, steps, cfg, seed, width, height, renderState);
 }
 
 // Image to Image, render result to canvas

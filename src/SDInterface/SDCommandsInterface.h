@@ -38,8 +38,9 @@ public:
                            int &modelLoadState);
 
   // Commands that can be used by modules
-  void textToImage(std::string sdModelPath, std::string prompt, std::string negative_prompt, int samples, int steps,
-                   double cfg, int seed, int width, int height, int &renderState);
+  void textToImage(std::string sdModelPath, std::string &canvasName, std::string prompt, std::string negative_prompt,
+                   std::string &samplerName, int samples, int steps, double cfg, int seed, int width, int height,
+                   int &renderState);
 
   void imageToImage(std::string path, std::string prompt, std::string negative_prompt, int samples, int steps,
                     double strength, int seed, int &renderState);

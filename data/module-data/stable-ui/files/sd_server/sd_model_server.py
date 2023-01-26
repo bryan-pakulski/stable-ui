@@ -1,6 +1,8 @@
 # Starts and runs a model server, this maintains an active model in memory
 # Should improve performance without having to reload constantly
 
+import traceback
+from sd import txt2img as txt2img
 from sd import sd_model
 from common import devices
 
@@ -14,7 +16,6 @@ context = zmq.Context()
 socket = context.socket(zmq.REP)
 socket.bind("tcp://*:5555")
 
-from sd import txt2img as txt2img
 
 class Command():
 
@@ -56,19 +57,23 @@ class SDModelServer():
                 "arguments": {
                     "checkpoint_path": {
                         "help": "Filepath of the model",
-                        "required": True
+                        "required": True,
+                        "type": str
                     },
                     "checkpoint_config_path": {
                         "help": "Filepath to checkpoint configuration yaml",
-                        "required": True
+                        "required": True,
+                        "type": str
                     },
                     "vae_path": {
                         "help": "Optional filepath to a vae model",
                         "required": False,
+                        "type": str
                     },
                     "precision": {
                         "help": "Model precision, [full, med, low, autocast]",
                         "required": False,
+                        "type": str
                     }
                 },
                 "function": self.__load_model
@@ -78,51 +83,63 @@ class SDModelServer():
                 "arguments": {
                     "outpath_samples": {
                         "help": "Base output folder",
-                        "required": True
+                        "required": True,
+                        "type": str
                     },
                     "subfolder_name": {
                         "help": "Subfolder name to save images into",
-                        "required": False
+                        "required": False,
+                        "type": str
                     },
                     "prompt": {
                         "help": "txt2img prompt",
-                        "required": True
+                        "required": True,
+                        "type": str
                     },
                     "negative_prompt": {
                         "help": "txt2img negative prompt",
-                        "required": False
+                        "required": False,
+                        "type": str
                     },
                     "seed": {
                         "help": "seed to generate against",
-                        "required": True
+                        "required": True,
+                        "type": int
                     },
                     "sampler_name": {
                         "help": "Sampler to use for image generation, defaults to PLMS",
-                        "required": False
+                        "required": True,
+                        "type": str
                     },
                     "batch_size": {
                         "help": "Number of images to generate concurrently",
-                        "required": False
+                        "required": False,
+                        "type": int
                     },
                     "n_iter": {
                         "help": "Number of images to create",
-                        "required": False
+                        "required": False,
+                        "type": int
                     },
                     "steps": {
                         "help": "Number of steps to run image generation over",
-                        "required": True
+                        "required": True,
+                        "type": int
                     },
                     "cfg_scale": {
                         "help": "The degree of freedom sd gets when following a prompt",
-                        "required": True
+                        "required": True,
+                        "type": float
                     },
                     "width": {
                         "help": "Generated image width",
-                        "required": True
+                        "required": True,
+                        "type": int
                     },
                     "height": {
                         "help": "Generated image height",
-                        "required": True
+                        "required": True,
+                        "type": int
                     }
                 },
                 "function": self.__text2image
@@ -175,9 +192,11 @@ class SDModelServer():
                 # Return False if the argument is missing
                 logging.error(f"Missing required argument: {arg_name}")
                 return False
-            # Optional requirements set to blank value
-            elif not arg_details["required"] and arg_name not in command_args:
-                cmd.arguments[arg_name] = ""
+
+            # Set type
+            if arg_name in command_args:
+                cmd.arguments[arg_name] = arg_details["type"](
+                    cmd.arguments[arg_name])
 
         # Return True if the command has all the required arguments
         return True
@@ -204,23 +223,18 @@ class SDModelServer():
 
         # Free the old model if it exists and recover resources
         if (self.model != None):
-            logging.info(f"Freeing old model & recovering resource: {self.model.checkpoint_path}")
+            logging.info(
+                f"Freeing old model & recovering resource: {self.model.checkpoint_path}")
             self.model.clean()
 
-        self.model = sd_model.StableDiffusionModel(
-            cmd.arguments['checkpoint_path'], cmd.arguments['vae_path'], cmd.arguments['checkpoint_config_path'], cmd.arguments['precision'])
+        self.model = sd_model.StableDiffusionModel(**cmd.arguments)
         self.model.load_model()
 
         return f"Model loaded... {cmd.arguments['checkpoint_path']}"
 
     def __text2image(self, cmd):
-        result = txt2img.generate(cmd.arguments['subfolder_name'], cmd.arguments['outpath_samples'],
-                                  cmd.arguments['prompt'], cmd.arguments['negative_prompt'],
-                                  cmd.arguments['seed'], cmd.arguments['sampler_name'], 
-                                  cmd.arguments['batch_size'], cmd.arguments['n_iter'],
-                                  cmd.arguments['steps'], cmd.arguments['cfg_scale'],
-                                  cmd.arguments['width'], cmd.arguments['height'])
-        
+        result = txt2img.generate(
+            **cmd.arguments, model=self.model.model)
         return f"{result}"
 
     # Main loop

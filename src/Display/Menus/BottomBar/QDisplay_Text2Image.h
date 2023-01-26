@@ -17,6 +17,8 @@ class QDisplay_Text2Image : public QDisplay_Base {
   // Window variables & flags
   char *m_prompt = new char[CONFIG::PROMPT_LENGTH_LIMIT.get()]();
   char *m_negative_prompt = new char[CONFIG::PROMPT_LENGTH_LIMIT.get()]();
+  std::string m_selectedSampler = "DDIM";
+  std::vector<listItem> m_samplerList;
   int m_width = 512;
   int m_height = 512;
   int m_steps = 70;
@@ -31,6 +33,11 @@ public:
   QDisplay_Text2Image(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     m_prompt[0] = 0;
     m_negative_prompt[0] = 0;
+
+    listItem i{.m_name = "DDIM"};
+    listItem j{.m_name = "PLMS"};
+    m_samplerList.push_back(i);
+    m_samplerList.push_back(j);
   }
 
   std::string getLatestFile() {
@@ -54,8 +61,8 @@ public:
     m_image.reset();
     m_image = std::unique_ptr<Image>(
         new Image(CONFIG::IMAGE_SIZE_X_LIMIT.get(), CONFIG::IMAGE_SIZE_Y_LIMIT.get(), "txt2img"));
-    m_stableManager->textToImage(m_prompt, m_negative_prompt, 1, m_steps, m_cfg, m_seed, m_width, m_height,
-                                 m_image->renderState);
+    m_stableManager->textToImage(m_prompt, m_negative_prompt, m_selectedSampler, 1, m_steps, m_cfg, m_seed, m_width,
+                                 m_height, m_image->renderState);
   }
 
   void imageWindow() {
@@ -126,6 +133,18 @@ public:
       if (ImGui::MenuItem("Reset to default: 512"))
         m_height = 512;
       ImGui::EndPopup();
+    }
+
+    if (ImGui::BeginCombo("Sampler", m_selectedSampler.c_str(), ImGuiComboFlags_NoArrowButton)) {
+      for (auto &item : m_samplerList) {
+        if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
+          m_selectedSampler = item.m_name;
+        }
+        if (item.m_isSelected) {
+          ImGui::SetItemDefaultFocus();
+        }
+      }
+      ImGui::EndCombo();
     }
 
     ImGui::InputInt("steps", &m_steps);

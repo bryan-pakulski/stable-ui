@@ -5,6 +5,7 @@ import docker
 import subprocess
 import yaml
 
+
 def getContainer():
     client = docker.from_env()
     return client.containers.get('sd')
@@ -43,9 +44,11 @@ def getAdditionalConfig(ckpt_filepath):
                 # Get data from yaml file
                 extra_conf["config"] = loadConfig(data, "config", "")
                 extra_conf["vae"] = loadConfig(data, "vae", "")
-                extra_conf["working_dir"] = loadConfig(data, "working_dir", "/sd")
-                extra_conf["trigger_prompt"] = loadConfig(data, "trigger_prompt", "")
-                
+                extra_conf["working_dir"] = loadConfig(
+                    data, "working_dir", "/sd")
+                extra_conf["trigger_prompt"] = loadConfig(
+                    data, "trigger_prompt", "")
+
                 if extra_conf["config"] != "":
                     extra_conf["config"] = f"--config {extra_conf['config']}"
                 if extra_conf["vae"] != "":
@@ -81,6 +84,8 @@ def launchSDModelServer(exec_path):
     return 0
 
 # Terminate SD_Model server on shutdown
+
+
 def terminateSDModelServer(exec_path):
     command = f"conda run -n ldm python 'exec_path' quit"
     getContainer().exec_run(
@@ -125,14 +130,16 @@ def attachSDModelToServer(exec_path, ckpt_path, config_path, vae_path="", precis
     return _e
 
 # Default txt2image command
-def txt2img(sd_model_path, exec_path, prompt, negative_prompt, samples, steps, scale, seed, width, height, out_dir, n_iter):
+
+
+def txt2img(exec_path, sd_model_path, canvas_name, prompt, negative_prompt, sampler_name, batch_size, steps, scale, seed, width, height, out_dir, n_iter):
     # Check if additional configuration is required for loaded ckpt
     extra_conf = getAdditionalConfig(sd_model_path)
     if (extra_conf['trigger_prompt'] != ""):
         prompt += f", {extra_conf['trigger_prompt']}"
-    msg = f"txt2img:prompt={prompt}:negative_prompt={negative_prompt}:samples={samples}:n_iter={n_iter}:steps={steps}:cfg_scale={scale}:seed={seed}:height={height}:width={width}:outpath_samples={out_dir}"
+    msg = f"txt2img:prompt={prompt}:negative_prompt={negative_prompt}:subfolder_name={canvas_name}:sampler_name={sampler_name}:batch_size={batch_size}:n_iter={n_iter}:steps={steps}:cfg_scale={scale}:seed={seed}:height={height}:width={width}:outpath_samples={out_dir}"
     command = f"conda run -n ldm python '{exec_path}' '{msg}'"
-    
+
     print("Processing command: ", command)
     _e, response = getContainer().exec_run(
         command, workdir="/modules/stable-ui/sd_client", demux=True)
@@ -150,13 +157,13 @@ def txt2img(sd_model_path, exec_path, prompt, negative_prompt, samples, steps, s
 
 
 # Default img2img commnad
-# TODO: Remember to include  --skip_grid 
-def img2image(exec_path, img_path, prompt, negative_prompt, samples, steps, strength, seed, out_dir, n_iter):
+# TODO: Remember to include  --skip_grid
+def img2image(exec_path, img_path, prompt, negative_prompt, batch_size, steps, strength, seed, out_dir, n_iter):
     if (extra_conf['trigger_prompt'] != ""):
         prompt += f", {extra_conf['trigger_prompt']}"
-    msg = f"img2img:prompt={prompt}:negative_prompt={negative_prompt}:init-img={img_path}:samples={samples}:strength={strength}:n_iter={n_iter}:steps={steps}:seed={seed}:height={height}:width={width}:outdir={out_dir}"
+    msg = f"img2img:prompt={prompt}:negative_prompt={negative_prompt}:init-img={img_path}:batch_size={batch_size}:strength={strength}:n_iter={n_iter}:steps={steps}:seed={seed}:height={height}:width={width}:outdir={out_dir}"
     command = f"conda run -n ldm python '{exec_path}' '{msg}'"
-    
+
     print("Processing command: ", command)
     _e, response = getContainer().exec_run(
         command, workdir="/modules/stable-ui/sd_client", demux=True)
