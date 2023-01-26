@@ -35,4 +35,3 @@ https://huggingface.co/spaces/akhaliq/GFPGAN/blob/main/app.py
 # Bugs
 
 - Close sd_server when app closes
-- Fix img2img code
