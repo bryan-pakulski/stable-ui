@@ -156,12 +156,12 @@ def txt2img(exec_path, sd_model_path, canvas_name, prompt, negative_prompt, samp
     return _e
 
 
-# Default img2img commnad
-# TODO: Remember to include  --skip_grid
-def img2image(exec_path, img_path, prompt, negative_prompt, batch_size, steps, strength, seed, out_dir, n_iter):
+# Default img2img commAND
+def img2img(exec_path, sd_model_path, canvas_name, img_path, prompt, negative_prompt, sampler_name, batch_size, steps, scale, strength, seed, out_dir, n_iter):
+    extra_conf = getAdditionalConfig(sd_model_path)
     if (extra_conf['trigger_prompt'] != ""):
         prompt += f", {extra_conf['trigger_prompt']}"
-    msg = f"img2img:prompt={prompt}:negative_prompt={negative_prompt}:init-img={img_path}:batch_size={batch_size}:strength={strength}:n_iter={n_iter}:steps={steps}:seed={seed}:height={height}:width={width}:outdir={out_dir}"
+    msg = f"img2img:prompt={prompt}:negative_prompt={negative_prompt}:init_img={img_path}:subfolder_name={canvas_name}:sampler_name={sampler_name}:batch_size={batch_size}:strength={strength}:cfg_scale={scale}:n_iter={n_iter}:steps={steps}:seed={seed}:outpath_samples={out_dir}"
     command = f"conda run -n ldm python '{exec_path}' '{msg}'"
 
     print("Processing command: ", command)

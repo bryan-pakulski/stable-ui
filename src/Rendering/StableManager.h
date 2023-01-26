@@ -74,13 +74,14 @@ public:
                    double cfg, int seed, int width, int height, int &renderState);
 
   // Generate img2img
-  void imageToImage(std::string imgPath, std::string prompt, std::string negative_prompt, int samples, int steps,
-                    double strength, int seed, int &renderState);
+  void imageToImage(std::string &imgPath, std::string prompt, std::string negative_prompt, std::string &samplerName,
+                    int samples, int steps, double cfg, double strength, int seed, int &renderState);
 
   // CALLBACKS
   static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
   static void mouse_callback(GLFWwindow *window, double xposIn, double yposIn);
   static void mouse_btn_callback(GLFWwindow *window, int button, int action, int mods);
+  static void close_callback(GLFWwindow *window);
   static void GLFWErrorCallBack(int, const char *err_str);
   static void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
                                          const GLchar *message, const void *userParam);

@@ -161,6 +161,7 @@ private:
     glfwSetKeyCallback(m_window, StableManager::key_callback);
     glfwSetCursorPosCallback(m_window, StableManager::mouse_callback);
     glfwSetMouseButtonCallback(m_window, StableManager::mouse_btn_callback);
+    // glfwSetWindowCloseCallback(m_window, StableManager::close_callback);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();

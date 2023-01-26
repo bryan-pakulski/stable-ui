@@ -3,6 +3,7 @@
 
 import traceback
 from sd import txt2img as txt2img
+from sd import img2img as img2img
 from sd import sd_model
 from common import devices
 
@@ -146,7 +147,69 @@ class SDModelServer():
             },
             "img2img": {
                 "help": "Generate Image to Image",
-                "arguments": None
+                "arguments": {
+                    "outpath_samples": {
+                        "help": "Base output folder",
+                        "required": True,
+                        "type": str
+                    },
+                    "subfolder_name": {
+                        "help": "Subfolder name to save images into",
+                        "required": False,
+                        "type": str
+                    },
+                    "prompt": {
+                        "help": "txt2img prompt",
+                        "required": True,
+                        "type": str
+                    },
+                    "negative_prompt": {
+                        "help": "txt2img negative prompt",
+                        "required": False,
+                        "type": str
+                    },
+                    "init_img": {
+                        "help": "Init image path",
+                        "required": True,
+                        "type": str
+                    },
+                    "seed": {
+                        "help": "seed to generate against",
+                        "required": True,
+                        "type": int
+                    },
+                    "sampler_name": {
+                        "help": "Sampler to use for image generation, defaults to PLMS",
+                        "required": True,
+                        "type": str
+                    },
+                    "batch_size": {
+                        "help": "Number of images to generate concurrently",
+                        "required": False,
+                        "type": int
+                    },
+                    "strength": {
+                        "help": "Retain original image, range from 0.0 - 1.0",
+                        "required": True,
+                        "type": float
+                    },
+                    "n_iter": {
+                        "help": "Number of images to create",
+                        "required": False,
+                        "type": int
+                    },
+                    "steps": {
+                        "help": "Number of steps to run image generation over",
+                        "required": True,
+                        "type": int
+                    },
+                    "cfg_scale": {
+                        "help": "The degree of freedom sd gets when following a prompt",
+                        "required": True,
+                        "type": float
+                    }
+                },
+                "function": self.__image2image
             }
         }
 
@@ -234,6 +297,11 @@ class SDModelServer():
 
     def __text2image(self, cmd):
         result = txt2img.generate(
+            **cmd.arguments, model=self.model.model, precision=self.model.get_precision())
+        return f"{result}"
+
+    def __image2image(self, cmd):
+        result = img2img.generate(
             **cmd.arguments, model=self.model.model, precision=self.model.get_precision())
         return f"{result}"
 

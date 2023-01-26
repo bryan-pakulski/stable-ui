@@ -21,6 +21,10 @@ class QDisplay_Image2Image : public QDisplay_Base {
   int m_steps = 70;
   int m_seed = 0;
   float m_strength = 0.5;
+  double m_cfg = 7.5;
+
+  std::string m_selectedSampler = "DDIM";
+  std::vector<listItem> m_samplerList;
 
   bool m_draw_mask_window = false;
   std::unique_ptr<Image> m_image = 0;
@@ -48,6 +52,12 @@ public:
     m_directory_icon->loadFromImage("data/images/directory_icon.png");
     m_file_icon->loadFromImage("data/images/file_icon.png");
     m_current_directory = std::filesystem::path(c_base_content_directory);
+
+    // Sampler menu
+    listItem i{.m_name = "DDIM"};
+    listItem j{.m_name = "PLMS"};
+    m_samplerList.push_back(i);
+    m_samplerList.push_back(j);
   }
 
   std::string getLatestFile() {
@@ -55,7 +65,8 @@ public:
     fs::file_time_type write_time;
 
     try {
-      for (const auto &entry : fs::directory_iterator("data/" + CONFIG::OUTPUT_DIRECTORY.get() + "/img2img")) {
+      for (const auto &entry : fs::directory_iterator("data" + CONFIG::OUTPUT_DIRECTORY.get() + "/" +
+                                                      m_stableManager->getActiveCanvas()->m_name)) {
         if (entry.is_regular_file()) {
           outfile = entry.path().string();
         }
@@ -71,8 +82,8 @@ public:
     m_image.reset();
     m_image = std::unique_ptr<Image>(
         new Image(CONFIG::IMAGE_SIZE_X_LIMIT.get(), CONFIG::IMAGE_SIZE_Y_LIMIT.get(), "img2img"));
-    m_stableManager->imageToImage(m_filepath, m_prompt, m_negative_prompt, 1, m_steps, m_strength, m_seed,
-                                  m_image->renderState);
+    m_stableManager->imageToImage(m_filepath, m_prompt, m_negative_prompt, m_selectedSampler, 1, m_steps, m_cfg,
+                                  m_strength, m_seed, m_image->renderState);
   }
 
   void imageWindow() {
@@ -276,9 +287,22 @@ public:
     ImGui::BeginChild("Prompt Config");
     ImGui::Text("Prompt Config");
 
+    if (ImGui::BeginCombo("Sampler", m_selectedSampler.c_str(), ImGuiComboFlags_NoArrowButton)) {
+      for (auto &item : m_samplerList) {
+        if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
+          m_selectedSampler = item.m_name;
+        }
+        if (item.m_isSelected) {
+          ImGui::SetItemDefaultFocus();
+        }
+      }
+      ImGui::EndCombo();
+    }
+
     ImGui::InputInt("steps", &m_steps);
     ImGui::InputInt("seed", &m_seed);
     ImGui::SliderFloat("Strength", &m_strength, 0.0, 1.0, "%.2f");
+    ImGui::InputDouble("cfg scale", &m_cfg, 0.1);
     ImGui::EndChild();
   }
 

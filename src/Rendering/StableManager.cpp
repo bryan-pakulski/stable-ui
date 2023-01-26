@@ -24,7 +24,7 @@ StableManager::StableManager(GLFWwindow &w) : m_window{w} {
 }
 
 // Destructor, destroy remaining instances
-StableManager::~StableManager() { SDCommandsInterface::GetInstance().terminateSDModelServer(); }
+StableManager::~StableManager() {}
 
 // Main update function, checks for object cap before calling instance logic /
 // render loops
@@ -123,11 +123,13 @@ void StableManager::textToImage(std::string prompt, std::string negative_prompt,
 }
 
 // Image to Image, render result to canvas
-void StableManager::imageToImage(std::string imgPath, std::string prompt, std::string negative_prompt, int samples,
-                                 int steps, double strength, int seed, int &renderState) {
+void StableManager::imageToImage(std::string &imgPath, std::string prompt, std::string negative_prompt,
+                                 std::string &samplerName, int samples, int steps, double cfg, double strength,
+                                 int seed, int &renderState) {
 
   // Generate & Retrieve newly generated image
-  SDCommandsInterface::GetInstance().imageToImage(imgPath, prompt, negative_prompt, samples, steps, strength, seed,
+  SDCommandsInterface::GetInstance().imageToImage(m_model.path, getActiveCanvas()->m_name, imgPath, prompt,
+                                                  negative_prompt, samplerName, samples, steps, cfg, strength, seed,
                                                   renderState);
 }
 
@@ -188,6 +190,11 @@ void StableManager::mouse_btn_callback(GLFWwindow *window, int button, int actio
     glfwGetCursorPos(window, &xpos, &ypos);
     rm->m_selection->dragStart(xpos, ypos);
   }
+}
+
+// Close window callback
+void StableManager::close_callback(GLFWwindow *window) {
+  // SDCommandsInterface::GetInstance().terminateSDModelServer();
 }
 
 // Build image from canvas, based on selection coordinates
