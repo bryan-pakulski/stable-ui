@@ -40,6 +40,7 @@ class StableDiffusionBaseProcess():
         self.width = width
         self.height = height
 
+        # ddim eta (eta=0.0 corresponds to deterministic sampling",
         self.ddim_eta = 0.0
         self.latent_channels = 4
         self.downsampling_factor = 8
@@ -105,9 +106,9 @@ class StableDiffusionTxt2Img(StableDiffusionBaseProcess):
                                 prompts)
                             shape = [self.latent_channels, self.height //
                                      self.downsampling_factor, self.width // self.downsampling_factor]
-                            samples_ddim, _ = self.sampler.sample(S=self.ddim_steps,
+                            samples_ddim, _ = self.sampler.sample(S=self.steps,
                                                                   conditioning=conditioning,
-                                                                  batch_size=self.n_samples,
+                                                                  batch_size=self.batch_size,
                                                                   shape=shape,
                                                                   verbose=False,
                                                                   unconditional_guidance_scale=self.cfg_scale,

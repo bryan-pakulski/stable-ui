@@ -72,7 +72,7 @@ enable_tf32()
 
 cpu = torch.device("cpu")
 device = device_interrogate = device_gfpgan = device_esrgan = device_codeformer = None
-weight_load_location = None  # if cmd_opts.lowram else "cpu"
+weight_load_location = "cpu"
 dtype = torch.float16
 dtype_vae = torch.float16
 

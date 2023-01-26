@@ -105,7 +105,7 @@ def terminateSDModelServer(exec_path):
 
 
 # Launch a client command
-def attachSDModelToServer(exec_path, ckpt_path, config_path, vae_path="", precision=""):
+def attachSDModelToServer(exec_path, ckpt_path, config_path, vae_path: str = "", precision: str = ""):
     msg = f"loadModel:checkpoint_path={ckpt_path}:checkpoint_config_path={config_path}"
 
     # Optionals

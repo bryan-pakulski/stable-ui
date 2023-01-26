@@ -99,7 +99,7 @@ void StableManager::attachModel(YAML::Node model, std::string hash) {
   // Optional parameters
   std::string vae = "";
   if (model["vae"]) {
-    model["vae"].as<std::string>();
+    vae = model["vae"].as<std::string>();
   }
 
   // Build model struct
