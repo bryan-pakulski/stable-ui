@@ -191,7 +191,7 @@ public:
           selectCanvasOpen = true;
         }
 
-        if (ImGui::MenuItem("Activate Model")) {
+        if (ImGui::MenuItem("Load Model To Memory")) {
           m_loadModelWindow->openWindow();
         }
 

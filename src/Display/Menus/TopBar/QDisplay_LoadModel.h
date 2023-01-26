@@ -54,9 +54,9 @@ private:
 public:
   QDisplay_LoadModel(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     listItem i{.m_name = "full"};
-    listItem j{.m_name = "mid"};
-    listItem k{.m_name = "low"};
-    listItem l{.m_name = "autocast"};
+    listItem j{.m_name = "autocast"};
+    listItem k{.m_name = "mid"};
+    listItem l{.m_name = "low"};
 
     m_precisionList.push_back(i);
     m_precisionList.push_back(j);
