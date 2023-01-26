@@ -6,7 +6,7 @@
 
 #include "../../../Display/ErrorHandler.h"
 #include "../../../QLogger.h"
-#include "../../../Rendering/RenderManager.h"
+#include "../../../Rendering/StableManager.h"
 #include "../../../Config/config.h"
 #include "../../QDisplay_Base.h"
 #include "QDisplay_Text2Image.h"
@@ -24,7 +24,7 @@ class QDisplay_BottomBar : public QDisplay_Base {
 
 public:
   // Initialise render manager references
-  QDisplay_BottomBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+  QDisplay_BottomBar(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     Text2ImageWindow = std::unique_ptr<QDisplay_Text2Image>(new QDisplay_Text2Image(rm, w));
     Image2ImageWindow = std::unique_ptr<QDisplay_Image2Image>(new QDisplay_Image2Image(rm, w));
 
@@ -48,27 +48,35 @@ public:
     ImGui::Begin(c_windowName.c_str(), 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 
     // Tabbed menu
-    {
-      ImGui::SameLine();
-      if (ImGui::Button("Text To Image")) {
-        tab = 0;
+    if (m_stableManager->getModelState() == EXECUTION_STATE::SUCCESS) {
+      {
+        ImGui::SameLine();
+        if (ImGui::Button("Text To Image")) {
+          tab = 0;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Image To Image")) {
+          tab = 1;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Textual Inversion")) {
+          tab = 2;
+        }
       }
-      ImGui::SameLine();
-      if (ImGui::Button("Image To Image")) {
-        tab = 1;
-      }
-      ImGui::SameLine();
-      if (ImGui::Button("Textual Inversion")) {
-        tab = 2;
-      }
-    }
-    ImGui::Separator();
+      ImGui::Separator();
 
-    if (tab == 0) {
-      Text2ImageWindow->render();
-    }
-    if (tab == 1) {
-      Image2ImageWindow->render();
+      if (tab == 0) {
+        Text2ImageWindow->render();
+      }
+      if (tab == 1) {
+        Image2ImageWindow->render();
+      }
+    } else if (m_stableManager->getModelState() == EXECUTION_STATE::PENDING) {
+      ImGui::Text("Please import and load a model first!");
+    } else if (m_stableManager->getModelState() == EXECUTION_STATE::LOADING) {
+      ImGui::Text("Please wait for model to finish loading...");
+    } else if (m_stableManager->getModelState() == EXECUTION_STATE::FAILED) {
+      ImGui::Text("Model failed to load, please check application logs");
     }
 
     ImGui::End();

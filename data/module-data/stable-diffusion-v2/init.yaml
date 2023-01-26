@@ -1,7 +1,0 @@
-git-repo: https://github.com/Stability-AI/stablediffusion.git
-working-directory: /modules/stable-diffusion-v2
-
-# These files are copied after the git-repo is initialised
-filepaths: 
-  "files/Qimg2img.py": "/modules/stable-diffusion-v2/scripts/Qimg2img.py"
-  "files/Qtxt2img.py": "/modules/stable-diffusion-v2/scripts/Qtxt2img.py"

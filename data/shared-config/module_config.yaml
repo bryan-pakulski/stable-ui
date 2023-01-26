@@ -1,0 +1,9 @@
+modules:
+  stable-ui:
+    filepaths:
+      files/Qimg2img.py: /modules/stable-ui/scripts/Qimg2img.py
+      files/Qtxt2img.py: /modules/stable-ui/scripts/Qtxt2img.py
+      files/sd_client: /modules/stable-ui/sd_client
+      files/sd_server: /modules/stable-ui/sd_server
+    name: stable-ui
+    working-directory: /modules/stable-ui

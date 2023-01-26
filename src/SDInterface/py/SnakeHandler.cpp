@@ -1,6 +1,7 @@
 #include "SnakeHandler.h"
 #include "../../QLogger.h"
 #include "../../Display/ErrorHandler.h"
+#include "../../Helpers/States.h"
 #include "boolobject.h"
 #include <iostream>
 #include <memory>
@@ -27,7 +28,7 @@ SnakeHandler::~SnakeHandler() {
 }
 
 bool SnakeHandler::callFunction(const std::string function, std::vector<std::unique_ptr<base_type>> *arguments,
-                                bool &finishedFlag) {
+                                int &state) {
   std::lock_guard<std::mutex> guard(m_mutex);
   /* pFunc is a new reference */
   m_pFunc = PyObject_GetAttrString(m_pModule, function.c_str());
@@ -52,7 +53,7 @@ bool SnakeHandler::callFunction(const std::string function, std::vector<std::uni
       if (!m_pValue) {
         Py_DECREF(m_pArgs);
         QLogger::GetInstance().Log(LOGLEVEL::ERR, m_filename, "Can't convert argument of type: ", arg->getType());
-        finishedFlag = true;
+        state = EXECUTION_STATE::FAILED;
         // Free old arguments
         arguments->clear();
         return 0;
@@ -69,7 +70,7 @@ bool SnakeHandler::callFunction(const std::string function, std::vector<std::uni
       QLogger::GetInstance().Log(LOGLEVEL::INFO, m_filename, "Function call completed successfully for: ", function);
       Py_DECREF(m_pValue);
       Py_XDECREF(m_pFunc);
-      finishedFlag = true;
+      state = EXECUTION_STATE::SUCCESS;
       // Free old arguments
       arguments->clear();
       return 1;
@@ -79,7 +80,7 @@ bool SnakeHandler::callFunction(const std::string function, std::vector<std::uni
       QLogger::GetInstance().Log(LOGLEVEL::ERR, m_filename, "Function call failed for: ", function);
       ErrorHandler::GetInstance().setError(
           "Docker function call execution failed, is docker running? check console for more information");
-      finishedFlag = true;
+      state = EXECUTION_STATE::FAILED;
       // Free old arguments
       arguments->clear();
       return 0;
@@ -93,7 +94,7 @@ bool SnakeHandler::callFunction(const std::string function, std::vector<std::uni
   }
 
   Py_DECREF(m_pFunc);
-  finishedFlag = true;
+  state = EXECUTION_STATE::FAILED;
   // Free old arguments
   arguments->clear();
   return 0;

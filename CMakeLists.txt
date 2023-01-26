@@ -13,6 +13,8 @@ set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
 
 include(FetchContent)
 
+find_package(OpenSSL REQUIRED)
+
 # Download and fetch GLM
 FetchContent_Declare(
         glm
@@ -119,8 +121,8 @@ find_package(PythonLibs 3.10.0 REQUIRED)
 add_subdirectory(${CMAKE_HOME_DIRECTORY}/src/ThirdParty/yaml-cpp)
 
 add_executable( stable-ui 
-                main.cpp 
-                src/Rendering/RenderManager.cpp
+                src/main.cpp 
+                src/Rendering/StableManager.cpp
                 src/Rendering/Camera.cpp
                 src/Rendering/Canvas.cpp 
                 src/Rendering/Helper.cpp 
@@ -159,9 +161,5 @@ target_link_libraries(
         yaml-cpp
         ${OPENGL_LIBRARY}
         ${Python_LIBRARIES}
+        OpenSSL::SSL
 )
-
-# Copy data directory after a successful build
-add_custom_command(TARGET stable-ui POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy_directory
-                       ${CMAKE_SOURCE_DIR}/data $<TARGET_FILE_DIR:stable-ui>/data)

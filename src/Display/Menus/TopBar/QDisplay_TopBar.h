@@ -3,11 +3,16 @@
 #include <fstream>
 #include <imgui.h>
 
-#include "../../../Display/ErrorHandler.h"
-#include "../../../QLogger.h"
 #include "../../../Config/config.h"
+#include "../../../QLogger.h"
 #include "../../../Rendering/Helper.h"
+
+#include "../../../Display/ErrorHandler.h"
 #include "../../QDisplay_Base.h"
+#include "QDisplay_ConfigureModel.h"
+#include "QDisplay_ImportModel.h"
+#include "QDisplay_ImportVAE.h"
+#include "QDisplay_LoadModel.h"
 
 class QDisplay_TopBar : public QDisplay_Base {
 
@@ -17,6 +22,12 @@ private:
   bool logFileOpen = false;
   bool loadFileOpen = false;
   bool selectCanvasOpen = false;
+  bool configureModelOpen = false;
+
+  std::unique_ptr<QDisplay_ConfigureModel> m_configureModelWindow;
+  std::unique_ptr<QDisplay_ImportModel> m_importModelWindow;
+  std::unique_ptr<QDisplay_ImportVAE> m_importVAEWindow;
+  std::unique_ptr<QDisplay_LoadModel> m_loadModelWindow;
 
   // Log config
   std::ifstream logStream;
@@ -34,7 +45,23 @@ private:
 
     if (logFileOpen) {
       ImGui::SetNextWindowBgAlpha(0.9f);
+      ImGui::SetNextWindowSize(ImVec2(CONFIG::IMGUI_LOG_WINDOW_WIDTH.get(), CONFIG::IMGUI_LOG_WINDOW_HEIGHT.get()));
       ImGui::Begin("Log");
+
+      if (ImGui::Button("Close")) {
+        logFileOpen = false;
+      }
+
+      ImGui::SameLine();
+
+      if (ImGui::Button("Clear")) {
+        logStream.close();
+        QLogger::GetInstance().resetLog();
+      }
+
+      ImGui::Separator();
+
+      ImGui::BeginChild("ScrollingLog");
 
       // Only update text if required
       if (QLogger::GetInstance().m_LAST_WRITE_TIME != lastLogReadTime) {
@@ -45,6 +72,7 @@ private:
 
         lastLogReadTime = QLogger::GetInstance().m_LAST_WRITE_TIME;
         logFileBuffer << logStream.rdbuf();
+        logStream.close();
         logUpdated = true;
       }
 
@@ -55,17 +83,8 @@ private:
         ImGui::SetScrollY(ImGui::GetScrollMaxY() + ImGui::GetStyle().ItemSpacing.y * 2);
         logUpdated = false;
       }
+      ImGui::EndChild();
 
-      if (ImGui::Button("Close")) {
-        logFileOpen = false;
-      }
-
-      if (ImGui::Button("Clear")) {
-        logStream.close();
-        QLogger::GetInstance().resetLog();
-      }
-
-      logStream.close();
       ImGui::End();
     }
   }
@@ -78,7 +97,7 @@ private:
         ImGui::InputText("canvas name", m_canvasName, 256);
 
         if (ImGui::Button("Create Canvas")) {
-          m_renderManager->createCanvas(0, 0, std::string(m_canvasName));
+          m_stableManager->createCanvas(0, 0, std::string(m_canvasName));
           newFileOpen = false;
         }
 
@@ -104,13 +123,13 @@ private:
       ImGui::OpenPopup("SELECTCANVAS");
       if (ImGui::BeginPopupModal("SELECTCANVAS")) {
         if (ImGui::BeginListBox("Canvas")) {
-          for (auto &item : m_renderManager->m_canvas) {
+          for (auto &item : m_stableManager->m_canvas) {
             const char *item_name = item->m_name.c_str();
-            int index = std::addressof(item) - std::addressof(m_renderManager->m_canvas.front());
-            const bool is_selected = index == m_renderManager->m_activeId;
+            int index = std::addressof(item) - std::addressof(m_stableManager->m_canvas.front());
+            const bool is_selected = index == m_stableManager->m_activeId;
 
             if (ImGui::Selectable(item_name, is_selected)) {
-              m_renderManager->selectCanvas(index);
+              m_stableManager->selectCanvas(index);
               selectCanvasOpen = false;
             }
 
@@ -132,7 +151,12 @@ private:
 
 public:
   // Initialise render manager reference
-  QDisplay_TopBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {}
+  QDisplay_TopBar(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+    m_configureModelWindow = std::unique_ptr<QDisplay_ConfigureModel>(new QDisplay_ConfigureModel(rm, w));
+    m_importModelWindow = std::unique_ptr<QDisplay_ImportModel>(new QDisplay_ImportModel(rm, w));
+    m_importVAEWindow = std::unique_ptr<QDisplay_ImportVAE>(new QDisplay_ImportVAE(rm, w));
+    m_loadModelWindow = std::unique_ptr<QDisplay_LoadModel>(new QDisplay_LoadModel(rm, w));
+  }
 
   /*
    * Main Menu renderer, contains logic for showing additional display items
@@ -142,16 +166,20 @@ public:
 
       if (ImGui::BeginMenu("File")) {
 
-        if (ImGui::MenuItem("New File")) {
+        if (ImGui::MenuItem("New Canvas")) {
           newFileOpen = true;
         }
 
-        if (ImGui::MenuItem("Load File")) {
+        if (ImGui::MenuItem("Load Canvas")) {
           loadFileOpen = true;
         }
 
-        if (ImGui::MenuItem("Open Log")) {
-          logFileOpen = true;
+        if (ImGui::MenuItem("Import Model")) {
+          m_importModelWindow->openWindow();
+        }
+
+        if (ImGui::MenuItem("Import VAE")) {
+          m_importVAEWindow->openWindow();
         }
 
         ImGui::EndMenu();
@@ -163,10 +191,22 @@ public:
           selectCanvasOpen = true;
         }
 
+        if (ImGui::MenuItem("Load Model To Memory")) {
+          m_loadModelWindow->openWindow();
+        }
+
+        if (ImGui::MenuItem("Configure Models")) {
+          m_configureModelWindow->openWindow();
+        }
+
+        if (ImGui::MenuItem("Open Log")) {
+          logFileOpen = true;
+        }
+
         ImGui::EndMenu();
       }
 
-      ImGui::MenuItem(m_renderManager->getActiveCanvas()->m_name.c_str());
+      ImGui::MenuItem(m_stableManager->getActiveCanvas()->m_name.c_str());
 
       ImGui::EndMainMenuBar();
     }
@@ -176,5 +216,11 @@ public:
     QDisplay_NewFile();
     QDisplay_LoadFile();
     QDisplay_SelectCanvasOpen();
+
+    // Render additional windows
+    m_configureModelWindow->render();
+    m_importModelWindow->render();
+    m_importVAEWindow->render();
+    m_loadModelWindow->render();
   }
 };

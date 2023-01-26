@@ -1,0 +1,1 @@
+cd /modules/stable-ui && git pull

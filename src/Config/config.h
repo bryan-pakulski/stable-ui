@@ -2,8 +2,6 @@
 
 #include <yaml-cpp/yaml.h>
 #include <yaml-cpp/exceptions.h>
-#include <imgui.h>
-
 #include "types.h"
 
 namespace CONFIG {
@@ -44,8 +42,23 @@ static CFloat IMGUI_BOTTOM_WINDOW_HEIGHT(loadConfig("IMGUI_BOTTOM_WINDOW_HEIGHT"
 static CFloat IMGUI_LEFT_WINDOW_WIDTH(loadConfig("IMGUI_LEFT_WINDOW_WIDTH", 320.0f));
 static CFloat IMGUI_TOP_WINDOW_HEIGHT(loadConfig("IMGUI_TOP_WINDOW_HEIGHT", 18.0f));
 
+static CFloat IMGUI_LOG_WINDOW_HEIGHT(loadConfig("IMGUI_LOG_WINDOW_HEIGHT", 820.0f));
+static CFloat IMGUI_LOG_WINDOW_WIDTH(loadConfig("IMGUI_LOG_WINDOW_WIDTH", 620.0f));
+
 // Program configuration
 static CString PYTHON_CONFIG_PATH(loadConfig<std::string>("PYTHON_CONFIG_PATH", "data/scripts"));
 static CInt ENABLE_GL_DEBUG(loadConfig<int>("ENABLE_OPENGL_DEBUG_OUTPUT", 0));
 static CInt DEFAULT_BUFFER_LENGTH(loadConfig("DEFAULT_BUFFER_LENGTH", 200));
+static CString MODEL_CONFIGURATIONS_DIRECTORY(loadConfig<std::string>("MODEL_CONFIGURATIONS_DIRECTORY",
+                                                                      "data/models/configs"));
+static CString MODELS_CONFIGURATION_FILE(loadConfig<std::string>("MODELS_CONFIGURATION_FILE",
+                                                                 "data/shared-config/model_config.yaml"));
+static CString MODULES_CONFIGURATION_FILE(loadConfig<std::string>("MODULES_CONFIGURATION_FILE",
+                                                                  "data/shared-config/module_config.yaml"));
+static CString VAE_FOLDER_PATH(loadConfig<std::string>("VAE_FOLDER_PATH", "data/models/vae"));
+static CString SD_SERVER_CLIENT(loadConfig<std::string>("SD_SERVER_CLIENT",
+                                                        "/modules/stable-ui/sd_client/sd_client.py"));
+static CString SD_MODEL_SERVER(loadConfig<std::string>("SD_MODEL_SERVER",
+                                                       "/modules/stable-ui/sd_server/sd_model_server.py"));
+
 } // namespace CONFIG

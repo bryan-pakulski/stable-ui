@@ -1,7 +1,4 @@
 # Main canvas window
-Split canvas window into 512x512 grid of textures expanding "infinitely"
-
-Allow for mouse interaction (zoom in / out)
 
 Allow for selection with mouse click (up to max pixel size i.e. 512x512 for img2img inpainting)
 
@@ -9,11 +6,32 @@ Allow for right click and drag erase functionality (no undo support as of yet)
 
 Allow for saving to a file, using grid detection, grids should grow / shrink dynamically if they contain data or are empty
 
+Load module progress bar
 
 # TODO: types.h
+
 initialise string with a maximum length, this is important as if we reload configuration by
 editing the string manually via ImGui we don't have the hooks to re-size memory and we risk overwriting if
 the initial string is too short
 
+This can potentially be resolved by using std::string as a resizable datatype, see imgui_stdlib.h
+
 # Additional
+
 Add support for textual inversion, see: https://towardsdatascience.com/how-to-fine-tune-stable-diffusion-using-textual-inversion-b995d7ecc095
+
+Delete models & configurations
+
+Save output to temporary folder - "gen??" This way you can generate multiple item etc.. and move them automatically after generation is finished to an output folder
+
+Ping Pong between server & client to ensure nothing has gone wrong mid command? perhaps do this over a seperate port?
+
+Add input sanitisation on sd_client on messages being sent, delimit or convert " to '?
+
+Add fix faces option:
+https://github.com/TencentARC/GFPGAN
+https://huggingface.co/spaces/akhaliq/GFPGAN/blob/main/app.py
+
+# Bugs
+
+- Close sd_server when app closes
