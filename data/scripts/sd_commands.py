@@ -88,7 +88,7 @@ def launchSDModelServer(exec_path):
 
 def terminateSDModelServer(exec_path):
     command = f"conda run -n ldm python 'exec_path' quit"
-    getContainer().exec_run(
+    _e, response = getContainer().exec_run(
         command, workdir="/modules/stable-ui/sd_client", demux=True)
 
     if (_e != 0):

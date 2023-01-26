@@ -92,7 +92,7 @@ class StableDiffusionTxt2Img(StableDiffusionBaseProcess):
                         for prompts in tqdm(self.data, desc="data"):
                             unconditional_conditioning = None
                             if self.cfg_scale != 1.0 or self.negative_prompt == "":
-                                unconditional_conditioning = self.model.get_leared_conditioning(
+                                unconditional_conditioning = self.model.get_learned_conditioning(
                                     self.batch_size * [""])
                             else:
                                 unconditional_conditioning = self.model.get_learned_conditioning(
@@ -115,7 +115,8 @@ class StableDiffusionTxt2Img(StableDiffusionBaseProcess):
                                                                   eta=self.ddim_eta,
                                                                   x_T=None)
 
-                            x_samples_ddim = self.model().decode_first_stage(samples_ddim)
+                            x_samples_ddim = self.model.decode_first_stage(
+                                samples_ddim)
                             x_samples_ddim = torch.clamp(
                                 (x_samples_ddim + 1.0) / 2.0, min=0.0, max=1.0)
 

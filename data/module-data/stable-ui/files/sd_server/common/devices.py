@@ -1,4 +1,6 @@
-import sys, os, shlex
+import sys
+import os
+import shlex
 import contextlib
 import torch
 from packaging import version
@@ -25,9 +27,12 @@ def extract_device_id(args, name):
 
 
 def get_cuda_device_string():
-    if torch.cuda.is_available():
+    if (torch.cuda.is_available()):
+        print("Using GPU...")
         return "cuda"
-    return "cpu"
+    else:
+        print("Using CPU...")
+        return "cpu"
 
 
 def get_optimal_device():
@@ -62,11 +67,12 @@ def enable_tf32():
         torch.backends.cuda.matmul.allow_tf32 = True
         torch.backends.cudnn.allow_tf32 = True
 
+
 enable_tf32()
 
 cpu = torch.device("cpu")
 device = device_interrogate = device_gfpgan = device_esrgan = device_codeformer = None
-weight_load_location = None #if cmd_opts.lowram else "cpu"
+weight_load_location = None  # if cmd_opts.lowram else "cpu"
 dtype = torch.float16
 dtype_vae = torch.float16
 
@@ -96,16 +102,20 @@ def autocast(disable=False, precision="full"):
 
 # MPS workaround for https://github.com/pytorch/pytorch/issues/79383
 orig_tensor_to = torch.Tensor.to
+
+
 def tensor_to_fix(self, *args, **kwargs):
     if self.device.type != 'mps' and \
-       ((len(args) > 0 and isinstance(args[0], torch.device) and args[0].type == 'mps') or \
-       (isinstance(kwargs.get('device'), torch.device) and kwargs['device'].type == 'mps')):
+       ((len(args) > 0 and isinstance(args[0], torch.device) and args[0].type == 'mps') or
+            (isinstance(kwargs.get('device'), torch.device) and kwargs['device'].type == 'mps')):
         self = self.contiguous()
     return orig_tensor_to(self, *args, **kwargs)
 
 
-# MPS workaround for https://github.com/pytorch/pytorch/issues/80800 
+# MPS workaround for https://github.com/pytorch/pytorch/issues/80800
 orig_layer_norm = torch.nn.functional.layer_norm
+
+
 def layer_norm_fix(*args, **kwargs):
     if len(args) > 0 and isinstance(args[0], torch.Tensor) and args[0].device.type == 'mps':
         args = list(args)
@@ -115,6 +125,8 @@ def layer_norm_fix(*args, **kwargs):
 
 # MPS workaround for https://github.com/pytorch/pytorch/issues/90532
 orig_tensor_numpy = torch.Tensor.numpy
+
+
 def numpy_fix(self, *args, **kwargs):
     if self.requires_grad:
         self = self.detach()
@@ -124,6 +136,8 @@ def numpy_fix(self, *args, **kwargs):
 # MPS workaround for https://github.com/pytorch/pytorch/issues/89784
 orig_cumsum = torch.cumsum
 orig_Tensor_cumsum = torch.Tensor.cumsum
+
+
 def cumsum_fix(input, cumsum_func, *args, **kwargs):
     if input.device.type == 'mps':
         output_dtype = kwargs.get('dtype', input.dtype)
