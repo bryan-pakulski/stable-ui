@@ -11,9 +11,9 @@
 
 #include "../Rendering/StableManager.h"
 #include "../Config/config.h"
-#include "Menus/BottomBar/QDisplay_BottomBar.h"
+#include "Menus/QDisplay_ContextMenu.h"
+#include "Menus/ToolsMenu/QDisplay_ToolsMenu.h"
 #include "Menus/TopBar/QDisplay_TopBar.h"
-#include "Menus/LeftBar/QDisplay_LeftBar.h"
 #include "QDisplay_Base.h"
 
 #include "Themes.h"
@@ -33,8 +33,8 @@ public:
 
     // Initialisation
     m_submenus.emplace_back(new QDisplay_TopBar(m_stableManager, m_window));
-    m_submenus.emplace_back(new QDisplay_BottomBar(m_stableManager, m_window));
-    m_submenus.emplace_back(new QDisplay_LeftBar(m_stableManager, m_window));
+    m_submenus.emplace_back(new QDisplay_ToolsMenu(m_stableManager, m_window));
+    m_submenus.emplace_back(new QDisplay_ContextMenu(m_stableManager, m_window));
 
     // Enable debug output
     if (CONFIG::ENABLE_GL_DEBUG.get() == 1) {

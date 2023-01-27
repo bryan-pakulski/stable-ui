@@ -8,6 +8,8 @@ Allow for saving to a file, using grid detection, grids should grow / shrink dyn
 
 Load module progress bar
 
+Render chunk objects to seperate framebuffer, this is used for the selection window as it will include an alpha channel, final render step is to copy to main framebuffer
+
 # TODO: types.h
 
 initialise string with a maximum length, this is important as if we reload configuration by
@@ -35,3 +37,38 @@ https://huggingface.co/spaces/akhaliq/GFPGAN/blob/main/app.py
 # Bugs
 
 - Close sd_server when app closes
+
+
+# Prompts:
+#
+
+raytraced render
+and digital painting of
+the inconceivable and
+spectacular a scene of
+complete madness, by
+greg rutkowski and
+michelangelo buonarroti
+and kinkade, cosmic
+entities, celestial,
+cosmic, luxury, elegant,
+ornate, vibrant and
+vivid, smooth,
+soft billowing smoke,
+darkness, bright,
+heavenly, elegant,
+swirls, cosmic flower,
+nebula vines,
+nebula tree, twirling,
+billowing, cinematic,
+unrealistic,
+high contrast, hdr,
+4 k, artstation,
+cgsociety, unreal engine,
+ symobolism, magical,
+mystical, mystifying,
+obscure, perplexing,
+zbrush, octane,
+hyperrealistic, bokeh,
+dof, battle of the gods,
+zeus

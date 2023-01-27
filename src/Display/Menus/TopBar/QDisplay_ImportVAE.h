@@ -40,7 +40,7 @@ public:
 
   QDisplay_ImportVAE(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     fileDialog.SetTitle("Import Models");
-    fileDialog.SetTypeFilters({".ckpt", ".safetensor"});
+    fileDialog.SetTypeFilters({".ckpt", ".safetensors, .pth"});
 
     *m_saving = false;
   }

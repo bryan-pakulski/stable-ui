@@ -1,4 +1,5 @@
 #define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
 
 #include "Helper.h"
 
@@ -24,8 +25,8 @@ bool GLHELPER::LoadTextureFromFile(const char *filename, GLuint *out_texture, in
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   } else {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_NEAREST);
   }
 
   // Upload pixels into texture
@@ -40,4 +41,18 @@ bool GLHELPER::LoadTextureFromFile(const char *filename, GLuint *out_texture, in
   *out_height = image_height;
 
   return true;
+}
+
+void GLHELPER::SaveTextureToFile(const char *filename, GLuint *texture, int width, int height) {
+  // Allocate array of pixels
+  unsigned char *pixels = (unsigned char *)malloc(width * height * 4);
+
+  // Get texture data
+  glGetTexImage(*texture, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
+  // Save texture as png file
+  stbi_write_png(filename, width, height, 4, pixels, 0);
+
+  // Free array of pixels
+  free(pixels);
 }

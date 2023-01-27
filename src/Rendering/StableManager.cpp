@@ -144,29 +144,26 @@ void StableManager::mouse_callback(GLFWwindow *window, double xposIn, double ypo
   StableManager *rm;
   rm = (StableManager *)glfwGetWindowUserPointer(window);
 
-  if (rm->m_cameraDrag) {
+  // Move camera view
+  if (rm->m_cameraDrag && (rm->m_camera->cur_mouse.x > CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get())) {
     rm->m_camera->moveCameraPosition(static_cast<float>(xposIn) - rm->m_camera->prev_mouse.x,
                                      static_cast<float>(yposIn) - rm->m_camera->prev_mouse.y);
     rm->m_camera->prev_mouse.x = xposIn;
     rm->m_camera->prev_mouse.y = yposIn;
   }
 
+  // Move selection window around
+  if (rm->m_selectionDrag && (rm->m_selection->cur_mouse.x > CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get())) {
+    rm->m_selection->moveSelectionPosition(static_cast<float>(xposIn) - rm->m_selection->prev_mouse.x,
+                                           static_cast<float>(yposIn) - rm->m_selection->prev_mouse.y);
+    rm->m_selection->prev_mouse.x = xposIn;
+    rm->m_selection->prev_mouse.y = yposIn;
+  }
+
   rm->m_camera->cur_mouse.x = xposIn;
   rm->m_camera->cur_mouse.y = yposIn;
-
-  // Check if we are making a selection
-  if (rm->m_selection->m_listening) {
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE) {
-
-      // Store the final x,y coordinates
-      rm->m_selection->dragStop(xposIn, yposIn);
-
-      // Check if our action was an actual drag event
-      if (rm->m_selection->isDragged()) {
-        rm->m_selection->makeSelection();
-      }
-    }
-  }
+  rm->m_selection->cur_mouse.x = xposIn;
+  rm->m_selection->cur_mouse.y = yposIn;
 }
 
 // Mouse button callback function for dragging camera and interacting with canvas
@@ -174,7 +171,7 @@ void StableManager::mouse_btn_callback(GLFWwindow *window, int button, int actio
   StableManager *rm;
   rm = (StableManager *)glfwGetWindowUserPointer(window);
 
-  if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
+  if (button == GLFW_MOUSE_BUTTON_MIDDLE && (rm->m_camera->cur_mouse.x > CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get())) {
     if (GLFW_PRESS == action) {
       rm->m_camera->prev_mouse.x = rm->m_camera->cur_mouse.x;
       rm->m_camera->prev_mouse.y = rm->m_camera->cur_mouse.y;
@@ -184,11 +181,18 @@ void StableManager::mouse_btn_callback(GLFWwindow *window, int button, int actio
     }
   }
 
-  // Start dragging
-  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-    double xpos, ypos;
-    glfwGetCursorPos(window, &xpos, &ypos);
-    rm->m_selection->dragStart(xpos, ypos);
+  if (button == GLFW_MOUSE_BUTTON_LEFT && (rm->m_selection->cur_mouse.x > CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get())) {
+    if (GLFW_PRESS == action) {
+      rm->m_selection->prev_mouse.x = rm->m_selection->cur_mouse.x;
+      rm->m_selection->prev_mouse.y = rm->m_selection->cur_mouse.y;
+      rm->m_selectionDrag = true;
+    } else if (GLFW_RELEASE == action) {
+      rm->m_selectionDrag = false;
+    }
+  }
+
+  if (button == GLFW_MOUSE_BUTTON_RIGHT && (rm->m_camera->cur_mouse.x > CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get())) {
+    rm->m_contextWindowVisible = true;
   }
 }
 

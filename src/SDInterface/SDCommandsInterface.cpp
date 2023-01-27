@@ -91,6 +91,7 @@ void SDCommandsInterface::textToImage(std::string sdModelPath, std::string &canv
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "n_iter", 1, 13)));
 
   // Offload thread execution, image generation can take some time
+  renderState = EXECUTION_STATE::LOADING;
   m_Thread = std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, std::ref(arguments),
                          std::ref(renderState));
   m_Thread.detach();
@@ -121,6 +122,7 @@ void SDCommandsInterface::imageToImage(std::string &sdModelPath, std::string &ca
   arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "n_iter", 1, 13)));
 
   // Offload thread execution, image generation can take some time
+  renderState = EXECUTION_STATE::LOADING;
   m_Thread = std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, std::ref(arguments),
                          std::ref(renderState));
   m_Thread.detach();

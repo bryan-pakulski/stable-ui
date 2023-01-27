@@ -6,10 +6,10 @@
 #include "../../../Rendering/Helper.h"
 #include "../../QDisplay_Base.h"
 
-class QDisplay_LeftBar : public QDisplay_Base {
+class QDisplay_CanvasTools : public QDisplay_Base {
 public:
   // Initialise render manager reference
-  QDisplay_LeftBar(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+  QDisplay_CanvasTools(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     m_visible_icon = std::unique_ptr<Image>(new Image(32, 32, "visible_icon"));
     m_hidden_icon = std::unique_ptr<Image>(new Image(32, 32, "hidden_icon"));
 
@@ -17,42 +17,24 @@ public:
     m_hidden_icon->loadFromImage("data/images/hidden.png");
   }
 
-  // Toggle window visibility
-  void visible(bool visibility) { m_windowVisisble = visibility; }
-
   virtual void render() {
-    if (m_windowVisisble) {
-      getWindowSize(m_windowSize);
+    ImGui::Text("Camera");
+    cameraHelper();
+    ImGui::Separator();
 
-      // Helper on left side, make sure to position around the bottom / top window bars
-      ImGui::SetNextWindowPos(ImVec2(0, CONFIG::IMGUI_TOP_WINDOW_HEIGHT.get()));
-      ImGui::SetNextWindowSize(ImVec2(CONFIG::IMGUI_LEFT_WINDOW_WIDTH.get(),
-                                      float(m_windowSize.second) - CONFIG::IMGUI_BOTTOM_WINDOW_HEIGHT.get() -
-                                          CONFIG::IMGUI_TOP_WINDOW_HEIGHT.get()));
-      ImGui::SetNextWindowBgAlpha(0.9f);
-      ImGui::Begin(c_windowName.c_str(), 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+    ImGui::Text("Layer Helper");
+    layerHelper();
+    ImGui::Separator();
 
-      ImGui::Text("Camera");
-      cameraHelper();
-      ImGui::Separator();
-
-      ImGui::Text("Layer Helper");
-      layerHelper();
-      ImGui::Separator();
-
-      ImGui::Text("Selection");
-      selectionPreview();
-      ImGui::Separator();
-
-      ImGui::End();
-    }
+    ImGui::Text("Selection");
+    selectionPreview();
+    ImGui::Separator();
   }
 
 private:
   // Window Options
   const std::string c_windowName = "Tools Window";
   std::pair<int, int> m_windowSize{};
-  bool m_windowVisisble = true;
 
   // Layer options
   int m_selectedLayerIndex = -1;
@@ -62,11 +44,12 @@ private:
 
   // Selection preview
   void selectionPreview() {
-    if (m_stableManager->m_selection->m_selection_texture_buffer) {
-      ImGui::Image(
-          (void *)(intptr_t)m_stableManager->m_selection->m_selection_texture_buffer,
-          ImVec2(m_stableManager->m_selection->m_size.first * 0.4, m_stableManager->m_selection->m_size.second * 0.4));
+    if (ImGui::Button("Save Buffer to tmp")) {
+      m_stableManager->m_selection->saveBuffer();
     }
+    ImGui::Image(
+        (void *)(intptr_t)m_stableManager->m_selection->m_selection_texture_buffer,
+        ImVec2(m_stableManager->m_selection->m_size.first * 0.4, m_stableManager->m_selection->m_size.second * 0.4));
   }
 
   // Camera helper

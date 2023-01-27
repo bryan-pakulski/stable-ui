@@ -43,8 +43,12 @@ public:
   // Camera details
   bool m_cameraDrag = false;
   std::shared_ptr<Camera> m_camera;
+
   // Selection
+  bool m_selectionDrag = false;
   std::shared_ptr<Selection> m_selection;
+
+  bool m_contextWindowVisible = false;
 
   // Main update loop
   void update();
