@@ -34,13 +34,24 @@ Add fix faces option:
 https://github.com/TencentARC/GFPGAN
 https://huggingface.co/spaces/akhaliq/GFPGAN/blob/main/app.py
 
+Show existing configuration when editing model config
+
+Link libraries statically to resolve issues on other systems (i.e. libcrypto libraries on windows, python lib)
+
 # Bugs
 
 - Close sd_server when app closes
+- Max of 27 images generated before overwriting, decide on new naming format
 
 
 # Prompts:
 #
+
+Image resolutions:
+
+512x512
+640x640
+768x768
 
 raytraced render
 and digital painting of
@@ -72,3 +83,9 @@ zbrush, octane,
 hyperrealistic, bokeh,
 dof, battle of the gods,
 zeus
+
+
+Drawing of Cassian andor, black and white, 
+concept art, sumi style, 
+artstation, trending, highly detailed, 
+smooth, focus, art by yoji shinkawa

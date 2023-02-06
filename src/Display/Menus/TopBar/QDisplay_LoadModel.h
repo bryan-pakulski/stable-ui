@@ -32,8 +32,10 @@ private:
       static YAML::Node configFile = YAML::LoadFile(CONFIG::MODELS_CONFIGURATION_FILE.get());
       YAML::Node models = configFile["models"];
       for (YAML::const_iterator it = models.begin(); it != models.end(); ++it) {
-        listItem i{.m_name = it->second["name"].as<std::string>(), .m_key = it->first.as<std::string>()};
-        m_ModelList.push_back(i);
+        if (it->second["name"].as<std::string>() != "default") {
+          listItem i{.m_name = it->second["name"].as<std::string>(), .m_key = it->first.as<std::string>()};
+          m_ModelList.push_back(i);
+        }
       }
     } catch (YAML::Exception) {
       QLogger::GetInstance().Log(LOGLEVEL::ERR, "Failed to parse yaml file: ", CONFIG::MODELS_CONFIGURATION_FILE.get());
