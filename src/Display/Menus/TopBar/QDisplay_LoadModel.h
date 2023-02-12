@@ -17,7 +17,6 @@ private:
   std::string m_selected_model = "";
   std::string m_selected_hash = "";
   std::string m_selected_precision = "full";
-  bool visible = false;
 
   void clear() {
     m_ModelList.clear();
@@ -50,7 +49,7 @@ private:
     YAML::Node model = _baseNode["models"][m_selected_hash];
 
     m_stableManager->attachModel(model, m_selected_hash, m_selected_precision);
-    visible = false;
+    m_isOpen = false;
   }
 
 public:
@@ -69,11 +68,11 @@ public:
   void openWindow() {
     clear();
     reloadFiles();
-    visible = true;
+    m_isOpen = true;
   }
 
   virtual void render() {
-    if (visible) {
+    if (m_isOpen) {
       ImGui::Begin("Load Model");
       if (ImGui::BeginCombo("model config", m_selected_model.c_str(), ImGuiComboFlags_NoArrowButton)) {
         for (auto &item : m_ModelList) {
@@ -108,7 +107,7 @@ public:
       }
 
       if (ImGui::Button("Cancel")) {
-        visible = false;
+        m_isOpen = false;
       }
 
       ImGui::End();

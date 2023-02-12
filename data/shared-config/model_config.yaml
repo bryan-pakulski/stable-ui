@@ -12,6 +12,5 @@ models:
   # Default configuration, do not delete or modify!!
   default:
     working_dir: "/modules/stable-ui"
-    config: "/modules/stable-ui/configs/v1-inference.yaml"
     name: "default"
     trigger_prompt: ""

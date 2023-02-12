@@ -20,20 +20,15 @@ private:
   std::string m_selected_model = "";
   std::string m_selected_hash = "";
   std::string m_selected_model_config = "";
-  std::string m_selected_module = "";
 
   std::vector<listItem> m_ModelList;
-  std::vector<listItem> m_ModulesList;
   std::vector<listItem> m_ModelConfigList;
   std::vector<listItem> m_VAEList;
   std::string m_triggerWords = "";
   std::string m_selected_vae = "";
 
-  bool m_isOpen = false;
-
   void clear() {
     m_ModelList.clear();
-    m_ModulesList.clear();
     m_ModelConfigList.clear();
     m_VAEList.clear();
 
@@ -53,20 +48,6 @@ private:
     } catch (fs::filesystem_error) {
       ErrorHandler::GetInstance().setConfigError(CONFIG::MODEL_CONFIGURATIONS_DIRECTORY,
                                                  "MODEL_CONFIGURATIONS_DIRECTORY");
-    }
-
-    // Load modules list from yaml
-    try {
-      static YAML::Node configFile = YAML::LoadFile(CONFIG::MODULES_CONFIGURATION_FILE.get());
-      YAML::Node modules = configFile["modules"];
-      for (YAML::const_iterator it = modules.begin(); it != modules.end(); ++it) {
-        listItem i{.m_name = it->first.as<std::string>()};
-        m_ModulesList.push_back(i);
-      }
-    } catch (YAML::Exception) {
-      QLogger::GetInstance().Log(LOGLEVEL::ERR,
-                                 "Failed to parse yaml file: ", CONFIG::MODULES_CONFIGURATION_FILE.get());
-      return;
     }
 
     // Load models list
@@ -96,11 +77,10 @@ private:
   }
 
   // Save model configuration to model config file
-  static void saveModelConfiguration(std::string model_name, std::string module_name, std::string model_config_file,
-                                     std::string hash, std::string trigger_words, std::string vae) {
+  static void saveModelConfiguration(std::string model_name, std::string model_config_file, std::string hash,
+                                     std::string trigger_words, std::string vae) {
     // Build yaml node to attach to model configuration file
     YAML::Node model_node;
-    model_node["working_dir"] = "/modules/" + module_name;
     model_node["config"] = "/models/configs/" + model_config_file;
     model_node["name"] = model_name;
     model_node["path"] = "/models/" + model_name;
@@ -148,19 +128,6 @@ private:
           ImGui::EndCombo();
         }
 
-        // Attach module
-        if (ImGui::BeginCombo("Module Runner", m_selected_module.c_str(), ImGuiComboFlags_NoArrowButton)) {
-          for (auto &item : m_ModulesList) {
-            if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
-              m_selected_module = item.m_name;
-            }
-            if (item.m_isSelected) {
-              ImGui::SetItemDefaultFocus();
-            }
-          }
-          ImGui::EndCombo();
-        }
-
         if (ImGui::BeginCombo("Custom VAE", m_selected_vae.c_str(), ImGuiComboFlags_NoArrowButton)) {
           for (auto &item : m_VAEList) {
             if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
@@ -176,10 +143,10 @@ private:
         ImGui::InputText("Trigger Words: ", &m_triggerWords);
 
         // Save available once we fill in information
-        if (m_selected_module != "" && m_selected_model_config != "") {
+        if (m_selected_model_config != "") {
           if (ImGui::Button("Save")) {
             m_isOpen = false;
-            saveModelConfiguration(m_selected_model, m_selected_module, m_selected_model_config, m_selected_hash,
+            saveModelConfiguration(m_selected_model, m_selected_model_config, m_selected_hash,
                                    std::string(m_triggerWords), m_selected_vae);
             clear();
           }

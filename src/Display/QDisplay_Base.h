@@ -16,14 +16,15 @@ struct listItem {
   bool m_isSelected = false;
 };
 class QDisplay_Base {
-  GLFWwindow *m_window;
 
 protected:
   std::shared_ptr<StableManager> m_stableManager;
+  GLFWwindow *m_window;
 
   void getWindowSize(std::pair<int, int> &size) { glfwGetFramebufferSize(m_window, &size.first, &size.second); }
 
 public:
+  bool m_isOpen = false;
   QDisplay_Base(std::shared_ptr<StableManager> rm, GLFWwindow *w) : m_stableManager(rm), m_window(w) {}
   virtual void render() {}
 };

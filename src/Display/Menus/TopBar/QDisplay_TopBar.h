@@ -13,6 +13,7 @@
 #include "QDisplay_ImportModel.h"
 #include "QDisplay_ImportVAE.h"
 #include "QDisplay_LoadModel.h"
+#include "QDisplay_PluginsWindow.h"
 
 class QDisplay_TopBar : public QDisplay_Base {
 
@@ -28,6 +29,7 @@ private:
   std::unique_ptr<QDisplay_ImportModel> m_importModelWindow;
   std::unique_ptr<QDisplay_ImportVAE> m_importVAEWindow;
   std::unique_ptr<QDisplay_LoadModel> m_loadModelWindow;
+  std::unique_ptr<QDisplay_PluginsWindow> m_pluginsWindow;
 
   // Log config
   std::ifstream logStream;
@@ -156,6 +158,7 @@ public:
     m_importModelWindow = std::unique_ptr<QDisplay_ImportModel>(new QDisplay_ImportModel(rm, w));
     m_importVAEWindow = std::unique_ptr<QDisplay_ImportVAE>(new QDisplay_ImportVAE(rm, w));
     m_loadModelWindow = std::unique_ptr<QDisplay_LoadModel>(new QDisplay_LoadModel(rm, w));
+    m_pluginsWindow = std::unique_ptr<QDisplay_PluginsWindow>(new QDisplay_PluginsWindow(rm, w));
   }
 
   /*
@@ -206,6 +209,12 @@ public:
         ImGui::EndMenu();
       }
 
+      if (ImGui::BeginMenu("Modules")) {
+        m_pluginsWindow->menus();
+
+        ImGui::EndMenu();
+      }
+
       ImGui::MenuItem(m_stableManager->getActiveCanvas()->m_name.c_str());
 
       ImGui::EndMainMenuBar();
@@ -222,5 +231,6 @@ public:
     m_importModelWindow->render();
     m_importVAEWindow->render();
     m_loadModelWindow->render();
+    m_pluginsWindow->render();
   }
 };

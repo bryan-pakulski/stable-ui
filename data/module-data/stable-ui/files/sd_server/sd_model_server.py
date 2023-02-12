@@ -210,6 +210,17 @@ class SDModelServer():
                     }
                 },
                 "function": self.__image2image
+            },
+            "plugin": {
+                "help": "Call custom plugin command",
+                "arguments": {
+                    "name": {
+                        "help": "plugin to use",
+                        "required": True,
+                        "type": str
+                    }
+                },
+                "function": None
             }
         }
 
@@ -267,6 +278,12 @@ class SDModelServer():
     # Sets up the callback for command
     def hookCommand(self, cmd):
         return self.commandList[cmd.command]["function"](cmd)
+
+    # Load and call python function from external module
+    def SDModule(self, cmd):
+        module = map(__import__, cmd.module_path)
+        module.init(**cmd.arguments, model=self.model.model)
+        module.run()
 
     # Function commands
     def __quit(self, cmd):
