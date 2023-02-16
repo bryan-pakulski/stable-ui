@@ -5,3 +5,4 @@ build/
 
 *.ckpt
 *.safetensors
+*.pth
