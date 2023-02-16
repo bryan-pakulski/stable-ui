@@ -63,7 +63,7 @@ private:
     ImGui::SliderFloat("Zoom", &m_stableManager->m_camera->m_zoom, 1.0f, 0.05f, "");
     if (ImGui::BeginPopupContextItem("Zoom")) {
       if (ImGui::MenuItem("Reset")) {
-        m_stableManager->m_camera->m_zoom = 1.0f;
+        m_stableManager->m_camera->m_zoom = 0.5f;
       }
       ImGui::EndPopup();
     }

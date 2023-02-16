@@ -79,6 +79,8 @@ void Selection::updateVisual() {
 
 void Selection::captureBuffer() {
   glBindTexture(GL_TEXTURE_2D, m_selection_texture_buffer);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, static_cast<int>(m_size.first / m_camera->m_zoom),
+               static_cast<int>(m_size.second / m_camera->m_zoom), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
   // Set texture parameters
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -89,8 +91,11 @@ void Selection::captureBuffer() {
   // Copy the window contents to the texture
   int windowWidth, windowHeight;
   glfwGetFramebufferSize(m_window, &windowWidth, &windowHeight);
-  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_camera->m_position.x + m_position.x,
-                   m_camera->m_position.y - m_position.y, 512, 512, 0);
+  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_position.x,
+                   windowHeight - (m_position.y + m_size.second), // bottom-left corner of selection
+                   static_cast<int>(m_size.first / m_camera->m_zoom),
+                   static_cast<int>(m_size.second / m_camera->m_zoom), // scaled width and height of selection
+                   0);
 
   QLogger::GetInstance().Log(LOGLEVEL::INFO,
                              "Selection::captureBuffer Capturing framebuffer details\n\twindow size: ", windowWidth,
