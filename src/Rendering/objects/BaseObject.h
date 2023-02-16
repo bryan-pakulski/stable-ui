@@ -55,7 +55,8 @@ static unsigned int initVertexShader(const char *vertexShaderSource, int &succes
 
   if (!success) {
     glGetShaderInfoLog(vertexShader, 512, nullptr, errorInfo);
-    QLogger::GetInstance().Log(LOGLEVEL::ERR, "ERROR::VERTEX::SHADER::COMPILATION_FAILED\n", errorInfo);
+    QLogger::GetInstance().Log(LOGLEVEL::ERR,
+                               "BaseObject::initVertexShader ERROR::VERTEX::SHADER::COMPILATION_FAILED\n", errorInfo);
   }
 
   return vertexShader;
@@ -72,7 +73,8 @@ static unsigned int initFragmentShader(const char *fragmentShaderSource, int &su
 
   if (!success) {
     glGetShaderInfoLog(fragmentShader, 512, nullptr, errorInfo);
-    QLogger::GetInstance().Log(LOGLEVEL::ERR, "ERROR::FRAGMENT::SHADER::COMPILATION_FAILED\n", errorInfo);
+    QLogger::GetInstance().Log(
+        LOGLEVEL::ERR, "BaseObject::initFragmentShader ERROR::FRAGMENT::SHADER::COMPILATION_FAILED\n", errorInfo);
   }
 
   return fragmentShader;

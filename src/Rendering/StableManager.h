@@ -63,6 +63,8 @@ public:
   void selectCanvas(int id);
   // Create a new canvas with a base image
   void sendImageToCanvas(Image &im);
+  // Set capture buffer flag
+  void captureBuffer();
 
   // MODEL SERVER INTERACTION
 
@@ -95,6 +97,7 @@ private:
 
   int m_modelLoaded = EXECUTION_STATE::PENDING;
   model m_model;
+  bool m_captureBuffer = false;
 
   // Process inputs
   void logicLoop();

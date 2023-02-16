@@ -44,6 +44,7 @@ private:
 
   // Selection preview
   void selectionPreview() {
+    // TODO: add send to img2img
     if (ImGui::Button("Save Buffer to tmp")) {
       m_stableManager->m_selection->saveBuffer();
     }

@@ -19,12 +19,12 @@ Image::Image(int width, int height, std::string name) : m_width(width), m_height
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Successfully created blank texture", m_name);
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Image::Image Successfully created blank texture", m_name);
 }
 
 void Image::loadFromImage(std::string path) {
   if (!GLHELPER::LoadTextureFromFile(path.c_str(), &m_texture, &m_width, &m_height, false)) {
-    QLogger::GetInstance().Log(LOGLEVEL::ERR, "Failed to load image from file: ", path.c_str());
+    QLogger::GetInstance().Log(LOGLEVEL::ERR, "Image::loadFromImage Failed to load image from file: ", path.c_str());
   }
   m_image_source = path;
 }

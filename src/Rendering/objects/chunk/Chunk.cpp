@@ -31,7 +31,7 @@ Chunk::Chunk(std::shared_ptr<Image> im, std::shared_ptr<Camera> c, int x, int y,
   setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices));
 
   if (!success) {
-    QLogger::GetInstance().Log(LOGLEVEL::ERR, "Error creating new chunk");
+    QLogger::GetInstance().Log(LOGLEVEL::ERR, "Chunk::Chunk Error creating new chunk");
   }
 }
 

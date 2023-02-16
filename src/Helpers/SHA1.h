@@ -15,9 +15,9 @@ inline std::string getFileHash(const char *fileName) {
   unsigned char data[1024];
 
   if (f == NULL) {
-    QLogger::GetInstance().Log(LOGLEVEL::ERR, "Unable to sha1 file: ", fileName);
+    QLogger::GetInstance().Log(LOGLEVEL::ERR, "SHA1::getFileHash Unable to sha1 file: ", fileName);
   } else {
-    QLogger::GetInstance().Log(LOGLEVEL::INFO, "Computing file hash for: ", fileName);
+    QLogger::GetInstance().Log(LOGLEVEL::INFO, "SHA1::getFileHash Computing file hash for: ", fileName);
   }
 
   SHA1_Init(&mdContent);
@@ -35,6 +35,6 @@ inline std::string getFileHash(const char *fileName) {
   }
 
   std::string str_hash(reinterpret_cast<char *>(result));
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Computed Hash: ", str_hash);
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "SHA1::getFileHash Computed Hash: ", str_hash);
   return str_hash;
 }

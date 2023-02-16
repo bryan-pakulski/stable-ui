@@ -3,7 +3,7 @@
 #include "../Helpers/States.h"
 
 SDCommandsInterface::SDCommandsInterface() {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Initialising SDCommandsInterface");
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "SDCommandsInterface::SDCommandsInterface initialising");
 
   std::string path = "sys.path.append(\"" + CONFIG::PYTHON_CONFIG_PATH.get() + "\")";
 
@@ -11,7 +11,7 @@ SDCommandsInterface::SDCommandsInterface() {
   PyRun_SimpleString("import sys");
   PyRun_SimpleString(path.c_str());
 
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Attached PYTHONPATH: ", path);
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "SDCommandsInterface::SDCommandsInterface attached PYTHONPATH: ", path);
 
   // sd_commands.py is the script that handles all incoming calls from the stable-ui application
   m_py_handle = std::unique_ptr<SnakeHandler>(new SnakeHandler("sd_commands"));
@@ -27,7 +27,7 @@ void SDCommandsInterface::launchSDModelServer() {
   m_dockerState = EXECUTION_STATE::LOADING;
 
   // Offload thread execution, image generation can take some time
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Starting up SD Model Server...");
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "SDCommandsInterface::launchSDModelServer starting up SD Model Server...");
   m_Thread = std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, std::ref(arguments),
                          std::ref(m_dockerState));
   m_Thread.detach();
@@ -41,7 +41,8 @@ void SDCommandsInterface::terminateSDModelServer() {
   m_dockerState = EXECUTION_STATE::LOADING;
 
   // Wait for thread execution to finish
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Shutting down SD Model Server...");
+  QLogger::GetInstance().Log(LOGLEVEL::INFO,
+                             "SDCommandsInterface::terminateSDModelServer shutting down SD Model Server...");
   m_Thread = std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, std::ref(arguments),
                          std::ref(m_dockerState));
   m_Thread.detach();

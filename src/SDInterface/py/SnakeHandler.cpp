@@ -14,16 +14,17 @@ SnakeHandler::SnakeHandler(std::string filename) : m_filename(filename) {
   Py_DECREF(m_pName);
 
   if (!m_pModule) {
-    QLogger::GetInstance().Log(LOGLEVEL::ERR, "Failed to load python module: ", m_filename);
+    QLogger::GetInstance().Log(LOGLEVEL::ERR, "SnakeHandler::SnakeHandler failed to load python module: ", m_filename);
     PyErr_Print();
   } else {
-    QLogger::GetInstance().Log(LOGLEVEL::INFO, "Loaded python module: ", m_filename);
+    QLogger::GetInstance().Log(LOGLEVEL::INFO, "SnakeHandler::SnakeHandler loaded python module: ", m_filename);
   }
 }
 
 SnakeHandler::~SnakeHandler() {
   if (Py_FinalizeEx() < 0) {
-    QLogger::GetInstance().Log(LOGLEVEL::ERR, m_filename, "Python handler failed to exit successfully");
+    QLogger::GetInstance().Log(LOGLEVEL::ERR, m_filename,
+                               "SnakeHandler::~SnakeHandler Python handler failed to exit successfully");
   }
 }
 
@@ -52,7 +53,8 @@ bool SnakeHandler::callFunction(const std::string function, std::vector<std::uni
 
       if (!m_pValue) {
         Py_DECREF(m_pArgs);
-        QLogger::GetInstance().Log(LOGLEVEL::ERR, m_filename, "Can't convert argument of type: ", arg->getType());
+        QLogger::GetInstance().Log(LOGLEVEL::ERR, m_filename,
+                                   "SnakeHandler::callFunction Can't convert argument of type: ", arg->getType());
         state = EXECUTION_STATE::FAILED;
         // Free old arguments
         arguments->clear();
@@ -67,7 +69,8 @@ bool SnakeHandler::callFunction(const std::string function, std::vector<std::uni
     Py_DECREF(m_pArgs);
 
     if (m_pValue && PyLong_AsLong(m_pValue) == 0) {
-      QLogger::GetInstance().Log(LOGLEVEL::INFO, m_filename, "Function call completed successfully for: ", function);
+      QLogger::GetInstance().Log(LOGLEVEL::INFO, m_filename,
+                                 "SnakeHandler::callFunction call completed successfully for: ", function);
       Py_DECREF(m_pValue);
       Py_XDECREF(m_pFunc);
       state = EXECUTION_STATE::SUCCESS;
@@ -77,7 +80,7 @@ bool SnakeHandler::callFunction(const std::string function, std::vector<std::uni
     } else {
       Py_DECREF(m_pFunc);
       PyErr_Print();
-      QLogger::GetInstance().Log(LOGLEVEL::ERR, m_filename, "Function call failed for: ", function);
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, m_filename, "SnakeHandler::callFunction call failed for: ", function);
       ErrorHandler::GetInstance().setError(
           "Docker function call execution failed, is docker running? check console for more information");
       state = EXECUTION_STATE::FAILED;
@@ -87,7 +90,7 @@ bool SnakeHandler::callFunction(const std::string function, std::vector<std::uni
     }
   }
 
-  QLogger::GetInstance().Log(LOGLEVEL::ERR, m_filename, "Can't find function: ", function);
+  QLogger::GetInstance().Log(LOGLEVEL::ERR, m_filename, "SnakeHandler::callFunction Can't find function: ", function);
 
   if (PyErr_Occurred()) {
     PyErr_Print();

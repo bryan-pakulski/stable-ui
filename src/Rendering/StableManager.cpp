@@ -4,7 +4,7 @@
 
 // Initialise render manager
 StableManager::StableManager(GLFWwindow &w) : m_window{w} {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableManager initialized");
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableManager::StableManager StableManager initialized");
 
   // Allow access to camera variable through static callback function
   glfwSetWindowUserPointer(&m_window, (void *)this);
@@ -55,6 +55,20 @@ void StableManager::renderLoop() {
   }
 
   m_selection->updateVisual();
+
+  // Capture render buffer to texture if flag is set
+  if (m_captureBuffer == true) {
+    m_selection->captureBuffer();
+    m_captureBuffer = false;
+  }
+}
+
+// Set capture render buffer flag, check for out of bounds condition and raise error if required
+void StableManager::captureBuffer() {
+  // TODO: Check camera x / y offset in conjunction with selection offset and display size
+  m_captureBuffer = true;
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableManager::captureBuffer Setting capture buffer flag to ",
+                             m_captureBuffer);
 }
 
 // Make a canvas active, pass texture to main window
@@ -71,7 +85,7 @@ void StableManager::selectCanvas(int id) {
 
 // Create new canvas object & return a reference
 std::shared_ptr<Canvas> StableManager::createCanvas(int x, int y, const std::string &name) {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Creating new canvas");
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableManager::createCanvas Creating new canvas");
   m_canvas.emplace_back(new Canvas(std::pair<int, int>{x, y}, name, &m_window, m_camera));
   selectCanvas(m_canvas.size() - 1);
   return m_canvas.back();
@@ -94,7 +108,8 @@ void StableManager::sendImageToCanvas(Image &im) {
 
 // STABLE DIFFUSION SERVER COMMANDS
 void StableManager::attachModel(YAML::Node model, std::string &hash, std::string &precision) {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Attaching model: ", model["name"].as<std::string>(),
+  QLogger::GetInstance().Log(LOGLEVEL::INFO,
+                             "StableManager::attachModel Attaching model: ", model["name"].as<std::string>(),
                              " to Stable Diffusion Docker Server");
   // Optional parameters
   std::string vae = "";
