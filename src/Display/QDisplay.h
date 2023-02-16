@@ -97,9 +97,9 @@ private:
   QDisplay() {
 
     if (!glfwInit()) {
-      QLogger::GetInstance().Log(LOGLEVEL::ERR, "Couldn't initialize GLFW");
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, "QDisplay::QDisplay Couldn't initialize GLFW");
     } else {
-      QLogger::GetInstance().Log(LOGLEVEL::INFO, "GLFW initialized");
+      QLogger::GetInstance().Log(LOGLEVEL::INFO, "QDisplay::QDisplay GLFW initialized");
     }
 
     // setup GLFW window
@@ -145,7 +145,7 @@ private:
                                 nullptr, nullptr);
 
     if (!m_window) {
-      QLogger::GetInstance().Log(LOGLEVEL::ERR, "Couldn't create a GLFW window");
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, "QDisplay::QDisplay Couldn't create a GLFW window");
       cleanupDisplay();
     }
 
@@ -178,10 +178,10 @@ private:
     ImGui_ImplOpenGL3_Init(m_glsl_version.c_str());
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-      QLogger::GetInstance().Log(LOGLEVEL::ERR, "Couldn't initialize GLAD");
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, "QDisplay::QDisplay Couldn't initialize GLAD");
       cleanupDisplay();
     } else {
-      QLogger::GetInstance().Log(LOGLEVEL::INFO, "GLAD initialized");
+      QLogger::GetInstance().Log(LOGLEVEL::INFO, "QDisplay::QDisplay:: GLAD initialized");
     }
 
     // Set clear colour

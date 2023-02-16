@@ -37,7 +37,8 @@ private:
         }
       }
     } catch (YAML::Exception) {
-      QLogger::GetInstance().Log(LOGLEVEL::ERR, "Failed to parse yaml file: ", CONFIG::MODELS_CONFIGURATION_FILE.get());
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, "QDisplay_LoadModel::reloadFiles Failed to parse yaml file: ",
+                                 CONFIG::MODELS_CONFIGURATION_FILE.get());
       return;
     }
   }

@@ -1,4 +1,5 @@
 #include "Selection.h"
+#include <vector>
 
 Selection::~Selection() {}
 
@@ -91,11 +92,17 @@ void Selection::captureBuffer() {
   glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_camera->m_position.x + m_position.x,
                    m_camera->m_position.y - m_position.y, 512, 512, 0);
 
+  QLogger::GetInstance().Log(LOGLEVEL::INFO,
+                             "Selection::captureBuffer Capturing framebuffer details\n\twindow size: ", windowWidth,
+                             windowHeight, "\n\tselection position: ", m_position.x, m_position.y,
+                             "\n\tcamera position: ", m_camera->m_position.x, m_camera->m_position.y);
+
   // Unbind the texture
   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Selection::saveBuffer() {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Saving selection buffer to file ", "data/output/buffer.png");
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Selection::saveBuffer Saving selection buffer to file ",
+                             "data/output/buffer.png");
   GLHELPER::SaveTextureToFile("data/output/buffer.png", &m_selection_texture_buffer, m_size.first, m_size.second);
 }

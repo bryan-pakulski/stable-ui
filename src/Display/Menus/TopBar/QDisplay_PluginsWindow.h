@@ -35,7 +35,8 @@ public:
       }
     } catch (YAML::Exception) {
       QLogger::GetInstance().Log(LOGLEVEL::ERR,
-                                 "Failed to parse yaml filImGui::End();e: ", CONFIG::MODULES_CONFIGURATION_FILE.get());
+                                 "QDisplay_PluginsWindow::QDisplay_PluginsWindow Failed to parse yaml file: ",
+                                 CONFIG::MODULES_CONFIGURATION_FILE.get());
       return;
     }
   }

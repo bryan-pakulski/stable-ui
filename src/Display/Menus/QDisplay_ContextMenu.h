@@ -15,7 +15,7 @@ public:
     if (ImGui::BeginPopup("context menu")) {
       {
         if (ImGui::Selectable("Send to buffer")) {
-          m_stableManager->m_selection->captureBuffer();
+          m_stableManager->captureBuffer();
         }
         if (ImGui::Selectable("Info")) {
         }

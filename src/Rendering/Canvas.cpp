@@ -85,7 +85,8 @@ void Canvas::updateMainWindowTexture() {}
 
 // TODO: Create a new grid chunk object/s based on provided image & coordinates
 void Canvas::createChunk(std::shared_ptr<Image> image, std::pair<int, int> chunk_coordinates) {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Creating new image chunk at coordinates: ", chunk_coordinates.first,
+  QLogger::GetInstance().Log(LOGLEVEL::INFO,
+                             "Canvas::createChunk Creating new image chunk at coordinates: ", chunk_coordinates.first,
                              chunk_coordinates.second, "on canvas: ", m_name);
   m_editorGrid.emplace_back(
       new Chunk(image, m_camera, chunk_coordinates.first, chunk_coordinates.second, m_editorGrid.size()));
