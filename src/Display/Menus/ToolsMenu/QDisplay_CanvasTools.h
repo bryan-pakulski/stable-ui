@@ -67,7 +67,8 @@ private:
       }
       ImGui::EndPopup();
     }
-  }
+
+    }
 
   // Layer Code
   void layerHelper() {
