@@ -71,6 +71,14 @@ void StableManager::captureBuffer() {
                              m_captureBuffer);
 }
 
+// Generate img2img from the selection buffer, check for out of bounds condition and raise error if required
+void StableManager::genFromSelection() {
+  QLogger::GetInstance().Log(LOGLEVEL::INFO,
+                             "StableManager::genFromSelection Generating img2img from selection on canvas ");
+
+  // TODO: call img2img with selection buffer
+}
+
 // Make a canvas active, pass texture to main window
 void StableManager::selectCanvas(int id) {
   // Disable old canvas

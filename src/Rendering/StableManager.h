@@ -65,6 +65,8 @@ public:
   void sendImageToCanvas(Image &im);
   // Set capture buffer flag
   void captureBuffer();
+  // Generate image from selection buffer, img2img
+  void genFromSelection();
 
   // MODEL SERVER INTERACTION
 

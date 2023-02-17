@@ -14,6 +14,11 @@ public:
   virtual void render() {
     if (ImGui::BeginPopup("context menu")) {
       {
+        if (m_stableManager->getModelState() == EXECUTION_STATE::SUCCESS) {
+          if (ImGui::Selectable("Generate")) {
+            m_stableManager->genFromSelection();
+          }
+        }
         if (ImGui::Selectable("Send to buffer")) {
           m_stableManager->captureBuffer();
         }

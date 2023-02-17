@@ -41,12 +41,12 @@ Selection::Selection(std::pair<int, int> coords, GLFWwindow *w, std::shared_ptr<
   // glBindTexture(GL_TEXTURE_2D, m_selection_texture_buffer);
 }
 
-std::pair<int, int> Selection::getCoordinates() { return std::pair<int, int>{m_position.x, -m_position.y}; }
+std::pair<int, int> Selection::getCoordinates() { return std::pair<int, int>{m_position.x, m_position.y}; }
 
 // Offset camera
 void Selection::moveSelectionPosition(float x, float y) {
   m_position.x -= -(x);
-  m_position.y -= -(y);
+  m_position.y -= y;
 }
 
 void Selection::updateLogic() {
