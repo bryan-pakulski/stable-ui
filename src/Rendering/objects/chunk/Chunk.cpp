@@ -9,10 +9,10 @@ Chunk::Chunk(std::shared_ptr<Image> im, std::shared_ptr<Camera> c, int x, int y,
   // Vertex data
   float vertices[] = {
       // positions        // colors         // texture coords
-      (float)m_image->m_width,  (float)m_image->m_height,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top right
-      (float)m_image->m_width,  -(float)m_image->m_height, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, // bottom right
-      -(float)m_image->m_width, -(float)m_image->m_height, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, // bottom left
-      -(float)m_image->m_width, (float)m_image->m_height,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f  // top left
+      (float)m_image->m_width,  (float)m_image->m_height,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
+      (float)m_image->m_width,  -(float)m_image->m_height, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+      -(float)m_image->m_width, -(float)m_image->m_height, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+      -(float)m_image->m_width, (float)m_image->m_height,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
   };
 
   // Index buffer // Element Buffer Objects (EBO)
@@ -59,18 +59,15 @@ void Chunk::updateVisual() {
     glUseProgram(shaderProgram);
 
     // View code
-    setMat4("viewProjection", m_camera->getViewProjectionMatrix());
+    setMat4("view", m_camera->getViewMatrix());
+    setMat4("projection", m_camera->getProjectionMatrix());
 
     // Model projection code
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)) *    // translation
-                      glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) * // rotation
-                      glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));         // scale
+    glm::mat4 model =
+        glm::translate(glm::mat4(1.0f), glm::vec3(m_coordinates.first, m_coordinates.second, 0.0f)) * // translation
+        glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                             // rotation
+        glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));                                     // scale
     setMat4("model", model);
-
-    // Shader uniforms
-    glUniform2f(glGetUniformLocation(shaderProgram, "offset"), (float)m_coordinates.first, (float)m_coordinates.second);
-    glUniform2f(glGetUniformLocation(shaderProgram, "uViewportSize"), (float)m_camera->getScreenSize().first,
-                (float)m_camera->getScreenSize().second);
 
     // Update texture information
     glEnable(GL_BLEND);

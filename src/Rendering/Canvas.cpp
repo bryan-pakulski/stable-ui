@@ -53,7 +53,8 @@ void Canvas::updateVisual() {
   glUseProgram(shaderProgram);
 
   // View code
-  setMat4("viewProjection", m_camera->getViewProjectionMatrix());
+  setMat4("view", m_camera->getViewMatrix());
+  setMat4("projection", m_camera->getProjectionMatrix());
 
   // Model code, default canvas scale is 16,000 x 16,000 pixels
   glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f)) *                // translation

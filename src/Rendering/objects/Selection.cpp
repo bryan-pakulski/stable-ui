@@ -9,14 +9,13 @@ Selection::Selection(std::pair<int, int> coords, GLFWwindow *w, std::shared_ptr<
   m_camera = std::shared_ptr<Camera>(c);
   m_position = glm::vec3(0.0f);
 
-  glfwGetFramebufferSize(m_window, &m_screen.first, &m_screen.second);
   // Vertex data
   float vertices[] = {
       // positions        // colors         // texture coords
-      512.0f,  512.0f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
-      512.0f,  -512.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-      -512.0f, -512.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-      -512.0f, 512.0f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
+      1.0f,  1.0f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
+      1.0f,  -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+      -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+      -1.0f, 1.0f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
   };
 
   // Index buffer // Element Buffer Objects (EBO)
@@ -33,20 +32,27 @@ Selection::Selection(std::pair<int, int> coords, GLFWwindow *w, std::shared_ptr<
 
   linkShaders(vertexShader, fragmentShader, success);
   setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices));
-
-  GLHELPER::LoadTextureFromFile("data/images/selection.png", &m_texture_id, &m_size.first, &m_size.second, true);
-
-  // Initialise selection buffer texture
-  glGenTextures(1, &m_selection_texture_buffer);
-  // glBindTexture(GL_TEXTURE_2D, m_selection_texture_buffer);
 }
 
 std::pair<int, int> Selection::getCoordinates() { return std::pair<int, int>{m_position.x, m_position.y}; }
 
-// Offset camera
-void Selection::moveSelectionPosition(float x, float y) {
-  m_position.x -= -(x);
-  m_position.y -= y;
+// Start a capture at the given screen space coordinates
+void Selection::startCapture(float x, float y) {
+  m_capturePosition.x = (int)x;
+  m_capturePosition.y = (int)y;
+
+  // Convert screen space to world space
+  m_position.x = ceil(x + m_camera->m_position.y);
+  m_position.y = ceil(y + m_camera->m_position.y);
+
+  m_size.first = 0;
+  m_size.second = 0;
+  m_captureInProgress = true;
+}
+
+void Selection::updateCapture(float x, float y) {
+  m_size.first = (int)x - m_capturePosition.x;
+  m_size.second = (int)y - m_capturePosition.y;
 }
 
 void Selection::updateLogic() {
@@ -57,53 +63,41 @@ void Selection::updateVisual() {
   glUseProgram(shaderProgram);
 
   // View code
-  setMat4("viewProjection", m_camera->getViewProjectionMatrix());
+  setMat4("view", m_camera->getViewMatrix());
+
+  // Projection code
+  setMat4("projection", m_camera->getProjectionMatrix());
 
   // Model code
-  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)) *    // translation
-                    glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) * // rotation
-                    glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));         // scale
+  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(m_position.x, m_position.y, 0.0f)) * // translation
+                    glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *              // rotation
+                    glm::scale(glm::mat4(1.0f), glm::vec3(m_size.first, m_size.second, 1.0f));     // scale
   setMat4("model", model);
 
-  glUniform2f(glGetUniformLocation(shaderProgram, "offset"), (float)m_position.x, (float)m_position.y);
-  glUniform2f(glGetUniformLocation(shaderProgram, "uViewportSize"), (float)m_camera->getScreenSize().first,
-              (float)m_camera->getScreenSize().second);
-  // Update texture information
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glBindTexture(GL_TEXTURE_2D, m_texture_id);
+  // Render the square
+  // Set the line width
+  glLineWidth(1.0f);
 
+  // Draw the square
   glBindVertexArray(VAO);
-  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+  glDrawArrays(GL_LINE_LOOP, 0, 4);
+  glBindVertexArray(0);
 }
 
 void Selection::captureBuffer() {
-  glBindTexture(GL_TEXTURE_2D, m_selection_texture_buffer);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, static_cast<int>(m_size.first / m_camera->m_zoom),
-               static_cast<int>(m_size.second / m_camera->m_zoom), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-  // Set texture parameters
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-  // Copy the window contents to the texture
-  int windowWidth, windowHeight;
-  glfwGetFramebufferSize(m_window, &windowWidth, &windowHeight);
-  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_position.x,
-                   windowHeight - (m_position.y + m_size.second), // bottom-left corner of selection
-                   static_cast<int>(m_size.first / m_camera->m_zoom),
-                   static_cast<int>(m_size.second / m_camera->m_zoom), // scaled width and height of selection
-                   0);
-
   QLogger::GetInstance().Log(LOGLEVEL::INFO,
-                             "Selection::captureBuffer Capturing framebuffer details\n\twindow size: ", windowWidth,
-                             windowHeight, "\n\tselection position: ", m_position.x, m_position.y,
-                             "\n\tcamera position: ", m_camera->m_position.x, m_camera->m_position.y);
+                             "Selection::captureBuffer Capturing at screenspace coords: ", m_capturePosition.x,
+                             m_capturePosition.y, "\n\tWorld space coords: ", m_position.x, m_position.y,
+                             "Capture size: ", m_size.first, m_size.second);
 
-  // Unbind the texture
-  glBindTexture(GL_TEXTURE_2D, 0);
+  unsigned char *pixels = new unsigned char[(int)m_capturePosition.x * (int)m_capturePosition.y * 4];
+  glReadPixels(m_capturePosition.x, m_capturePosition.y, m_size.first, m_size.second, GL_RGBA, GL_UNSIGNED_BYTE,
+               pixels);
+  GLuint texture;
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_size.first, m_size.second, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+  delete[] pixels;
 }
 
 void Selection::saveBuffer() {

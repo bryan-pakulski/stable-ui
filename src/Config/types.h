@@ -6,16 +6,16 @@
 #include <cstring>
 #include <string>
 
-class Base {
+class BaseType {
 public:
-  virtual ~Base() = default;
+  virtual ~BaseType() = default;
 };
 
 // Polymorphic copy of std::string
 // TODO: initialise string with a maximum length, this is important as if we reload configuration by
 // editing the string manually via ImGui we don't have the hooks to re-size memory and we risk overwriting if
 // the initial string is too short
-class CString : public Base {
+class CString : public BaseType {
   std::string m_string = "";
 
 public:
@@ -28,7 +28,7 @@ public:
 };
 
 // Polymorphic copy of int
-class CInt : public Base {
+class CInt : public BaseType {
   int m_int;
 
 public:
@@ -38,7 +38,7 @@ public:
 };
 
 // Polymorphic copy of float
-class CFloat : public Base {
+class CFloat : public BaseType {
   float m_float;
 
 public:

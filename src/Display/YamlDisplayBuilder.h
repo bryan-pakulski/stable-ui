@@ -6,11 +6,13 @@
 #include "../Rendering/Helper.h"
 #include "QDisplay_Base.h"
 
+#include "../Config/types.h"
 class YamlDisplayBuilder : public QDisplay_Base {
 public:
   bool m_terminate = false;
 
   std::vector<YAML::Node> m_windows;
+  std::map<std::string, BaseType> m_variables;
 
   // Initialise render manager reference
   YamlDisplayBuilder(std::string yamlPath, std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
@@ -36,6 +38,17 @@ public:
       std::string type = it->first.as<std::string>();
 
       // Read types and construct gui elements
+
+      // TODO: Read variables?
+
+      /*
+        IMGUI TEXT INPUT
+        PARAMS:
+          varName (required)
+          inputType (required, string / int / float / boolean)
+      */
+      if (type == "input") {
+      }
 
       /*
         IMGUI BUTTON

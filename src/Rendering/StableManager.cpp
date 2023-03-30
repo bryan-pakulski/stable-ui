@@ -1,5 +1,6 @@
 #include "StableManager.h"
 #include "GLFW/glfw3.h"
+#include "imgui.h"
 #include "imgui_impl_glfw.h"
 
 // Initialise render manager
@@ -163,38 +164,41 @@ void StableManager::key_callback(GLFWwindow *window, int key, int scancode, int 
 }
 
 // Mouse movement callback
-void StableManager::mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
+void StableManager::mouse_cursor_callback(GLFWwindow *window, double xposIn, double yposIn) {
+  // Check if the click was inside an ImGui window or popup
+  if (ImGui::IsWindowFocused() || ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopup)) {
+    return;
+  }
   StableManager *rm;
   rm = (StableManager *)glfwGetWindowUserPointer(window);
 
   // Move camera view
-  if (rm->m_cameraDrag && (rm->m_camera->cur_mouse.x > CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get())) {
+  if (rm->m_cameraDrag) {
     rm->m_camera->moveCameraPosition(static_cast<float>(xposIn) - rm->m_camera->prev_mouse.x,
                                      static_cast<float>(yposIn) - rm->m_camera->prev_mouse.y);
     rm->m_camera->prev_mouse.x = xposIn;
     rm->m_camera->prev_mouse.y = yposIn;
   }
 
-  // Move selection window around
-  if (rm->m_selectionDrag && (rm->m_selection->cur_mouse.x > CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get())) {
-    rm->m_selection->moveSelectionPosition(static_cast<float>(xposIn) - rm->m_selection->prev_mouse.x,
-                                           static_cast<float>(yposIn) - rm->m_selection->prev_mouse.y);
-    rm->m_selection->prev_mouse.x = xposIn;
-    rm->m_selection->prev_mouse.y = yposIn;
+  // Catch selection coordinates
+  if (rm->m_selection->m_captureInProgress) {
+    rm->m_selection->updateCapture(xposIn, yposIn);
   }
 
   rm->m_camera->cur_mouse.x = xposIn;
   rm->m_camera->cur_mouse.y = yposIn;
-  rm->m_selection->cur_mouse.x = xposIn;
-  rm->m_selection->cur_mouse.y = yposIn;
 }
 
 // Mouse button callback function for dragging camera and interacting with canvas
 void StableManager::mouse_btn_callback(GLFWwindow *window, int button, int action, int mods) {
+  // Check if the click was inside an ImGui window or popup
+  if (ImGui::IsWindowFocused() || ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopup)) {
+    return;
+  }
   StableManager *rm;
   rm = (StableManager *)glfwGetWindowUserPointer(window);
 
-  if (button == GLFW_MOUSE_BUTTON_MIDDLE && (rm->m_camera->cur_mouse.x > CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get())) {
+  if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
     if (GLFW_PRESS == action) {
       rm->m_camera->prev_mouse.x = rm->m_camera->cur_mouse.x;
       rm->m_camera->prev_mouse.y = rm->m_camera->cur_mouse.y;
@@ -204,17 +208,16 @@ void StableManager::mouse_btn_callback(GLFWwindow *window, int button, int actio
     }
   }
 
-  if (button == GLFW_MOUSE_BUTTON_LEFT && (rm->m_selection->cur_mouse.x > CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get())) {
-    if (GLFW_PRESS == action) {
-      rm->m_selection->prev_mouse.x = rm->m_selection->cur_mouse.x;
-      rm->m_selection->prev_mouse.y = rm->m_selection->cur_mouse.y;
-      rm->m_selectionDrag = true;
-    } else if (GLFW_RELEASE == action) {
-      rm->m_selectionDrag = false;
-    }
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS &&
+      (rm->m_camera->cur_mouse.x > CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get())) {
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
+    rm->m_selection->startCapture(xpos, ypos);
+  } else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+    rm->m_selection->m_captureInProgress = false;
   }
 
-  if (button == GLFW_MOUSE_BUTTON_RIGHT && (rm->m_camera->cur_mouse.x > CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get())) {
+  if (button == GLFW_MOUSE_BUTTON_RIGHT) {
     rm->m_contextWindowVisible = true;
   }
 }
