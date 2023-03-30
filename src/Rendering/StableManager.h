@@ -96,6 +96,8 @@ public:
 
 private:
   GLFWwindow &m_window;
+  GLuint fbo;
+  GLuint m_colorBufferTexture;
 
   int m_modelLoaded = EXECUTION_STATE::PENDING;
   model m_model;

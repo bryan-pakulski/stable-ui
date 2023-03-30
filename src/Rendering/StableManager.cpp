@@ -22,6 +22,28 @@ StableManager::StableManager(GLFWwindow &w) : m_window{w} {
   // Intialise python interface for calling commands
   SDCommandsInterface::GetInstance();
   SDCommandsInterface::GetInstance().launchSDModelServer();
+
+  // Set up frame buffer for rendering canvas
+  glGenFramebuffers(1, &fbo);
+  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+  // Attach color buffer
+  glGenTextures(1, &m_colorBufferTexture);
+  glBindTexture(GL_TEXTURE_2D, m_colorBufferTexture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_camera->m_screen.first, m_camera->m_screen.second, 0, GL_RGBA,
+               GL_UNSIGNED_BYTE, NULL);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colorBufferTexture, 0);
+
+  GLenum framebuffer_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+  if (framebuffer_status != GL_FRAMEBUFFER_COMPLETE) {
+    // Handle error with framebuffer here
+  }
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 // Destructor, destroy remaining instances
@@ -49,19 +71,30 @@ void StableManager::logicLoop() {
 void StableManager::renderLoop() {
   m_camera->updateVisual();
 
+  // TODO: draw canvas to frame buffer
+  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+  glViewport(0, 0, m_camera->m_screen.first, m_camera->m_screen.second);
+
   for (auto &canvas : m_canvas) {
     if (canvas->m_active) {
       canvas->updateVisual();
     }
   }
 
-  m_selection->updateVisual();
-
   // Capture render buffer to texture if flag is set
   if (m_captureBuffer == true) {
     m_selection->captureBuffer();
     m_captureBuffer = false;
   }
+
+  // Render Frame Buffer
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+  glBlitFramebuffer(0, 0, m_camera->m_screen.first, m_camera->m_screen.second, 0, 0, m_camera->m_screen.first,
+                    m_camera->m_screen.second, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  m_selection->updateVisual();
 }
 
 // Set capture render buffer flag, check for out of bounds condition and raise error if required

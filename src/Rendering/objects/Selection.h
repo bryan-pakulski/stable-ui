@@ -8,7 +8,6 @@ class Selection : public BaseObject {
 
 private:
   std::shared_ptr<Camera> m_camera; // Camera ptr
-  GLuint m_texture_id;
 
   // Mouse positions for dragging across screen
   glm::vec2 prev_mouse;

@@ -32,6 +32,9 @@ Selection::Selection(std::pair<int, int> coords, GLFWwindow *w, std::shared_ptr<
 
   linkShaders(vertexShader, fragmentShader, success);
   setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices));
+
+  // Initialise selection buffer texture
+  glGenTextures(1, &m_selection_texture_buffer);
 }
 
 std::pair<int, int> Selection::getCoordinates() { return std::pair<int, int>{m_position.x, m_position.y}; }
@@ -90,14 +93,23 @@ void Selection::captureBuffer() {
                              m_capturePosition.y, "\n\tWorld space coords: ", m_position.x, m_position.y,
                              "Capture size: ", m_size.first, m_size.second);
 
-  unsigned char *pixels = new unsigned char[(int)m_capturePosition.x * (int)m_capturePosition.y * 4];
+  // Allocate memory block size of pixel count
+  std::vector<unsigned char> pixels(m_size.first * m_size.second * 4);
+
+  // Read pixels starting from m_capturePosition with specified width, height, format and type
+  glReadBuffer(GL_COLOR_ATTACHMENT0);
   glReadPixels(m_capturePosition.x, m_capturePosition.y, m_size.first, m_size.second, GL_RGBA, GL_UNSIGNED_BYTE,
-               pixels);
-  GLuint texture;
-  glGenTextures(1, &texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_size.first, m_size.second, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-  delete[] pixels;
+               pixels.data());
+  // Check for errors here
+
+  // Create the texture buffer with correct format, internal format and properties
+  glGenTextures(1, &m_selection_texture_buffer);
+  glBindTexture(GL_TEXTURE_2D, m_selection_texture_buffer);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_size.first, m_size.second, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+
+  // If filtering is requred:
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Selection::saveBuffer() {
