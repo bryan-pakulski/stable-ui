@@ -34,6 +34,7 @@ public:
 
   void updateLogic() override;
   void updateVisual() override;
+  void renderChunks();
 
   // Checks which grids are visible and creates a texture to apply to the main window
   void updateMainWindowTexture();

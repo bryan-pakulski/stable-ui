@@ -29,7 +29,7 @@ public:
   float m_zoom = 0.5f;
   const float c_defaultZoom = 0.5f;
   std::pair<float, float> c_zoom_minmax{0.05f, 3.0f};
-  float m_zoomSpeed = 0.5f;
+  float m_zoomSpeed = 0.05f;
 
   glm::vec3 m_position;
   std::pair<int, int> m_screen{}; // Screen size

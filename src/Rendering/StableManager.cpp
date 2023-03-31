@@ -71,15 +71,12 @@ void StableManager::logicLoop() {
 void StableManager::renderLoop() {
   m_camera->updateVisual();
 
-  // TODO: draw canvas to frame buffer
+  // TODO: seperate the chunk rendering from the base canvas so that there is no visible background for our textures
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);
   glViewport(0, 0, m_camera->m_screen.first, m_camera->m_screen.second);
 
-  for (auto &canvas : m_canvas) {
-    if (canvas->m_active) {
-      canvas->updateVisual();
-    }
-  }
+  getActiveCanvas()->updateVisual();
+  getActiveCanvas()->renderChunks();
 
   // Capture render buffer to texture if flag is set
   if (m_captureBuffer == true) {
@@ -198,10 +195,6 @@ void StableManager::key_callback(GLFWwindow *window, int key, int scancode, int 
 
 // Mouse movement callback
 void StableManager::mouse_cursor_callback(GLFWwindow *window, double xposIn, double yposIn) {
-  // Check if the click was inside an ImGui window or popup
-  if (ImGui::IsWindowFocused() || ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopup)) {
-    return;
-  }
   StableManager *rm;
   rm = (StableManager *)glfwGetWindowUserPointer(window);
 
@@ -225,9 +218,10 @@ void StableManager::mouse_cursor_callback(GLFWwindow *window, double xposIn, dou
 // Mouse button callback function for dragging camera and interacting with canvas
 void StableManager::mouse_btn_callback(GLFWwindow *window, int button, int action, int mods) {
   // Check if the click was inside an ImGui window or popup
-  if (ImGui::IsWindowFocused() || ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopup)) {
+  if (ImGui::GetIO().WantCaptureMouse) {
     return;
   }
+
   StableManager *rm;
   rm = (StableManager *)glfwGetWindowUserPointer(window);
 
@@ -241,8 +235,7 @@ void StableManager::mouse_btn_callback(GLFWwindow *window, int button, int actio
     }
   }
 
-  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS &&
-      (rm->m_camera->cur_mouse.x > CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get())) {
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && (rm->m_camera->cur_mouse.x)) {
     double xpos, ypos;
     glfwGetCursorPos(window, &xpos, &ypos);
     rm->m_selection->startCapture(xpos, ypos);
@@ -253,6 +246,11 @@ void StableManager::mouse_btn_callback(GLFWwindow *window, int button, int actio
   if (button == GLFW_MOUSE_BUTTON_RIGHT) {
     rm->m_contextWindowVisible = true;
   }
+}
+
+void StableManager::mouse_scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+  StableManager *rm = (StableManager *)glfwGetWindowUserPointer(window);
+  rm->m_camera->m_zoom -= (yoffset * rm->m_camera->m_zoomSpeed);
 }
 
 // Close window callback

@@ -69,7 +69,9 @@ void Canvas::updateVisual() {
 
   glBindVertexArray(VAO);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+}
 
+void Canvas::renderChunks() {
   // TODO: render onto framebuffer
   // Check which chunks are in view and should be rendered
   for (auto &chunk : m_editorGrid) {
