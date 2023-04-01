@@ -26,6 +26,9 @@ public:
   glm::vec2 prev_mouse;
   glm::vec2 cur_mouse;
 
+  // Helper to convert screenspace coordinates to global coordinates
+  glm::vec2 screenToGlobalCoordinates(float x, float y);
+
   float m_zoom = 0.5f;
   const float c_defaultZoom = 0.5f;
   std::pair<float, float> c_zoom_minmax{0.05f, 3.0f};
