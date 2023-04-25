@@ -20,7 +20,6 @@ StableManager::StableManager(GLFWwindow &w) : m_window{w} {
   createCanvas(0, 0, "default");
 
   // Intialise python interface for calling commands
-  SDCommandsInterface::GetInstance();
   SDCommandsInterface::GetInstance().launchSDModelServer();
 
   // Set up frame buffer for rendering canvas
@@ -249,6 +248,11 @@ void StableManager::mouse_btn_callback(GLFWwindow *window, int button, int actio
 }
 
 void StableManager::mouse_scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+  // Check if the click was inside an ImGui window or popup
+  if (ImGui::GetIO().WantCaptureMouse) {
+    return;
+  }
+
   StableManager *rm = (StableManager *)glfwGetWindowUserPointer(window);
   rm->m_camera->m_zoom -= (yoffset * rm->m_camera->m_zoomSpeed);
 }

@@ -132,6 +132,7 @@ add_executable( stable-ui
                 src/Rendering/objects/chunk/Chunk.cpp
                 src/SDInterface/SDCommandsInterface.cpp 
                 src/SDInterface/py/SnakeHandler.cpp
+                src/SDInterface/Heartbeat.cpp
         )
 
 target_include_directories(

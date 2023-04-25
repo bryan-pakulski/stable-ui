@@ -52,7 +52,7 @@ class StableDiffusionBaseProcess():
 
         # Initialise logging
         logging.basicConfig(
-            filename="/shared-config/sd_server.log",
+            filename="/logs/sd_server.log",
             level=logging.INFO,
             format="[SDSERVER] %(asctime)s - %(levelname)s - %(message)s"
         )

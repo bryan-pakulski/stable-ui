@@ -22,6 +22,8 @@ public:
   virtual std::string getArg() = 0;
 };
 
+typedef std::vector<std::unique_ptr<base_type>> PyArgs;
+
 /*
     Possible types:
     d - int
@@ -47,12 +49,14 @@ private:
   PyObject *m_pName, *m_pModule, *m_pFunc;
   PyObject *m_pArgs, *m_pValue;
   std::mutex m_mutex;
-
   std::string m_filename;
+
+  bool popArguments(std::shared_ptr<PyArgs> arguments, PyObject *pargs);
 
 public:
   SnakeHandler(std::string filename);
   ~SnakeHandler();
 
-  bool callFunction(const std::string function, std::vector<std::unique_ptr<base_type>> *arguments, int &state);
+  bool callFunction(const std::string function, std::shared_ptr<PyArgs> arguments, int &state);
+  bool asyncCall(const std::string function, std::shared_ptr<PyArgs> arguments, int &state);
 };

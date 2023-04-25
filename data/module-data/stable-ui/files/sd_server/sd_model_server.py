@@ -1,7 +1,9 @@
+#!/opt/conda/envs/ldm/bin/python3.8
 # Starts and runs a model server, this maintains an active model in memory
 # Should improve performance without having to reload constantly
 
 import traceback
+import threading, _thread
 from sd import txt2img as txt2img
 from sd import img2img as img2img
 from sd import sd_model
@@ -15,7 +17,67 @@ import logging
 
 context = zmq.Context()
 socket = context.socket(zmq.REP)
+heartbeatSocket = context.socket(zmq.REP)
 socket.bind("tcp://*:5555")
+heartbeatSocket.bind("tcp://*:5556")
+
+# Initialise logging
+logging.basicConfig(
+    filename="/logs/sd_server.log",
+    level=logging.INFO,
+    format="[SDSERVER] %(asctime)s - %(levelname)s - %(message)s"
+)
+
+logging.addLevelName(logging.INFO, "INFO")
+logging.addLevelName(logging.WARNING, "WARN")
+logging.addLevelName(logging.ERROR, "ERR")
+
+class MQServer():
+    def __init__(self):
+        self.running = True
+        self.debuglogging = False
+        self.commandList = {}
+        
+    # Create a command from a message
+    def parseMessage(self, message):
+        if self.debuglogging:
+            logging.info(f"Recieved message: {message.decode()}")
+        return Command(message.decode())
+
+    # Validate a command is correct against the command list
+    def validateCommand(self, cmd):
+        command_name = cmd.command
+        command_args = cmd.arguments
+
+        # Get the argument requirements from the commandList
+        if not command_name in self.commandList:
+            logging.error(f"Command not found: {command_name}")
+            return False
+
+        # Return immediately if arguments aren't required
+        command_arg_requirements = self.commandList[command_name]["arguments"]
+        if command_arg_requirements == None:
+            return True
+
+        # Check if the command has all the required arguments
+        for arg_name, arg_details in command_arg_requirements.items():
+            # If the argument is required, check if it is present in the command
+            if arg_details["required"] and arg_name not in command_args:
+                # Return False if the argument is missing
+                logging.error(f"Missing required argument: {arg_name}")
+                return False
+
+            # Set type
+            if arg_name in command_args:
+                cmd.arguments[arg_name] = arg_details["type"](
+                    cmd.arguments[arg_name])
+
+        # Return True if the command has all the required arguments
+        return True
+
+    # Sets up the callback for command
+    def hookCommand(self, cmd):
+        return self.commandList[cmd.command]["function"](cmd)
 
 
 class Command():
@@ -37,16 +99,65 @@ class Command():
                 arg, val = pair.split("=")
                 self.arguments[arg] = val
 
-
-class SDModelServer():
+class HeartBeatServer(MQServer):
 
     def __init__(self):
-        self.running = True
+        MQServer.__init__(self)
+        self.commandList = {
+            "ping": {
+                "help": "pong",
+                "arguments": {},
+                "function": self.__pong
+            }
+        }
+
+    def __pong(self, cmd):
+        return "pong"
+
+    # Main loop
+    def main(self):
+        heartbeatSocket.setsockopt(zmq.RCVTIMEO, 10000)
+        response = ""
+
+        logging.info(f"Heartbeat listener started")
+
+        while self.running:
+            #  Wait for next request from client
+            try: 
+                message = heartbeatSocket.recv()
+            except zmq.error.Again:
+                print("Heartbeat timeout")
+                logging.info(f"heartbeat timeout detected, 10000ms without a response")
+                self.running = False
+                break
+
+            # We received a response
+            try:
+                cmd = self.parseMessage(message)
+                if (self.validateCommand(cmd)):
+                    response = self.hookCommand(cmd)
+                else:
+                    response = "Invalid command"
+            except Exception as e:
+                logging.error(traceback.format_exc())
+                response = f"Exception: {traceback.format_exc()}"
+
+            #  Send reply back to client
+            heartbeatSocket.send(response.encode())
+
+        heartbeatSocket.close()
+        
+
+class SDModelServer(MQServer):
+
+    def __init__(self):
+        MQServer.__init__(self)
+        self.debuglogging = True
         self.commandList = {
             "quit": {
                 "help": "Shuts down SD Model Server",
                 "arguments": None,
-                "function": self.__quit
+                "function": self.quit
             },
             "help": {
                 "help": "Prints this message",
@@ -221,63 +332,10 @@ class SDModelServer():
                     }
                 },
                 "function": None
-            }
+            }            
         }
 
         self.model = None
-
-        # Initialise logging
-        logging.basicConfig(
-            filename="/shared-config/sd_server.log",
-            level=logging.INFO,
-            format="[SDSERVER] %(asctime)s - %(levelname)s - %(message)s"
-        )
-
-        logging.addLevelName(logging.INFO, "INFO")
-        logging.addLevelName(logging.WARNING, "WARN")
-        logging.addLevelName(logging.ERROR, "ERR")
-
-        logging.info("Starting up sd_server")
-
-    # Create a command from a message
-    def parseMessage(self, message):
-        logging.info(f"Recieved message: {message.decode()}")
-        return Command(message.decode())
-
-    # Validate a command is correct against the command list
-    def validateCommand(self, cmd):
-        command_name = cmd.command
-        command_args = cmd.arguments
-
-        # Get the argument requirements from the commandList
-        if not command_name in self.commandList:
-            logging.error(f"Command not found: {command_name}")
-            return False
-
-        # Return immediately if arguments aren't required
-        command_arg_requirements = self.commandList[command_name]["arguments"]
-        if command_arg_requirements == None:
-            return True
-
-        # Check if the command has all the required arguments
-        for arg_name, arg_details in command_arg_requirements.items():
-            # If the argument is required, check if it is present in the command
-            if arg_details["required"] and arg_name not in command_args:
-                # Return False if the argument is missing
-                logging.error(f"Missing required argument: {arg_name}")
-                return False
-
-            # Set type
-            if arg_name in command_args:
-                cmd.arguments[arg_name] = arg_details["type"](
-                    cmd.arguments[arg_name])
-
-        # Return True if the command has all the required arguments
-        return True
-
-    # Sets up the callback for command
-    def hookCommand(self, cmd):
-        return self.commandList[cmd.command]["function"](cmd)
 
     # Load and call python function from external module
     def SDModule(self, cmd):
@@ -286,7 +344,7 @@ class SDModelServer():
         module.run()
 
     # Function commands
-    def __quit(self, cmd):
+    def quit(self, cmd):
         self.running = False
         logging.info("Recieved Quit command")
 
@@ -326,12 +384,18 @@ class SDModelServer():
     def main(self):
         response = ""
 
-        while self.running:
-            #  Wait for next request from client
-            logging.info("SD Server waiting for request...")
+        #  Wait for next request from client
+        logging.info("Server waiting for request...")
 
-            message = socket.recv()
-            logging.info("SD Server Received request: %s" % message)
+        while self.running:
+            # Run in a non blocking state, polling every second for new messages
+            try:
+                message = socket.recv(flags=zmq.NOBLOCK)
+            except zmq.Again as e:
+                time.sleep(1.0)
+                continue
+
+            logging.info("Server Received request: %s" % message)
 
             # Break down message, message format is as follows: command:var1=val1,var2=val2 ...
             try:
@@ -345,13 +409,28 @@ class SDModelServer():
                 response = f"Exception: {traceback.format_exc()}"
 
             #  Send reply back to client
-            time.sleep(0.5)
             socket.send(response.encode())
+
+        socket.close()
 
 
 def main():
+    # Start sd model server on seperate thread running in background
     sd_server = SDModelServer()
-    sd_server.main()
+    print("Starting SD Server")
+    server_thread = threading.Thread(target =  sd_server.main)
+    server_thread.start()
+
+    print("Starting Heartbeat server")
+    # Kill main process when heartbeat stops
+    # This should only happen when the client is shut down and we don't receive a poll for over 5s
+    heartbeat_server = HeartBeatServer()
+    heartbeat_thread = threading.Thread(target = heartbeat_server.main)
+    heartbeat_thread.start()
+    heartbeat_thread.join()
+
+    sd_server.quit({})
+    server_thread.join()
 
 
 if __name__ == "__main__":

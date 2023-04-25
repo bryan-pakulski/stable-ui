@@ -15,7 +15,7 @@ class StableDiffusionModel():
     def __init__(self, checkpoint_path: str = "", vae_path: str = "", checkpoint_config_path: str = "", precision: str = ""):
         # Initialise logging
         logging.basicConfig(
-            filename="/shared-config/sd_server.log",
+            filename="/logs/sd_server.log",
             level=logging.INFO,
             format="[SDSERVER] %(asctime)s - %(levelname)s - %(message)s"
         )
@@ -126,22 +126,27 @@ class StableDiffusionModel():
             self.load_vae()
 
     def load_model(self):
-        from common import lowvram
-        self.model = instantiate_from_config(self.checkpoint_config.model)
+        try:
+            from common import lowvram
+            self.model = instantiate_from_config(self.checkpoint_config.model)
 
-        if self.model is None:
+            if self.model is None:
+                logging.error('Failed to create model', file=sys.stderr)
+                return None
+
+            self.load_model_weights()
+
+            if self.get_precision() == "low" or self.get_precision() == "med":
+                lowvram.setup_for_low_vram(self.model, True if (
+                    self.get_precision() == "med") else False)
+            else:
+                self.model.to(devices.get_cuda_device_string())
+
+            self.model.eval()
+        except:
+            self.clean()
             logging.error('Failed to create model', file=sys.stderr)
             return None
-
-        self.load_model_weights()
-
-        if self.get_precision() == "low" or self.get_precision() == "med":
-            lowvram.setup_for_low_vram(self.model, True if (
-                self.get_precision() == "med") else False)
-        else:
-            self.model.to(devices.get_cuda_device_string())
-
-        self.model.eval()
 
     def clean(self):
         devices.torch_gc()
