@@ -8,11 +8,15 @@
 #include <memory>
 
 SnakeHandler::SnakeHandler(std::string filename) : m_filename(filename) {
+  // Register threaded state with GIL
+  PyGILState_STATE gstate;
+  gstate = PyGILState_Ensure();
 
   m_pName = PyUnicode_DecodeFSDefault(filename.c_str());
 
   m_pModule = PyImport_Import(m_pName);
   Py_DECREF(m_pName);
+  PyGILState_Release(gstate);
 
   if (!m_pModule) {
     QLogger::GetInstance().Log(LOGLEVEL::ERR, "SnakeHandler::SnakeHandler failed to load python module: ", m_filename);
@@ -25,6 +29,10 @@ SnakeHandler::SnakeHandler(std::string filename) : m_filename(filename) {
 SnakeHandler::~SnakeHandler() {}
 
 bool SnakeHandler::asyncCall(const std::string function, std::shared_ptr<PyArgs> arguments, int &state) {
+  // Register threaded state with GIL
+  PyGILState_STATE gstate;
+  gstate = PyGILState_Ensure();
+
   PyObject *l_pName = PyUnicode_DecodeFSDefault(m_filename.c_str());
   PyObject *l_pModule = PyImport_Import(l_pName);
   Py_DECREF(l_pName);
@@ -32,8 +40,6 @@ bool SnakeHandler::asyncCall(const std::string function, std::shared_ptr<PyArgs>
   if (!l_pModule) {
     QLogger::GetInstance().Log(LOGLEVEL::ERR, "SnakeHandler::asyncCall failed to load python module: ", m_filename);
     PyErr_Print();
-  } else {
-    QLogger::GetInstance().Log(LOGLEVEL::INFO, "SnakeHandler::asyncCall loaded python module: ", m_filename);
   }
 
   /* pFunc is a new reference */
@@ -44,6 +50,7 @@ bool SnakeHandler::asyncCall(const std::string function, std::shared_ptr<PyArgs>
     // Attempt to load arguments
     PyObject *l_pArgs = PyTuple_New(arguments->size());
     if (popArguments(arguments, l_pArgs) != 0) {
+      PyGILState_Release(gstate);
       return EXECUTION_STATE::FAILED;
     }
 
@@ -55,12 +62,14 @@ bool SnakeHandler::asyncCall(const std::string function, std::shared_ptr<PyArgs>
       Py_DECREF(l_pValue);
       Py_XDECREF(l_pFunc);
       state = EXECUTION_STATE::SUCCESS;
+      PyGILState_Release(gstate);
       return 1;
     } else {
       Py_DECREF(l_pFunc);
       PyErr_Print();
       QLogger::GetInstance().Log(LOGLEVEL::ERR, m_filename, "SnakeHandler::asyncCall call failed for: ", function);
       state = EXECUTION_STATE::FAILED;
+      PyGILState_Release(gstate);
       return 0;
     }
   }
@@ -73,6 +82,7 @@ bool SnakeHandler::asyncCall(const std::string function, std::shared_ptr<PyArgs>
     Py_DECREF(l_pFunc);
   }
 
+  PyGILState_Release(gstate);
   state = EXECUTION_STATE::FAILED;
 
   return 0;
@@ -113,18 +123,9 @@ bool SnakeHandler::popArguments(std::shared_ptr<PyArgs> arguments, PyObject *par
 
 bool SnakeHandler::callFunction(const std::string function, std::shared_ptr<PyArgs> arguments, int &state) {
   std::lock_guard<std::mutex> guard(m_mutex);
+  PyGILState_STATE gstate;
+  gstate = PyGILState_Ensure();
 
-  // TODO: calling functions in a multithreaded environment causes a segmentation fault
-  /*
-    https://stackoverflow.com/questions/23700035/embedding-python-in-c-crashes-during-running-time
-    m_state = PyThreadState_New(m_interpreterState);
-    PyEval_RestoreThread(m_state);
-
-    // Perform some Python actions here
-
-    // Release Python GIL
-    PyEval_SaveThread();
-  */
   /* pFunc is a new reference */
   m_pFunc = PyObject_GetAttrString(m_pModule, function.c_str());
 
@@ -133,6 +134,7 @@ bool SnakeHandler::callFunction(const std::string function, std::shared_ptr<PyAr
     // Attempt to load arguments
     m_pArgs = PyTuple_New(arguments->size());
     if (popArguments(arguments, m_pArgs) != 0) {
+      PyGILState_Release(gstate);
       return EXECUTION_STATE::FAILED;
     }
 
@@ -146,12 +148,14 @@ bool SnakeHandler::callFunction(const std::string function, std::shared_ptr<PyAr
       state = EXECUTION_STATE::SUCCESS;
       // Free old arguments
       arguments->clear();
+      PyGILState_Release(gstate);
       return 1;
     } else {
       Py_DECREF(m_pFunc);
       PyErr_Print();
       QLogger::GetInstance().Log(LOGLEVEL::ERR, m_filename, "SnakeHandler::callFunction call failed for: ", function);
       state = EXECUTION_STATE::FAILED;
+      PyGILState_Release(gstate);
       return 0;
     }
   }
@@ -165,5 +169,6 @@ bool SnakeHandler::callFunction(const std::string function, std::shared_ptr<PyAr
   }
 
   state = EXECUTION_STATE::FAILED;
+  PyGILState_Release(gstate);
   return 0;
 }

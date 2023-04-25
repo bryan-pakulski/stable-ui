@@ -12,6 +12,8 @@ SDCommandsInterface::SDCommandsInterface() {
   PyRun_SimpleString("import sys");
   PyRun_SimpleString(path.c_str());
 
+  PyEval_SaveThread();
+
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "SDCommandsInterface::SDCommandsInterface attached PYTHONPATH: ", path);
 
   // sd_commands.py is the script that handles all incoming calls from the stable-ui application
