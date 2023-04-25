@@ -119,12 +119,12 @@ bool SnakeHandler::callFunction(const std::string function, std::shared_ptr<PyAr
     https://stackoverflow.com/questions/23700035/embedding-python-in-c-crashes-during-running-time
     m_state = PyThreadState_New(m_interpreterState);
     PyEval_RestoreThread(m_state);
+
+    // Perform some Python actions here
+
+    // Release Python GIL
+    PyEval_SaveThread();
   */
-
-  // Perform some Python actions here
-
-  // Release Python GIL
-  PyEval_SaveThread();
   /* pFunc is a new reference */
   m_pFunc = PyObject_GetAttrString(m_pModule, function.c_str());
 
