@@ -234,7 +234,7 @@ void StableManager::mouse_btn_callback(GLFWwindow *window, int button, int actio
     }
   }
 
-  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && (rm->m_camera->cur_mouse.x)) {
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
     double xpos, ypos;
     glfwGetCursorPos(window, &xpos, &ypos);
     rm->m_selection->startCapture(xpos, ypos);

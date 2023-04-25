@@ -45,17 +45,23 @@ void Selection::startCapture(float x, float y) {
   m_capturePosition.y = (int)y;
 
   // Convert screen space to world space
-  m_position.x = ceil(x + m_camera->m_position.y);
-  m_position.y = ceil(y + m_camera->m_position.y);
+  glm::vec2 convertedCoords = m_camera->screenToGlobalCoordinates(x, y);
+  m_position.x = ceil(convertedCoords.x);
+  m_position.y = ceil(convertedCoords.y);
 
   m_size.first = 0;
   m_size.second = 0;
   m_captureInProgress = true;
 }
 
+// TODO: Make selection increment in power of two's?
 void Selection::updateCapture(float x, float y) {
-  m_size.first = (int)x - m_capturePosition.x;
-  m_size.second = (int)y - m_capturePosition.y;
+  glm::vec2 convertedCoords = m_camera->screenToGlobalCoordinates(x, y);
+  x = ceil(convertedCoords.x);
+  y = ceil(convertedCoords.y);
+
+  m_size.first = x + m_capturePosition.x;
+  m_size.second = y + m_capturePosition.y;
 }
 
 void Selection::updateLogic() {

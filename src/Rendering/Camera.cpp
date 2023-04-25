@@ -38,6 +38,19 @@ void Camera::recalculateViewMatrix() {
                              glm::vec3(0, 1, 0));                      // Head is up (set to 0,-1,0 to look upside-down)
 }
 
+glm::vec2 Camera::screenToGlobalCoordinates(float x, float y) {
+  // Step 1: Normalize coordinates
+  float normX = (2.0f * x) / m_screen.first - 1.0f;
+  float normY = 1.0f - (2.0f * y) / m_screen.second;
+
+  // Step 2 and 3: Calculate distances from camera position
+  glm::vec2 distFromCamera =
+      glm::vec2((normX * m_screen.first * m_zoom) / 2.0f, (normY * m_screen.second * m_zoom) / 2.0f);
+
+  // Step 4: Add camera position
+  return distFromCamera + glm::vec2(m_position.x, m_position.y);
+}
+
 void Camera::updateLogic() {
   if (m_zoom < c_zoom_minmax.first) {
     m_zoom = c_zoom_minmax.first;

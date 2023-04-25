@@ -13,10 +13,10 @@ Canvas::Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *
   // Set vertex data
   float vertices[] = {
       // positions        // colors         // texture coords
-      16000.0f,  16000.0f,  0.0f, 1.0f, 0.0f, 0.0f, 160.0f, 160.0f, // top right
-      16000.0f,  -16000.0f, 0.0f, 0.0f, 1.0f, 0.0f, 160.0f, 0.0f,   // bottom right
-      -16000.0f, -16000.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,   0.0f,   // bottom left
-      -16000.0f, 16000.0f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f,   160.0f  // top left
+      1.0f,  1.0f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
+      1.0f,  -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+      -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+      -1.0f, 1.0f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
   };
 
   // Index buffer // Element Buffer Objects (EBO)
@@ -59,7 +59,7 @@ void Canvas::updateVisual() {
   // Model code, default canvas scale is 16,000 x 16,000 pixels
   glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f)) *                // translation
                     glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) * // rotation
-                    glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));         // scale
+                    glm::scale(glm::mat4(1.0f), glm::vec3(16000.0f, 16000.0f, 1.0f)); // scale
   setMat4("model", model);
 
   // Update texture information
