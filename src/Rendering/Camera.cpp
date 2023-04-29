@@ -1,5 +1,6 @@
 #include "Camera.h"
 
+#include <algorithm>
 #include <imgui.h>
 #include <string>
 
@@ -24,8 +25,15 @@ Camera::~Camera() {}
 
 // Offset camera
 void Camera::moveCameraPosition(float x, float y) {
-  m_position.x += (-x * m_cameraSpeed);
-  m_position.y += (-y * m_cameraSpeed);
+
+  // Adjust camera speed based on how far zoomed in we are, ranging from min/max camera speed
+  float cameraSpeed = (m_zoom / c_zoom_minmax.second) * m_cameraSpeed.y;
+  if (cameraSpeed < m_cameraSpeed.x) {
+    cameraSpeed = m_cameraSpeed.x;
+  }
+
+  m_position.x += (-x * cameraSpeed);
+  m_position.y += (-y * cameraSpeed);
 }
 
 // Recalculate matrices
@@ -40,15 +48,17 @@ void Camera::recalculateViewMatrix() {
 
 glm::vec2 Camera::screenToGlobalCoordinates(float x, float y) {
   // Step 1: Normalize coordinates
-  float normX = (2.0f * x) / m_screen.first - 1.0f;
-  float normY = 1.0f - (2.0f * y) / m_screen.second;
+  float normX = 2.0f * x / m_screen.first - 1.0f;
+  float normY = 2.0f * y / m_screen.second - 1.0f;
 
-  // Step 2 and 3: Calculate distances from camera position
-  glm::vec2 distFromCamera =
-      glm::vec2((normX * m_screen.first * m_zoom) / 2.0f, (normY * m_screen.second * m_zoom) / 2.0f);
+  // HOMOGENEOUS SPACE
+  glm::vec4 screenPos = glm::vec4(normX, normY, -1.0f, 1.0f);
 
-  // Step 4: Add camera position
-  return distFromCamera + glm::vec2(m_position.x, m_position.y);
+  // Projection/Eye Space
+  glm::mat4 ProjectView = getProjectionMatrix() * getViewMatrix();
+  glm::mat4 viewProjectionInverse = inverse(ProjectView);
+  glm::vec4 worldPos = viewProjectionInverse * screenPos;
+  return glm::vec2(worldPos.x, worldPos.y);
 }
 
 void Camera::updateLogic() {

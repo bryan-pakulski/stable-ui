@@ -39,29 +39,18 @@ Selection::Selection(std::pair<int, int> coords, GLFWwindow *w, std::shared_ptr<
 
 std::pair<int, int> Selection::getCoordinates() { return std::pair<int, int>{m_position.x, m_position.y}; }
 
-// Start a capture at the given screen space coordinates
-void Selection::startCapture(float x, float y) {
-  m_capturePosition.x = (int)x;
-  m_capturePosition.y = (int)y;
+void Selection::startCapture(float x, float y) { m_captureInProgress = true; }
 
-  // Convert screen space to world space
-  glm::vec2 convertedCoords = m_camera->screenToGlobalCoordinates(x, y);
-  m_position.x = ceil(convertedCoords.x);
-  m_position.y = ceil(convertedCoords.y);
-
-  m_size.first = 0;
-  m_size.second = 0;
-  m_captureInProgress = true;
-}
-
-// TODO: Make selection increment in power of two's?
 void Selection::updateCapture(float x, float y) {
   glm::vec2 convertedCoords = m_camera->screenToGlobalCoordinates(x, y);
-  x = ceil(convertedCoords.x);
-  y = ceil(convertedCoords.y);
 
-  m_size.first = x + m_capturePosition.x;
-  m_size.second = y + m_capturePosition.y;
+  // Round coordinates to nearest multiple of 32
+  int roundedX = static_cast<int>(std::round(convertedCoords.x / m_pixelSnap)) * m_pixelSnap;
+  int roundedY = static_cast<int>(std::round(convertedCoords.y / m_pixelSnap)) * m_pixelSnap;
+
+  // Assign to m_position
+  m_position.x = static_cast<float>(roundedX);
+  m_position.y = -static_cast<float>(roundedY);
 }
 
 void Selection::updateLogic() {
@@ -94,18 +83,16 @@ void Selection::updateVisual() {
 }
 
 void Selection::captureBuffer() {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO,
-                             "Selection::captureBuffer Capturing at screenspace coords: ", m_capturePosition.x,
-                             m_capturePosition.y, "\n\tWorld space coords: ", m_position.x, m_position.y,
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Selection::captureBuffer Capturing at screenspace coords: ", m_position.x,
+                             m_position.y, "\n\tWorld space coords: ", m_position.x, m_position.y,
                              "Capture size: ", m_size.first, m_size.second);
 
   // Allocate memory block size of pixel count
   std::vector<unsigned char> pixels(m_size.first * m_size.second * 4);
 
-  // Read pixels starting from m_capturePosition with specified width, height, format and type
+  // Read pixels starting from position with specified width, height, format and type
   glReadBuffer(GL_COLOR_ATTACHMENT0);
-  glReadPixels(m_capturePosition.x, m_capturePosition.y, m_size.first, m_size.second, GL_RGBA, GL_UNSIGNED_BYTE,
-               pixels.data());
+  glReadPixels(m_position.x, m_position.y, m_size.first, m_size.second, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
   // Check for errors here
 
   // Create the texture buffer with correct format, internal format and properties

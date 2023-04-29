@@ -19,9 +19,8 @@ private:
 public:
   GLuint m_selection_texture_buffer = 0;
   std::pair<int, int> m_size{512, 512}; // Selection image size
-
-  glm::vec2 m_capturePosition; // Screen space coordinates
-  bool m_captureInProgress = false;
+  bool m_captureInProgress = false;     // Capture flag, when set we will update the m_position
+  int m_pixelSnap = 512;                // Size of pixel snapping
 
   Selection(std::pair<int, int> coords, GLFWwindow *w, std::shared_ptr<Camera> c);
   virtual ~Selection();

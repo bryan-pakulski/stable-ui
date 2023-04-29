@@ -14,7 +14,9 @@ class Camera {
 
   glm::mat4 m_projectionMatrix;
   glm::mat4 m_viewMatrix;
-  float m_cameraSpeed = 0.5f;
+
+  // Camera speed is proportional to zoom level
+  glm::vec2 m_cameraSpeed = {0.5f, 2.0f};
 
   void recalculateViewMatrix();
 
@@ -29,9 +31,9 @@ public:
   // Helper to convert screenspace coordinates to global coordinates
   glm::vec2 screenToGlobalCoordinates(float x, float y);
 
-  float m_zoom = 0.5f;
-  const float c_defaultZoom = 0.5f;
-  std::pair<float, float> c_zoom_minmax{0.05f, 3.0f};
+  float m_zoom = 1.0f;
+  const float c_defaultZoom = 1.0f;
+  std::pair<float, float> c_zoom_minmax{0.05f, 5.0f};
   float m_zoomSpeed = 0.05f;
 
   glm::vec3 m_position;
