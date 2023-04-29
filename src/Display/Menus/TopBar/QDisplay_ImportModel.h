@@ -1,7 +1,7 @@
 #pragma once
 
 #include <imgui.h>
-#include "../../../Helpers/SHA1.h"
+#include "../../../Helpers/hash.h"
 #include "../../../Display/ErrorHandler.h"
 #include "../../../ThirdParty/imgui/imfilebrowser.h"
 #include "../../QDisplay_Base.h"
