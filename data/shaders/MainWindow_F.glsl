@@ -21,6 +21,13 @@ uniform float iTime;
 
 out vec4 fragColor;
 
+// Grid rendering
+float miv(vec2 a){return min(a.y,a.x);}//return max domain of vector.
+float miv(vec3 a){return min(a.z,miv(a.xy));}
+float miv(vec4 a){return min(miv(a.zw),miv(a.xy));}
+#define mav(a) -miv(-a)
+#define grid(u) mav(abs(fract(u)*2.-1.))
+
 void main() {
   // GET COORDS AND DIRECTIONS
   vec2 uv = (gl_FragCoord.xy / iResolution) - 0.5;
@@ -75,4 +82,11 @@ void main() {
   color *= mix(cold, warm, colorMix);
 
   fragColor = vec4(color.r, color.g, color.b, 1.0);
+
+  w// 2D Grid
+  float zoom =10.;//2d scaling
+  float thick=2.5;//line thickness in screenspace pixels (hairline)
+  
+  float gridLineThickness = zoom*thick/iResolution.y;        
+  fragColor += vec4(0,smoothstep(1.-gridLineThickness,1.,grid(uv*zoom)), 0, 1);
 }

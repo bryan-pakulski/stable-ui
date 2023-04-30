@@ -64,9 +64,8 @@ void Canvas::updateVisual() {
   glUniform3f(glGetUniformLocation(shaderProgram, "iMouse"), m_camera->m_position.x, m_camera->m_position.y,
               m_camera->m_position.z);
 
-  // Get the epoch time in seconds as a float
-  m_time += 0.05;
-  std::cout << m_time << std::endl;
+  // TODO: increment time until we hit the max value for a float, then decrement to zero and repeat
+  m_time += 0.01;
   glUniform1f(glGetUniformLocation(shaderProgram, "iTime"), m_time);
 
   glBindVertexArray(VAO);

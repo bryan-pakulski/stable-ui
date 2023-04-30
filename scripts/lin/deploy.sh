@@ -10,7 +10,7 @@ echo "Running build..."
 mkdir -p build
 pushd build
     cmake -DBUILD_SHARED_LIBS=OFF ..
-    jinja > build.log
+    ninja > build.log
 popd
 
 echo "Packing docker container..."
