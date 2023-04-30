@@ -21,6 +21,7 @@ private:
 
   // Reference to texture for main window
   GLuint m_texture_id;
+  float m_time = 0.0f;
 
   void setTexture(GLuint *id);
 

@@ -44,7 +44,7 @@ void Selection::startCapture(float x, float y) { m_captureInProgress = true; }
 void Selection::updateCapture(float x, float y) {
   glm::vec2 convertedCoords = m_camera->screenToGlobalCoordinates(x, y);
 
-  // Round coordinates to nearest multiple of 32
+  // Round coordinates to nearest multiple of snapping distance
   int roundedX = static_cast<int>(std::round(convertedCoords.x / m_pixelSnap)) * m_pixelSnap;
   int roundedY = static_cast<int>(std::round(convertedCoords.y / m_pixelSnap)) * m_pixelSnap;
 

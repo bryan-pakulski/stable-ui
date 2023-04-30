@@ -1,4 +1,5 @@
 #include "Canvas.h"
+#include <chrono>
 
 Canvas::~Canvas() {}
 
@@ -33,10 +34,6 @@ Canvas::Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *
 
   linkShaders(vertexShader, fragmentShader, success);
   setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices));
-
-  int imgX = 0;
-  int imgY = 0;
-  GLHELPER::LoadTextureFromFile("data/images/uv_grid.png", &m_texture_id, &imgX, &imgY, true);
 }
 
 void Canvas::updateLogic() {
@@ -57,15 +54,20 @@ void Canvas::updateVisual() {
   setMat4("projection", m_camera->getProjectionMatrix());
 
   // Model code, default canvas scale is 16,000 x 16,000 pixels
-  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f)) *                // translation
+  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 0.0f)) *    // translation
                     glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) * // rotation
                     glm::scale(glm::mat4(1.0f), glm::vec3(16000.0f, 16000.0f, 1.0f)); // scale
   setMat4("model", model);
 
-  // Update texture information
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glBindTexture(GL_TEXTURE_2D, m_texture_id);
+  // Set screen size, camera coords and time
+  glUniform2f(glGetUniformLocation(shaderProgram, "iResolution"), m_camera->m_screen.first, m_camera->m_screen.second);
+  glUniform3f(glGetUniformLocation(shaderProgram, "iMouse"), m_camera->m_position.x, m_camera->m_position.y,
+              m_camera->m_position.z);
+
+  // Get the epoch time in seconds as a float
+  m_time += 0.05;
+  std::cout << m_time << std::endl;
+  glUniform1f(glGetUniformLocation(shaderProgram, "iTime"), m_time);
 
   glBindVertexArray(VAO);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);

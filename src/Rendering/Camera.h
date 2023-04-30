@@ -16,7 +16,7 @@ class Camera {
   glm::mat4 m_viewMatrix;
 
   // Camera speed is proportional to zoom level
-  glm::vec2 m_cameraSpeed = {0.5f, 2.0f};
+  glm::vec2 m_cameraSpeed = {0.5f, 5.0f};
 
   void recalculateViewMatrix();
 
