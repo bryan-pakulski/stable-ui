@@ -15,7 +15,7 @@ public:
     // TODO: Make Popup menus a static definition
     if (ImGui::BeginPopup("context menu")) {
       {
-        if (m_stableManager->getModelState() == EXECUTION_STATE::SUCCESS) {
+        if (m_stableManager->getModelState() == Q_EXECUTION_STATE::SUCCESS) {
           if (ImGui::Selectable("Fill")) {
             m_stableManager->genFromSelection();
           }

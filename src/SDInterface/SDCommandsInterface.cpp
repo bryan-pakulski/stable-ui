@@ -28,7 +28,7 @@ void SDCommandsInterface::launchSDModelServer() {
   std::string functionName = "launchSDModelServer";
   m_arguments->emplace_back(
       std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", CONFIG::SD_MODEL_SERVER.get(), 0)));
-  m_dockerState = EXECUTION_STATE::LOADING;
+  m_dockerState = Q_EXECUTION_STATE::LOADING;
 
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "SDCommandsInterface::launchSDModelServer starting up SD Model Server...");
   m_Thread =
@@ -42,7 +42,7 @@ void SDCommandsInterface::terminateSDModelServer() {
   std::string execPath = CONFIG::SD_SERVER_CLIENT.get();
 
   m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", execPath, 0)));
-  m_dockerState = EXECUTION_STATE::LOADING;
+  m_dockerState = Q_EXECUTION_STATE::LOADING;
 
   // Wait for thread execution to finish
   QLogger::GetInstance().Log(LOGLEVEL::INFO,
@@ -57,7 +57,7 @@ void SDCommandsInterface::attachModelToServer(std::string ckpt_path, std::string
                                               std::string precision, int &state) {
   std::string functionName = "attachSDModelToServer";
   std::string execPath = CONFIG::SD_SERVER_CLIENT.get();
-  state = EXECUTION_STATE::LOADING;
+  state = Q_EXECUTION_STATE::LOADING;
 
   m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", execPath, 0)));
   m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "ckpt_path", ckpt_path, 1)));
@@ -107,7 +107,7 @@ void SDCommandsInterface::textToImage(std::string sdModelPath, std::string &canv
   m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "n_iter", 1, 13)));
 
   // Offload thread execution, image generation can take some time
-  renderState = EXECUTION_STATE::LOADING;
+  renderState = Q_EXECUTION_STATE::LOADING;
   m_Thread =
       std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, m_arguments, std::ref(renderState));
   m_Thread.detach();
@@ -138,7 +138,7 @@ void SDCommandsInterface::imageToImage(std::string &sdModelPath, std::string &ca
   m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "n_iter", 1, 13)));
 
   // Offload thread execution, image generation can take some time
-  renderState = EXECUTION_STATE::LOADING;
+  renderState = Q_EXECUTION_STATE::LOADING;
   m_Thread =
       std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, m_arguments, std::ref(renderState));
   m_Thread.detach();

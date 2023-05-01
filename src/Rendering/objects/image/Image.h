@@ -11,8 +11,8 @@ class Image {
 public:
   GLuint m_texture = 0;
   GLuint m_framebuffer = 0;
-  int renderState = EXECUTION_STATE::PENDING;
-  bool textured = EXECUTION_STATE::PENDING;
+  int renderState = Q_EXECUTION_STATE::PENDING;
+  bool textured = Q_EXECUTION_STATE::PENDING;
   std::string m_name;
   std::string m_image_source;
   int m_width;

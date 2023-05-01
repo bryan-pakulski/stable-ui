@@ -57,7 +57,7 @@ public:
 
     // Rendering menus
     if (ImGui::CollapsingHeader("Rendering")) {
-      if (m_stableManager->getModelState() == EXECUTION_STATE::SUCCESS) {
+      if (m_stableManager->getModelState() == Q_EXECUTION_STATE::SUCCESS) {
         {
           if (ImGui::Button("txt2img")) {
             tab = 0;
@@ -79,11 +79,11 @@ public:
         if (tab == 1) {
           Image2ImageWindow->render();
         }
-      } else if (m_stableManager->getModelState() == EXECUTION_STATE::PENDING) {
+      } else if (m_stableManager->getModelState() == Q_EXECUTION_STATE::PENDING) {
         ImGui::Text("Please import and load a model first!");
-      } else if (m_stableManager->getModelState() == EXECUTION_STATE::LOADING) {
+      } else if (m_stableManager->getModelState() == Q_EXECUTION_STATE::LOADING) {
         ImGui::Text("Please wait for model to finish loading...");
-      } else if (m_stableManager->getModelState() == EXECUTION_STATE::FAILED) {
+      } else if (m_stableManager->getModelState() == Q_EXECUTION_STATE::FAILED) {
         ImGui::Text("Model failed to load, please check application logs");
       }
     }

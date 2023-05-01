@@ -51,7 +51,7 @@ bool SnakeHandler::asyncCall(const std::string function, std::shared_ptr<PyArgs>
     PyObject *l_pArgs = PyTuple_New(arguments->size());
     if (popArguments(arguments, l_pArgs) != 0) {
       PyGILState_Release(gstate);
-      return EXECUTION_STATE::FAILED;
+      return Q_EXECUTION_STATE::FAILED;
     }
 
     // Call function with arguments
@@ -61,14 +61,14 @@ bool SnakeHandler::asyncCall(const std::string function, std::shared_ptr<PyArgs>
     if (l_pValue && PyLong_AsLong(l_pValue) == 0) {
       Py_DECREF(l_pValue);
       Py_XDECREF(l_pFunc);
-      state = EXECUTION_STATE::SUCCESS;
+      state = Q_EXECUTION_STATE::SUCCESS;
       PyGILState_Release(gstate);
       return 1;
     } else {
       Py_DECREF(l_pFunc);
       PyErr_Print();
       QLogger::GetInstance().Log(LOGLEVEL::ERR, m_filename, "SnakeHandler::asyncCall call failed for: ", function);
-      state = EXECUTION_STATE::FAILED;
+      state = Q_EXECUTION_STATE::FAILED;
       PyGILState_Release(gstate);
       return 0;
     }
@@ -83,7 +83,7 @@ bool SnakeHandler::asyncCall(const std::string function, std::shared_ptr<PyArgs>
   }
 
   PyGILState_Release(gstate);
-  state = EXECUTION_STATE::FAILED;
+  state = Q_EXECUTION_STATE::FAILED;
 
   return 0;
 }
@@ -109,7 +109,7 @@ bool SnakeHandler::popArguments(std::shared_ptr<PyArgs> arguments, PyObject *par
       Py_DECREF(pargs);
       QLogger::GetInstance().Log(LOGLEVEL::ERR, m_filename,
                                  "SnakeHandler::callFunction Can't convert argument of type: ", arg->getType());
-      return EXECUTION_STATE::FAILED;
+      return Q_EXECUTION_STATE::FAILED;
     }
 
     /* pValue reference stolen here: */
@@ -135,7 +135,7 @@ bool SnakeHandler::callFunction(const std::string function, std::shared_ptr<PyAr
     m_pArgs = PyTuple_New(arguments->size());
     if (popArguments(arguments, m_pArgs) != 0) {
       PyGILState_Release(gstate);
-      return EXECUTION_STATE::FAILED;
+      return Q_EXECUTION_STATE::FAILED;
     }
 
     // Call function with arguments
@@ -145,7 +145,7 @@ bool SnakeHandler::callFunction(const std::string function, std::shared_ptr<PyAr
     if (m_pValue && PyLong_AsLong(m_pValue) == 0) {
       Py_DECREF(m_pValue);
       Py_XDECREF(m_pFunc);
-      state = EXECUTION_STATE::SUCCESS;
+      state = Q_EXECUTION_STATE::SUCCESS;
       // Free old arguments
       arguments->clear();
       PyGILState_Release(gstate);
@@ -154,7 +154,7 @@ bool SnakeHandler::callFunction(const std::string function, std::shared_ptr<PyAr
       Py_DECREF(m_pFunc);
       PyErr_Print();
       QLogger::GetInstance().Log(LOGLEVEL::ERR, m_filename, "SnakeHandler::callFunction call failed for: ", function);
-      state = EXECUTION_STATE::FAILED;
+      state = Q_EXECUTION_STATE::FAILED;
       PyGILState_Release(gstate);
       return 0;
     }
@@ -168,7 +168,7 @@ bool SnakeHandler::callFunction(const std::string function, std::shared_ptr<PyAr
     Py_DECREF(m_pFunc);
   }
 
-  state = EXECUTION_STATE::FAILED;
+  state = Q_EXECUTION_STATE::FAILED;
   PyGILState_Release(gstate);
   return 0;
 }

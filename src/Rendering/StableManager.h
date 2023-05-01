@@ -102,7 +102,7 @@ private:
   static GLuint fbo;
   static GLuint m_colorBufferTexture;
 
-  int m_modelLoaded = EXECUTION_STATE::PENDING;
+  int m_modelLoaded = Q_EXECUTION_STATE::PENDING;
   model m_model;
   bool m_captureBuffer = false;
 

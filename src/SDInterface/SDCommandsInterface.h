@@ -16,7 +16,7 @@ private:
   std::unique_ptr<SnakeHandler> m_py_handle;
   std::shared_ptr<PyArgs> m_arguments;
   std::thread m_Thread;
-  int m_dockerState = EXECUTION_STATE::PENDING;
+  int m_dockerState = Q_EXECUTION_STATE::PENDING;
 
   SDCommandsInterface();
   ~SDCommandsInterface();

@@ -26,7 +26,7 @@ class QDisplay_Text2Image : public QDisplay_Base {
   double m_cfg = 7.5;
 
   std::unique_ptr<Image> m_image = 0;
-  int m_renderState = EXECUTION_STATE::PENDING;
+  int m_renderState = Q_EXECUTION_STATE::PENDING;
 
 public:
   // Initialise render manager references
@@ -70,7 +70,7 @@ public:
     if (ImGui::CollapsingHeader("Render")) {
       if (m_image) {
         // Generate option only available whilst a image isn't pending
-        if (m_image->renderState != EXECUTION_STATE::LOADING) {
+        if (m_image->renderState != Q_EXECUTION_STATE::LOADING) {
           if (ImGui::Button("Generate")) {
             renderImage();
           }
@@ -79,7 +79,7 @@ public:
         }
 
         // Once image is marked as rendered display on screen
-        if (m_image->renderState == EXECUTION_STATE::SUCCESS) {
+        if (m_image->renderState == Q_EXECUTION_STATE::SUCCESS) {
           ImGui::Text("image width: %d image height:%d", m_image->m_width, m_image->m_height);
           if (ImGui::Button("Send to Canvas")) {
             // Send image to be rendered on canvas at selection coordinates
