@@ -47,7 +47,7 @@ private:
   void run();
 
 public:
-  int m_state = HEARTBEAT_STATE::ALIVE;
+  int m_state = HEARTBEAT_STATE::DEAD;
 
   static Heartbeat &GetInstance() {
     static Heartbeat s_hb;

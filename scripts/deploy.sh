@@ -10,12 +10,12 @@ echo "Running build..."
 mkdir -p build
 pushd build
     cmake -DBUILD_SHARED_LIBS=OFF ..
-    ninja > build.log
+    make -j $(nproc) > build.log
 popd
 
 echo "Packing docker container..."
-bash -c "./scripts/lin/package.sh"
+bash -c "./scripts/package.sh"
 
 echo "Starting application..."
-bash -c "./scripts/lin/run.sh"
+bash -c "./scripts/run.sh"
 

@@ -52,8 +52,8 @@ Install supporting libraries:
 - Python 3.8+ dev libraries
 - Python 3.8+ debug symbols
 - Building:
-  - Run a cmake build and then the `./scripts/lin/package.sh` shell script
-  - Build is stored in `build/stable-ui/bin`
+  - Run a cmake build and then the `./scripts/package.sh` shell script
+  - Build is stored in `build/stable-ui-bin`
 
 ## Windows:
 

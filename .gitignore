@@ -6,3 +6,7 @@ build/
 *.ckpt
 *.safetensors
 *.pth
+
+# Build artifacts
+*.tar.gz
+*.zip

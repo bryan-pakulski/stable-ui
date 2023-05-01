@@ -28,8 +28,6 @@ Delete models & configurations
 
 Save output to temporary folder - "gen??" This way you can generate multiple item etc.. and move them automatically after generation is finished to an output folder
 
-Status monitoring for ping/pong state
-
 Add input sanitisation on sd_client on messages being sent, delimit or convert " to '?
 
 Add fix faces option:
