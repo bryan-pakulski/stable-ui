@@ -6,4 +6,5 @@ if [ ! -d "build/stable-ui-bin" ]; then
 fi
 
 cd build/stable-ui-bin
+./start_docker.sh &
 ./stable-ui
