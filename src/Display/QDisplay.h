@@ -82,7 +82,12 @@ private:
   float backgroundB = 0.48f;
 
   // Window resize callback
-  static void framebuffer_size_callback(GLFWwindow *window, int width, int height) {}
+  static void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
+    // make sure the viewport matches the new window dimensions; note that width and
+    // height will be significantly larger than specified on retina displays.
+    glViewport(0, 0, width, height);
+    StableManager::calculateFramebuffer(width, height);
+  }
 
   // Cleans up all GL variables for clean exit
   void cleanupDisplay() {

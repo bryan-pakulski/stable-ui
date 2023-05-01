@@ -3,6 +3,9 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 
+GLuint StableManager::fbo = 0;
+GLuint StableManager::m_colorBufferTexture = 0;
+
 // Initialise render manager
 StableManager::StableManager(GLFWwindow &w) : m_window{w} {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableManager::StableManager StableManager initialized");
@@ -21,21 +24,23 @@ StableManager::StableManager(GLFWwindow &w) : m_window{w} {
 
   // Intialise python interface for calling commands
   SDCommandsInterface::GetInstance().launchSDModelServer();
+  StableManager::calculateFramebuffer(m_camera->m_screen.first, m_camera->m_screen.second);
+}
 
+void StableManager::calculateFramebuffer(int width, int height) {
   // Set up frame buffer for rendering canvas
-  glGenFramebuffers(1, &fbo);
-  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+  glGenFramebuffers(1, &StableManager::fbo);
+  glBindFramebuffer(GL_FRAMEBUFFER, StableManager::fbo);
 
   // Attach color buffer
-  glGenTextures(1, &m_colorBufferTexture);
-  glBindTexture(GL_TEXTURE_2D, m_colorBufferTexture);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_camera->m_screen.first, m_camera->m_screen.second, 0, GL_RGBA,
-               GL_UNSIGNED_BYTE, NULL);
+  glGenTextures(1, &StableManager::m_colorBufferTexture);
+  glBindTexture(GL_TEXTURE_2D, StableManager::m_colorBufferTexture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colorBufferTexture, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, StableManager::m_colorBufferTexture, 0);
 
   GLenum framebuffer_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
   if (framebuffer_status != GL_FRAMEBUFFER_COMPLETE) {
@@ -71,8 +76,7 @@ void StableManager::renderLoop() {
   m_camera->updateVisual();
 
   // TODO: seperate the chunk rendering from the base canvas so that there is no visible background for our textures
-  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-  glViewport(0, 0, m_camera->m_screen.first, m_camera->m_screen.second);
+  glBindFramebuffer(GL_FRAMEBUFFER, StableManager::fbo);
 
   getActiveCanvas()->updateVisual();
   getActiveCanvas()->renderChunks();
@@ -84,7 +88,7 @@ void StableManager::renderLoop() {
   }
 
   // Render Frame Buffer
-  glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, StableManager::fbo);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
   glBlitFramebuffer(0, 0, m_camera->m_screen.first, m_camera->m_screen.second, 0, 0, m_camera->m_screen.first,
                     m_camera->m_screen.second, GL_COLOR_BUFFER_BIT, GL_NEAREST);

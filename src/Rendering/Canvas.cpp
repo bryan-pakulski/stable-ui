@@ -49,20 +49,22 @@ void Canvas::updateLogic() {
 void Canvas::updateVisual() {
   glUseProgram(shaderProgram);
 
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
   // View code
   setMat4("view", m_camera->getViewMatrix());
   setMat4("projection", m_camera->getProjectionMatrix());
 
-  // Model code, default canvas scale is 16,000 x 16,000 pixels
-  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 0.0f)) *    // translation
-                    glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) * // rotation
-                    glm::scale(glm::mat4(1.0f), glm::vec3(16000.0f, 16000.0f, 1.0f)); // scale
+  glm::mat4 model =
+      glm::translate(glm::mat4(1.0f), glm::vec3(m_camera->m_position.x, m_camera->m_position.y, 0.0f)) * // translation
+      glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                                  // rotation
+      glm::scale(glm::mat4(1.0f), glm::vec3(m_camera->m_screen.first * m_camera->m_zoom,
+                                            m_camera->m_screen.second * m_camera->m_zoom, 1.0f)); // scale
   setMat4("model", model);
 
   // Set screen size, camera coords and time
   glUniform2f(glGetUniformLocation(shaderProgram, "iResolution"), m_camera->m_screen.first, m_camera->m_screen.second);
-  glUniform3f(glGetUniformLocation(shaderProgram, "iMouse"), m_camera->m_position.x, m_camera->m_position.y,
-              m_camera->m_position.z);
+  glUniform2f(glGetUniformLocation(shaderProgram, "iMouse"), -m_camera->m_position.x, -m_camera->m_position.y);
 
   // TODO: increment time until we hit the max value for a float, then decrement to zero and repeat
   m_time += 0.01;

@@ -21,13 +21,6 @@ uniform float iTime;
 
 out vec4 fragColor;
 
-// Grid rendering
-float miv(vec2 a){return min(a.y,a.x);}//return max domain of vector.
-float miv(vec3 a){return min(a.z,miv(a.xy));}
-float miv(vec4 a){return min(miv(a.zw),miv(a.xy));}
-#define mav(a) -miv(-a)
-#define grid(u) mav(abs(fract(u)*2.-1.))
-
 void main() {
   // GET COORDS AND DIRECTIONS
   vec2 uv = (gl_FragCoord.xy / iResolution) - 0.5;
@@ -38,9 +31,12 @@ void main() {
   // COLOR
   vec4 color = vec4(uv, 0.5 + 0.5 * sin(iTime), 1.0);
 
+  // Make mouse movement less sensitive
+  float mouseScaling = 17.0f;
+
   // mouse rotation
-  float a1 = 0.5 + iMouse.x / iResolution.x * 2.;
-  float a2 = 0.8 + iMouse.y / iResolution.y * 2.;
+  float a1 = 0.5 + (iMouse.x / mouseScaling) / iResolution.x * 2.;
+  float a2 = 0.8 + (iMouse.y / mouseScaling) / iResolution.y * 2.;
   mat2 rot1 = mat2(cos(a1), sin(a1), -sin(a1), cos(a1));
   mat2 rot2 = mat2(cos(a2), sin(a2), -sin(a2), cos(a2));
   dir.xz *= rot1;
@@ -82,11 +78,4 @@ void main() {
   color *= mix(cold, warm, colorMix);
 
   fragColor = vec4(color.r, color.g, color.b, 1.0);
-
-  w// 2D Grid
-  float zoom =10.;//2d scaling
-  float thick=2.5;//line thickness in screenspace pixels (hairline)
-  
-  float gridLineThickness = zoom*thick/iResolution.y;        
-  fragColor += vec4(0,smoothstep(1.-gridLineThickness,1.,grid(uv*zoom)), 0, 1);
 }

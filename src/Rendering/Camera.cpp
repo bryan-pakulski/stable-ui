@@ -79,7 +79,6 @@ void Camera::updateVisual() {
   glOrtho(0, m_screen.first, m_screen.second, 0.0, -1.0, 1.0);
 
   glLoadIdentity();
-  glViewport(0, 0, m_screen.first, m_screen.second);
 
   m_projectionMatrix =
       glm::ortho(m_position.x - (m_screen.first * m_zoom) / 2.0f, m_position.x + (m_screen.first * m_zoom) / 2.0f,

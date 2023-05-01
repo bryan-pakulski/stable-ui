@@ -55,6 +55,8 @@ public:
 
   // CANVAS FUNCTIONS
 
+  // Recalculate frame buffer on window resize
+  static void calculateFramebuffer(int width, int height);
   // Create new canvas object for rendering
   std::shared_ptr<Canvas> createCanvas(int x, int y, const std::string &name);
   // Get current active canvas
@@ -97,8 +99,8 @@ public:
 
 private:
   GLFWwindow &m_window;
-  GLuint fbo;
-  GLuint m_colorBufferTexture;
+  static GLuint fbo;
+  static GLuint m_colorBufferTexture;
 
   int m_modelLoaded = EXECUTION_STATE::PENDING;
   model m_model;
