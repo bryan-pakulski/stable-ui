@@ -1,3 +1,5 @@
+#pragma once
+
 #include "SDCommandsInterface.h"
 #include <condition_variable>
 #include <thread>
@@ -39,13 +41,24 @@ private:
   const int c_timer = 5;
   timer_killer m_kill_timer = timer_killer();
 
-public:
-  int m_state = HEARTBEAT_STATE::ALIVE;
-
   Heartbeat();
   ~Heartbeat();
 
+  void run();
+
+public:
+  int m_state = HEARTBEAT_STATE::ALIVE;
+
+  static Heartbeat &GetInstance() {
+    static Heartbeat s_hb;
+    return s_hb;
+  }
+
+  // Prevent replication
+  Heartbeat(Heartbeat const &) = delete;
+  void operator=(Heartbeat const &) = delete;
+
   void start();
   void stop();
-  void run();
+  int getState();
 };

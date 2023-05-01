@@ -12,7 +12,7 @@ int main() {
   QDisplay::GetInstance().AttachManager(rm);
 
   // Initialise heartbeat
-  std::unique_ptr<Heartbeat> heartbeat(new Heartbeat());
+  Heartbeat::GetInstance().start();
 
   while (!glfwWindowShouldClose(QDisplay::GetInstance().getWindow())) {
 
@@ -35,7 +35,7 @@ int main() {
     QDisplay::processFrameAndEvents();
   }
 
-  heartbeat->stop();
+  Heartbeat::GetInstance().stop();
 
   return 0;
 }
