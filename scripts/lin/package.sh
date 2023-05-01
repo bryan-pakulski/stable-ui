@@ -14,6 +14,3 @@ cp -ruv data build/stable-ui-bin/
 cp -uv scripts/lin/start_docker.sh build/stable-ui-bin/
 cp -uv requirements.txt build/stable-ui-bin/
 cp -uv src/imgui.ini build/stable-ui-bin/
-
-cd build/stable-ui-bin
-./start_docker.sh
