@@ -42,7 +42,7 @@ jobs:
       # Copy data folders and compress release
       run: |
         scripts/win/package.bat
-        zip -r stable-ui.zip build\stable-ui-bin
+        Compress-Archive -Path build\stable-ui-bin/* -Destination stable-ui.zip
         
     - name: Artifacts
       uses: actions/upload-artifact@v3
