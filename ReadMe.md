@@ -1,46 +1,68 @@
+# About
+
+This application stack provides an evironment to create & manage a Stable-Diffusion inference server. 
+It is composed of a native front end app & dockerised backend server to ensure ease of setup and maintenance.
+
 # Requirements
 
-- Python 3.8.0+
-- pip (see requirements.txt for libraries, can be installed with `pip install -r requirements.txt`)
+These are requirements on both Windows (WSL) & Linux
+
+- Python 3.8.X (https://www.python.org/downloads/)
+- pip (see requirements.txt for libraries, these can be installed from the command line with `pip install -r requirements.txt`)
 - Docker see: https://github.com/NVIDIA/nvidia-docker#quickstart
 - nvidia-container-toolkit
 
-# Setup
+# Installation
 
 - Install all requirements
-- Initialise docker container `./start_docker.sh`
-- Run `./stable-ui`
+- Initialise the docker container with `start_docker.sh / start_docker.bat`
+- Run `stable-ui`
 
 # Features
 
-- TXT2IMG generation
-- IMG2IMG generation
-- Custom module extension
-- VAE Support
-- Stable Diffusion v2 support
-- Low VRAM Support (TODO)
-- Inpainting & Outpainting (TODO)
-- Textual Inversion training (TODO)
+- text to image / image to image generation
+- custom module extensions
+- vae, pickle & safetensor model support
+- Stable Diffusion v1 & v2
+- LORA support (TODO)
+- low VRAM Support (TODO)
+- CPU inference (TODO)
+- infinite canvas inpainting & outpainting (TODO)
+- textual inversion training (TODO)
 
-# Details
+# Usage
 
-This UI environment spins up and manages a docker image for Stable-Diffusion. It interfaces with this using python scripts to run SD commands to generate images.
+## Adding models
 
-# Adding models
+To add models to stable-ui select `tools -> import model` and load your `.ckpt / .vae` files. Once imported a copy of the model is saved
+to the `data/models` folder. The original file can be deleted.
 
-To add models to stable-ui select `tools -> import model` files will automatically be copied to the `data/models` folder, if a model requires additional configuration i.e. the stable diffusion v2 models you can define them while importing. The model configuration file contains a `sha1sum` hash of the model files and a corresponding configuration, some popular ones are included by default.
+## Configuring models
 
-# Custom Modules
+On model import you will be prompted to provide configuration for a given ckpt, if you'd like to reconfigure a model you can 
+redefine configuration via the `tools -> configure models` menu.
 
-Functionality of the application can be extended by loading custom modules, see `data/modules/ReadMe.md` for additional information, default module:
+## Loading models & generating images
 
-- `stable-ui`: SD V2 support base image/text generation scripts, runs the sd generation server, critical component and should not be removed
+The image generation options only become available once a model has been loaded into memory, you can do this by importing a model and then loading it with
+`tools -> load model to memory`. Once loading is completed the txt2img and img2img toolbar will unlock and you can begin prompting the model server.
 
-# Controls
+## Custom Modules
+
+Functionality of the application can be extended by loading custom modules, see `data/modules/ReadMe.md` for additional information, default modules include:
+
+- `stable-ui`: SD V1 & V2 support for image/text generation scripts, runs the sd generation client & server within docker, critical component and should not be removed
+
+## Controls
 
 - Middle mouse button to move the main window canvas
 
 # Building
+
+There is a github pipeline available for both linux & windows that runs on the master branch.
+Release artifacts are saved for each tagged version and published.
+
+If you'd like to build locally you can perform the following:
 
 ## Linux:
 
@@ -52,11 +74,11 @@ Install supporting libraries:
 - Python 3.8+ dev libraries
 - Python 3.8+ debug symbols
 - Building:
-  - Run a cmake build and then the `./scripts/package.sh` shell script
+  - Run the `./deploy/package.sh` shell script
   - Build is stored in `build/stable-ui-bin`
 
 ## Windows:
 
 - Compiler: VSCC
-- Additional libraries: Python debug symbols & Debug binaries
-- Building: Run a cmake build and then the `.\scripts\package.bat` batch script
+- Additional libraries: Python 3.8 debug symbols & Debug binaries
+- Building: Run `cmake --build` and then the `.\scripts\package.bat` batch script

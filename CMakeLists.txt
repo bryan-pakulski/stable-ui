@@ -143,13 +143,11 @@ target_include_directories(
         ${imgui_SOURCE_DIR}/backends
         ${imgui_SOURCE_DIR}/misc/cpp
         ${glm_SOURCE_DIR}/src
-        ${Python_INCLUDE_DIRS}
         ${CMAKE_HOME_DIRECTORY}/src/ThirdParty/yaml-cpp/include
 )
 
 target_link_directories(
         stable-ui PRIVATE
-        ${Python_LIBRARY_DIRS}
 )
 
 target_link_libraries(
@@ -160,5 +158,5 @@ target_link_libraries(
         glm
         yaml-cpp
         ${OPENGL_LIBRARY}
-        ${Python_LIBRARIES}
+        Python::Python
 )
