@@ -1,0 +1,12 @@
+windows:
+  0:
+    name: "Upscale"
+    button: 
+      label: "Ok"
+      action: "command"
+      command: 
+    button: 
+      label: "Close"
+      action: "close"
+
+    

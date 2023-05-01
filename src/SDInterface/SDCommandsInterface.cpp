@@ -1,9 +1,10 @@
 #include "SDCommandsInterface.h"
 
 #include "../Helpers/States.h"
+#include <memory>
 
 SDCommandsInterface::SDCommandsInterface() {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Initialising SDCommandsInterface");
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "SDCommandsInterface::SDCommandsInterface initialising");
 
   std::string path = "sys.path.append(\"" + CONFIG::PYTHON_CONFIG_PATH.get() + "\")";
 
@@ -11,39 +12,43 @@ SDCommandsInterface::SDCommandsInterface() {
   PyRun_SimpleString("import sys");
   PyRun_SimpleString(path.c_str());
 
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Attached PYTHONPATH: ", path);
+  PyEval_SaveThread();
+
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "SDCommandsInterface::SDCommandsInterface attached PYTHONPATH: ", path);
 
   // sd_commands.py is the script that handles all incoming calls from the stable-ui application
   m_py_handle = std::unique_ptr<SnakeHandler>(new SnakeHandler("sd_commands"));
+  m_arguments = std::shared_ptr<PyArgs>(new PyArgs);
 }
 
-SDCommandsInterface::~SDCommandsInterface() { delete arguments; }
+SDCommandsInterface::~SDCommandsInterface() {}
 
 // Starts up SD Model Server
 void SDCommandsInterface::launchSDModelServer() {
   std::string functionName = "launchSDModelServer";
-  arguments->emplace_back(
+  m_arguments->emplace_back(
       std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", CONFIG::SD_MODEL_SERVER.get(), 0)));
   m_dockerState = EXECUTION_STATE::LOADING;
 
-  // Offload thread execution, image generation can take some time
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Starting up SD Model Server...");
-  m_Thread = std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, std::ref(arguments),
-                         std::ref(m_dockerState));
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "SDCommandsInterface::launchSDModelServer starting up SD Model Server...");
+  m_Thread =
+      std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, m_arguments, std::ref(m_dockerState));
   m_Thread.detach();
 }
 
 // Terminates SD Model Server
 void SDCommandsInterface::terminateSDModelServer() {
   std::string functionName = "terminateSDModelServer";
-  arguments->emplace_back(
-      std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", CONFIG::SD_SERVER_CLIENT.get(), 0)));
+  std::string execPath = CONFIG::SD_SERVER_CLIENT.get();
+
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", execPath, 0)));
   m_dockerState = EXECUTION_STATE::LOADING;
 
   // Wait for thread execution to finish
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Shutting down SD Model Server...");
-  m_Thread = std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, std::ref(arguments),
-                         std::ref(m_dockerState));
+  QLogger::GetInstance().Log(LOGLEVEL::INFO,
+                             "SDCommandsInterface::terminateSDModelServer shutting down SD Model Server...");
+  m_Thread =
+      std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, m_arguments, std::ref(m_dockerState));
   m_Thread.detach();
 }
 
@@ -54,15 +59,26 @@ void SDCommandsInterface::attachModelToServer(std::string ckpt_path, std::string
   std::string execPath = CONFIG::SD_SERVER_CLIENT.get();
   state = EXECUTION_STATE::LOADING;
 
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", execPath, 0)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "ckpt_path", ckpt_path, 1)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "config_path", config_path, 2)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "vae_path", vae_path, 3)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "precision", precision, 4)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", execPath, 0)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "ckpt_path", ckpt_path, 1)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "config_path", config_path, 2)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "vae_path", vae_path, 3)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "precision", precision, 4)));
 
-  // Offload thread execution, image generation can take some time
+  m_Thread = std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, m_arguments, std::ref(state));
+  m_Thread.detach();
+}
+
+// Ping server to establish online status
+void SDCommandsInterface::heartbeat(int &heartBeatState) {
+  std::string functionName = "heartbeat";
+  std::string execPath = CONFIG::SD_SERVER_CLIENT.get();
+
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", execPath, 0)));
+
   m_Thread =
-      std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, std::ref(arguments), std::ref(state));
+      std::thread(&SnakeHandler::asyncCall, m_py_handle.get(), functionName, m_arguments, std::ref(heartBeatState));
+
   m_Thread.detach();
 }
 
@@ -74,26 +90,26 @@ void SDCommandsInterface::textToImage(std::string sdModelPath, std::string &canv
   std::string execPath = CONFIG::SD_SERVER_CLIENT.get();
   std::string outDir = CONFIG::OUTPUT_DIRECTORY.get();
 
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", execPath, 0)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "sd_model_path", sdModelPath, 1)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "canvas_name", canvasName, 2)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "prompt", prompt, 3)));
-  arguments->emplace_back(
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", execPath, 0)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "sd_model_path", sdModelPath, 1)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "canvas_name", canvasName, 2)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "prompt", prompt, 3)));
+  m_arguments->emplace_back(
       std::unique_ptr<base_type>(new d_type<std::string>('s', "negative_prompt", negative_prompt, 4)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "sampler_name", samplerName, 5)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "batch_size", batch_size, 6)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "steps", steps, 7)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<double>('f', "scale", cfg, 8)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "seed", seed, 9)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "width", width, 10)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "height", height, 11)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "out_dir", outDir, 12)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "n_iter", 1, 13)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "sampler_name", samplerName, 5)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "batch_size", batch_size, 6)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "steps", steps, 7)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<double>('f', "scale", cfg, 8)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "seed", seed, 9)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "width", width, 10)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "height", height, 11)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "out_dir", outDir, 12)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "n_iter", 1, 13)));
 
   // Offload thread execution, image generation can take some time
   renderState = EXECUTION_STATE::LOADING;
-  m_Thread = std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, std::ref(arguments),
-                         std::ref(renderState));
+  m_Thread =
+      std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, m_arguments, std::ref(renderState));
   m_Thread.detach();
 }
 
@@ -105,25 +121,25 @@ void SDCommandsInterface::imageToImage(std::string &sdModelPath, std::string &ca
   std::string execPath = CONFIG::SD_SERVER_CLIENT.get();
   std::string outDir = CONFIG::OUTPUT_DIRECTORY.get();
 
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", execPath, 0)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "sd_model_path", sdModelPath, 1)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "canvas_name", canvasName, 2)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "img_path", imgPath, 3)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "prompt", prompt, 4)));
-  arguments->emplace_back(
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "exec_path", execPath, 0)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "sd_model_path", sdModelPath, 1)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "canvas_name", canvasName, 2)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "img_path", imgPath, 3)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "prompt", prompt, 4)));
+  m_arguments->emplace_back(
       std::unique_ptr<base_type>(new d_type<std::string>('s', "negative_prompt", negative_prompt, 5)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "sampler_name", samplerName, 6)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "batch_size", batch_size, 7)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "steps", steps, 8)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<double>('f', "scale", cfg, 9)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<double>('f', "strength", strength, 10)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "seed", seed, 11)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "out_dir", outDir, 12)));
-  arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "n_iter", 1, 13)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "sampler_name", samplerName, 6)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "batch_size", batch_size, 7)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "steps", steps, 8)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<double>('f', "scale", cfg, 9)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<double>('f', "strength", strength, 10)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "seed", seed, 11)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<std::string>('s', "out_dir", outDir, 12)));
+  m_arguments->emplace_back(std::unique_ptr<base_type>(new d_type<int>('d', "n_iter", 1, 13)));
 
   // Offload thread execution, image generation can take some time
   renderState = EXECUTION_STATE::LOADING;
-  m_Thread = std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, std::ref(arguments),
-                         std::ref(renderState));
+  m_Thread =
+      std::thread(&SnakeHandler::callFunction, m_py_handle.get(), functionName, m_arguments, std::ref(renderState));
   m_Thread.detach();
 }

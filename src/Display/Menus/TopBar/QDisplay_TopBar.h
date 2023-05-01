@@ -6,6 +6,7 @@
 #include "../../../Config/config.h"
 #include "../../../QLogger.h"
 #include "../../../Rendering/Helper.h"
+#include "../../../SDInterface/Heartbeat.h"
 
 #include "../../../Display/ErrorHandler.h"
 #include "../../QDisplay_Base.h"
@@ -13,6 +14,7 @@
 #include "QDisplay_ImportModel.h"
 #include "QDisplay_ImportVAE.h"
 #include "QDisplay_LoadModel.h"
+#include "QDisplay_PluginsWindow.h"
 
 class QDisplay_TopBar : public QDisplay_Base {
 
@@ -28,6 +30,12 @@ private:
   std::unique_ptr<QDisplay_ImportModel> m_importModelWindow;
   std::unique_ptr<QDisplay_ImportVAE> m_importVAEWindow;
   std::unique_ptr<QDisplay_LoadModel> m_loadModelWindow;
+  std::unique_ptr<QDisplay_PluginsWindow> m_pluginsWindow;
+
+  // Docker status icons
+  std::unique_ptr<Image> m_docker_connected_icon;
+  std::unique_ptr<Image> m_docker_disconnected_icon;
+  float c_dockerIconSize = 15.0f;
 
   // Log config
   std::ifstream logStream;
@@ -156,6 +164,14 @@ public:
     m_importModelWindow = std::unique_ptr<QDisplay_ImportModel>(new QDisplay_ImportModel(rm, w));
     m_importVAEWindow = std::unique_ptr<QDisplay_ImportVAE>(new QDisplay_ImportVAE(rm, w));
     m_loadModelWindow = std::unique_ptr<QDisplay_LoadModel>(new QDisplay_LoadModel(rm, w));
+    m_pluginsWindow = std::unique_ptr<QDisplay_PluginsWindow>(new QDisplay_PluginsWindow(rm, w));
+
+    // Load images
+    m_docker_connected_icon = std::unique_ptr<Image>(new Image(32, 32, "connected_icon"));
+    m_docker_disconnected_icon = std::unique_ptr<Image>(new Image(32, 32, "disconnected_icon"));
+
+    m_docker_connected_icon->loadFromImage("data/images/connected.png");
+    m_docker_disconnected_icon->loadFromImage("data/images/disconnected.png");
   }
 
   /*
@@ -187,10 +203,6 @@ public:
 
       if (ImGui::BeginMenu("Tools")) {
 
-        if (ImGui::MenuItem("Select Canvas")) {
-          selectCanvasOpen = true;
-        }
-
         if (ImGui::MenuItem("Load Model To Memory")) {
           m_loadModelWindow->openWindow();
         }
@@ -206,7 +218,25 @@ public:
         ImGui::EndMenu();
       }
 
-      ImGui::MenuItem(m_stableManager->getActiveCanvas()->m_name.c_str());
+      if (ImGui::BeginMenu("Modules")) {
+        m_pluginsWindow->menus();
+
+        ImGui::EndMenu();
+      }
+
+      ImGui::Separator();
+      if (ImGui::MenuItem(std::string("Canvas - " + m_stableManager->getActiveCanvas()->m_name).c_str())) {
+        selectCanvasOpen = true;
+      }
+
+      // Docker connection state
+      ImGui::Separator();
+      {
+        Image icon = Heartbeat::GetInstance().getState() ? *m_docker_connected_icon : *m_docker_disconnected_icon;
+        ImGui::Image((void *)(intptr_t)icon.m_texture, {c_dockerIconSize, c_dockerIconSize}, {1, 0}, {0, 1});
+        std::string dockerState = Heartbeat::GetInstance().getState() ? "Docker Connected" : "Docker Disconnected";
+        ImGui::MenuItem(dockerState.c_str());
+      }
 
       ImGui::EndMainMenuBar();
     }
@@ -222,5 +252,6 @@ public:
     m_importModelWindow->render();
     m_importVAEWindow->render();
     m_loadModelWindow->render();
+    m_pluginsWindow->render();
   }
 };

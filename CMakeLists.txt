@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.20)
 project(stable-ui)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -g ")
 
 # for clangd language server
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -12,8 +12,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
 
 include(FetchContent)
-
-find_package(OpenSSL REQUIRED)
 
 # Download and fetch GLM
 FetchContent_Declare(
@@ -112,10 +110,10 @@ find_package(Threads REQUIRED) # for GLFW
 find_package(X11 REQUIRED)     # for GLFW
 
 # Embed python
-find_package (Python 3.10.0 REQUIRED
+find_package (Python 3.8.0 REQUIRED
         COMPONENTS Interpreter Development)
 
-find_package(PythonLibs 3.10.0 REQUIRED)
+find_package(PythonLibs 3.8.0 REQUIRED)
 
 # Yaml-cpp
 add_subdirectory(${CMAKE_HOME_DIRECTORY}/src/ThirdParty/yaml-cpp)
@@ -132,6 +130,8 @@ add_executable( stable-ui
                 src/Rendering/objects/chunk/Chunk.cpp
                 src/SDInterface/SDCommandsInterface.cpp 
                 src/SDInterface/py/SnakeHandler.cpp
+                src/SDInterface/Heartbeat.cpp
+                src/ThirdParty/sha1/sha1.cpp
         )
 
 target_include_directories(
@@ -161,5 +161,4 @@ target_link_libraries(
         yaml-cpp
         ${OPENGL_LIBRARY}
         ${Python_LIBRARIES}
-        OpenSSL::SSL
 )

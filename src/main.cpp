@@ -1,13 +1,18 @@
 #include "Display/ErrorHandler.h"
 #include "Display/QDisplay.h"
 #include "Rendering/StableManager.h"
+#include "SDInterface/Heartbeat.h"
 #include <imgui_impl_glfw.h>
+#include <memory>
 
 int main() {
 
   // Intialise Render manager & attach to Display
   std::shared_ptr<StableManager> rm(new StableManager(*QDisplay::GetInstance().getWindow()));
   QDisplay::GetInstance().AttachManager(rm);
+
+  // Initialise heartbeat
+  Heartbeat::GetInstance().start();
 
   while (!glfwWindowShouldClose(QDisplay::GetInstance().getWindow())) {
 
@@ -29,6 +34,8 @@ int main() {
     // Process and catch events
     QDisplay::processFrameAndEvents();
   }
+
+  Heartbeat::GetInstance().stop();
 
   return 0;
 }

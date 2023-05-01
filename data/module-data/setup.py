@@ -44,24 +44,18 @@ active_modules = []
 for module_folder in next(os.walk("."))[1]:
     print("Initialising: ", module_folder)
 
-    # Read Yaml file and intialise git repos etc...
+    # Read Yaml file
     with open(f"{module_folder}/init.yaml", "r") as stream:
         try:
             yaml_dict = yaml.safe_load(stream)
             data = yaml_dict["module"]
 
-            repo = data["git-repo"] if ("git-repo" in yaml_dict) else None
             name = data["name"]
             wd = data["working-directory"]
             filepaths = data["filepaths"]
 
             update_module_config(name, MODULE_CONFIG_PATH, data)
             active_modules.append(name)
-
-            if (repo != None):
-                git_cmd = f"git clone {repo} {wd}"
-                print("Running git command: ", git_cmd)
-                os.system(git_cmd)
 
             # Copy files as required
             for src, dst in filepaths.items():

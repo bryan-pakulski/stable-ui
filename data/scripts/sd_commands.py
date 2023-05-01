@@ -77,17 +77,15 @@ def getAdditionalConfig(ckpt_filepath):
 
 # Start SD_Model server
 def launchSDModelServer(exec_path):
-    command = f"conda run -n ldm python '{exec_path}'"
+    command = f"conda run -n ldm python '{exec_path}' > /logs/sd_server.out 2>&1"
     print("Starting server with command: ", command)
     getContainer().exec_run(
         command, workdir="/modules/stable-ui/sd_server", demux=True, detach=True)
     return 0
 
 # Terminate SD_Model server on shutdown
-
-
 def terminateSDModelServer(exec_path):
-    command = f"conda run -n ldm python 'exec_path' quit"
+    command = f"conda run -n ldm python '{exec_path}' quit"
     _e, response = getContainer().exec_run(
         command, workdir="/modules/stable-ui/sd_client", demux=True)
 
@@ -103,6 +101,14 @@ def terminateSDModelServer(exec_path):
     # Error code response is used by cpp integration to check for success / failure status
     return _e
 
+# Ping pong heartbeat
+def heartbeat(exec_path):
+    command = f"conda run -n ldm python '{exec_path}' ping"
+    _e, response = getContainer().exec_run(
+        command, workdir="/modules/stable-ui/sd_client", demux=True)
+
+    # Error code response is used by cpp integration to check for success / failure status
+    return _e
 
 # Launch a client command
 def attachSDModelToServer(exec_path, ckpt_path, config_path, vae_path: str = "", precision: str = ""):

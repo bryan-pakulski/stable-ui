@@ -82,7 +82,12 @@ private:
   float backgroundB = 0.48f;
 
   // Window resize callback
-  static void framebuffer_size_callback(GLFWwindow *window, int width, int height) {}
+  static void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
+    // make sure the viewport matches the new window dimensions; note that width and
+    // height will be significantly larger than specified on retina displays.
+    glViewport(0, 0, width, height);
+    StableManager::calculateFramebuffer(width, height);
+  }
 
   // Cleans up all GL variables for clean exit
   void cleanupDisplay() {
@@ -97,9 +102,9 @@ private:
   QDisplay() {
 
     if (!glfwInit()) {
-      QLogger::GetInstance().Log(LOGLEVEL::ERR, "Couldn't initialize GLFW");
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, "QDisplay::QDisplay Couldn't initialize GLFW");
     } else {
-      QLogger::GetInstance().Log(LOGLEVEL::INFO, "GLFW initialized");
+      QLogger::GetInstance().Log(LOGLEVEL::INFO, "QDisplay::QDisplay GLFW initialized");
     }
 
     // setup GLFW window
@@ -145,7 +150,7 @@ private:
                                 nullptr, nullptr);
 
     if (!m_window) {
-      QLogger::GetInstance().Log(LOGLEVEL::ERR, "Couldn't create a GLFW window");
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, "QDisplay::QDisplay Couldn't create a GLFW window");
       cleanupDisplay();
     }
 
@@ -159,8 +164,9 @@ private:
     // Initialise callbacks for glfw *MUST BE DONE BEFORE IMGUI OTHERWISE IT WILL OVERRIDE THE CALLBACKS THERE*
     glfwSetErrorCallback(StableManager::GLFWErrorCallBack);
     glfwSetKeyCallback(m_window, StableManager::key_callback);
-    glfwSetCursorPosCallback(m_window, StableManager::mouse_callback);
+    glfwSetCursorPosCallback(m_window, StableManager::mouse_cursor_callback);
     glfwSetMouseButtonCallback(m_window, StableManager::mouse_btn_callback);
+    glfwSetScrollCallback(m_window, StableManager::mouse_scroll_callback);
     // glfwSetWindowCloseCallback(m_window, StableManager::close_callback);
 
     // Setup Dear ImGui context
@@ -178,10 +184,10 @@ private:
     ImGui_ImplOpenGL3_Init(m_glsl_version.c_str());
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-      QLogger::GetInstance().Log(LOGLEVEL::ERR, "Couldn't initialize GLAD");
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, "QDisplay::QDisplay Couldn't initialize GLAD");
       cleanupDisplay();
     } else {
-      QLogger::GetInstance().Log(LOGLEVEL::INFO, "GLAD initialized");
+      QLogger::GetInstance().Log(LOGLEVEL::INFO, "QDisplay::QDisplay:: GLAD initialized");
     }
 
     // Set clear colour

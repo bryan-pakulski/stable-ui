@@ -4,7 +4,7 @@ services:
   stable-diffusion:
     image: "sd"
     container_name: sd
-    tty: true 
+    tty: true
     build:
       context: .
       dockerfile: Dockerfile
@@ -14,6 +14,7 @@ services:
       - ../output:/output
       - ../module-data:/module-data
       - ../shared-config:/shared-config
+      - ../logs:/logs
       - conda_env:/opt/conda
       - root_profile:/root
 volumes:

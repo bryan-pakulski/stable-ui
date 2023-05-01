@@ -44,13 +44,15 @@ Functionality of the application can be extended by loading custom modules, see 
 
 ## Linux:
 
-- Compiler:
-  - GCC
-- Additional libraries:
-  - Python 3.8+ dev libraries
-  - Python 3.8+ debug symbols
+Initialise submodules:
+`git submodule update --recursive --remote`
+
+Install supporting libraries:
+
+- Python 3.8+ dev libraries
+- Python 3.8+ debug symbols
 - Building:
-  - Run a cmake build and then the `./scripts/package.sh` shell script
+  - Run a cmake build and then the `./scripts/lin/package.sh` shell script
   - Build is stored in `build/stable-ui/bin`
 
 ## Windows:

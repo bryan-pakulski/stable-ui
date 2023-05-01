@@ -17,7 +17,6 @@ private:
   std::string m_selected_model = "";
   std::string m_selected_hash = "";
   std::string m_selected_precision = "full";
-  bool visible = false;
 
   void clear() {
     m_ModelList.clear();
@@ -32,11 +31,14 @@ private:
       static YAML::Node configFile = YAML::LoadFile(CONFIG::MODELS_CONFIGURATION_FILE.get());
       YAML::Node models = configFile["models"];
       for (YAML::const_iterator it = models.begin(); it != models.end(); ++it) {
-        listItem i{.m_name = it->second["name"].as<std::string>(), .m_key = it->first.as<std::string>()};
-        m_ModelList.push_back(i);
+        if (it->second["name"].as<std::string>() != "default") {
+          listItem i{.m_name = it->second["name"].as<std::string>(), .m_key = it->first.as<std::string>()};
+          m_ModelList.push_back(i);
+        }
       }
     } catch (YAML::Exception) {
-      QLogger::GetInstance().Log(LOGLEVEL::ERR, "Failed to parse yaml file: ", CONFIG::MODELS_CONFIGURATION_FILE.get());
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, "QDisplay_LoadModel::reloadFiles Failed to parse yaml file: ",
+                                 CONFIG::MODELS_CONFIGURATION_FILE.get());
       return;
     }
   }
@@ -48,7 +50,7 @@ private:
     YAML::Node model = _baseNode["models"][m_selected_hash];
 
     m_stableManager->attachModel(model, m_selected_hash, m_selected_precision);
-    visible = false;
+    m_isOpen = false;
   }
 
 public:
@@ -67,11 +69,11 @@ public:
   void openWindow() {
     clear();
     reloadFiles();
-    visible = true;
+    m_isOpen = true;
   }
 
   virtual void render() {
-    if (visible) {
+    if (m_isOpen) {
       ImGui::Begin("Load Model");
       if (ImGui::BeginCombo("model config", m_selected_model.c_str(), ImGuiComboFlags_NoArrowButton)) {
         for (auto &item : m_ModelList) {
@@ -106,7 +108,7 @@ public:
       }
 
       if (ImGui::Button("Cancel")) {
-        visible = false;
+        m_isOpen = false;
       }
 
       ImGui::End();

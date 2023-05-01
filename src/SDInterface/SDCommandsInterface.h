@@ -14,8 +14,8 @@
 class SDCommandsInterface {
 private:
   std::unique_ptr<SnakeHandler> m_py_handle;
+  std::shared_ptr<PyArgs> m_arguments;
   std::thread m_Thread;
-  std::vector<std::unique_ptr<base_type>> *arguments = new std::vector<std::unique_ptr<base_type>>;
   int m_dockerState = EXECUTION_STATE::PENDING;
 
   SDCommandsInterface();
@@ -36,6 +36,7 @@ public:
   void terminateSDModelServer();
   void attachModelToServer(std::string ckpt_path, std::string config_path, std::string vae_path, std::string precision,
                            int &modelLoadState);
+  void heartbeat(int &heartbeatState);
 
   // Commands that can be used by modules
   void textToImage(std::string sdModelPath, std::string &canvasName, std::string prompt, std::string negative_prompt,

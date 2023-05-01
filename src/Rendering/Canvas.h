@@ -21,6 +21,7 @@ private:
 
   // Reference to texture for main window
   GLuint m_texture_id;
+  float m_time = 0.0f;
 
   void setTexture(GLuint *id);
 
@@ -34,6 +35,7 @@ public:
 
   void updateLogic() override;
   void updateVisual() override;
+  void renderChunks();
 
   // Checks which grids are visible and creates a texture to apply to the main window
   void updateMainWindowTexture();

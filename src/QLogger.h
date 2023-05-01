@@ -17,7 +17,7 @@
 #define stat _stat
 #endif
 
-#define QLOGGER_LOGFILE "data/shared-config/sd_server.log"
+#define QLOGGER_LOGFILE "data/logs/sd_server.log"
 
 enum class LOGLEVEL { INFO, WARN, ERR };
 

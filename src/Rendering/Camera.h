@@ -14,12 +14,9 @@ class Camera {
 
   glm::mat4 m_projectionMatrix;
   glm::mat4 m_viewMatrix;
-  glm::mat4 m_viewProjectionMatrix;
-  float m_rotation = 0.0f;
-  float m_cameraSpeed = 2.0f;
 
-  std::pair<int, int> m_screen{}; // Screen size
-  std::pair<float, float> c_zoom_minmax{0.05f, 3.0f};
+  // Camera speed is proportional to zoom level
+  glm::vec2 m_cameraSpeed = {0.5f, 5.0f};
 
   void recalculateViewMatrix();
 
@@ -30,15 +27,22 @@ public:
   // Mouse positions for dragging across screen
   glm::vec2 prev_mouse;
   glm::vec2 cur_mouse;
-  float m_zoom = 0.5f; // Acceptable range is from 1.0f - 0.05f
+
+  // Helper to convert screenspace coordinates to global coordinates
+  glm::vec2 screenToGlobalCoordinates(float x, float y);
+
+  float m_zoom = 1.0f;
+  const float c_defaultZoom = 1.0f;
+  std::pair<float, float> c_zoom_minmax{0.05f, 5.0f};
   float m_zoomSpeed = 0.05f;
+
   glm::vec3 m_position;
+  std::pair<int, int> m_screen{}; // Screen size
 
   void updateLogic();
   void updateVisual();
 
   void moveCameraPosition(float x, float y);
-  glm::mat4 getViewProjectionMatrix() { return m_viewProjectionMatrix; }
   glm::mat4 getProjectionMatrix() { return m_projectionMatrix; }
   glm::mat4 getViewMatrix() { return m_viewMatrix; }
 

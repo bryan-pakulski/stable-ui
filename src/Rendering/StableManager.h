@@ -55,6 +55,8 @@ public:
 
   // CANVAS FUNCTIONS
 
+  // Recalculate frame buffer on window resize
+  static void calculateFramebuffer(int width, int height);
   // Create new canvas object for rendering
   std::shared_ptr<Canvas> createCanvas(int x, int y, const std::string &name);
   // Get current active canvas
@@ -63,6 +65,10 @@ public:
   void selectCanvas(int id);
   // Create a new canvas with a base image
   void sendImageToCanvas(Image &im);
+  // Set capture buffer flag
+  void captureBuffer();
+  // Generate image from selection buffer, img2img
+  void genFromSelection();
 
   // MODEL SERVER INTERACTION
 
@@ -83,7 +89,8 @@ public:
 
   // CALLBACKS
   static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
-  static void mouse_callback(GLFWwindow *window, double xposIn, double yposIn);
+  static void mouse_cursor_callback(GLFWwindow *window, double xposIn, double yposIn);
+  static void mouse_scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
   static void mouse_btn_callback(GLFWwindow *window, int button, int action, int mods);
   static void close_callback(GLFWwindow *window);
   static void GLFWErrorCallBack(int, const char *err_str);
@@ -92,9 +99,12 @@ public:
 
 private:
   GLFWwindow &m_window;
+  static GLuint fbo;
+  static GLuint m_colorBufferTexture;
 
   int m_modelLoaded = EXECUTION_STATE::PENDING;
   model m_model;
+  bool m_captureBuffer = false;
 
   // Process inputs
   void logicLoop();

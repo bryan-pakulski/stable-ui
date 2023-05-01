@@ -1,7 +1,7 @@
 #pragma once
 
 #include <imgui.h>
-#include "../../../Helpers/SHA1.h"
+#include "../../../Helpers/hash.h"
 #include "../../../Display/ErrorHandler.h"
 #include "../../../ThirdParty/imgui/imfilebrowser.h"
 #include "../../QDisplay_Base.h"
@@ -25,22 +25,18 @@ private:
   std::shared_ptr<bool> m_saving = std::make_shared<bool>(shared_bool);
 
   std::string m_selected_model_config = "";
-  std::string m_selected_module = "";
   std::string m_selected_vae = "";
   std::string m_triggerWords = "";
-  std::vector<listItem> m_ModulesList;
   std::vector<listItem> m_ModelConfigList;
   std::vector<listItem> m_VAEList;
 
   void clear() {
     fileDialog.ClearSelected();
-    m_ModulesList.clear();
     m_ModelConfigList.clear();
     m_VAEList.clear();
 
     m_triggerWords = "";
     m_selected_model_config = "";
-    m_selected_module = "";
     m_selected_vae = "";
   }
 
@@ -56,20 +52,6 @@ private:
                                                  "MODEL_CONFIGURATIONS_DIRECTORY");
     }
 
-    // Load modules list from yaml
-    try {
-      static YAML::Node configFile = YAML::LoadFile(CONFIG::MODULES_CONFIGURATION_FILE.get());
-      YAML::Node modules = configFile["modules"];
-      for (YAML::const_iterator it = modules.begin(); it != modules.end(); ++it) {
-        listItem i{.m_name = it->first.as<std::string>()};
-        m_ModulesList.push_back(i);
-      }
-    } catch (YAML::Exception) {
-      QLogger::GetInstance().Log(LOGLEVEL::ERR,
-                                 "Failed to parse yaml file: ", CONFIG::MODULES_CONFIGURATION_FILE.get());
-      return;
-    }
-
     // Load VAE List
     try {
       for (const auto &entry : fs::directory_iterator(CONFIG::VAE_FOLDER_PATH.get())) {
@@ -82,14 +64,16 @@ private:
   }
 
   // Save model configuration to model config file
-  static void saveModelConfiguration(std::string filepath, std::string module_name, std::string model_config_file,
+  static void saveModelConfiguration(std::string filepath, std::string model_config_file,
                                      std::shared_ptr<bool> m_saving, std::string trigger_words, std::string vae) {
     std::filesystem::path modelPath(filepath);
 
     // Build yaml node to attach to model configuration file
     YAML::Node model_node;
     std::string hash = getFileHash(filepath.c_str());
-    model_node["working_dir"] = "/modules/" + module_name;
+
+    // TODO: add custom working directory in future?
+    model_node["working_dir"] = "/sd";
     model_node["config"] = "/models/configs/" + model_config_file;
     model_node["name"] = modelPath.filename().string();
     model_node["path"] = "/models/" + modelPath.filename().string();
@@ -131,18 +115,6 @@ private:
       ImGui::EndCombo();
     }
 
-    if (ImGui::BeginCombo("Module Runner", m_selected_module.c_str(), ImGuiComboFlags_NoArrowButton)) {
-      for (auto &item : m_ModulesList) {
-        if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
-          m_selected_module = item.m_name;
-        }
-        if (item.m_isSelected) {
-          ImGui::SetItemDefaultFocus();
-        }
-      }
-      ImGui::EndCombo();
-    }
-
     if (ImGui::BeginCombo("Custom VAE", m_selected_vae.c_str(), ImGuiComboFlags_NoArrowButton)) {
       for (auto &item : m_VAEList) {
         if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
@@ -159,14 +131,14 @@ private:
 
     if (ImGui::Button("Cancel")) {
       clear();
-    } else if (m_selected_module != "" && m_selected_model_config != "" && !*m_saving) {
+    } else if (m_selected_model_config != "" && !*m_saving) {
       ImGui::SameLine();
       if (ImGui::Button("Save")) {
         // Save on a seperate thread so we don't block application, use the m_saving shared pointer as a basic lock to
         // track completion
         *m_saving = true;
-        std::thread t(saveModelConfiguration, fileDialog.GetSelected().string(), m_selected_module,
-                      m_selected_model_config, m_saving, std::string(m_triggerWords), m_selected_vae);
+        std::thread t(saveModelConfiguration, fileDialog.GetSelected().string(), m_selected_model_config, m_saving,
+                      std::string(m_triggerWords), m_selected_vae);
         t.detach();
         clear();
       }

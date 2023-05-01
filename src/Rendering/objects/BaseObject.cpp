@@ -2,7 +2,8 @@
 #include <sstream>
 
 BaseObject::BaseObject(std::pair<int, int> pixelCoords) : pixelCoords{pixelCoords} {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Object initialized at", pixelCoords.first, pixelCoords.second);
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "BaseObject::BaseObject Object initialized at", pixelCoords.first,
+                             pixelCoords.second);
 }
 
 BaseObject::~BaseObject() {
@@ -17,7 +18,8 @@ std::string BaseObject::readShader(const char *filePath) {
   std::ifstream fileStream(filePath, std::ios::in);
 
   if (!fileStream.is_open()) {
-    QLogger::GetInstance().Log(LOGLEVEL::ERR, "Could not read file, file doesn't exist: ", filePath);
+    QLogger::GetInstance().Log(LOGLEVEL::ERR,
+                               "BaseObject::readShader Could not read file, file doesn't exist: ", filePath);
     return "";
   }
 
@@ -40,7 +42,7 @@ void BaseObject::linkShaders(unsigned int vertexShader, unsigned int fragmentSha
 
   if (!success) {
     glGetProgramInfoLog(shaderProgram, 512, nullptr, errorInfo);
-    QLogger::GetInstance().Log(LOGLEVEL::ERR, "ERROR::PROGRAM::LINKING_FAILED\n", errorInfo);
+    QLogger::GetInstance().Log(LOGLEVEL::ERR, "BaseObject::linkShaders ERROR::PROGRAM::LINKING_FAILED\n", errorInfo);
   }
 
   // delete shaders after linking

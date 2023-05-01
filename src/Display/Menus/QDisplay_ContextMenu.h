@@ -12,10 +12,16 @@ public:
   QDisplay_ContextMenu(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {}
 
   virtual void render() {
+    // TODO: Make Popup menus a static definition
     if (ImGui::BeginPopup("context menu")) {
       {
+        if (m_stableManager->getModelState() == EXECUTION_STATE::SUCCESS) {
+          if (ImGui::Selectable("Fill")) {
+            m_stableManager->genFromSelection();
+          }
+        }
         if (ImGui::Selectable("Send to buffer")) {
-          m_stableManager->m_selection->captureBuffer();
+          m_stableManager->captureBuffer();
         }
         if (ImGui::Selectable("Info")) {
         }

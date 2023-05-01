@@ -1,14 +1,9 @@
-# Basic module that serves as the default txt2img / img2img handler for stable-ui
+# Basic module that serves as the default client/server handler for stable-ui
 module:
   name: stable-ui
   working-directory: /modules/stable-ui
-
-  # Note files are copied after git repositories are initialised
+  gui-path: ""
   filepaths:
     # Stable diffusion server
     "files/sd_server": "/modules/stable-ui/sd_server"
     "files/sd_client": "/modules/stable-ui/sd_client"
-
-    # image generation scripts
-    "files/Qimg2img.py": "/modules/stable-ui/scripts/Qimg2img.py"
-    "files/Qtxt2img.py": "/modules/stable-ui/scripts/Qtxt2img.py"

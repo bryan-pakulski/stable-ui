@@ -20,13 +20,15 @@ This can potentially be resolved by using std::string as a resizable datatype, s
 
 # Additional
 
+Add search and indexing system on prompt, image hash etc.. for image browser, will need some sort of metadata saved for each image generated (store inside image??)
+
 Add support for textual inversion, see: https://towardsdatascience.com/how-to-fine-tune-stable-diffusion-using-textual-inversion-b995d7ecc095
 
 Delete models & configurations
 
 Save output to temporary folder - "gen??" This way you can generate multiple item etc.. and move them automatically after generation is finished to an output folder
 
-Ping Pong between server & client to ensure nothing has gone wrong mid command? perhaps do this over a seperate port?
+Status monitoring for ping/pong state
 
 Add input sanitisation on sd_client on messages being sent, delimit or convert " to '?
 
@@ -34,13 +36,24 @@ Add fix faces option:
 https://github.com/TencentARC/GFPGAN
 https://huggingface.co/spaces/akhaliq/GFPGAN/blob/main/app.py
 
+Show existing configuration when editing model config
+
+Link libraries statically to resolve issues on other systems (i.e. libcrypto libraries on windows, python lib)
+
 # Bugs
 
 - Close sd_server when app closes
-
+- Max of 27 images generated before overwriting, decide on new naming format
 
 # Prompts:
+
 #
+
+Image resolutions:
+
+512x512
+640x640
+768x768
 
 raytraced render
 and digital painting of
@@ -65,10 +78,15 @@ unrealistic,
 high contrast, hdr,
 4 k, artstation,
 cgsociety, unreal engine,
- symobolism, magical,
+symobolism, magical,
 mystical, mystifying,
 obscure, perplexing,
 zbrush, octane,
 hyperrealistic, bokeh,
 dof, battle of the gods,
 zeus
+
+Drawing of Cassian andor, black and white,
+concept art, sumi style,
+artstation, trending, highly detailed,
+smooth, focus, art by yoji shinkawa

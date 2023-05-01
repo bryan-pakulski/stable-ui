@@ -52,8 +52,8 @@ template <class T> struct ConfigError : public Base_Error {
   ~ConfigError() {}
 
   void setConfigValue() {
-    QLogger::GetInstance().Log(LOGLEVEL::INFO, "Setting additional configuration for", m_configPath, "to value",
-                               m_variable->get());
+    QLogger::GetInstance().Log(LOGLEVEL::INFO, "ErrorHandler::setConfigValue Setting additional configuration for",
+                               m_configPath, "to value", m_variable->get());
     CONFIG::setConfig(*m_variable, m_configPath);
   }
 
