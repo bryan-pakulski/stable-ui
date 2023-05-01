@@ -1,5 +1,5 @@
 @echo off
-pushd ..\data\docker
+pushd data\docker
 echo Building docker image, this may take some time...
 docker build -t sd .
 
@@ -25,3 +25,5 @@ if "%status%" == "Exists" (
 docker exec sd /home/entrypoint.sh
 
 popd
+
+pause
