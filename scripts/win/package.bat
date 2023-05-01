@@ -7,10 +7,7 @@ if not exist "build" (
 mkdir build\stable-ui-bin
 mkdir build\stable-ui-bin\data
 
-if exist build\stable-ui (
-    move build\stable-ui build\stable-ui-bin
-)
-
+move build\Release\stable-ui.exe build\stable-ui-bin
 xcopy /s /e /q data build\stable-ui-bin\data
 copy scripts\win\start_docker.bat build\stable-ui-bin
 copy requirements.txt build\stable-ui-bin
