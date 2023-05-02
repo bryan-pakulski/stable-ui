@@ -1,0 +1,6 @@
+# Set the default behavior
+* text=auto
+
+# Don't allow windows to insert line endings on scripts for docker
+*.sh text eol=LF
+*.py text eol=LF

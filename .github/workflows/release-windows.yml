@@ -25,6 +25,10 @@ jobs:
 
     - name: Checkout repository
       uses: actions/checkout@v3
+      run: /
+        git config --global core.autocrlf false
+        git config --global core.eol lf
+        
     - name: Checkout submodules
       run: git submodule update --init --recursive
     
