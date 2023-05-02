@@ -109,11 +109,9 @@ find_package(OpenGL REQUIRED)  # for Dear ImGui
 find_package(Threads REQUIRED) # for GLFW
 find_package(X11 REQUIRED)     # for GLFW
 
-# Embed python
-find_package (Python 3.8.0 REQUIRED
+# Using python 3.8.X
+find_package (Python 3.8 EXACT REQUIRED
         COMPONENTS Interpreter Development)
-
-find_package(PythonLibs 3.8.0 REQUIRED)
 
 # Yaml-cpp
 add_subdirectory(${CMAKE_HOME_DIRECTORY}/src/ThirdParty/yaml-cpp)
