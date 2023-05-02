@@ -31,13 +31,14 @@ private:
 
 struct HEARTBEAT_STATE {
   const static int DEAD = -1;
+  const static int POLL = 0;
   const static int ALIVE = 1;
 };
 
 class Heartbeat {
 private:
   std::thread m_thread;
-  int m_lastState = HEARTBEAT_STATE::ALIVE;
+  int m_lastState = HEARTBEAT_STATE::POLL;
   const int c_timer = 5;
   timer_killer m_kill_timer = timer_killer();
 

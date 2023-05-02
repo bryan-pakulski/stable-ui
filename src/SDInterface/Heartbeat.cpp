@@ -21,7 +21,8 @@ void Heartbeat::run() {
     // Call sd-client to ping sd-server
     SDCommandsInterface::GetInstance().heartbeat(m_state);
 
-    if (m_state == HEARTBEAT_STATE::DEAD && m_lastState != HEARTBEAT_STATE::DEAD) {
+    // Only throw an error when we experience a connection failure, on initial connect the last_state is POLL
+    if (m_state == HEARTBEAT_STATE::DEAD && m_lastState == HEARTBEAT_STATE::ALIVE) {
       ErrorHandler::GetInstance().setError("No heartbeat to SD Server, is docker running?");
     }
 
