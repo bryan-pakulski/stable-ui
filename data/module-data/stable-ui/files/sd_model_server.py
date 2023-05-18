@@ -25,12 +25,14 @@ heartbeatSocket.bind("tcp://*:5556")
 logging.basicConfig(
     filename="/logs/sd_server.log",
     level=logging.INFO,
-    format="[SDSERVER] %(asctime)s - %(levelname)s - %(message)s"
+    format="%(asctime)s - [%(levelname)s][dkr]: %(message)s",
+    datefmt='%a %b %d %H:%M:%S %Y'
 )
 
-logging.addLevelName(logging.INFO, "INFO")
-logging.addLevelName(logging.WARNING, "WARN")
-logging.addLevelName(logging.ERROR, "ERR")
+logging.addLevelName(logging.INFO, "info")
+logging.addLevelName(logging.WARNING, "warn")
+logging.addLevelName(logging.ERROR, "err")
+logging.addLevelName(logging.DEBUG, "dbg")
 
 class MQServer():
     def __init__(self):
@@ -90,7 +92,9 @@ class Command():
     def parse(self, command):
         # Split the message into the command and arguments
         command_and_args = command.split(":")
-        self.command = command_and_args[0]
+        self.command = str(command_and_args[0])
+
+        print("Creating command: ", self.command)
 
         print(command_and_args)
         if (len(command_and_args) > 1):
@@ -158,6 +162,11 @@ class SDModelServer(MQServer):
                 "help": "Shuts down SD Model Server",
                 "arguments": None,
                 "function": self.quit
+            },
+            "restart": {
+                "help": "Reload SD Model Server",
+                "arguments": None,
+                "function": self.restart
             },
             "help": {
                 "help": "Prints this message",
@@ -346,9 +355,20 @@ class SDModelServer(MQServer):
     # Function commands
     def quit(self, cmd):
         self.running = False
-        logging.info("Recieved Quit command")
-
         return "Quitting..."
+
+    def restart(self, cmd):
+        logging.info("Recieved reset command")
+
+        # Free the old model if it exists and recover resources
+        if (self.model != None):
+            logging.info(
+                f"Freeing old model & recovering resource: {self.model.checkpoint_path}")
+            self.model.clean()
+
+        # TODO: any additional cleanup???
+
+        return "Restarted!"
 
     def __help(self, cmd):
         dump = json.dumps(self.commandList, sort_keys=True,

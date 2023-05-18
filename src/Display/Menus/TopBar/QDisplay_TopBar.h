@@ -6,7 +6,7 @@
 #include "../../../Config/config.h"
 #include "../../../QLogger.h"
 #include "../../../Rendering/Helper.h"
-#include "../../../SDInterface/Heartbeat.h"
+#include "../../../Client/Heartbeat.h"
 
 #include "../../../Display/ErrorHandler.h"
 #include "../../QDisplay_Base.h"
@@ -201,7 +201,7 @@ public:
         ImGui::EndMenu();
       }
 
-      if (ImGui::BeginMenu("Tools")) {
+      if (ImGui::BeginMenu("Model")) {
 
         if (ImGui::MenuItem("Load Model To Memory")) {
           m_loadModelWindow->openWindow();
@@ -211,15 +211,28 @@ public:
           m_configureModelWindow->openWindow();
         }
 
-        if (ImGui::MenuItem("Open Log")) {
-          logFileOpen = true;
-        }
+        ImGui::EndMenu();
+      }
+
+      if (ImGui::BeginMenu("Plugins")) {
+        m_pluginsWindow->menus();
 
         ImGui::EndMenu();
       }
 
-      if (ImGui::BeginMenu("Modules")) {
-        m_pluginsWindow->menus();
+      if (ImGui::BeginMenu("Debug")) {
+
+        if (ImGui::MenuItem("Release model from memory")) {
+          SDCommandsInterface::GetInstance().releaseSDModelServer();
+        }
+
+        if (ImGui::MenuItem("Restart SD Server")) {
+          SDCommandsInterface::GetInstance().launchSDModelServer();
+        }
+
+        if (ImGui::MenuItem("Open Log")) {
+          logFileOpen = true;
+        }
 
         ImGui::EndMenu();
       }

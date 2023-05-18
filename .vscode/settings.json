@@ -1,4 +1,8 @@
 {
+    "clangd.arguments": [
+        "-background-index",
+        "-compile-commands-dir=build"
+    ],
     "files.associations": {
         "functional": "cpp",
         "ratio": "cpp",

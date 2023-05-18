@@ -1,21 +1,9 @@
 #!/bin/bash
 
-if [ ! -d "src" ]; then
-    echo "please run this script from the root directory"
+if [ ! -d "build/stable-ui-bin" ]; then
+    echo "build/stable-ui-bin directory not present, please build & package the project first"
     exit 1
 fi
 
-echo "Running build..."
-
-mkdir -p build
-pushd build
-    cmake -DBUILD_SHARED_LIBS=OFF ..
-    make -j $(nproc) > build.log
-popd
-
-echo "Packing docker container..."
-bash -c "./scripts/package.sh"
-
-echo "Starting application..."
-bash -c "./scripts/run.sh"
-
+cd build/stable-ui-bin
+./start_docker.sh

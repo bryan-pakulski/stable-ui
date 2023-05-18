@@ -28,8 +28,8 @@ private:
     // Copy model file
     try {
       fs::copy_file(modelPath, "data/models/vae/" + modelPath.filename().string());
-    } catch (fs::filesystem_error const &ex) {
-      ErrorHandler::GetInstance().setError(ex.what());
+    } catch (fs::filesystem_error const &err) {
+      ErrorHandler::GetInstance().setError(err.what());
     }
 
     *m_saving = false;

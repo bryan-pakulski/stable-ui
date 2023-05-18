@@ -1,14 +1,12 @@
 #include "Heartbeat.h"
 #include "../../../Display/ErrorHandler.h"
 
-// TODO: make this a singleton so that the connection can be monitored via the display toolbar
-
 Heartbeat::Heartbeat() {}
 
 Heartbeat::~Heartbeat() {}
 
 void Heartbeat::start() {
-  m_thread = std::thread([=] { run(); });
+  m_thread = std::thread([this] { run(); });
 }
 void Heartbeat::stop() {
   m_kill_timer.kill();
@@ -19,11 +17,13 @@ void Heartbeat::run() {
   while (m_kill_timer.wait_for(std::chrono::seconds(c_timer))) {
 
     // Call sd-client to ping sd-server
-    SDCommandsInterface::GetInstance().heartbeat(m_state);
+    QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "SDCommandsInterface::heartbeat ping");
+    StableClient::GetInstance().heartbeat(m_state);
 
     // Only throw an error when we experience a connection failure, on initial connect the last_state is POLL
     if (m_state == HEARTBEAT_STATE::DEAD && m_lastState == HEARTBEAT_STATE::ALIVE) {
       ErrorHandler::GetInstance().setError("No heartbeat to SD Server, is docker running?");
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, "SDCommandsInterface::heartbeat lost heartbeat with docker");
     }
 
     // Only fire an error once on timeout to avoid spamming

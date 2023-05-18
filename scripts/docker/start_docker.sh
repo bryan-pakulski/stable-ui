@@ -5,7 +5,13 @@ if [ ! -d "data/docker" ]; then
     exit 1
 fi
 
+# Ensure log files have correct permissions, create as current user if they don't exist
+touch data/logs/sd_server.log
+touch data/logs/docker_server.err
+touch data/logs/docker_server.out
+
 pushd data/docker
+
 docker build -t sd .
 
 # Some distro requires that the absolute path is given when invoking lspci

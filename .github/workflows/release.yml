@@ -26,9 +26,8 @@ jobs:
     
     - name: Initialise
       run: |
-        sudo add-apt-repository ppa:deadsnakes/ppa
         sudo apt update && sudo apt upgrade
-        sudo apt install -y libxrandr-dev xorg-dev python3.8 python3.8-dev
+        sudo apt install -y libxrandr-dev xorg-dev
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -43,7 +42,7 @@ jobs:
     - name: Package
       # Copy data folders and compress release
       run: |
-        ./scripts/package.sh
+        ./scripts/pipeline/package.sh
         tar -zcvf stable-ui.tar.gz build/stable-ui-bin
         
     - name: Artifacts

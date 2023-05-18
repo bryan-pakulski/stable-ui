@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SDCommandsInterface.h"
+#include "../Helpers/States.h"
 #include <condition_variable>
 #include <thread>
 #include <chrono>
@@ -27,12 +28,6 @@ private:
   mutable std::condition_variable cv;
   mutable std::mutex m;
   bool terminate = false;
-};
-
-struct HEARTBEAT_STATE {
-  const static int DEAD = -1;
-  const static int POLL = 0;
-  const static int ALIVE = 1;
 };
 
 class Heartbeat {

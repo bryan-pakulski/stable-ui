@@ -1,4 +1,4 @@
-// Load model into sd_model_server#pragma once
+#pragma once
 
 #include <imgui.h>
 #include "../../../Display/ErrorHandler.h"
@@ -36,7 +36,7 @@ private:
           m_ModelList.push_back(i);
         }
       }
-    } catch (YAML::Exception) {
+    } catch (const YAML::Exception &) {
       QLogger::GetInstance().Log(LOGLEVEL::ERR, "QDisplay_LoadModel::reloadFiles Failed to parse yaml file: ",
                                  CONFIG::MODELS_CONFIGURATION_FILE.get());
       return;

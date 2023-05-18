@@ -18,11 +18,6 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-python@v4
-      with:
-        python-version: '3.8' 
-
     - name: Checkout repository
       uses: actions/checkout@v3
     - name: Checkout submodules
@@ -45,7 +40,7 @@ jobs:
     - name: Package
       # Copy data folders and compress release
       run: |
-        scripts/win/package.bat
+        scripts/pipeline/package.bat
         Compress-Archive -Path build\stable-ui-bin/* -Destination stable-ui.zip
         
     - name: Artifacts

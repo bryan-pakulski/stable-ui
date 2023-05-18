@@ -7,8 +7,6 @@ It is composed of a native front end app & dockerised backend server to ensure e
 
 These are requirements on both Windows (WSL) & Linux
 
-- Python 3.8.X (https://www.python.org/downloads/)
-- pip (see requirements.txt for libraries, these can be installed from the command line with `pip install -r requirements.txt`)
 - Docker see: https://github.com/NVIDIA/nvidia-docker#quickstart
 - nvidia-container-toolkit
 
@@ -51,7 +49,7 @@ The image generation options only become available once a model has been loaded 
 
 Functionality of the application can be extended by loading custom modules, see `data/modules/ReadMe.md` for additional information, default modules include:
 
-- `stable-ui`: SD V1 & V2 support for image/text generation scripts, runs the sd generation client & server within docker, critical component and should not be removed
+- `stable-ui`: SD V1 & V2 support for image/text generation scripts, runs the sd generation ZMQ server within docker, critical component and should not be removed
 
 ## Controls
 
@@ -70,15 +68,15 @@ Initialise submodules:
 `git submodule update --recursive --remote`
 
 Install supporting libraries:
+- libzmq
 
-- Python 3.8+ dev libraries
-- Python 3.8+ debug symbols
 - Building:
-  - Run the `./deploy/package.sh` shell script
-  - Build is stored in `build/stable-ui-bin`
+  - Run the `./scripts/local_build.sh` shell script
+  - Build is stored in `build/stable-ui-bin` (statically linked)
 
 ## Windows:
 
 - Compiler: VSCC
-- Additional libraries: Python 3.8 debug symbols & Debug binaries
-- Building: Run `cmake --build` and then the `.\scripts\package.bat` batch script
+- Libraries:
+  - libzmq
+- Building: Run `cmake --build` and then the `.\scripts\pipeline\package.bat` batch script

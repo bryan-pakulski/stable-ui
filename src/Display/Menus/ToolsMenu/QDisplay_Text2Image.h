@@ -51,8 +51,9 @@ public:
           outfile = entry.path().string();
         }
       }
-    } catch (fs::filesystem_error) {
+    } catch (const fs::filesystem_error &err) {
       ErrorHandler::GetInstance().setConfigError(CONFIG::OUTPUT_DIRECTORY, "OUTPUT_DIRECTORY");
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, err.what());
     }
 
     return outfile;
@@ -67,17 +68,8 @@ public:
   }
 
   void imageWindow() {
-    if (ImGui::CollapsingHeader("Render")) {
+    if (ImGui::CollapsingHeader("Preview")) {
       if (m_image) {
-        // Generate option only available whilst a image isn't pending
-        if (m_image->renderState != Q_EXECUTION_STATE::LOADING) {
-          if (ImGui::Button("Generate")) {
-            renderImage();
-          }
-        } else {
-          ImGui::Text("Generating image...");
-        }
-
         // Once image is marked as rendered display on screen
         if (m_image->renderState == Q_EXECUTION_STATE::SUCCESS) {
           ImGui::Text("image width: %d image height:%d", m_image->m_width, m_image->m_height);
@@ -93,10 +85,6 @@ public:
           }
 
           ImGui::Image((void *)(intptr_t)m_image->m_texture, ImVec2(m_image->m_width * 0.3, m_image->m_height * 0.3));
-        }
-      } else {
-        if (ImGui::Button("Generate")) {
-          renderImage();
         }
       }
     }
@@ -151,6 +139,31 @@ public:
   }
 
   virtual void render() {
+
+    // Generate option only available whilst a image isn't pending
+    if ((m_image && m_image->renderState != Q_EXECUTION_STATE::LOADING) || !m_image) {
+      static const ImVec4 currentColor{0, 0.5f, 0, 1.0f};
+
+      ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
+      ImGui::PushStyleColor(ImGuiCol_ButtonActive, currentColor);
+      ImGui::PushStyleColor(ImGuiCol_ButtonHovered, currentColor);
+
+      if (ImGui::Button("Generate", ImVec2(150, 40))) {
+        renderImage();
+      }
+      ImGui::PopStyleColor(3);
+    } else if (m_image && m_image->renderState == Q_EXECUTION_STATE::LOADING) {
+      static const ImVec4 currentColor{0.5f, 0, 0, 1.0f};
+      ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
+      ImGui::PushStyleColor(ImGuiCol_ButtonActive, currentColor);
+      ImGui::PushStyleColor(ImGuiCol_ButtonHovered, currentColor);
+
+      if (ImGui::Button("Cancel", ImVec2(150, 40))) {
+        // TODO: cut render short?
+      }
+      ImGui::PopStyleColor(3);
+    }
+
     promptHelper();
     promptConfig();
     imageWindow();

@@ -47,9 +47,10 @@ private:
         listItem i{.m_name = entry.path().filename().string()};
         m_ModelConfigList.push_back(i);
       }
-    } catch (fs::filesystem_error) {
+    } catch (const fs::filesystem_error &err) {
       ErrorHandler::GetInstance().setConfigError(CONFIG::MODEL_CONFIGURATIONS_DIRECTORY,
                                                  "MODEL_CONFIGURATIONS_DIRECTORY");
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, err.what());
     }
 
     // Load VAE List
@@ -58,8 +59,9 @@ private:
         listItem i{.m_name = entry.path().filename().string()};
         m_VAEList.push_back(i);
       }
-    } catch (fs::filesystem_error) {
+    } catch (const fs::filesystem_error &err) {
       ErrorHandler::GetInstance().setConfigError(CONFIG::VAE_FOLDER_PATH, "VAE_FOLDER_PATH");
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, err.what());
     }
   }
 
@@ -91,8 +93,8 @@ private:
     // Copy model file
     try {
       fs::copy_file(modelPath, "data/models/" + modelPath.filename().string());
-    } catch (fs::filesystem_error const &ex) {
-      ErrorHandler::GetInstance().setError(ex.what());
+    } catch (fs::filesystem_error const &err) {
+      ErrorHandler::GetInstance().setError(err.what());
     }
 
     *m_saving = false;

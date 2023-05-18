@@ -5,5 +5,4 @@ module:
   gui-path: ""
   filepaths:
     # Stable diffusion server
-    "files/sd_server": "/modules/stable-ui/sd_server"
-    "files/sd_client": "/modules/stable-ui/sd_client"
+    "files": "/modules/stable-ui"

@@ -1,6 +1,13 @@
 @echo off
+
+:: Ensure log files have correct permissions, create as current user if they don't exist
+type nul >> data\logs\sd_server.log
+type nul >> data\logs\docker_server.err
+type nul >> data\logs\docker_server.out
+
 pushd data\docker
 echo Building docker image, this may take some time...
+
 docker build -t sd .
 
 echo Detecting Nvidia GPU...
@@ -25,5 +32,4 @@ if "%status%" == "Exists" (
 docker exec sd /home/entrypoint.sh
 
 popd
-
 pause

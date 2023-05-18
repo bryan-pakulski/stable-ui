@@ -32,3 +32,4 @@
 - Max of 27 images generated before overwriting, decide on new naming format
 - Save canvas buffer coordinates not working correctly
 - Selection not offseting correctly on Y axis, constrained to initial screenspace (check transform logic)
+- Crash when docker closes and then ui is closed afterwards

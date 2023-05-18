@@ -22,7 +22,7 @@ StableManager::StableManager(GLFWwindow &w) : m_window{w} {
   // Create initial canvas
   createCanvas(0, 0, "default");
 
-  // Intialise python interface for calling commands
+  // Intialise zmq server within docker to receive commands from client
   SDCommandsInterface::GetInstance().launchSDModelServer();
   StableManager::calculateFramebuffer(m_camera->m_screen.first, m_camera->m_screen.second);
 }
@@ -263,7 +263,7 @@ void StableManager::mouse_scroll_callback(GLFWwindow *window, double xoffset, do
 
 // Close window callback
 void StableManager::close_callback(GLFWwindow *window) {
-  // SDCommandsInterface::GetInstance().terminateSDModelServer();
+  // SDCommandsInterface::GetInstance().restartSDModelServer();
 }
 
 // Build image from canvas, based on selection coordinates

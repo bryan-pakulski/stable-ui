@@ -73,7 +73,8 @@ for module_folder in next(os.walk("."))[1]:
                     # try creating parent directories
                     os.makedirs(os.path.dirname(dst))
                     shutil.copy(src, dst)
-
+            
+            os.system(f"chmod +x ./{module_folder}/init.sh")
             os.system(f"./{module_folder}/init.sh")
 
         except yaml.YAMLError as exc:

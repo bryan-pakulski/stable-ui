@@ -45,9 +45,10 @@ private:
         listItem i{.m_name = entry.path().filename().string()};
         m_ModelConfigList.push_back(i);
       }
-    } catch (fs::filesystem_error) {
+    } catch (const fs::filesystem_error &err) {
       ErrorHandler::GetInstance().setConfigError(CONFIG::MODEL_CONFIGURATIONS_DIRECTORY,
                                                  "MODEL_CONFIGURATIONS_DIRECTORY");
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, err.what());
     }
 
     // Load models list
@@ -60,7 +61,7 @@ private:
           m_ModelList.push_back(i);
         }
       }
-    } catch (YAML::Exception) {
+    } catch (const YAML::Exception &) {
       QLogger::GetInstance().Log(LOGLEVEL::ERR, "QDisplay_ConfigureModel::reloadFiles Failed to parse yaml file: ",
                                  CONFIG::MODELS_CONFIGURATION_FILE.get());
       return;
@@ -72,8 +73,9 @@ private:
         listItem i{.m_name = entry.path().filename().string()};
         m_VAEList.push_back(i);
       }
-    } catch (fs::filesystem_error) {
+    } catch (const fs::filesystem_error &err) {
       ErrorHandler::GetInstance().setConfigError(CONFIG::VAE_FOLDER_PATH, "VAE_FOLDER_PATH");
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, err.what());
     }
   }
 

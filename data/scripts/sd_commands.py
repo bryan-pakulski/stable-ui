@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/bin/python3.8
 
 import glob
 import docker

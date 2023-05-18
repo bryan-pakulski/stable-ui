@@ -60,7 +60,6 @@ public:
 
   std::string getLatestFile() {
     std::string outfile = "";
-    fs::file_time_type write_time;
 
     try {
       for (const auto &entry : fs::directory_iterator("data" + CONFIG::OUTPUT_DIRECTORY.get() + "/" +
@@ -69,8 +68,9 @@ public:
           outfile = entry.path().string();
         }
       }
-    } catch (fs::filesystem_error) {
+    } catch (const fs::filesystem_error &err) {
       ErrorHandler::GetInstance().setConfigError(CONFIG::OUTPUT_DIRECTORY, "OUTPUT_DIRECTORY");
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, err.what());
     }
 
     return outfile;

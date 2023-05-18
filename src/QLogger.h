@@ -9,6 +9,8 @@
 #include <thread>
 #include <mutex>
 
+#include "Config/config.h"
+
 #ifndef WIN32
 #include <unistd.h>
 #endif
@@ -19,7 +21,7 @@
 
 #define QLOGGER_LOGFILE "data/logs/sd_server.log"
 
-enum class LOGLEVEL { INFO, WARN, ERR };
+enum class LOGLEVEL { INFO, WARN, ERR, DEBUG };
 
 class QLogger {
 
@@ -43,8 +45,8 @@ public:
       if (ePtr) {
         std::rethrow_exception(ePtr);
       }
-    } catch (const std::exception &e) {
-      QLogger::GetInstance().Error(std::string("Caught Exception: "), e.what());
+    } catch (const std::exception &err) {
+      QLogger::GetInstance().Error(std::string("Caught Exception: "), err.what());
     }
   }
 
@@ -85,14 +87,17 @@ private:
   template <typename T, typename... Args> void _Log(LOGLEVEL logLevel, T message, Args... args) {
     std::lock_guard<std::mutex> guard(m_mutex);
     if (logLevel == LOGLEVEL::INFO) {
-      log << std::string(getDateTime()).append(" - [INFO]: ") << message << ", ";
+      log << std::string(getDateTime()).append(" - [info]: ") << message << ", ";
       Info(args...);
     } else if (logLevel == LOGLEVEL::WARN) {
-      log << std::string(getDateTime()).append(" - [WARN]: ") << message << ", ";
+      log << std::string(getDateTime()).append(" - [warn]: ") << message << ", ";
       Warning(args...);
     } else if (logLevel == LOGLEVEL::ERR) {
-      log << std::string(getDateTime()).append(" - [ERR]: ") << message << ", ";
+      log << std::string(getDateTime()).append(" - [err]: ") << message << ", ";
       Error(args...);
+    } else if (logLevel == LOGLEVEL::DEBUG && CONFIG::ENABLE_DEBUG_LOGGING.get() == 1) {
+      log << std::string(getDateTime()).append(" - [dbg]: ") << message << ", ";
+      Debug(args...);
     }
 
     updateLogTimestamp();
@@ -116,10 +121,17 @@ private:
     Info(args...);
   }
 
+  template <typename T> void Debug(T message) { log << message << std::endl; }
+  template <typename T, typename... Args> void Debug(T message, Args... args) {
+    log << message << ", ";
+    Debug(args...);
+  }
+
   // Empty EOL for single message logs without ...args
   void Error() { log << std::endl; }
   void Warning() { log << std::endl; }
   void Info() { log << std::endl; }
+  void Debug() { log << std::endl; }
 
   /*
    * Gets current date time, strips new lines and returns string

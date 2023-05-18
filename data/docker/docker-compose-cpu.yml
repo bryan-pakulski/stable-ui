@@ -17,6 +17,21 @@ services:
       - ../logs:/logs
       - conda_env:/opt/conda
       - root_profile:/root
+    ports:
+      - "5555:5555"
+      - "5556:5556"
+    networks:
+      vpcbr:
+        ipv4_address: 10.5.0.6
 volumes:
   conda_env:
   root_profile:
+networks:
+  vpcbr:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1
+    aliases:
+      - stable_ui_server

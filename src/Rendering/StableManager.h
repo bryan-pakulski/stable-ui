@@ -6,7 +6,7 @@
 
 #include "../Config/config.h"
 #include "../QLogger.h"
-#include "../SDInterface/SDCommandsInterface.h"
+#include "../Client/SDCommandsInterface.h"
 #include "../Helpers/States.h"
 
 #include "objects/BaseObject.h"
