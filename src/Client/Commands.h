@@ -93,6 +93,7 @@ Parameters:
     - outpath_samples               (output directory)
 */
 class textToImage : public command {
+public:
   textToImage(std::string &prompt, int width, int height, std::string &negative_prompt, std::string &canvas_name,
               std::string &sampler_name, int batch_size, int n_iter, int steps, double cfg_scale, int seed,
               std::string &out_path) {
@@ -131,6 +132,7 @@ Parameters:
     - outpath_samples               (output directory)
 */
 class imageToImage : public command {
+public:
   imageToImage(std::string &prompt, std::string &negative_prompt, std::string &canvas_name, std::string &img_path,
                std::string &sampler_name, int batch_size, int n_iter, int steps, double cfg_scale, double strength,
                int seed, std::string &out_path) {
@@ -145,6 +147,7 @@ class imageToImage : public command {
     m_parameters.push_back(makePair("n_iter", n_iter));
     m_parameters.push_back(makePair("steps", steps));
     m_parameters.push_back(makePair("cfg_scale", cfg_scale));
+    m_parameters.push_back(makePair("strength", strength));
     m_parameters.push_back(makePair("seed", seed));
     m_parameters.push_back(makePair("outpath_samples", out_path));
   }

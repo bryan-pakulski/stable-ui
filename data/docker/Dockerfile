@@ -23,5 +23,6 @@ COPY ./setup.py /home/
 COPY ./sd-server.sh /home/
 COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+RUN ["chmod", "+x", "/home/sd-server.sh"]
 RUN ["chmod", "+x", "/home/entrypoint.sh"]
 CMD sleep infinity

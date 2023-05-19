@@ -22,7 +22,9 @@ public:
   void loadModelToMemory(std::string ckpt_path, std::string config_path, std::string vae_path, std::string precision,
                          int &state);
 
-  void textToImage(int &state);
+  void textToImage(std::string sdModelPath, std::string &canvasName, std::string prompt, std::string negative_prompt,
+                   std::string &samplerName, int batch_size, int steps, double cfg, int seed, int width, int height,
+                   int &renderState);
   void imageToImage(int &state);
 
 private:

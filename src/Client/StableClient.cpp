@@ -63,7 +63,16 @@ void StableClient::loadModelToMemory(std::string ckpt_path, std::string config_p
 }
 
 // Text to image
-void StableClient::textToImage(int &state) {}
+void StableClient::textToImage(std::string outDir, std::string &canvasName, std::string prompt,
+                               std::string negative_prompt, std::string &samplerName, int batch_size, int steps,
+                               double cfg, int seed, int width, int height, int &renderState) {
+
+  commands::textToImage cmd = commands::textToImage(prompt, width, height, negative_prompt, canvasName, samplerName,
+                                                    batch_size, 1, steps, cfg, seed, outDir);
+
+  std::string msg = sendMessage(cmd.getCommandString(), renderState);
+  renderState = Q_EXECUTION_STATE::SUCCESS;
+}
 
 // Image to image
 void StableClient::imageToImage(int &state) {}
