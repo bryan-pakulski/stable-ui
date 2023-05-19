@@ -25,7 +25,9 @@ jobs:
     
     - name: Initialise
       run: |
-        echo "Initialised"
+        git clone https://github.com/microsoft/vcpkg.git
+        call bootstrap-vcpkg.bat # For powershell
+        vcpkg install zeromq
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
