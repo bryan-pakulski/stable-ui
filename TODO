@@ -10,6 +10,7 @@
 
 - initialise string with a maximum length, this is important as if we reload configuration by editing the string manually via ImGui we don't have the hooks to re-size memory and we risk overwriting if the initial string is too short (This can potentially be resolved by using std::string as a resizable datatype, see imgui_stdlib.h)
 - Add input sanitisation on sd_client on messages being sent, delimit or convert " to '?
+- Refactor main rendering code
 
 
 # Functionality
@@ -33,3 +34,4 @@
 - Save canvas buffer coordinates not working correctly
 - Selection not offseting correctly on Y axis, constrained to initial screenspace (check transform logic)
 - Crash when docker closes and then ui is closed afterwards
+- Extra configuration i.e. trigger_prompt not being loaded from model yaml
