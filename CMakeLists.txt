@@ -124,6 +124,11 @@ find_package(X11 REQUIRED)     # for GLFW
 # Yaml-cpp
 add_subdirectory(${CMAKE_HOME_DIRECTORY}/src/ThirdParty/yaml-cpp)
 
+# Zero MQ should be install as part of the pipeline or using vcpkg
+if (WIN32)
+        find_package(ZeroMQ CONFIG REQUIRED)
+endif()
+
 add_executable( stable-ui 
                 src/main.cpp
                 src/Helpers/GLHelper.cpp
@@ -156,13 +161,26 @@ target_link_directories(
         stable-ui PRIVATE
 )
 
-target_link_libraries(
-        stable-ui PRIVATE
-        imgui
-        glad
-        glfw
-        glm
-        yaml-cpp
-        zmq
-        ${OPENGL_LIBRARY}
-)
+if(UNIX)
+        target_link_libraries(
+                stable-ui PRIVATE
+                imgui
+                glad
+                glfw
+                glm
+                yaml-cpp
+                zmq
+                ${OPENGL_LIBRARY}
+        )
+else()
+        target_link_libraries(
+                stable-ui PRIVATE
+                imgui
+                glad
+                glfw
+                glm
+                yaml-cpp
+                libzmq-static
+                ${OPENGL_LIBRARY}
+        )
+endif()

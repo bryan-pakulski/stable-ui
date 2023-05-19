@@ -79,4 +79,13 @@ Install supporting libraries:
 - Compiler: VSCC
 - Libraries:
   - libzmq
+
+
+Libraries can be installed using vcpkg in the same manner as they are set up in the pipeline:
+```
+git clone https://github.com/microsoft/vcpkg.git
+.\vcpkg\bootstrap-vcpkg.bat
+.\vcpkg\vcpkg install zeromq
+```
+
 - Building: Run `cmake --build` and then the `.\scripts\pipeline\package.bat` batch script
