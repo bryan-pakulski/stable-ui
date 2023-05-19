@@ -40,7 +40,7 @@ jobs:
     - name: Package
       # Copy data folders and compress release
       run: |
-        scripts/pipeline/package.bat
+        scripts/pipeline/package.bat -r
         Compress-Archive -Path build\stable-ui-bin/* -Destination stable-ui.zip
         
     - name: Artifacts

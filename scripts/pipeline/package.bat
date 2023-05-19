@@ -11,6 +11,12 @@ mkdir build\stable-ui-bin\data
 xcopy /Y /s /e /q data build\stable-ui-bin\data
 
 :: Top level
-move /Y build\Release\* build\stable-ui-bin
+if "%1"=="-r" (
+    move /Y build\Release\* build\stable-ui-bin
+) 
+else (
+    move /Y build\Debug\* build\stable-ui-bin
+)
+
 copy /Y src\imgui.ini build\stable-ui-bin
 copy /Y scripts\docker\start_docker.bat build\stable-ui-bin

@@ -21,4 +21,9 @@ else (
 )
 popd
 
-CALL .\scripts\pipeline\package.bat
+if "%1"=="-r" (
+	CALL .\scripts\pipeline\package.bat -r
+)
+else (
+	CALL .\scripts\pipeline\package.bat
+)
