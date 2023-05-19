@@ -1,5 +1,5 @@
 #include "BaseObject.h"
-#include "../Helper.h"
+#include "../../Helpers/GLHelper.h"
 #include "../Camera.h"
 #include "image/Image.h"
 #include <memory>

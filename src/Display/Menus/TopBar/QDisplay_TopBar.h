@@ -5,7 +5,7 @@
 
 #include "../../../Config/config.h"
 #include "../../../QLogger.h"
-#include "../../../Rendering/Helper.h"
+#include "../../../Helpers/GLHelper.h"
 #include "../../../Client/Heartbeat.h"
 
 #include "../../../Display/ErrorHandler.h"

@@ -1,5 +1,7 @@
 // Description of commands and the parameters we can use when sending to server
 #pragma once
+#include "yaml-cpp/node/node.h"
+#include "../Config/config.h"
 #include <vector>
 #include <string>
 #include <sstream>
@@ -94,10 +96,15 @@ Parameters:
 */
 class textToImage : public command {
 public:
-  textToImage(std::string &prompt, int width, int height, std::string &negative_prompt, std::string &canvas_name,
-              std::string &sampler_name, int batch_size, int n_iter, int steps, double cfg_scale, int seed,
-              std::string &out_path) {
+  textToImage(std::string hash, std::string &prompt, int width, int height, std::string &negative_prompt,
+              std::string &canvas_name, std::string &sampler_name, int batch_size, int n_iter, int steps,
+              double cfg_scale, int seed, std::string &out_path) {
     m_name = "txt2img";
+
+    YAML::Node model_config = getAdditionalConfiguration(hash);
+    if (model_config["trigger_prompt"]) {
+      prompt.append(" " + model_config["trigger_propmt"].as<std::string>());
+    }
 
     m_parameters.push_back(makePair("prompt", prompt));
     m_parameters.push_back(makePair("negative_prompt", negative_prompt));
@@ -111,6 +118,16 @@ public:
     m_parameters.push_back(makePair("height", height));
     m_parameters.push_back(makePair("width", width));
     m_parameters.push_back(makePair("outpath_samples", out_path));
+  }
+
+private:
+  // Get any extra configuration needed by this command
+  YAML::Node getAdditionalConfiguration(std::string hash) {
+    // If we have any additional configuration for the model hash add it to the call
+    YAML::Node node, _baseNode = YAML::LoadFile(CONFIG::MODELS_CONFIGURATION_FILE.get());
+    YAML::Node model = _baseNode["models"][hash];
+
+    return node;
   }
 };
 
@@ -133,15 +150,20 @@ Parameters:
 */
 class imageToImage : public command {
 public:
-  imageToImage(std::string &prompt, std::string &negative_prompt, std::string &canvas_name, std::string &img_path,
-               std::string &sampler_name, int batch_size, int n_iter, int steps, double cfg_scale, double strength,
-               int seed, std::string &out_path) {
-    m_name = "txt2img";
+  imageToImage(std::string hash, std::string &prompt, std::string &negative_prompt, std::string &canvas_name,
+               std::string &img_path, std::string &sampler_name, int batch_size, int n_iter, int steps,
+               double cfg_scale, double strength, int seed, std::string &out_path) {
+    m_name = "img2img";
+
+    YAML::Node model_config = getAdditionalConfiguration(hash);
+    if (model_config["trigger_prompt"]) {
+      prompt.append(" " + model_config["trigger_propmt"].as<std::string>());
+    }
 
     m_parameters.push_back(makePair("prompt", prompt));
     m_parameters.push_back(makePair("negative_prompt", negative_prompt));
     m_parameters.push_back(makePair("subfolder_name", canvas_name));
-    m_parameters.push_back(makePair("img_path", img_path));
+    m_parameters.push_back(makePair("init_img", img_path));
     m_parameters.push_back(makePair("sampler_name", sampler_name));
     m_parameters.push_back(makePair("batch_size", batch_size));
     m_parameters.push_back(makePair("n_iter", n_iter));
@@ -150,6 +172,16 @@ public:
     m_parameters.push_back(makePair("strength", strength));
     m_parameters.push_back(makePair("seed", seed));
     m_parameters.push_back(makePair("outpath_samples", out_path));
+  }
+
+private:
+  // Get any extra configuration needed by this command
+  YAML::Node getAdditionalConfiguration(std::string hash) {
+    // If we have any additional configuration for the model hash add it to the call
+    YAML::Node node, _baseNode = YAML::LoadFile(CONFIG::MODELS_CONFIGURATION_FILE.get());
+    YAML::Node model = _baseNode["models"][hash];
+
+    return node;
   }
 };
 

@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "../QLogger.h"
-#include "Helper.h"
+#include "../Helpers/GLHelper.h"
 #include "Camera.h"
 
 #include "objects/BaseObject.h"

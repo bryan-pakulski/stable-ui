@@ -120,11 +120,11 @@ find_package(X11 REQUIRED)     # for GLFW
 add_subdirectory(${CMAKE_HOME_DIRECTORY}/src/ThirdParty/yaml-cpp)
 
 add_executable( stable-ui 
-                src/main.cpp 
+                src/main.cpp
+                src/Helpers/GLHelper.cpp
                 src/Rendering/StableManager.cpp
                 src/Rendering/Camera.cpp
                 src/Rendering/Canvas.cpp 
-                src/Rendering/Helper.cpp 
                 src/Rendering/objects/BaseObject.cpp 
                 src/Rendering/objects/Selection.cpp
                 src/Rendering/objects/image/Image.cpp

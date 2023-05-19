@@ -38,7 +38,7 @@ void StableClient::heartbeat(int &state) {
     QLogger::GetInstance().Log(LOGLEVEL::ERR, err.what());
     state = HEARTBEAT_STATE::DEAD;
 
-    // TODO: reset socket
+    // reset socket
     m_heartbeatSocket.disconnect(m_heartbeat_addr);
     m_heartbeatSocket = zmq::socket_t(m_ctx, zmq::socket_type::req);
     m_heartbeatSocket.connect(m_heartbeat_addr);
@@ -63,19 +63,29 @@ void StableClient::loadModelToMemory(std::string ckpt_path, std::string config_p
 }
 
 // Text to image
-void StableClient::textToImage(std::string outDir, std::string &canvasName, std::string prompt,
+void StableClient::textToImage(std::string hash, std::string outDir, std::string &canvasName, std::string prompt,
                                std::string negative_prompt, std::string &samplerName, int batch_size, int steps,
                                double cfg, int seed, int width, int height, int &renderState) {
 
-  commands::textToImage cmd = commands::textToImage(prompt, width, height, negative_prompt, canvasName, samplerName,
-                                                    batch_size, 1, steps, cfg, seed, outDir);
+  commands::textToImage cmd = commands::textToImage(hash, prompt, width, height, negative_prompt, canvasName,
+                                                    samplerName, batch_size, 1, steps, cfg, seed, outDir);
 
   std::string msg = sendMessage(cmd.getCommandString(), renderState);
   renderState = Q_EXECUTION_STATE::SUCCESS;
 }
 
 // Image to image
-void StableClient::imageToImage(int &state) {}
+void StableClient::imageToImage(std::string hash, std::string outDir, std::string &prompt, std::string &negative_prompt,
+                                std::string &canvas_name, std::string &img_path, std::string &sampler_name,
+                                int batch_size, int n_iter, int steps, double cfg_scale, double strength, int seed,
+                                int &renderState) {
+  commands::imageToImage cmd =
+      commands::imageToImage(hash, prompt, negative_prompt, canvas_name, img_path, sampler_name, batch_size, n_iter,
+                             steps, cfg_scale, strength, seed, outDir);
+
+  std::string msg = sendMessage(cmd.getCommandString(), renderState);
+  renderState = Q_EXECUTION_STATE::SUCCESS;
+}
 
 // Send message to ZMQ server listening on m_socket
 std::string StableClient::sendMessage(const std::string &message, int &state) {

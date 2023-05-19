@@ -21,11 +21,6 @@
 #include <memory>
 #include <vector>
 
-namespace rm {
-const int MAX_OBJECTS = 100;
-const int MIN_OBJECTS = 5;
-}; // namespace rm
-
 struct model {
   std::string name;
   std::string hash;

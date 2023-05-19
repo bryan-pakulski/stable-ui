@@ -3,7 +3,7 @@
 #include "ErrorHandler.h"
 #include "../QLogger.h"
 #include "../Config/config.h"
-#include "../Rendering/Helper.h"
+#include "../Helpers/GLHelper.h"
 #include "QDisplay_Base.h"
 
 #include "../Config/types.h"
