@@ -5,5 +5,5 @@ if not exist "build" (
 )
 
 pushd build\stable-ui-bin
-START start_docker.bat
+START stable-ui.exe
 popd
