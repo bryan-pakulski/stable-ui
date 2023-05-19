@@ -32,4 +32,3 @@ if "%status%" == "Exists" (
 docker exec sd /home/entrypoint.sh
 
 popd
-pause
