@@ -62,30 +62,31 @@ Release artifacts are saved for each tagged version and published.
 
 If you'd like to build locally you can perform the following:
 
+* Initialise submodules: `git submodule update --recursive --remote`
+
 ## Linux:
 
-Initialise submodules:
-`git submodule update --recursive --remote`
-
 Install supporting libraries:
-- libzmq
+- `libzmq` / `libzmq-dev` / `libzmq3-dev` (dependant on distribution)
 
-- Building:
-  - Run the `./scripts/local_build.sh` shell script
+### Building:
+  - Run the following build scripts:
+    - `build.sh -r` compile gui and package docker container, `-r` flag is optional to enable release mode
+    - `deploy.sh` Deploy docker changes and synchronise with `compose-up`
+    - `run.sh` Run gui
   - Build is stored in `build/stable-ui-bin` (statically linked)
 
 ## Windows:
 
 - Compiler: VSCC
-- Libraries:
-  - libzmq
 
-
+The `build_release.bat` script assumes the you have vcpkg installed in the root `C:\` drive<br>
 Libraries can be installed using vcpkg in the same manner as they are set up in the pipeline:
 ```
-git clone https://github.com/microsoft/vcpkg.git
-.\vcpkg\bootstrap-vcpkg.bat
-.\vcpkg\vcpkg install zeromq
+git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
+C:\vcpkg\bootstrap-vcpkg.bat
+C:\vcpkg\vcpkg install zeromq --triplet x64-windows
 ```
 
-- Building: Run `cmake --build` and then the `.\scripts\pipeline\package.bat` batch script
+### Building
+- `./scripts/build_release.bat -r` to build & package application, stored in `build/stable-ui-bin`, `-r` is optional to enable release mode
