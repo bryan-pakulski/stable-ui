@@ -8,9 +8,14 @@ endif()
 
 if (UNIX)
         set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+        set(CMAKE_CXX_FLAGS_DEBUG "-g")
+        set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+else()
+        set(CMAKE_CXX_FLAGS "/Wall")
+        set(CMAKE_CXX_FLAGS_DEBUG "/Z7")
+        set(CMAKE_CXX_FLAGS_RELEASE "/O2")
 endif()
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
 
 # for clangd language server
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
