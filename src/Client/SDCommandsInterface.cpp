@@ -17,7 +17,7 @@ void SDCommandsInterface::launchSDModelServer() {
 
   // Launch SD Server inside docker on startup
 #ifdef _WIN32
-  system("call data\scripts\start_sd_server.bat");
+  system("call data\\scripts\\start_sd_server.bat");
 #else
   system("./data/scripts/start_sd_server.sh");
 #endif
