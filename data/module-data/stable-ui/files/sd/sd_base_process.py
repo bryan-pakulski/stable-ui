@@ -22,6 +22,7 @@ from common import lowvram
  Supported Samplers:
  - PLMS
  - DDIM
+ - UNIPC
 """
 
 

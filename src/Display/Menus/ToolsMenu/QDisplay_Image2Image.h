@@ -37,7 +37,9 @@ public:
 
     // Sampler menu
     listItem i{.m_name = "DDIM"};
+    listItem j{.m_name = "UNIPC"};
     m_samplerList.push_back(i);
+    m_samplerList.push_back(j);
   }
 
   std::string getLatestFile() {
