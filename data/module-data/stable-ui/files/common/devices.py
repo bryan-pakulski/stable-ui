@@ -10,7 +10,6 @@ weight_load_location = "cpu"
 dtype = torch.float16
 dtype_vae = torch.float16
 
-
 def get_cuda_device_string():
     if (torch.cuda.is_available()):
         print("Using GPU...")
@@ -34,14 +33,13 @@ def torch_gc():
             torch.cuda.ipc_collect()
 
 
-def autocast(disable=False, precision="full"):
-    if disable:
-        return contextlib.nullcontext()
-
+def get_precision_scope(precision="full"):
     if dtype == torch.float32 or precision == "full":
-        return contextlib.nullcontext()
-
-    return torch.autocast(get_cuda_device_string())
+        return contextlib.nullcontext
+    elif precision == "autocast":
+        return torch.autocast
+    else:
+        return contextlib.nullcontext
 
 
 def enable_tf32():

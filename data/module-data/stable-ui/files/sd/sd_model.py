@@ -106,18 +106,45 @@ class StableDiffusionModel():
         del sd
 
         # TODO: additional logic here for different precision options
-        if self.get_precision() != "full":
-            vae = self.model.first_stage_model
-            # with --no-half-vae, remove VAE from model when doing half() to prevent its weights from being converted to float16
-            if self.no_half_vae:
-                self.model.first_stage_model = None
+        if devices.get_cuda_device_string() == "cpu":
+            devices.dtype = torch.float32
+            devices.dtype_vae = torch.float32
+        else:
+            if self.get_precision() == "full":
+                devices.dtype = torch.float32
+                devices.dtype_vae = torch.float32
 
-            self.model.half()
-            self.model.first_stage_model = vae
+            if self.get_precision() == "autocast":
+                # with --no-half-vae, remove VAE from model when doing half() to prevent its weights from being converted to float16
+                vae = self.model.first_stage_model
+                if self.no_half_vae:
+                    self.model.first_stage_model = None
+                self.model.half()
+                self.model.first_stage_model = vae
+                devices.dtype = torch.float16
+                devices.dtype_vae = torch.float16
 
-        devices.dtype = torch.float32 if self.get_precision() == "full" else torch.float16
-        devices.dtype_vae = torch.float32 if self.get_precision() == "full" else torch.float16
+            if self.get_precision() == "med":
+                # with --no-half-vae, remove VAE from model when doing half() to prevent its weights from being converted to float16
+                vae = self.model.first_stage_model
+                if self.no_half_vae:
+                    self.model.first_stage_model = None
+                self.model.half()
+                self.model.first_stage_model = vae
+                devices.dtype = torch.float16
+                devices.dtype_vae = torch.float16
 
+            if self.get_precision() == "low":
+                # with --no-half-vae, remove VAE from model when doing half() to prevent its weights from being converted to float16
+                vae = self.model.first_stage_model
+                if self.no_half_vae:
+                    self.model.first_stage_model = None
+                self.model.half()
+                self.model.first_stage_model = vae
+                devices.dtype = torch.float16
+                devices.dtype_vae = torch.float16
+
+        # TODO: look into 8 bit quantization
         self.model.first_stage_model.to(devices.dtype_vae)
 
         # Load additional VAE model
@@ -135,12 +162,23 @@ class StableDiffusionModel():
                 return None
 
             self.load_model_weights()
-
-            if self.get_precision() == "low" or self.get_precision() == "med":
-                lowvram.setup_for_low_vram(self.model, True if (
-                    self.get_precision() == "med") else False)
-            else:
+            
+            # TODO: adjust precision 
+            # On CPU we send straight to device
+            if (devices.get_cuda_device_string() == "cpu"):
                 self.model.to(devices.get_cuda_device_string())
+            else:
+                if self.get_precision() == "low":
+                    lowvram.setup_for_low_vram(self.model, False)
+                    
+                if self.get_precision() == "med":
+                    lowvram.setup_for_low_vram(self.model, True)
+
+                if self.get_precision() == "autocast":
+                    self.model.to(devices.get_cuda_device_string())    
+
+                if self.get_precision() == "full":
+                    self.model.to(devices.get_cuda_device_string())                
 
             self.model.eval()
         except:

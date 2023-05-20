@@ -2,6 +2,7 @@ import os
 import sys
 import torch
 import numpy as np
+from torch import autocast
 from tqdm import tqdm, trange
 import PIL
 from PIL import Image
@@ -86,9 +87,59 @@ class StableDiffusionTxt2Img(StableDiffusionBaseProcess):
         self.data = [self.batch_size * [self.prompt]]
         self.precision = precision
 
+    def cpu_sample(self):
+        with torch.no_grad():
+            with devices.get_precision_scope(self.precision)("cuda"):
+                with self.model.ema_scope():
+                    for n in trange(self.n_iter, desc="Sampling"):
+                        for prompts in tqdm(self.data, desc="data"):
+                            unconditional_conditioning = None
+                            if self.cfg_scale != 1.0 or self.negative_prompt == "":
+                                unconditional_conditioning = self.model.get_learned_conditioning(
+                                    self.batch_size * [""])
+                            else:
+                                unconditional_conditioning = self.model.get_learned_conditioning(
+                                    len(prompts) * [self.negative_prompt])
+
+                            if isinstance(prompts, tuple):
+                                prompts = list(prompts)
+
+                            conditioning = self.model.get_learned_conditioning(
+                                prompts)
+                            shape = [self.latent_channels, self.height //
+                                    self.downsampling_factor, self.width // self.downsampling_factor]
+                            samples_ddim, _ = self.sampler.sample(S=self.steps,
+                                                                    conditioning=conditioning,
+                                                                    batch_size=self.batch_size,
+                                                                    shape=shape,
+                                                                    verbose=False,
+                                                                    unconditional_guidance_scale=self.cfg_scale,
+                                                                    unconditional_conditioning=unconditional_conditioning,
+                                                                    eta=self.ddim_eta,
+                                                                    x_T=None)
+
+                            x_samples_ddim = self.model.decode_first_stage(
+                                samples_ddim)
+                            x_samples_ddim = torch.clamp(
+                                (x_samples_ddim + 1.0) / 2.0, min=0.0, max=1.0)
+
+                            del samples_ddim
+                            
+                            if (self.precision == "low") or (self.precision == "med"):
+                                lowvram.send_everything_to_cpu()
+
+                            for x_sample in x_samples_ddim:
+                                x_sample = 255. * \
+                                    rearrange(x_sample.cpu().numpy(),
+                                                'c h w -> h w c')
+                                base_count = len(
+                                    os.listdir(self.outpath_samples))
+                                Image.fromarray(x_sample.astype(np.uint8)).save(
+                                    os.path.join(self.outpath_samples, f"{base_count:05}.png"))
+
     def sample(self):
         with torch.no_grad(), self.model.ema_scope():
-            with devices.autocast(precision=self.precision):
+            with devices.get_precision_scope(self.precision)("cuda"):
                 seed_everything(self.seed)
 
                 for n in trange(self.n_iter, desc="Sampling"):
@@ -167,7 +218,7 @@ class StableDiffusionImg2Img(StableDiffusionBaseProcess):
 
     def sample(self):
         with torch.no_grad(), self.model.ema_scope():
-            with devices.autocast(precision=self.precision):
+            with devices.get_precision_scope(self.precision)("cuda"):
                 init_image = self.load_img(self.init_img).to(devices.get_optimal_device())
                 init_image = repeat(init_image, '1 ... -> b ...', b=self.batch_size)
                 init_latent = self.model.get_first_stage_encoding(
