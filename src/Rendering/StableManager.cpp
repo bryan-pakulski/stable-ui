@@ -142,6 +142,10 @@ std::shared_ptr<Canvas> StableManager::getActiveCanvas() {
   }
 }
 
+// Select an image to use as a base for generation
+void StableManager::useImage(std::string path) { m_useImage = path; }
+const std::string StableManager::getImage() { return m_useImage; }
+
 // Get image from canvas, based on selection coordinates
 void StableManager::sendImageToCanvas(Image &im) {
   // Create copy of image to send to canvas

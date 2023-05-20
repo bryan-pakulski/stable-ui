@@ -74,6 +74,10 @@ public:
 
   // IMAGE GENERATION
 
+  // Get / Set image to use for base rendering
+  void useImage(std::string path);
+  const std::string getImage();
+
   // Generate txt2img
   void textToImage(std::string prompt, std::string negative_prompt, std::string &sampler_name, int samples, int steps,
                    double cfg, int seed, int width, int height, int &renderState);
@@ -99,6 +103,7 @@ private:
 
   int m_modelLoaded = Q_EXECUTION_STATE::PENDING;
   model m_model;
+  std::string m_useImage;
   bool m_captureBuffer = false;
 
   // Process inputs
