@@ -1,2 +1,2 @@
 #!/bin/bash
-docker exec sd /home/sd-server.sh
+docker exec sd /home/sd-supervisor.sh

@@ -170,6 +170,7 @@ class StableDiffusionModel():
             else:
                 if self.get_precision() == "low":
                     lowvram.setup_for_low_vram(self.model, False)
+                    self.model.enable_attention_slicing()
                     
                 if self.get_precision() == "med":
                     lowvram.setup_for_low_vram(self.model, True)
