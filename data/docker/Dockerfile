@@ -5,8 +5,14 @@ WORKDIR /
 
 SHELL ["/bin/bash", "-c"]
 
+# Software useage
+# supervisor: manager for starting/restarting different sd scripts
+# libjemalloc: more efficient memory manager
+# numactl: more efficient core pinning for python
+# exempi: libraries to manipulate xmp data
+
 RUN apt-get update && \
-    apt-get install -y libglib2.0-0 wget git supervisor libjemalloc2 numactl && \
+    apt-get install -y libglib2.0-0 wget git supervisor libjemalloc2 numactl exempi && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

@@ -17,6 +17,7 @@ import logging
 from common import samplers
 from common import devices
 from common import lowvram
+from common import metadata
 
 """
  Supported Samplers:
@@ -66,7 +67,6 @@ class StableDiffusionBaseProcess():
         logging.info("Starting up sd_server")
 
     # Create subfolder for our images
-
     def create_sub_folder(self, name, default):
         if (self.outpath_samples != ""):
             logging.info(f"Creating folder: {self.outpath_samples}")
@@ -87,6 +87,24 @@ class StableDiffusionTxt2Img(StableDiffusionBaseProcess):
         self.create_sub_folder(subfolder_name, "txt2img")
         self.data = [self.batch_size * [self.prompt]]
         self.precision = precision
+
+    def save_metadata(self, img):
+        md = metadata.StableMetaData(img)
+
+        data = {
+            "prompt": self.prompt,
+            "negative_prompt": self.negative_prompt,
+            "model_hash": "",
+            "seed": self.seed,
+            "sampler": "",
+            "steps": self.steps,
+            "cfg": self.cfg_scale,
+            "width": self.width,
+            "height": self.height
+        }
+
+        md.addMetaData(data)
+        md.save()
 
     def cpu_sample(self):
         with torch.no_grad():
@@ -137,6 +155,7 @@ class StableDiffusionTxt2Img(StableDiffusionBaseProcess):
                                     os.listdir(self.outpath_samples))
                                 Image.fromarray(x_sample.astype(np.uint8)).save(
                                     os.path.join(self.outpath_samples, f"{base_count:05}.png"))
+                                self.save_metadata(os.path.join(self.outpath_samples, f"{base_count:05}.png"))
 
     def sample(self):
         with torch.no_grad(), self.model.ema_scope():
@@ -188,8 +207,7 @@ class StableDiffusionTxt2Img(StableDiffusionBaseProcess):
                                 os.listdir(self.outpath_samples))
                             Image.fromarray(x_sample.astype(np.uint8)).save(
                                 os.path.join(self.outpath_samples, f"{base_count:05}.png"))
-
-                    
+                            self.save_metadata(os.path.join(self.outpath_samples, f"{base_count:05}.png"))
 
 
 class StableDiffusionImg2Img(StableDiffusionBaseProcess):
@@ -204,6 +222,26 @@ class StableDiffusionImg2Img(StableDiffusionBaseProcess):
 
         self.init_img = init_img
         self.strength = strength
+
+    def save_metadata(self, img):
+        md = metadata.StableMetaData(img)
+
+        data = {
+            "prompt": self.prompt,
+            "negative_prompt": self.negative_prompt,
+            "model_hash": "",
+            "init_img": self.init_img,
+            "seed": self.seed,
+            "sampler": "",
+            "steps": self.steps,
+            "cfg": self.cfg_scale,
+            "strength": self.strength,
+            "width": self.width,
+            "height": self.height
+        }
+
+        md.addMetaData(data)
+        md.save()
 
     def load_img(self, path):
         image = Image.open(path).convert("RGB")
@@ -272,3 +310,4 @@ class StableDiffusionImg2Img(StableDiffusionBaseProcess):
                             base_count = len(os.listdir(self.outpath_samples))
                             Image.fromarray(x_sample.astype(np.uint8)).save(
                                 os.path.join(self.outpath_samples, f"{base_count:05}.png"))
+                            self.save_metadata(os.path.join(self.outpath_samples, f"{base_count:05}.png"))

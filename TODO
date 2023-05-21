@@ -11,6 +11,7 @@
 - initialise string with a maximum length, this is important as if we reload configuration by editing the string manually via ImGui we don't have the hooks to re-size memory and we risk overwriting if the initial string is too short (This can potentially be resolved by using std::string as a resizable datatype, see imgui_stdlib.h)
 - Add input sanitisation on sd_client on messages being sent, delimit or convert " to '?
 - Refactor main rendering code
+- Move to huggingface diffusers library system to load models (see: https://github.com/huggingface/diffusers)
 
 
 # Functionality

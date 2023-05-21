@@ -1,3 +1,4 @@
+from typing import Optional
 from ldm.util import instantiate_from_config
 from omegaconf import OmegaConf
 import torch
@@ -5,6 +6,7 @@ import safetensors.torch
 import sys
 import os
 import logging
+import inspect
 
 from common import devices
 # Courtesy of Automatic111; https://github.com/AUTOMATIC1111/stable-diffusion-webui/blob/master/modules/sd_models.py
@@ -170,7 +172,6 @@ class StableDiffusionModel():
             else:
                 if self.get_precision() == "low":
                     lowvram.setup_for_low_vram(self.model, False)
-                    self.model.enable_attention_slicing()
                     
                 if self.get_precision() == "med":
                     lowvram.setup_for_low_vram(self.model, True)

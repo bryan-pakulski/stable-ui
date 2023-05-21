@@ -36,6 +36,7 @@ dependencies:
     - invisible-watermark>=0.1.5
     - safetensors==0.2.7
     - streamlit-drawable-canvas==0.8.0
+    - python-xmp-toolkit==2.0.1
     - -e git+https://github.com/hlky/facexlib#egg=facexlib
     - -e git+https://github.com/CompVis/taming-transformers#egg=taming-transformers
     - -e git+https://github.com/TencentARC/GFPGAN#egg=GFPGAN
