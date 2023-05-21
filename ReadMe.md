@@ -51,6 +51,23 @@ Functionality of the application can be extended by loading custom modules, see 
 
 - `stable-ui`: SD V1 & V2 support for image/text generation scripts, runs the sd generation ZMQ server within docker, critical component and should not be removed
 
+## Optimisations
+
+In order to speed up inference time and use resources more effeciently the following optimisations are in place:
+
+### Always enabled / CPU inference
+
+- jemalloc memory allocation library is used inside the docker image for more efficient memory allocation (https://github.com/jemalloc/jemalloc)
+- numactl is installed to ensure that inference is pinned across all available CPU cores (https://linux.die.net/man/8/numactl)
+
+### Full Precision
+
+### Autocast Precision
+
+### Medium Precision
+
+### Low Precision
+
 ## Controls
 
 - Middle mouse button to move the main window canvas

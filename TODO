@@ -5,14 +5,15 @@
 - Load saved canvas
 - Render chunk objects to seperate framebuffer, this is used for the selection window as it will include an alpha channel, final render step is to copy to main framebuffer
 
-
 # Core systems
 
 - initialise string with a maximum length, this is important as if we reload configuration by editing the string manually via ImGui we don't have the hooks to re-size memory and we risk overwriting if the initial string is too short (This can potentially be resolved by using std::string as a resizable datatype, see imgui_stdlib.h)
 - Add input sanitisation on sd_client on messages being sent, delimit or convert " to '?
 - Refactor main rendering code
 - Move to huggingface diffusers library system to load models (see: https://github.com/huggingface/diffusers)
-
+- use Xformers library https://github.com/facebookresearch/xformers/tree/main
+- Look at implementing additional optimisations: https://huggingface.co/docs/diffusers/optimization/fp16
+- Look at any performance improvements that can be used from openvino: https://github.com/bes-dev/stable_diffusion.openvino/tree/master
 
 # Functionality
 
@@ -20,9 +21,6 @@
 - Add support for textual inversion, see: https://towardsdatascience.com/how-to-fine-tune-stable-diffusion-using-textual-inversion-b995d7ecc095
 - Delete models & configurations window
 - Save output to temporary folder - "gen??" This way you can generate multiple item etc.. and move them automatically after generation is finished to an output folder
-- Add fix faces option:
-	https://github.com/TencentARC/GFPGAN
-	https://huggingface.co/spaces/akhaliq/GFPGAN/blob/main/app.py
 - Show existing configuration when editing model config
 - Power of two scaling for selection box
 - Adjustable grid snapping
