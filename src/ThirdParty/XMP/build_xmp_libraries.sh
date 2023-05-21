@@ -11,6 +11,7 @@ if [ ! -d "src" ]; then
     exit 1
 fi
 
+mkdir -p lib
 lib_output=$(pwd)/lib
 
 pushd src/ThirdParty/XMP
