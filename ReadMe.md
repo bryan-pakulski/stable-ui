@@ -90,7 +90,7 @@ Install supporting libraries:
 ### Building:
 
 - Run the following build scripts:
-  - `build.sh -r` compile gui and package docker container, `-r` flag is optional to enable release mode
+  - `build.sh -r` compile thirdparty libraries followed by stable-ui gui and package docker container, `-r` flag is optional to enable release mode
   - `deploy.sh` Deploy docker changes and synchronise with `compose-up`
   - `run.sh` Run gui
 - Build is stored in `build/stable-ui-bin` (statically linked)

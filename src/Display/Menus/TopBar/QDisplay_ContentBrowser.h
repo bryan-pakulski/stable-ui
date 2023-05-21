@@ -55,8 +55,6 @@ public:
   }
 
   void contentBrowser() {
-    ImGui::SetNextWindowSizeConstraints(ImVec2(CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get(), 820.0f),
-                                        ImVec2(CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get(), 640.0f));
     ImGui::BeginChild("Content-Browser");
 
     if (m_current_directory != std::filesystem::path(c_base_content_directory)) {
@@ -120,14 +118,43 @@ public:
 
   virtual void render() {
     if (m_isOpen) {
+
       ImGui::Begin("Content Browser");
-      ImGui::Columns(2, 0, false);
-      contentBrowser();
-      ImGui::NextColumn();
+
+      static float w = 200.0f;
+      static float h = 300.0f;
+
+      // Child window 1, search & filterwindow
+      ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+      ImGui::BeginChild("child1", ImVec2(w, h), true);
+      ImGui::Text("Search & Filter: ");
+      ImGui::EndChild();
+
+      ImGui::SameLine();
+      ImGui::InvisibleButton("vsplitter", ImVec2(8.0f, h));
+      if (ImGui::IsItemActive())
+        w += ImGui::GetIO().MouseDelta.x;
+      ImGui::SameLine();
+
+      // Child window 2, content browser / search
+      ImGui::BeginChild("child2", ImVec2(0, h), true);
       previewPanel();
+      ImGui::EndChild();
+
+      ImGui::InvisibleButton("hsplitter", ImVec2(-1, 8.0f));
+      if (ImGui::IsItemActive())
+        h += ImGui::GetIO().MouseDelta.y;
+
+      // Child window 3, content browser
+      ImGui::BeginChild("child3", ImVec2(0, 0), true);
+      contentBrowser();
+      ImGui::EndChild();
+      ImGui::PopStyleVar();
+
       if (ImGui::Button("Close")) {
         m_isOpen = false;
       }
+
       ImGui::End();
     }
   }

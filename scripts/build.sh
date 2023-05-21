@@ -5,8 +5,11 @@ if [ ! -d "src" ]; then
     exit 1
 fi
 
-echo "Running build..."
+echo "Building ThirdParty libs..."
+./src/ThirdParty/XMP/build_xmp_libraries.sh
 
+
+echo "Building stable-ui..."
 export DYNAMIC_LIBS=OFF
 
 mkdir -p build

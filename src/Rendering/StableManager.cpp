@@ -2,6 +2,7 @@
 #include "GLFW/glfw3.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
+#include "Helpers/Indexer/Indexer.h"
 
 GLuint StableManager::fbo = 0;
 GLuint StableManager::m_colorBufferTexture = 0;
@@ -21,6 +22,8 @@ StableManager::StableManager(GLFWwindow &w) : m_window{w} {
 
   // Create initial canvas
   createCanvas(0, 0, "default");
+
+  Indexer a("test");
 
   // Intialise zmq server within docker to receive commands from client
   SDCommandsInterface::GetInstance().launchSDModelServer();
