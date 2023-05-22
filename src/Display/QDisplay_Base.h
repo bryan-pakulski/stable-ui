@@ -3,8 +3,8 @@
 #include <fstream>
 #include <imgui.h>
 
-#include "../QLogger.h"
-#include "../Rendering/StableManager.h"
+#include "QLogger.h"
+#include "Rendering/StableManager.h"
 
 // Basic menu class
 // QDisplay uses this base class as a reference via smart pointer, this is to

@@ -4,13 +4,13 @@
 #include <imgui.h>
 #include <memory>
 
-#include "../../../Config/config.h"
-#include "../../../QLogger.h"
-#include "../../../Helpers/GLHelper.h"
-#include "../../../Client/Heartbeat.h"
+#include "Config/config.h"
+#include "QLogger.h"
+#include "Helpers/GLHelper.h"
+#include "Client/Heartbeat.h"
 
-#include "../../../Display/ErrorHandler.h"
-#include "../../QDisplay_Base.h"
+#include "Display/ErrorHandler.h"
+#include "Display/QDisplay_Base.h"
 #include "QDisplay_ConfigureModel.h"
 #include "QDisplay_ImportModel.h"
 #include "QDisplay_ImportVAE.h"

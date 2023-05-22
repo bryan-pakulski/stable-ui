@@ -3,8 +3,8 @@
 
 #include <GLFW/glfw3.h>
 
-#include "../ThirdParty/stb/stb_image.h"
-#include "../ThirdParty/stb/stb_image_write.h"
+#include "ThirdParty/stb/stb_image.h"
+#include "ThirdParty/stb/stb_image_write.h"
 
 class GLHELPER {
 public:

@@ -4,13 +4,13 @@
 #include <memory>
 #include <vector>
 
-#include "../QLogger.h"
-#include "../Helpers/GLHelper.h"
+#include "QLogger.h"
+#include "Helpers/GLHelper.h"
 #include "Camera.h"
 
-#include "objects/BaseObject.h"
-#include "objects/chunk/Chunk.h"
-#include "objects/image/Image.h"
+#include "Rendering/objects/BaseObject.h"
+#include "Rendering/objects/chunk/Chunk.h"
+#include "Rendering/objects/image/Image.h"
 
 class Canvas : public BaseObject {
 private:

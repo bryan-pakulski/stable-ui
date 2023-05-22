@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../QLogger.h"
+#include "QLogger.h"
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
@@ -9,8 +9,8 @@
 #include <memory>
 #include <vector>
 
-#include "../Rendering/StableManager.h"
-#include "../Config/config.h"
+#include "Rendering/StableManager.h"
+#include "Config/config.h"
 #include "Menus/QDisplay_ContextMenu.h"
 #include "Menus/ToolsMenu/QDisplay_ToolsMenu.h"
 #include "Menus/TopBar/QDisplay_TopBar.h"

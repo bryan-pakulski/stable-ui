@@ -1,19 +1,15 @@
-//
-// Created by BryanP on 1/8/2022.
-//
-
 #pragma once
 
-#include "../Config/config.h"
-#include "../QLogger.h"
-#include "../Client/SDCommandsInterface.h"
-#include "../Helpers/States.h"
+#include "Config/config.h"
+#include "QLogger.h"
+#include "Client/SDCommandsInterface.h"
+#include "Helpers/States.h"
 
-#include "objects/BaseObject.h"
-#include "objects/image/Image.h"
-#include "objects/Selection.h"
-#include "Camera.h"
-#include "Canvas.h"
+#include "Rendering/objects/BaseObject.h"
+#include "Rendering/objects/image/Image.h"
+#include "Rendering/objects/Selection.h"
+#include "Rendering/Camera.h"
+#include "Rendering/Canvas.h"
 
 #include <glad/glad.h>
 

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../Config/config.h"
-#include "../QLogger.h"
+#include "Config/config.h"
+#include "QLogger.h"
 
 #include "StableClient.h"
-#include "../Helpers/States.h"
+#include "Helpers/States.h"
 
 #include <memory>
 #include <vector>

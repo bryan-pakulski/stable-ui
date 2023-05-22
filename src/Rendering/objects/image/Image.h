@@ -1,6 +1,6 @@
 #pragma once
-#include "../../../Helpers/GLHelper.h"
-#include "../../../Helpers/States.h"
+#include "Helpers/GLHelper.h"
+#include "Helpers/States.h"
 
 #include <glad/glad.h>
 

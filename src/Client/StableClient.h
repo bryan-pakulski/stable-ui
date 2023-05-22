@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
-#include "../Config/config.h"
-#include "../ThirdParty/cppzmq/zmq.hpp"
+#include "Config/config.h"
+#include "ThirdParty/cppzmq/zmq.hpp"
 
 // Singleton class implementation, functions are called on seperate threads, mutex lock on socket access
 class StableClient {

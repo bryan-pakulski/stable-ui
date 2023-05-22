@@ -1,7 +1,7 @@
 #include "BaseObject.h"
-#include "../../Helpers/GLHelper.h"
-#include "../Camera.h"
-#include "image/Image.h"
+#include "Helpers/GLHelper.h"
+#include "Rendering/Camera.h"
+#include "Rendering/objects/image/Image.h"
 #include <memory>
 
 class Selection : public BaseObject {

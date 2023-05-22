@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../../../Display/ErrorHandler.h"
-#include "../../../QLogger.h"
-#include "../../../Config/config.h"
-#include "../../../Helpers/GLHelper.h"
-#include "../../QDisplay_Base.h"
+#include "Display/ErrorHandler.h"
+#include "QLogger.h"
+#include "Config/config.h"
+#include "Helpers/GLHelper.h"
+#include "Display/QDisplay_Base.h"
 
 class QDisplay_CanvasTools : public QDisplay_Base {
 public:

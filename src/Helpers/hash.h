@@ -1,5 +1,5 @@
-#include "../QLogger.h"
-#include "../ThirdParty/sha1/sha1.h"
+#include "QLogger.h"
+#include "ThirdParty/sha1/sha1.h"
 
 inline std::string getFileHash(const char *fileName) {
   SHA1 sha1stream;
