@@ -29,8 +29,6 @@ private:
   std::thread m_queueThread;
 
   std::shared_ptr<asyncQueue<std::pair<std::string, QUEUE_STATUS>>> m_crawlerQueue;
-  XMP m_xmpManager;
-
   bool m_crawl = true;
 
   // Stores all our XMP data in memory for fast lookup

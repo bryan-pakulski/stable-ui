@@ -14,7 +14,7 @@ Indexer::Indexer(std::string folder_path) {
   // TODO: load cached index and populate our inverted index and crawler with the last run values
 
   m_II = InvertedIndex();
-  m_xmpManager = XMP();
+  XMP::GetInstance();
 
   m_crawlerQueue = std::make_shared<asyncQueue<std::pair<std::string, QUEUE_STATUS>>>();
   m_crawler = Crawler(folder_path, m_crawlerQueue);
@@ -49,7 +49,7 @@ void Indexer::indexerCrawlerQueueThreadWorker() {
     if (queueEntry.second == QUEUE_STATUS::ADDED) {
       QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Indexer::indexerCrawlerQueueThreadWorker Getting XMP data for",
                                  queueEntry.first);
-      std::pair<meta_node, metadata> data = m_xmpManager.readFile(queueEntry.first);
+      std::pair<meta_node, metadata> data = XMP::GetInstance().readFile(queueEntry.first);
       m_II.add(data.second, data.first);
     } else if (queueEntry.second == QUEUE_STATUS::UPDATED) {
       QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Indexer::indexerCrawlerQueueThreadWorker Updating XMP data for",

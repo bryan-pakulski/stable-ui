@@ -6,6 +6,7 @@
 #include "Display/ErrorHandler.h"
 #include "Display/QDisplay_Base.h"
 #include <imgui_stdlib.h>
+#include "Indexer/MetaData.h"
 
 class QDisplay_ContentBrowser : public QDisplay_Base {
 
@@ -18,6 +19,7 @@ private:
   std::unique_ptr<Image> m_directory_icon;
   std::unique_ptr<Image> m_file_icon;
   std::unique_ptr<Image> m_preview_image;
+  std::pair<meta_node, metadata> m_xmpData;
 
 public:
   QDisplay_ContentBrowser(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
@@ -30,6 +32,29 @@ public:
   }
 
   void openWindow() { m_isOpen = true; }
+
+  void searchPanel() {
+    std::string searchString;
+    ImGui::InputText("Search", &searchString);
+  }
+
+  void loadImageXMPData(const std::string &filepath) { m_xmpData = XMP::GetInstance().readFile(filepath); }
+
+  void metadataPanel() {
+    if (!m_selected_file.empty()) {
+
+      // Get XMP data of select image
+      for (auto &i : m_xmpData.second.m_map) {
+        ImGui::Separator();
+        ImGui::Text(i.first.c_str(), 1);
+        ImGui::Separator();
+
+        ImGui::Indent();
+        ImGui::Text("%s\n", i.second.c_str());
+        ImGui::Unindent();
+      }
+    }
+  }
 
   void previewPanel() {
     if (!m_selected_file.empty() && m_preview_image->textured) {
@@ -45,6 +70,7 @@ public:
     m_preview_image.reset();
     m_preview_image = std::unique_ptr<Image>(new Image(512, 512, "preview"));
     m_preview_image->loadFromImage(m_current_directory.string() + "/" + m_selected_file.string());
+    loadImageXMPData(m_current_directory.string() + "/" + m_selected_file.string());
 
     // Path must be relative to docker, remove local data prefix
     m_filepath = m_current_directory.string() + "/" + m_selected_file.string();
@@ -120,13 +146,21 @@ public:
 
       ImGui::Begin("Content Browser");
 
-      static float w = 200.0f;
-      static float h = 300.0f;
+      static float w = 300.0f;
+      static float h = 400.0f;
 
       // Child window 1, search & filterwindow
       ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
       ImGui::BeginChild("child1", ImVec2(w, h), true);
       ImGui::Text("Search & Filter: ");
+      searchPanel();
+
+      ImGui::InvisibleButton("hsplitter", ImVec2(-1, 8.0f));
+      if (ImGui::IsItemActive())
+        h += ImGui::GetIO().MouseDelta.y;
+
+      ImGui::Text("Metadata: ");
+      metadataPanel();
       ImGui::EndChild();
 
       ImGui::SameLine();
@@ -136,7 +170,7 @@ public:
       ImGui::SameLine();
 
       // Child window 2, content browser / search
-      ImGui::BeginChild("child2", ImVec2(0, h), true);
+      ImGui::BeginChild("child3", ImVec2(0, h), true);
       previewPanel();
       ImGui::EndChild();
 
@@ -145,7 +179,7 @@ public:
         h += ImGui::GetIO().MouseDelta.y;
 
       // Child window 3, content browser
-      ImGui::BeginChild("child3", ImVec2(0, 0), true);
+      ImGui::BeginChild("child4", ImVec2(0, 0), true);
       contentBrowser();
       ImGui::EndChild();
       ImGui::PopStyleVar();

@@ -30,10 +30,6 @@
 
 #include "QLogger.h"
 
-static const std::vector<std::string> s_keys = {"stableui-prompt", "stableui-negative_prompt", "stableui-model_hash",
-                                                "stableui-seed",   "stableui-sampler",         "stableui-steps",
-                                                "stableui-cfg",    "stableui-width",           "stableui-height"};
-
 struct meta_node {
   std::string m_filepath;
 
@@ -44,9 +40,10 @@ struct meta_node {
 };
 
 struct metadata {
-  std::map<std::string, std::string> m_map{{"prompt", ""},     {"negative_prompt", ""}, {"negative_prompt", ""},
-                                           {"model_hash", ""}, {"sampler", ""},         {"width", ""},
-                                           {"height", ""}};
+  std::map<std::string, std::string> m_map{{"stableui-prompt", ""},          {"stableui-negative_prompt", ""},
+                                           {"stableui-negative_prompt", ""}, {"stableui-model_hash", ""},
+                                           {"stableui-sampler", ""},         {"stableui-width", ""},
+                                           {"stableui-height", ""}};
 
   // Return all metadata as a concatenated string, these form the basis of our inverted index search
   std::string getKeys() {
@@ -62,12 +59,16 @@ struct metadata {
 
 class XMP {
 public:
-  XMP() { initialise(); }
-  ~XMP() {
-    // Terminate the toolkit
-    SXMPFiles::Terminate();
-    SXMPMeta::Terminate();
+  static XMP &GetInstance() {
+    static XMP s_xmp;
+    return s_xmp;
   }
+
+  // Prohibit external replication constructs
+  XMP(XMP const &) = delete;
+
+  // Prohibit external assignment operations
+  void operator=(XMP const &) = delete;
 
   /**
    *	Initializes the toolkit and attempts to open a file for reading metadata.  Initially
@@ -113,12 +114,13 @@ public:
         // Extract XMP values
         std::string simpleVal;
         bool exists;
-        for (auto &k : s_keys) {
-          exists = meta.GetProperty(kXMP_NS_XMP, k.c_str(), &simpleVal, NULL);
-          if (exists)
-            nodeMetadata.m_map[k] = simpleVal;
-          else
+        for (auto &k : nodeMetadata.m_map) {
+          exists = meta.GetProperty(kXMP_NS_DC, k.first.c_str(), &simpleVal, NULL);
+          if (exists) {
+            nodeMetadata.m_map[k.first.c_str()] = simpleVal;
+          } else {
             simpleVal.clear();
+          }
         }
 
         // Dump the current xmp object to a file
@@ -147,6 +149,13 @@ public:
 private:
   bool m_initialised = true;
 
+  XMP() { initialise(); }
+  ~XMP() {
+    // Terminate the toolkit
+    SXMPFiles::Terminate();
+    SXMPMeta::Terminate();
+  }
+
   /**
    * Client defined callback function to dump XMP to a file.  In this case an output file stream is used
    * to write a buffer, of length bufferSize, to a text file.  This callback is called multiple
@@ -168,7 +177,7 @@ private:
   }
 
   void initialise() {
-    QLogger::GetInstance().Log(LOGLEVEL::ERR, "XMP::initialise Initialising XMP Toolkit");
+    QLogger::GetInstance().Log(LOGLEVEL::INFO, "XMP::initialise Initialising XMP Toolkit");
     if (!SXMPMeta::Initialize()) {
       QLogger::GetInstance().Log(LOGLEVEL::ERR, "XMP::initialise couldn't initialise toolkit");
       m_initialised = false;
