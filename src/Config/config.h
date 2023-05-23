@@ -53,6 +53,7 @@ static CString MODULES_CONFIGURATION_FILE(loadConfig<std::string>("MODULES_CONFI
                                                                   "data/shared-config/module_config.yaml"));
 static CString VAE_FOLDER_PATH(loadConfig<std::string>("VAE_FOLDER_PATH", "data/models/vae"));
 static CString INDEX_CACHE(loadConfig<std::string>("INDEX_CACHE", "data/cache"));
+static CString CRAWLER_PATH(loadConfig<std::string>("CRAWLER_PATH", "data/output"));
 
 // Logging
 static CInt ENABLE_GL_DEBUG(loadConfig<int>("ENABLE_OPENGL_DEBUG_OUTPUT", 0));

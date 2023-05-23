@@ -29,5 +29,7 @@ IMAGE_SIZE_Y_LIMIT: 1024
 ### Internal configuration ###
 ##############################
 ENABLE_OPENGL_DEBUG_OUTPUT: 0
-ENABLE_DEBUG_LOGGING: 0
-INDEX_CACHE: data/cache
+ENABLE_DEBUG_LOGGING: 1
+INDEX_CACHE: "data/cache"
+# Relative path of the docker output directory
+CRAWLER_PATH: "data/output"

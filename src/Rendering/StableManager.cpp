@@ -8,7 +8,7 @@ GLuint StableManager::fbo = 0;
 GLuint StableManager::m_colorBufferTexture = 0;
 
 // Initialise render manager
-StableManager::StableManager(GLFWwindow &w) : m_window{w} {
+StableManager::StableManager(GLFWwindow &w) : m_window{w}, m_indexer(CONFIG::CRAWLER_PATH.get()) {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableManager::StableManager StableManager initialized");
 
   // Allow access to camera variable through static callback function
@@ -22,8 +22,6 @@ StableManager::StableManager(GLFWwindow &w) : m_window{w} {
 
   // Create initial canvas
   createCanvas(0, 0, "default");
-
-  Indexer a("test");
 
   // Intialise zmq server within docker to receive commands from client
   SDCommandsInterface::GetInstance().launchSDModelServer();

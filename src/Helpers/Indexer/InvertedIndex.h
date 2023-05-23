@@ -24,7 +24,7 @@ struct metadata {
   std::string width;
   std::string height;
 
-  // Return all metadata as a concatenated string
+  // Return all metadata as a concatenated string, these form the basis of our inverted index search
   std::string getKeys() {
     return prompt + " " + negative_prompt + " " + model_hash + " " + sampler + " " + width + " " + height;
   }
@@ -47,7 +47,6 @@ private:
   }
 
   // This function takes two vectors and returns a new vector containing only the elements that are present in both
-  // input vectors.
   std::vector<meta_node> intersection(const std::vector<meta_node> &v1, const std::vector<meta_node> &v2) {
     std::vector<meta_node> result;
     std::set<meta_node> s1(v1.begin(), v1.end());

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Config/config.h"
+#include "Helpers/Indexer/Indexer.h"
 #include "QLogger.h"
 #include "Client/SDCommandsInterface.h"
 #include "Helpers/States.h"
@@ -99,6 +100,7 @@ private:
 
   int m_modelLoaded = Q_EXECUTION_STATE::PENDING;
   model m_model;
+  Indexer m_indexer;
   std::string m_useImage;
   bool m_captureBuffer = false;
 
