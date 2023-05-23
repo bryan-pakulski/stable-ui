@@ -5,30 +5,7 @@
 #include <thread>
 
 #include "Config/config.h"
-
-struct meta_node {
-  std::string m_filepath;
-  std::string m_filehash;
-
-  bool operator==(const meta_node &other) const { return (m_filepath == other.m_filepath); }
-  bool operator!=(const meta_node &other) const { return (m_filepath != other.m_filepath); }
-  bool operator<(const meta_node &other) const { return m_filepath < other.m_filepath; }
-  bool operator>(const meta_node &other) const { return m_filepath > other.m_filepath; }
-};
-
-struct metadata {
-  std::string prompt;
-  std::string negative_prompt;
-  std::string model_hash;
-  std::string sampler;
-  std::string width;
-  std::string height;
-
-  // Return all metadata as a concatenated string, these form the basis of our inverted index search
-  std::string getKeys() {
-    return prompt + " " + negative_prompt + " " + model_hash + " " + sampler + " " + width + " " + height;
-  }
-};
+#include "Indexer/MetaData.h"
 
 class InvertedIndex {
 
@@ -71,7 +48,7 @@ public:
       if (m_index.find(key) != m_index.end()) {
         for (auto &nodes : m_index[key]) {
           // Already existing reference for this file
-          if (nodes.m_filehash == node.m_filehash) {
+          if (nodes.m_filepath == node.m_filepath) {
             return;
           }
         }

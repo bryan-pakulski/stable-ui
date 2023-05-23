@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Config/config.h"
-#include "Helpers/Indexer/Indexer.h"
+#include "Indexer/Indexer.h"
 #include "QLogger.h"
 #include "Client/SDCommandsInterface.h"
 #include "Helpers/States.h"

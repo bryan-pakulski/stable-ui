@@ -2,7 +2,6 @@
 #include "GLFW/glfw3.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
-#include "Helpers/Indexer/Indexer.h"
 
 GLuint StableManager::fbo = 0;
 GLuint StableManager::m_colorBufferTexture = 0;

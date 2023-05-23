@@ -131,18 +131,18 @@ endif()
 
 add_executable( stable-ui 
                 src/main.cpp
-                src/Helpers/GLHelper.cpp
-                src/Helpers/Indexer/Indexer.cpp
-                src/Rendering/StableManager.cpp
-                src/Rendering/Camera.cpp
-                src/Rendering/Canvas.cpp 
-                src/Rendering/objects/BaseObject.cpp 
-                src/Rendering/objects/Selection.cpp
-                src/Rendering/objects/image/Image.cpp
-                src/Rendering/objects/chunk/Chunk.cpp
+                src/Client/Heartbeat.cpp
                 src/Client/StableClient.cpp
                 src/Client/SDCommandsInterface.cpp
-                src/Client/Heartbeat.cpp
+                src/Helpers/GLHelper.cpp
+                src/Indexer/Indexer.cpp
+                src/Rendering/Camera.cpp
+                src/Rendering/Canvas.cpp 
+                src/Rendering/StableManager.cpp
+                src/Rendering/objects/BaseObject.cpp 
+                src/Rendering/objects/Selection.cpp
+                src/Rendering/objects/chunk/Chunk.cpp
+                src/Rendering/objects/image/Image.cpp
                 src/ThirdParty/sha1/sha1.cpp
         )
 
