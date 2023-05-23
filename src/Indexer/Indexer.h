@@ -19,7 +19,7 @@ public:
   ~Indexer();
 
   // Return all nodes that matches the searchterm
-  std::vector<meta_node> find(const std::string &searchTerm);
+  std::set<meta_node> find(const std::string &searchTerm);
 
 private:
   std::string m_root_path;

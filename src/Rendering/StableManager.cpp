@@ -2,6 +2,7 @@
 #include "GLFW/glfw3.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
+#include "Indexer/MetaData.h"
 
 GLuint StableManager::fbo = 0;
 GLuint StableManager::m_colorBufferTexture = 0;
@@ -194,10 +195,15 @@ void StableManager::imageToImage(std::string &imgPath, std::string prompt, std::
                                                   renderState);
 }
 
-// Key callback function to map keypresses / actions to object instantiation
-void StableManager::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-  int width, height;
-  glfwGetWindowSize(window, &width, &height);
+std::set<std::string> StableManager::searchIndex(const std::string &searchTerm) {
+  std::set<std::string> results;
+
+  std::set<meta_node> data = m_indexer.find(searchTerm);
+  for (auto &node : data) {
+    results.insert(node.m_filepath);
+  }
+
+  return results;
 }
 
 // Mouse movement callback
@@ -264,13 +270,6 @@ void StableManager::mouse_scroll_callback(GLFWwindow *window, double xoffset, do
   StableManager *rm = (StableManager *)glfwGetWindowUserPointer(window);
   rm->m_camera->m_zoom -= (yoffset * rm->m_camera->m_zoomSpeed);
 }
-
-// Close window callback
-void StableManager::close_callback(GLFWwindow *window) {
-  // SDCommandsInterface::GetInstance().restartSDModelServer();
-}
-
-// Build image from canvas, based on selection coordinates
 
 // Callback to log GL errors
 void StableManager::GLFWErrorCallBack(int, const char *err_str) { QLogger::GetInstance().Log(LOGLEVEL::ERR, err_str); }

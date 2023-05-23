@@ -41,10 +41,10 @@ struct meta_node {
 };
 
 struct metadata {
-  std::unordered_map<std::string, std::string> m_map{{"stableui-prompt", ""},          {"stableui-negative_prompt", ""},
-                                                     {"stableui-negative_prompt", ""}, {"stableui-model_hash", ""},
-                                                     {"stableui-sampler", ""},         {"stableui-width", ""},
-                                                     {"stableui-height", ""}};
+  std::unordered_map<std::string, std::string> m_map{
+      {"stableui-prompt", ""},     {"stableui-negative_prompt", ""}, {"stableui-seed", ""},
+      {"stableui-model_hash", ""}, {"stableui-sampler", ""},         {"stableui-steps", ""},
+      {"stableui-cfg", ""},        {"stableui-width", ""},           {"stableui-height", ""}};
 
   // Return all metadata as a concatenated string, these form the basis of our inverted index search
   std::string getKeys() {

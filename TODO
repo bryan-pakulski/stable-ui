@@ -17,7 +17,6 @@
 
 # Functionality
 
-- Add search and indexing system on prompt, image hash etc.. for image browser, will need some sort of metadata saved for each image generated (store inside image??)
 - Add support for textual inversion, see: https://towardsdatascience.com/how-to-fine-tune-stable-diffusion-using-textual-inversion-b995d7ecc095
 - Delete models & configurations window
 - Save output to temporary folder - "gen??" This way you can generate multiple item etc.. and move them automatically after generation is finished to an output folder
@@ -35,3 +34,8 @@
 - Crash when docker closes and then ui is closed afterwards
 - Extra configuration i.e. trigger_prompt not being loaded from model yaml
 - Heartbeat bug on windows (no connectivity)
+- Multi string search doesn't work properly (Set union not working as intended?)
+
+# Done
+
+- Add search and indexing system on prompt, image hash etc.. for image browser, will need some sort of metadata saved for each image generated (store inside image??)

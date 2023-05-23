@@ -63,30 +63,13 @@ void Indexer::indexerCrawlerQueueThreadWorker() {
   }
 }
 
-std::vector<meta_node> Indexer::find(const std::string &searchTerm) {
-  std::vector<meta_node> results = m_II.search(searchTerm);
+std::set<meta_node> Indexer::find(const std::string &searchTerm) {
+  std::set<meta_node> results = m_II.search(searchTerm);
 
   if (CONFIG::ENABLE_DEBUG_LOGGING.get() == 1) {
     for (auto &i : results) {
       std::cout << "Search match: " << i.m_filepath << std::endl;
     }
   }
+  return results;
 }
-
-/*
-  // Pretend we load metadata
-  metadata a{"test prompt blah blah", "", "12345", "UNIPC", "512", "512"};
-  metadata b{"another test", "bad", "54321", "UNIPC", "512", "768"};
-
-  meta_node fileA{"a.png", "a"};
-  meta_node fileB{"b.png", "b"};
-
-  m_II.add(a, fileA);
-  m_II.add(b, fileB);
-
-  std::vector<meta_node> results = m_II.search("test 512 768");
-
-  for (auto &i : results) {
-    std::cout << "Found match: " << i.m_filepath << std::endl;
-  }
-*/

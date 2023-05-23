@@ -163,11 +163,9 @@ private:
 
     // Initialise callbacks for glfw *MUST BE DONE BEFORE IMGUI OTHERWISE IT WILL OVERRIDE THE CALLBACKS THERE*
     glfwSetErrorCallback(StableManager::GLFWErrorCallBack);
-    glfwSetKeyCallback(m_window, StableManager::key_callback);
     glfwSetCursorPosCallback(m_window, StableManager::mouse_cursor_callback);
     glfwSetMouseButtonCallback(m_window, StableManager::mouse_btn_callback);
     glfwSetScrollCallback(m_window, StableManager::mouse_scroll_callback);
-    // glfwSetWindowCloseCallback(m_window, StableManager::close_callback);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();

@@ -42,6 +42,9 @@ public:
 
   bool m_contextWindowVisible = false;
 
+  // Search index for files that match our search term
+  std::set<std::string> searchIndex(const std::string &searchTerm);
+
   // Main update loop
   void update();
 
@@ -84,11 +87,9 @@ public:
                     int samples, int steps, double cfg, double strength, int seed, int &renderState);
 
   // CALLBACKS
-  static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
   static void mouse_cursor_callback(GLFWwindow *window, double xposIn, double yposIn);
   static void mouse_scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
   static void mouse_btn_callback(GLFWwindow *window, int button, int action, int mods);
-  static void close_callback(GLFWwindow *window);
   static void GLFWErrorCallBack(int, const char *err_str);
   static void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
                                          const GLchar *message, const void *userParam);
