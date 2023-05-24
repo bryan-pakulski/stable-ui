@@ -1,19 +1,16 @@
-//
-// Created by BryanP on 1/8/2022.
-//
-
 #pragma once
 
-#include "../Config/config.h"
-#include "../QLogger.h"
-#include "../Client/SDCommandsInterface.h"
-#include "../Helpers/States.h"
+#include "Config/config.h"
+#include "Indexer/Indexer.h"
+#include "QLogger.h"
+#include "Client/SDCommandsInterface.h"
+#include "Helpers/States.h"
 
-#include "objects/BaseObject.h"
-#include "objects/image/Image.h"
-#include "objects/Selection.h"
-#include "Camera.h"
-#include "Canvas.h"
+#include "Rendering/objects/BaseObject.h"
+#include "Rendering/objects/image/Image.h"
+#include "Rendering/objects/Selection.h"
+#include "Rendering/Camera.h"
+#include "Rendering/Canvas.h"
 
 #include <glad/glad.h>
 
@@ -45,6 +42,9 @@ public:
 
   bool m_contextWindowVisible = false;
 
+  // Search index for files that match our search term
+  std::set<std::string> searchIndex(const std::string &searchTerm);
+
   // Main update loop
   void update();
 
@@ -74,6 +74,10 @@ public:
 
   // IMAGE GENERATION
 
+  // Get / Set image to use for base rendering
+  void useImage(std::string path);
+  const std::string getImage();
+
   // Generate txt2img
   void textToImage(std::string prompt, std::string negative_prompt, std::string &sampler_name, int samples, int steps,
                    double cfg, int seed, int width, int height, int &renderState);
@@ -83,11 +87,9 @@ public:
                     int samples, int steps, double cfg, double strength, int seed, int &renderState);
 
   // CALLBACKS
-  static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
   static void mouse_cursor_callback(GLFWwindow *window, double xposIn, double yposIn);
   static void mouse_scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
   static void mouse_btn_callback(GLFWwindow *window, int button, int action, int mods);
-  static void close_callback(GLFWwindow *window);
   static void GLFWErrorCallBack(int, const char *err_str);
   static void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
                                          const GLchar *message, const void *userParam);
@@ -99,6 +101,8 @@ private:
 
   int m_modelLoaded = Q_EXECUTION_STATE::PENDING;
   model m_model;
+  Indexer m_indexer;
+  std::string m_useImage;
   bool m_captureBuffer = false;
 
   // Process inputs

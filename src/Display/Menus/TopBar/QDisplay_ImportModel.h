@@ -1,10 +1,10 @@
 #pragma once
 
 #include <imgui.h>
-#include "../../../Helpers/hash.h"
-#include "../../../Display/ErrorHandler.h"
-#include "../../../ThirdParty/imgui/imfilebrowser.h"
-#include "../../QDisplay_Base.h"
+#include "Helpers/hash.h"
+#include "Display/ErrorHandler.h"
+#include "ThirdParty/imgui/imfilebrowser.h"
+#include "Display/QDisplay_Base.h"
 
 #include <imgui_stdlib.h>
 

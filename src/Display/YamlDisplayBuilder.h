@@ -1,12 +1,12 @@
 #pragma once
 
 #include "ErrorHandler.h"
-#include "../QLogger.h"
-#include "../Config/config.h"
-#include "../Helpers/GLHelper.h"
-#include "QDisplay_Base.h"
+#include "QLogger.h"
+#include "Config/config.h"
+#include "Helpers/GLHelper.h"
+#include "Display/QDisplay_Base.h"
 
-#include "../Config/types.h"
+#include "Config/types.h"
 class YamlDisplayBuilder : public QDisplay_Base {
 public:
   bool m_terminate = false;

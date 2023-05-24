@@ -131,20 +131,22 @@ endif()
 
 add_executable( stable-ui 
                 src/main.cpp
-                src/Helpers/GLHelper.cpp
-                src/Rendering/StableManager.cpp
-                src/Rendering/Camera.cpp
-                src/Rendering/Canvas.cpp 
-                src/Rendering/objects/BaseObject.cpp 
-                src/Rendering/objects/Selection.cpp
-                src/Rendering/objects/image/Image.cpp
-                src/Rendering/objects/chunk/Chunk.cpp
+                src/Client/Heartbeat.cpp
                 src/Client/StableClient.cpp
                 src/Client/SDCommandsInterface.cpp
-                src/Client/Heartbeat.cpp
+                src/Helpers/GLHelper.cpp
+                src/Indexer/Indexer.cpp
+                src/Rendering/Camera.cpp
+                src/Rendering/Canvas.cpp 
+                src/Rendering/StableManager.cpp
+                src/Rendering/objects/BaseObject.cpp 
+                src/Rendering/objects/Selection.cpp
+                src/Rendering/objects/chunk/Chunk.cpp
+                src/Rendering/objects/image/Image.cpp
                 src/ThirdParty/sha1/sha1.cpp
         )
 
+# XMP has to be built manually (see src/ThirdParty/build_xmp_libraries.sh)
 target_include_directories(
         stable-ui PRIVATE
         ${OPENGL_INCLUDE_DIR}
@@ -154,7 +156,9 @@ target_include_directories(
         ${imgui_SOURCE_DIR}/backends
         ${imgui_SOURCE_DIR}/misc/cpp
         ${glm_SOURCE_DIR}/src
+        ${CMAKE_HOME_DIRECTORY}/src
         ${CMAKE_HOME_DIRECTORY}/src/ThirdParty/yaml-cpp/include
+        ${CMAKE_HOME_DIRECTORY}/src/ThirdParty/XMP/XMP-Toolkit-SDK/public/include
 )
 
 target_link_directories(
@@ -170,6 +174,8 @@ if(UNIX)
                 glm
                 yaml-cpp
                 zmq
+                ${CMAKE_SOURCE_DIR}/lib/staticXMPCore.ar
+                ${CMAKE_SOURCE_DIR}/lib/staticXMPFiles.ar
                 ${OPENGL_LIBRARY}
         )
 else()
@@ -181,6 +187,8 @@ else()
                 glm
                 yaml-cpp
                 libzmq-static
+                ${CMAKE_SOURCE_DIR}/lib/XMPCore.lib
+                ${CMAKE_SOURCE_DIR}/lib/XMPFiles.lib
                 ${OPENGL_LIBRARY}
         )
 endif()

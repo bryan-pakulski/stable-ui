@@ -4,11 +4,11 @@
 #include <imgui.h>
 #include <filesystem>
 
-#include "../../../Display/ErrorHandler.h"
-#include "../../../QLogger.h"
-#include "../../../Rendering/StableManager.h"
-#include "../../../Config/config.h"
-#include "../../QDisplay_Base.h"
+#include "Display/ErrorHandler.h"
+#include "QLogger.h"
+#include "Rendering/StableManager.h"
+#include "Config/config.h"
+#include "Display/QDisplay_Base.h"
 
 namespace fs = std::filesystem;
 
@@ -36,8 +36,10 @@ public:
 
     listItem i{.m_name = "DDIM"};
     listItem j{.m_name = "PLMS"};
+    listItem k{.m_name = "UNIPC"};
     m_samplerList.push_back(i);
     m_samplerList.push_back(j);
+    m_samplerList.push_back(k);
   }
 
   std::string getLatestFile() {

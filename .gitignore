@@ -10,3 +10,5 @@ build/
 # Build artifacts
 *.tar.gz
 *.zip
+src/ThirdParty/XMP/XMP-Toolkit-SDK
+lib/

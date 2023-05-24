@@ -4,11 +4,11 @@
 #include <imgui.h>
 #include <filesystem>
 
-#include "../../../Display/ErrorHandler.h"
-#include "../../../QLogger.h"
-#include "../../../Rendering/StableManager.h"
-#include "../../../Config/config.h"
-#include "../../QDisplay_Base.h"
+#include "Display/ErrorHandler.h"
+#include "QLogger.h"
+#include "Rendering/StableManager.h"
+#include "Config/config.h"
+#include "Display/QDisplay_Base.h"
 #include "QDisplay_CanvasTools.h"
 #include "QDisplay_Text2Image.h"
 #include "QDisplay_Image2Image.h"

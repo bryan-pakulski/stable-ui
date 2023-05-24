@@ -1,26 +1,35 @@
 # stable-ui application configuration options
 # These are loaded in via the config.h header
 
-# ImGUI Settings
+######################
+### ImGUI Settings ###
+######################
 HIGH_DPI_SCALE_FACTOR: 1.0
 WINDOW_WIDTH: 1664
 WINDOW_HEIGHT: 936
 
-# Docker Configuration
+############################
+### Docker Configuration ###
+############################
 STABLE_DIFFUSION_DOCKER_PATH: "/sd/"
 OUTPUT_DIRECTORY: "/output"
+# This IP address shouldn't change as the network is created via docker compose
+# The ui application uses this to interact with the stable diffusion server
+DOCKER_IP_ADDRESS: "127.0.0.1"
 
-# Stable Diffusion Configuration
+######################################
+### Stable Diffusion Configuration ###
+######################################
 MODELS_DIRECTORY: "data/models"
 PROMPT_LENGTH_LIMIT: 2048
 IMAGE_SIZE_X_LIMIT: 1024
 IMAGE_SIZE_Y_LIMIT: 1024
 
-# Program configuration
-PYTHON_CONFIG_PATH: "data/scripts/"
+##############################
+### Internal configuration ###
+##############################
 ENABLE_OPENGL_DEBUG_OUTPUT: 0
 ENABLE_DEBUG_LOGGING: 0
-
-# This IP address shouldn't change as the network is created via docker compose
-# The ui application uses this to interact with the stable diffusion server
-DOCKER_IP_ADDRESS: "10.5.0.6"
+INDEX_CACHE: "data/cache"
+# Relative path of the docker output directory
+CRAWLER_PATH: "data/output"

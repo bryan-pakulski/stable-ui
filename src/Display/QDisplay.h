@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../QLogger.h"
+#include "QLogger.h"
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
@@ -9,8 +9,8 @@
 #include <memory>
 #include <vector>
 
-#include "../Rendering/StableManager.h"
-#include "../Config/config.h"
+#include "Rendering/StableManager.h"
+#include "Config/config.h"
 #include "Menus/QDisplay_ContextMenu.h"
 #include "Menus/ToolsMenu/QDisplay_ToolsMenu.h"
 #include "Menus/TopBar/QDisplay_TopBar.h"
@@ -163,11 +163,9 @@ private:
 
     // Initialise callbacks for glfw *MUST BE DONE BEFORE IMGUI OTHERWISE IT WILL OVERRIDE THE CALLBACKS THERE*
     glfwSetErrorCallback(StableManager::GLFWErrorCallBack);
-    glfwSetKeyCallback(m_window, StableManager::key_callback);
     glfwSetCursorPosCallback(m_window, StableManager::mouse_cursor_callback);
     glfwSetMouseButtonCallback(m_window, StableManager::mouse_btn_callback);
     glfwSetScrollCallback(m_window, StableManager::mouse_scroll_callback);
-    // glfwSetWindowCloseCallback(m_window, StableManager::close_callback);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();

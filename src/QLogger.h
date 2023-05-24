@@ -51,6 +51,7 @@ public:
   }
 
   template <typename T, typename... Args> void Log(LOGLEVEL logLevel, T message, Args... args) {
+    std::lock_guard<std::mutex> guard(m_mutex);
     m_Thread = std::thread(&QLogger::_Log<T, Args...>, this, logLevel, message, args...);
     m_Thread.detach();
   }

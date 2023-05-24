@@ -3,8 +3,8 @@
 #include <imgui.h>
 #include <filesystem>
 
-#include "../../../Display/ErrorHandler.h"
-#include "../../QDisplay_Base.h"
+#include "Display/ErrorHandler.h"
+#include "Display/QDisplay_Base.h"
 #include <imgui_stdlib.h>
 
 #include "yaml-cpp/emittermanip.h"

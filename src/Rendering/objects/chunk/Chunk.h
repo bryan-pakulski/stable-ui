@@ -6,9 +6,9 @@
 #include <memory>
 #include <utility>
 
-#include "../../Camera.h"
-#include "../BaseObject.h"
-#include "../image/Image.h"
+#include "Rendering/Camera.h"
+#include "Rendering/objects/BaseObject.h"
+#include "Rendering/objects/image/Image.h"
 
 // This class wraps an image class and contains some flags to check for visibility based on
 // Camera and world coordinates

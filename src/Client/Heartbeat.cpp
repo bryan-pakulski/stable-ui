@@ -1,5 +1,5 @@
 #include "Heartbeat.h"
-#include "../../../Display/ErrorHandler.h"
+#include "Display/ErrorHandler.h"
 
 Heartbeat::Heartbeat() {}
 

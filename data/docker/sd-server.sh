@@ -1,14 +1,5 @@
 #!/bin/bash
-
-echo "Reloading supervisord"
-unlink /run/supervisor.sock
-service supervisor stop
-
-# Run supervisor (or restart if already running)
-if pgrep -f "sd_model_server.py"; then
-    echo "SD Model server already running, killing process"
-    kill $(pgrep -f "sd_model_server.py")
-fi
-
-echo "Starting up supervisor..."
-/usr/bin/supervisord
+# This script will actually run the the sd server using numactl to pin across all available cpu cores
+cores=$(expr $(nproc) - 1)
+echo "Starting sd_model_server with cores 0-${cores}"
+conda run -n ldm numactl -C 0-${cores} python '/modules/stable-ui/sd_model_server.py'

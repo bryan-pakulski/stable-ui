@@ -1,7 +1,7 @@
 // Description of commands and the parameters we can use when sending to server
 #pragma once
 #include "yaml-cpp/node/node.h"
-#include "../Config/config.h"
+#include "Config/config.h"
 #include <vector>
 #include <string>
 #include <sstream>

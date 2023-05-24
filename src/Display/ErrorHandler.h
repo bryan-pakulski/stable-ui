@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../QLogger.h"
+#include "QLogger.h"
 #include <imgui.h>
 #include <memory>
-#include "../Config/config.h"
-#include "../Config/types.h"
+#include "Config/config.h"
+#include "Config/types.h"
 
 struct Base_Error {
   std::string m_errorMessage;
