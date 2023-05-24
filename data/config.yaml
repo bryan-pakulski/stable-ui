@@ -15,7 +15,7 @@ STABLE_DIFFUSION_DOCKER_PATH: "/sd/"
 OUTPUT_DIRECTORY: "/output"
 # This IP address shouldn't change as the network is created via docker compose
 # The ui application uses this to interact with the stable diffusion server
-DOCKER_IP_ADDRESS: "10.5.0.6"
+DOCKER_IP_ADDRESS: "127.0.0.1"
 
 ######################################
 ### Stable Diffusion Configuration ###
