@@ -93,10 +93,10 @@ public:
     // Create new texture
     m_preview_image.reset();
     m_preview_image = std::unique_ptr<Image>(new Image(512, 512, "preview"));
-    m_preview_image->loadFromImage(path);
+    m_preview_image->loadFromImage(path.string());
     m_preview_image->textured = true;
 
-    loadImageXMPData(path);
+    loadImageXMPData(path.string());
   }
 
   void contentBrowser() {
@@ -171,7 +171,7 @@ public:
           } else {
             // Send image to be used for further processing
             selectImage(path);
-            m_stableManager->useImage(path);
+            m_stableManager->useImage(path.string());
           }
         }
         if (!directoryEntry.is_directory() && ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {

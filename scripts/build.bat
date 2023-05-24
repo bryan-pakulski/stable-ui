@@ -10,20 +10,21 @@ if not exist "build" (
 set vcpkg_location=C:/vcpkg
 %vcpkg_location%/vcpkg install zeromq --triplet x64-windows
 
+echo "Building ThirdParty libs..."
+call .\src\ThirdParty\XMP\build_xmp_libraries.bat > build\XMP_build.log
+
 pushd build
-cmake -B . -S .. -DCMAKE_TOOLCHAIN_FILE=%vcpkg_location%/scripts/buildsystems/vcpkg.cmake
+cmake -B . -S .. -DCMAKE_TOOLCHAIN_FILE=%vcpkg_location%/scripts/buildsystems/vcpkg.cmake > build.log
 
 if "%1"=="-r" (
-	cmake --build . --config Release
-)
-else (
-	cmake --build . --config Debug
+	cmake --build . --config Release >> build.log
+) else (
+	cmake --build . --config Debug >> build.log
 )
 popd
 
 if "%1"=="-r" (
 	CALL .\scripts\pipeline\package.bat -r
-)
-else (
+) else (
 	CALL .\scripts\pipeline\package.bat
 )

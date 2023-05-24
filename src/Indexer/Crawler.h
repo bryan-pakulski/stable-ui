@@ -42,7 +42,7 @@ public:
       const std::string filepath = entry.path().string();
       // Check if this is a new entry, only allow files from our fileTypes vector
       if (entry.is_regular_file() && !m_fileInfo.contains(filepath)) {
-        if (s_filetypes.contains(entry.path().extension())) {
+        if (s_filetypes.contains(entry.path().extension().string())) {
           QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Crawler::Traverse Found new file:", filepath);
           m_fileInfo[filepath] =
               FileInfo{std::filesystem::last_write_time(filepath), std::filesystem::file_size(filepath)};

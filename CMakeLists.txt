@@ -187,7 +187,8 @@ else()
                 glm
                 yaml-cpp
                 libzmq-static
-                # TODO: XMP linking for windows
+                ${CMAKE_SOURCE_DIR}/lib/XMPCore.lib
+                ${CMAKE_SOURCE_DIR}/lib/XMPFiles.lib
                 ${OPENGL_LIBRARY}
         )
 endif()

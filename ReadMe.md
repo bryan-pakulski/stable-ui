@@ -97,7 +97,7 @@ Install supporting libraries:
 
 ## Windows:
 
-- Compiler: VSCC
+- Compiler: VSCC Visual Studio 17 2022
 
 The `build_release.bat` script assumes the you have vcpkg installed in the root `C:\` drive<br>
 Libraries can be installed using vcpkg in the same manner as they are set up in the pipeline:
@@ -110,4 +110,4 @@ C:\vcpkg\vcpkg install zeromq --triplet x64-windows
 
 ### Building
 
-- `./scripts/build_release.bat -r` to build & package application, stored in `build/stable-ui-bin`, `-r` is optional to enable release mode
+- `./scripts/build.bat -r` to build & package application, stored in `build/stable-ui-bin`, `-r` is optional to enable release mode
