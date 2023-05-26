@@ -38,7 +38,7 @@ private:
 public:
   void openWindow() { fileDialog.Open(); };
 
-  QDisplay_ImportVAE(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+  QDisplay_ImportVAE(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     fileDialog.SetTitle("Import Models");
     fileDialog.SetTypeFilters({".ckpt", ".safetensors", ".pth", ".vae"});
 

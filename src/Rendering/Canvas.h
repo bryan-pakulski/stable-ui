@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include "QLogger.h"
+#include "Helpers/QLogger.h"
 #include "Helpers/GLHelper.h"
 #include "Camera.h"
 

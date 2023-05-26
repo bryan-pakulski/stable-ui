@@ -1,7 +1,7 @@
 #include "StableClient.h"
 #include "Commands.h"
 #include "Helpers/States.h"
-#include "QLogger.h"
+#include "Helpers/QLogger.h"
 #include <sstream>
 
 StableClient::StableClient() {

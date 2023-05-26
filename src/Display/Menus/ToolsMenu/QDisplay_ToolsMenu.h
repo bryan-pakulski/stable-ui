@@ -4,9 +4,10 @@
 #include <imgui.h>
 #include <filesystem>
 
+#include "StableManager.h"
 #include "Display/ErrorHandler.h"
-#include "QLogger.h"
-#include "Rendering/StableManager.h"
+#include "Helpers/QLogger.h"
+#include "Rendering/RenderManager.h"
 #include "Config/config.h"
 #include "Display/QDisplay_Base.h"
 #include "QDisplay_CanvasTools.h"
@@ -26,12 +27,11 @@ class QDisplay_ToolsMenu : public QDisplay_Base {
 
 public:
   // Initialise render manager references
-  QDisplay_ToolsMenu(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+  QDisplay_ToolsMenu(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
 
     // Initialise sub menus
     Text2ImageWindow = std::unique_ptr<QDisplay_Text2Image>(new QDisplay_Text2Image(rm, w));
     Image2ImageWindow = std::unique_ptr<QDisplay_Image2Image>(new QDisplay_Image2Image(rm, w));
-
     CanvasToolsWindow = std::unique_ptr<QDisplay_CanvasTools>(new QDisplay_CanvasTools(rm, w));
 
     // Set drag drop callback
@@ -57,7 +57,7 @@ public:
 
     // Rendering menus
     if (ImGui::CollapsingHeader("Rendering")) {
-      if (m_stableManager->getModelState() == Q_EXECUTION_STATE::SUCCESS) {
+      if (StableManager::GetInstance().getModelState() == Q_EXECUTION_STATE::SUCCESS) {
         {
           if (ImGui::Button("txt2img")) {
             tab = 0;
@@ -79,11 +79,11 @@ public:
         if (tab == 1) {
           Image2ImageWindow->render();
         }
-      } else if (m_stableManager->getModelState() == Q_EXECUTION_STATE::PENDING) {
+      } else if (StableManager::GetInstance().getModelState() == Q_EXECUTION_STATE::PENDING) {
         ImGui::Text("Please import and load a model first!");
-      } else if (m_stableManager->getModelState() == Q_EXECUTION_STATE::LOADING) {
+      } else if (StableManager::GetInstance().getModelState() == Q_EXECUTION_STATE::LOADING) {
         ImGui::Text("Please wait for model to finish loading...");
-      } else if (m_stableManager->getModelState() == Q_EXECUTION_STATE::FAILED) {
+      } else if (StableManager::GetInstance().getModelState() == Q_EXECUTION_STATE::FAILED) {
         ImGui::Text("Model failed to load, please check application logs");
       }
     }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "QLogger.h"
+#include "Helpers/QLogger.h"
 #include <imgui.h>
 #include <memory>
 #include "Config/config.h"

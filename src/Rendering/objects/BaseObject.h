@@ -1,6 +1,6 @@
 #pragma once
 
-#include "QLogger.h"
+#include "Helpers/QLogger.h"
 
 #include <glad/glad.h>
 

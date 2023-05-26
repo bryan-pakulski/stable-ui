@@ -1,14 +1,9 @@
 #pragma once
 
-#include <fstream>
-#include <imgui.h>
-#include <memory>
-
 #include "Config/config.h"
-#include "QLogger.h"
+#include "Helpers/QLogger.h"
 #include "Helpers/GLHelper.h"
 #include "Client/Heartbeat.h"
-
 #include "Display/ErrorHandler.h"
 #include "Display/QDisplay_Base.h"
 #include "QDisplay_ConfigureModel.h"
@@ -17,6 +12,10 @@
 #include "QDisplay_LoadModel.h"
 #include "QDisplay_PluginsWindow.h"
 #include "QDisplay_ContentBrowser.h"
+
+#include <fstream>
+#include <imgui.h>
+#include <memory>
 
 class QDisplay_TopBar : public QDisplay_Base {
 
@@ -107,7 +106,7 @@ private:
         ImGui::InputText("canvas name", m_canvasName, 256);
 
         if (ImGui::Button("Create Canvas")) {
-          m_stableManager->createCanvas(0, 0, std::string(m_canvasName));
+          m_renderManager->createCanvas(0, 0, std::string(m_canvasName));
           newFileOpen = false;
         }
 
@@ -133,13 +132,13 @@ private:
       ImGui::OpenPopup("SELECTCANVAS");
       if (ImGui::BeginPopupModal("SELECTCANVAS")) {
         if (ImGui::BeginListBox("Canvas")) {
-          for (auto &item : m_stableManager->m_canvas) {
+          for (auto &item : m_renderManager->m_canvas) {
             const char *item_name = item->m_name.c_str();
-            int index = std::addressof(item) - std::addressof(m_stableManager->m_canvas.front());
-            const bool is_selected = index == m_stableManager->m_activeId;
+            int index = std::addressof(item) - std::addressof(m_renderManager->m_canvas.front());
+            const bool is_selected = index == m_renderManager->m_activeId;
 
             if (ImGui::Selectable(item_name, is_selected)) {
-              m_stableManager->selectCanvas(index);
+              m_renderManager->selectCanvas(index);
               selectCanvasOpen = false;
             }
 
@@ -161,7 +160,7 @@ private:
 
 public:
   // Initialise render manager reference
-  QDisplay_TopBar(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+  QDisplay_TopBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     m_configureModelWindow = std::unique_ptr<QDisplay_ConfigureModel>(new QDisplay_ConfigureModel(rm, w));
     m_importModelWindow = std::unique_ptr<QDisplay_ImportModel>(new QDisplay_ImportModel(rm, w));
     m_importVAEWindow = std::unique_ptr<QDisplay_ImportVAE>(new QDisplay_ImportVAE(rm, w));
@@ -245,7 +244,7 @@ public:
       }
 
       ImGui::Separator();
-      if (ImGui::MenuItem(std::string("Canvas - " + m_stableManager->getActiveCanvas()->m_name).c_str())) {
+      if (ImGui::MenuItem(std::string("Canvas - " + m_renderManager->getActiveCanvas()->m_name).c_str())) {
         selectCanvasOpen = true;
       }
 

@@ -1,11 +1,11 @@
 #pragma once
 
-#include <imgui.h>
+#include "StableManager.h"
 #include "Display/ErrorHandler.h"
 #include "Display/QDisplay_Base.h"
 
+#include <imgui.h>
 #include <imgui_stdlib.h>
-
 #include <filesystem>
 
 class QDisplay_LoadModel : public QDisplay_Base {
@@ -49,12 +49,12 @@ private:
     YAML::Node node, _baseNode = YAML::LoadFile(CONFIG::MODELS_CONFIGURATION_FILE.get());
     YAML::Node model = _baseNode["models"][m_selected_hash];
 
-    m_stableManager->attachModel(model, m_selected_hash, m_selected_precision);
+    StableManager::GetInstance().attachModel(model, m_selected_hash, m_selected_precision);
     m_isOpen = false;
   }
 
 public:
-  QDisplay_LoadModel(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+  QDisplay_LoadModel(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     listItem i{.m_name = "full"};
     listItem j{.m_name = "autocast"};
     listItem k{.m_name = "mid"};

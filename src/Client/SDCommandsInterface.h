@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Config/config.h"
-#include "QLogger.h"
+#include "Helpers/QLogger.h"
 
 #include "StableClient.h"
 #include "Helpers/States.h"

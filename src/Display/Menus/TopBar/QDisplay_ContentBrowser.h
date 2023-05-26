@@ -1,12 +1,13 @@
 #pragma once
 
-#include <imgui.h>
-#include <filesystem>
-
+#include "StableManager.h"
 #include "Display/ErrorHandler.h"
 #include "Display/QDisplay_Base.h"
-#include <imgui_stdlib.h>
 #include "Indexer/MetaData.h"
+
+#include <imgui.h>
+#include <filesystem>
+#include <imgui_stdlib.h>
 
 class QDisplay_ContentBrowser : public QDisplay_Base {
 
@@ -26,7 +27,7 @@ private:
   std::set<std::string> m_filteredPaths;
 
 public:
-  QDisplay_ContentBrowser(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+  QDisplay_ContentBrowser(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     // Initialise content browser
     m_directory_icon = std::unique_ptr<Image>(new Image(256, 256, "dir_icon"));
     m_file_icon = std::unique_ptr<Image>(new Image(256, 256, "file_icon"));
@@ -41,7 +42,7 @@ public:
     ImGui::InputText("filter", &m_searchString);
     if (ImGui::Button("Search")) {
       QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Searching for: ", m_searchString);
-      m_filteredPaths = m_stableManager->searchIndex(m_searchString);
+      m_filteredPaths = StableManager::GetInstance().searchIndex(m_searchString);
     }
     ImGui::SameLine();
     if (ImGui::Button("Clear")) {
@@ -133,7 +134,7 @@ public:
 
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
           selectImage(path);
-          m_stableManager->useImage(path);
+          m_renderManager->useImage(path);
         }
         if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
           selectImage(path);
@@ -171,7 +172,7 @@ public:
           } else {
             // Send image to be used for further processing
             selectImage(path);
-            m_stableManager->useImage(path.string());
+            m_renderManager->useImage(path.string());
           }
         }
         if (!directoryEntry.is_directory() && ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {

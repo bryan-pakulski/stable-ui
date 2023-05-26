@@ -1,5 +1,5 @@
 #include "Image.h"
-#include "QLogger.h"
+#include "Helpers/QLogger.h"
 #include <cstddef>
 
 Image::Image(int width, int height, std::string name) : m_width(width), m_height(height), m_name(name) {

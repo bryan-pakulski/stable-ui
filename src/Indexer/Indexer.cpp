@@ -3,7 +3,7 @@
 #include "asyncQueue.h"
 #include "Config/config.h"
 #include "Config/config.h"
-#include "QLogger.h"
+#include "Helpers/QLogger.h"
 
 #include <thread>
 

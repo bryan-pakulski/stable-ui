@@ -1,6 +1,6 @@
 #pragma once
 
-#include "QLogger.h"
+#include "Helpers/QLogger.h"
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
@@ -9,7 +9,7 @@
 #include <memory>
 #include <vector>
 
-#include "Rendering/StableManager.h"
+#include "Rendering/RenderManager.h"
 #include "Config/config.h"
 #include "Menus/QDisplay_ContextMenu.h"
 #include "Menus/ToolsMenu/QDisplay_ToolsMenu.h"
@@ -28,18 +28,18 @@ public:
 
   // Attach a render manager instance
   // This is necessary for sub menus to interact with the render manager
-  void AttachManager(std::shared_ptr<StableManager> rm) {
-    m_stableManager = rm;
+  void AttachManager(std::shared_ptr<RenderManager> rm) {
+    m_renderManager = rm;
 
     // Initialisation
-    m_submenus.emplace_back(new QDisplay_TopBar(m_stableManager, m_window));
-    m_submenus.emplace_back(new QDisplay_ToolsMenu(m_stableManager, m_window));
-    m_submenus.emplace_back(new QDisplay_ContextMenu(m_stableManager, m_window));
+    m_submenus.emplace_back(new QDisplay_TopBar(m_renderManager, m_window));
+    m_submenus.emplace_back(new QDisplay_ToolsMenu(m_renderManager, m_window));
+    m_submenus.emplace_back(new QDisplay_ContextMenu(m_renderManager, m_window));
 
     // Enable debug output
     if (CONFIG::ENABLE_GL_DEBUG.get() == 1) {
       glEnable(GL_DEBUG_OUTPUT);
-      glDebugMessageCallback(m_stableManager->MessageCallback, 0);
+      glDebugMessageCallback(m_renderManager->MessageCallback, 0);
     }
   }
 
@@ -75,7 +75,7 @@ private:
   GLFWwindow *m_window;
   std::string m_glsl_version;
   std::vector<std::unique_ptr<QDisplay_Base>> m_submenus;
-  std::shared_ptr<StableManager> m_stableManager = 0;
+  std::shared_ptr<RenderManager> m_renderManager = 0;
 
   float backgroundR = 0.45f;
   float backgroundG = 0.44f;
@@ -86,7 +86,7 @@ private:
     // make sure the viewport matches the new window dimensions; note that width and
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
-    StableManager::calculateFramebuffer(width, height);
+    RenderManager::calculateFramebuffer(width, height);
   }
 
   // Cleans up all GL variables for clean exit
@@ -162,10 +162,10 @@ private:
     glfwSwapInterval(1);
 
     // Initialise callbacks for glfw *MUST BE DONE BEFORE IMGUI OTHERWISE IT WILL OVERRIDE THE CALLBACKS THERE*
-    glfwSetErrorCallback(StableManager::GLFWErrorCallBack);
-    glfwSetCursorPosCallback(m_window, StableManager::mouse_cursor_callback);
-    glfwSetMouseButtonCallback(m_window, StableManager::mouse_btn_callback);
-    glfwSetScrollCallback(m_window, StableManager::mouse_scroll_callback);
+    glfwSetErrorCallback(RenderManager::GLFWErrorCallBack);
+    glfwSetCursorPosCallback(m_window, RenderManager::mouse_cursor_callback);
+    glfwSetMouseButtonCallback(m_window, RenderManager::mouse_btn_callback);
+    glfwSetScrollCallback(m_window, RenderManager::mouse_scroll_callback);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();

@@ -29,7 +29,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "QLogger.h"
+#include "Helpers/QLogger.h"
 
 struct meta_node {
   std::string m_filepath;
