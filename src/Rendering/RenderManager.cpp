@@ -23,7 +23,6 @@ RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
   // Create initial canvas
   createCanvas(0, 0, "default");
 
-  // Intialise zmq server within docker to receive commands from client
   RenderManager::calculateFramebuffer(m_camera->m_screen.first, m_camera->m_screen.second);
 }
 
