@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #ifndef _EXEC_STATE
 #define _EXEC_STATE
 

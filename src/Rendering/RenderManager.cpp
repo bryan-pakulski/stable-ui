@@ -1,4 +1,3 @@
-#include "StableManager.h"
 #include "RenderManager.h"
 #include "GLFW/glfw3.h"
 #include "imgui.h"
@@ -158,9 +157,8 @@ void RenderManager::textToImage(std::string prompt, std::string negative_prompt,
                                 int steps, double cfg, int seed, int width, int height, int &renderState) {
 
   // Generate & Retrieve newly generated image
-  SDCommandsInterface::GetInstance().textToImage(StableManager::GetInstance().m_model.hash, getActiveCanvas()->m_name,
-                                                 prompt, negative_prompt, samplerName, samples, steps, cfg, seed, width,
-                                                 height, renderState);
+  SDCommandsInterface::GetInstance().textToImage(getActiveCanvas()->m_name, prompt, negative_prompt, samplerName,
+                                                 samples, steps, cfg, seed, width, height, renderState);
 }
 
 // Image to Image, render result to canvas
@@ -169,9 +167,8 @@ void RenderManager::imageToImage(std::string &imgPath, std::string prompt, std::
                                  int seed, int &renderState) {
 
   // Generate & Retrieve newly generated image
-  SDCommandsInterface::GetInstance().imageToImage(StableManager::GetInstance().m_model.hash, getActiveCanvas()->m_name,
-                                                  imgPath, prompt, negative_prompt, samplerName, samples, steps, cfg,
-                                                  strength, seed, renderState);
+  SDCommandsInterface::GetInstance().imageToImage(getActiveCanvas()->m_name, imgPath, prompt, negative_prompt,
+                                                  samplerName, samples, steps, cfg, strength, seed, renderState);
 }
 
 // Mouse movement callback

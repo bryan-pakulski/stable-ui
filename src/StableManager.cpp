@@ -47,6 +47,7 @@ void StableManager::attachModel(YAML::Node model, std::string &hash, std::string
 }
 
 int StableManager::getModelState() { return m_modelLoaded; }
+model StableManager::getModel() { return m_model; }
 
 // Search our inverted index for a term
 std::set<std::string> StableManager::searchIndex(const std::string &searchTerm) {

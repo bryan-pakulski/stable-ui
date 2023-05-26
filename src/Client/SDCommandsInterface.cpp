@@ -1,6 +1,7 @@
 #include "SDCommandsInterface.h"
 #include <functional>
 
+#include "StableManager.h"
 #include "Helpers/States.h"
 #include <memory>
 
@@ -44,26 +45,29 @@ void SDCommandsInterface::attachModelToServer(std::string ckpt_path, std::string
 }
 
 // Calls text to image command from client -> sd model server
-void SDCommandsInterface::textToImage(std::string &hash, std::string &canvasName, std::string prompt,
-                                      std::string negative_prompt, std::string &samplerName, int batch_size, int steps,
-                                      double cfg, int seed, int width, int height, int &renderState) {
+void SDCommandsInterface::textToImage(std::string &canvasName, std::string prompt, std::string negative_prompt,
+                                      std::string &samplerName, int batch_size, int steps, double cfg, int seed,
+                                      int width, int height, int &renderState) {
   std::string outDir = CONFIG::OUTPUT_DIRECTORY.get();
   renderState = Q_EXECUTION_STATE::LOADING;
 
-  m_Thread = std::thread(std::bind(&StableClient::textToImage, &StableClient::GetInstance(), hash, outDir, canvasName,
-                                   prompt, negative_prompt, samplerName, batch_size, steps, cfg, seed, width, height,
-                                   std::ref(renderState)));
+  model mdl = StableManager::GetInstance().getModel();
+
+  m_Thread = std::thread(std::bind(&StableClient::textToImage, &StableClient::GetInstance(), mdl.hash, outDir,
+                                   canvasName, prompt, negative_prompt, samplerName, batch_size, steps, cfg, seed,
+                                   width, height, std::ref(renderState)));
   m_Thread.detach();
 }
 
-void SDCommandsInterface::imageToImage(std::string &hash, std::string &canvasName, std::string &imgPath,
-                                       std::string &prompt, std::string &negative_prompt, std::string &samplerName,
-                                       int batch_size, int steps, double cfg, double strength, int seed,
-                                       int &renderState) {
+void SDCommandsInterface::imageToImage(std::string &canvasName, std::string &imgPath, std::string &prompt,
+                                       std::string &negative_prompt, std::string &samplerName, int batch_size,
+                                       int steps, double cfg, double strength, int seed, int &renderState) {
   std::string outDir = CONFIG::OUTPUT_DIRECTORY.get();
   renderState = Q_EXECUTION_STATE::LOADING;
 
-  m_Thread = std::thread(std::bind(&StableClient::imageToImage, &StableClient::GetInstance(), hash, outDir, prompt,
+  model mdl = StableManager::GetInstance().getModel();
+
+  m_Thread = std::thread(std::bind(&StableClient::imageToImage, &StableClient::GetInstance(), mdl.hash, outDir, prompt,
                                    negative_prompt, canvasName, imgPath, samplerName, batch_size, 1, steps, cfg,
                                    strength, seed, std::ref(renderState)));
   m_Thread.detach();

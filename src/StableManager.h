@@ -1,22 +1,14 @@
 #pragma once
 
+#include "Config/structs.h"
 #include "Indexer/Indexer.h"
 #include "Rendering/RenderManager.h"
 
 #include <memory>
 #include <vector>
 
-struct model {
-  std::string name;
-  std::string hash;
-  std::string path;
-};
-
 class StableManager {
 public:
-  int m_modelLoaded = Q_EXECUTION_STATE::PENDING;
-  model m_model;
-
   static StableManager &GetInstance() {
     static StableManager s_stableManager;
     return s_stableManager;
@@ -44,10 +36,14 @@ public:
   void attachModel(YAML::Node model, std::string &hash, std::string &precision);
   // Return model state
   int getModelState();
+  model getModel();
 
 private:
   std::shared_ptr<RenderManager> m_renderManager;
   Indexer m_indexer;
+
+  int m_modelLoaded = Q_EXECUTION_STATE::PENDING;
+  model m_model;
 
   explicit StableManager();
   ~StableManager();
