@@ -93,9 +93,9 @@ if(NOT imgui_POPULATED)
     )
 endif()
 
-# Dear ImGui library configuration
+# Dear ImGui library configuration, built as static
 add_library(
-        imgui
+        imgui STATIC
         ${imgui_SOURCE_DIR}/imgui.cpp
         ${imgui_SOURCE_DIR}/imgui_draw.cpp
         ${imgui_SOURCE_DIR}/imgui_tables.cpp
@@ -166,7 +166,21 @@ target_link_directories(
 )
 
 if(UNIX)
-        target_link_libraries(
+        if(DYNAMIC_LIBS EQUAL "ON")
+                target_link_libraries(
+                stable-ui PRIVATE
+                imgui
+                glad
+                glfw
+                glm
+                yaml-cpp
+                zmq
+                ${CMAKE_SOURCE_DIR}/lib/libXMPCore.so
+                ${CMAKE_SOURCE_DIR}/lib/libXMPFiles.so
+                ${OPENGL_LIBRARY}
+                )
+        else()
+                target_link_libraries(
                 stable-ui PRIVATE
                 imgui
                 glad
@@ -177,7 +191,9 @@ if(UNIX)
                 ${CMAKE_SOURCE_DIR}/lib/staticXMPCore.ar
                 ${CMAKE_SOURCE_DIR}/lib/staticXMPFiles.ar
                 ${OPENGL_LIBRARY}
-        )
+                )
+        endif()
+        
 else()
         target_link_libraries(
                 stable-ui PRIVATE

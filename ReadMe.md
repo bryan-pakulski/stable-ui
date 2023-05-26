@@ -10,6 +10,11 @@ These are requirements on both Windows (WSL) & Linux
 - Docker see: https://github.com/NVIDIA/nvidia-docker#quickstart
 - nvidia-container-toolkit
 
+### Linux specific requirements:
+
+- `libzmq` / `libzmq-dev` / `libzmq3-dev` (dependant on distribution)
+
+
 # Installation
 
 - Install all requirements
@@ -111,3 +116,5 @@ C:\vcpkg\vcpkg install zeromq --triplet x64-windows
 ### Building
 
 - `./scripts/build.bat -r` to build & package application, stored in `build/stable-ui-bin`, `-r` is optional to enable release mode
+- `./scripts/deploy.bat` to deploy / update existing docker container
+- `./scripts/run.bat` to start application
