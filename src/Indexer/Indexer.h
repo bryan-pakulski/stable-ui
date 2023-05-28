@@ -5,6 +5,7 @@
 #include <map>
 #include <thread>
 
+#include "Helpers/Timer.h"
 #include "Indexer/InvertedIndex.h"
 #include "Indexer/Crawler.h"
 #include "Indexer/asyncQueue.h"
@@ -28,8 +29,12 @@ private:
   std::thread m_crawlerThread;
   std::thread m_queueThread;
 
+  std::mutex m_queueMutex;
+  std::condition_variable m_queueConditionVariable;
+
   std::shared_ptr<asyncQueue<std::pair<std::string, QUEUE_STATUS>>> m_crawlerQueue;
   bool m_crawl = true;
+  timer_killer m_kill_timer = timer_killer();
 
   // Stores all our XMP data in memory for fast lookup
   InvertedIndex m_II;

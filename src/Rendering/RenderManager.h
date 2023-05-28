@@ -41,8 +41,6 @@ public:
     CANVAS FUNCTIONS
   */
 
-  // Recalculate frame buffer on window resize
-  static void calculateFramebuffer(int width, int height);
   // Create new canvas object for rendering
   std::shared_ptr<Canvas> createCanvas(int x, int y, const std::string &name);
   // Get current active canvas
@@ -75,6 +73,8 @@ public:
   /*
     CALLBACKS
   */
+  // Recalculate frame buffer on window resize
+  static void recalculateFramebuffer(int width, int height);
   static void mouse_cursor_callback(GLFWwindow *window, double xposIn, double yposIn);
   static void mouse_scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
   static void mouse_btn_callback(GLFWwindow *window, int button, int action, int mods);

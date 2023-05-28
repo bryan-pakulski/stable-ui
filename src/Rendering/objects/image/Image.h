@@ -11,7 +11,6 @@ class Image {
 
 public:
   GLuint m_texture = 0;
-  GLuint m_framebuffer = 0;
   int renderState = Q_EXECUTION_STATE::PENDING;
   bool textured = Q_EXECUTION_STATE::PENDING;
   std::string m_name;
@@ -22,8 +21,5 @@ public:
   Image(int width, int height, std::string name);
   ~Image() = default;
 
-  // Draw a brush mask to our Texture, all data is in pixels
-  void drawMaskToTexture(int xPos, int yPos, float size);
-
-  void loadFromImage(std::string path);
+  void loadFromImage(std::string path, bool flipImage = false);
 };

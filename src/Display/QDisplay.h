@@ -57,7 +57,7 @@ public:
 
   // Clears frame
   static void clearFrame() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -86,7 +86,7 @@ private:
     // make sure the viewport matches the new window dimensions; note that width and
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
-    RenderManager::calculateFramebuffer(width, height);
+    RenderManager::recalculateFramebuffer(width, height);
   }
 
   // Cleans up all GL variables for clean exit

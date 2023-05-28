@@ -24,14 +24,18 @@ Selection::Selection(std::pair<int, int> coords, GLFWwindow *w, std::shared_ptr<
       1, 2, 3  // second triangle
   };
 
+  std::shared_ptr<shader> sh = std::shared_ptr<shader>(new shader);
+
   std::string vShaderSource = readShader("data/shaders/Selection_V.glsl");
   std::string fShaderSource = readShader("data/shaders/Selection_F.glsl");
 
   unsigned int vertexShader = initVertexShader(vShaderSource.c_str(), success);
   unsigned int fragmentShader = initFragmentShader(fShaderSource.c_str(), success);
 
-  linkShaders(vertexShader, fragmentShader, success);
-  setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices));
+  linkShaders(vertexShader, fragmentShader, success, sh);
+  setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices), sh);
+
+  createShader(sh, "selection");
 
   // Initialise selection buffer texture
   glGenTextures(1, &m_selection_texture_buffer);
@@ -58,26 +62,26 @@ void Selection::updateLogic() {
 }
 
 void Selection::updateVisual() {
-  glUseProgram(shaderProgram);
+  glUseProgram(getShader("selection")->shaderProgram);
 
   // View code
-  setMat4("view", m_camera->getViewMatrix());
+  setMat4("view", m_camera->getViewMatrix(), "selection");
 
   // Projection code
-  setMat4("projection", m_camera->getProjectionMatrix());
+  setMat4("projection", m_camera->getProjectionMatrix(), "selection");
 
   // Model code
   glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(m_position.x, m_position.y, 0.0f)) * // translation
                     glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *              // rotation
                     glm::scale(glm::mat4(1.0f), glm::vec3(m_size.first, m_size.second, 1.0f));     // scale
-  setMat4("model", model);
+  setMat4("model", model, "selection");
 
   // Render the square
   // Set the line width
   glLineWidth(1.0f);
 
   // Draw the square
-  glBindVertexArray(VAO);
+  glBindVertexArray(getShader("selection")->VAO);
   glDrawArrays(GL_LINE_LOOP, 0, 4);
   glBindVertexArray(0);
 }

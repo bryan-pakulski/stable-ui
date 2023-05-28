@@ -12,12 +12,23 @@
 
 #include <iostream>
 
+struct shader {
+  unsigned int VAO{}, VBO{}, EBO{};
+  unsigned int shaderProgram{};
+
+  ~shader() {
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+    glDeleteProgram(shaderProgram);
+  }
+};
+
 class BaseObject {
 
 protected:
   std::pair<int, int> pixelCoords;
-  unsigned int VAO{}, VBO{}, EBO{};
-  unsigned int shaderProgram{};
+  std::map<std::string, std::shared_ptr<shader>> m_shaders;
   GLFWwindow *m_window = 0;
 
 public:
@@ -32,13 +43,19 @@ public:
   static std::string readShader(const char *filePath);
 
   // Link shaders
-  void linkShaders(unsigned int vertexShader, unsigned int fragmentShader, int &success);
+  void linkShaders(unsigned int vertexShader, unsigned int fragmentShader, int &success, std::shared_ptr<shader> sh);
 
   // Set shader buffers
-  void setShaderBuffers(float *vertices, int sv, unsigned int *indices, int si);
+  void setShaderBuffers(float *vertices, int sv, unsigned int *indices, int si, std::shared_ptr<shader> sh);
+
+  // Create shader
+  void createShader(std::shared_ptr<shader> sh, std::string name);
+
+  // Get shader
+  std::shared_ptr<shader> getShader(std::string name);
 
   // Set matrix coordinates for projection
-  void setMat4(std::string uniformName, glm::mat4x4 mat);
+  void setMat4(std::string uniformName, glm::mat4x4 mat, std::string shaderName);
 };
 
 // Linear convert X/Y coordinates to local coordinates (-1, 1.0)

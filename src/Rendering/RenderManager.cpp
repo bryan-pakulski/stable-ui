@@ -14,32 +14,30 @@ RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
   // Allow access to camera variable through static callback function
   glfwSetWindowUserPointer(&m_window, (void *)this);
 
-  // Create Camera
+  // Create objects
   m_camera = std::shared_ptr<Camera>(new Camera(&m_window));
-
-  // Create additional objects
   m_selection = std::shared_ptr<Selection>(new Selection(std::pair<int, int>(0, 0), &m_window, m_camera));
 
-  // Create initial canvas
   createCanvas(0, 0, "default");
 
-  RenderManager::calculateFramebuffer(m_camera->m_screen.first, m_camera->m_screen.second);
+  RenderManager::recalculateFramebuffer(m_camera->m_screen.first, m_camera->m_screen.second);
 }
 
-void RenderManager::calculateFramebuffer(int width, int height) {
-  // Set up frame buffer for rendering canvas
-  glGenFramebuffers(1, &RenderManager::fbo);
-  glBindFramebuffer(GL_FRAMEBUFFER, RenderManager::fbo);
+void RenderManager::recalculateFramebuffer(int width, int height) {
+
+  glGenFramebuffers(1, &fbo);
+  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
   // Attach color buffer
-  glGenTextures(1, &RenderManager::m_colorBufferTexture);
-  glBindTexture(GL_TEXTURE_2D, RenderManager::m_colorBufferTexture);
+  glGenTextures(1, &m_colorBufferTexture);
+  glBindTexture(GL_TEXTURE_2D, m_colorBufferTexture);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, RenderManager::m_colorBufferTexture, 0);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colorBufferTexture, 0);
 
   GLenum framebuffer_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
   if (framebuffer_status != GL_FRAMEBUFFER_COMPLETE) {
@@ -74,11 +72,13 @@ void RenderManager::logicLoop() {
 void RenderManager::renderLoop() {
   m_camera->updateVisual();
 
-  // TODO: seperate the chunk rendering from the base canvas so that there is no visible background for our textures
-  glBindFramebuffer(GL_FRAMEBUFFER, RenderManager::fbo);
+  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+  glColorMask(true, true, true, true);
+  glClearColor(0, 0, 0, 0);
+  glClear(GL_COLOR_BUFFER_BIT);
 
-  getActiveCanvas()->updateVisual();
-  getActiveCanvas()->renderChunks();
+  getActiveCanvas()->renderImages();
+  getActiveCanvas()->setTexture(&m_colorBufferTexture);
 
   // Capture render buffer to texture if flag is set
   if (m_captureBuffer == true) {
@@ -86,12 +86,12 @@ void RenderManager::renderLoop() {
     m_captureBuffer = false;
   }
 
-  // Render Frame Buffer
-  glBindFramebuffer(GL_READ_FRAMEBUFFER, RenderManager::fbo);
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-  glBlitFramebuffer(0, 0, m_camera->m_screen.first, m_camera->m_screen.second, 0, 0, m_camera->m_screen.first,
-                    m_camera->m_screen.second, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+  // Render canvas background / fbo of our images / selection
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glClear(GL_COLOR_BUFFER_BIT);
+  glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+  getActiveCanvas()->updateVisual();
 
   m_selection->updateVisual();
 }
@@ -147,15 +147,12 @@ const std::string RenderManager::getImage() { return m_useImage; }
 
 // Get image from canvas, based on selection coordinates
 void RenderManager::sendImageToCanvas(Image &im) {
-  // Create copy of image to send to canvas
-  m_canvas[m_activeId]->createChunk(std::shared_ptr<Image>(new Image(im)), m_selection->getCoordinates());
+  m_canvas[m_activeId]->createImage(std::shared_ptr<Image>(new Image(im)), m_selection->getCoordinates());
 }
 
 // Text to Image, render result to canvas
 void RenderManager::textToImage(std::string prompt, std::string negative_prompt, std::string &samplerName, int samples,
                                 int steps, double cfg, int seed, int width, int height, int &renderState) {
-
-  // Generate & Retrieve newly generated image
   SDCommandsInterface::GetInstance().textToImage(getActiveCanvas()->m_name, prompt, negative_prompt, samplerName,
                                                  samples, steps, cfg, seed, width, height, renderState);
 }
@@ -164,8 +161,6 @@ void RenderManager::textToImage(std::string prompt, std::string negative_prompt,
 void RenderManager::imageToImage(std::string &imgPath, std::string prompt, std::string negative_prompt,
                                  std::string &samplerName, int samples, int steps, double cfg, double strength,
                                  int seed, int &renderState) {
-
-  // Generate & Retrieve newly generated image
   SDCommandsInterface::GetInstance().imageToImage(getActiveCanvas()->m_name, imgPath, prompt, negative_prompt,
                                                   samplerName, samples, steps, cfg, strength, seed, renderState);
 }

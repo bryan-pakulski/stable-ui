@@ -22,36 +22,9 @@ Image::Image(int width, int height, std::string name) : m_width(width), m_height
   QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Image::Image Successfully created blank texture", m_name);
 }
 
-void Image::loadFromImage(std::string path) {
-  if (!GLHELPER::LoadTextureFromFile(path.c_str(), &m_texture, &m_width, &m_height, false)) {
+void Image::loadFromImage(std::string path, bool flipImage) {
+  if (!GLHELPER::LoadTextureFromFile(path.c_str(), &m_texture, &m_width, &m_height, false, flipImage)) {
     QLogger::GetInstance().Log(LOGLEVEL::ERR, "Image::loadFromImage Failed to load image from file: ", path.c_str());
   }
   m_image_source = path;
-}
-
-void Image::drawMaskToTexture(int xPos, int yPos, float size) {
-
-  // Set up framebuffer for additional rendering
-  glGenFramebuffers(1, &m_framebuffer);
-  glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
-
-  // Attach texture to the framebuffer
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texture, 0);
-
-  // Clear the framebuffer
-  // glClear(GL_COLOR_BUFFER_BIT);
-
-  // TODO: Draw whatever you want directly onto texture1 here
-  // Draw a pixel at the mouse coordinates
-  glBegin(GL_POINTS);
-  glColor3f(1.0f, 1.0f, 1.0f);
-  glVertex2f(xPos, yPos);
-  glEnd();
-
-  // Save the framebuffer
-  glBindTexture(GL_TEXTURE_2D, m_texture);
-  // glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, m_width, m_height, 0);
-
-  // unbind the framebuffer
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

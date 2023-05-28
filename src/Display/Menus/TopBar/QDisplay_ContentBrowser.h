@@ -83,6 +83,12 @@ public:
 
   void previewPanel() {
     if (!m_selected_file.empty() && m_preview_image->textured) {
+      {
+        if (ImGui::Button("Send to Canvas")) {
+          m_renderManager->sendImageToCanvas(*m_preview_image);
+        }
+      }
+      ImGui::Separator();
       ImGui::Image((void *)(intptr_t)m_preview_image->m_texture,
                    ImVec2(m_preview_image->m_width, m_preview_image->m_height));
     }
@@ -134,10 +140,20 @@ public:
 
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
           selectImage(path);
-          m_renderManager->useImage(path);
         }
         if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
           selectImage(path);
+        }
+
+        if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1)) {
+          ImGui::OpenPopup(path.c_str());
+        }
+
+        if (ImGui::BeginPopup(path.c_str())) {
+          if (ImGui::Selectable("Delete")) {
+            // TODO: delete file
+          }
+          ImGui::EndPopup();
         }
 
         ImGui::TextWrapped("%s", path.c_str());

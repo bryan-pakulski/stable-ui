@@ -4,15 +4,15 @@ Chunk::Chunk(std::shared_ptr<Image> im, std::shared_ptr<Camera> c, int x, int y,
     : m_image{im}, m_coordinates{std::pair<int, int>(x, y)}, BaseObject(std::pair<int, int>(x, y)) {
   int success = 0;
   m_camera = std::shared_ptr<Camera>(c);
-  m_image->loadFromImage(m_image->m_image_source.c_str());
+  m_image->loadFromImage(m_image->m_image_source.c_str(), true);
 
   // Vertex data
   float vertices[] = {
       // positions        // colors         // texture coords
-      (float)m_image->m_width,  (float)m_image->m_height,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
-      (float)m_image->m_width,  -(float)m_image->m_height, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-      -(float)m_image->m_width, -(float)m_image->m_height, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-      -(float)m_image->m_width, (float)m_image->m_height,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
+      (float)m_image->m_width / 2,  (float)m_image->m_height / 2,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
+      (float)m_image->m_width / 2,  -(float)m_image->m_height / 2, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+      -(float)m_image->m_width / 2, -(float)m_image->m_height / 2, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+      -(float)m_image->m_width / 2, (float)m_image->m_height / 2,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
   };
 
   // Index buffer // Element Buffer Objects (EBO)
@@ -27,8 +27,12 @@ Chunk::Chunk(std::shared_ptr<Image> im, std::shared_ptr<Camera> c, int x, int y,
   unsigned int vertexShader = initVertexShader(vShaderSource.c_str(), success);
   unsigned int fragmentShader = initFragmentShader(fShaderSource.c_str(), success);
 
-  linkShaders(vertexShader, fragmentShader, success);
-  setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices));
+  std::shared_ptr<shader> sh = std::shared_ptr<shader>(new shader);
+
+  linkShaders(vertexShader, fragmentShader, success, sh);
+  setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices), sh);
+
+  createShader(sh, "chunk");
 
   if (!success) {
     QLogger::GetInstance().Log(LOGLEVEL::ERR, "Chunk::Chunk Error creating new chunk");
@@ -56,25 +60,25 @@ void Chunk::updateLogic() {}
 // Render onto screen, offset based on world coordinates & window size
 void Chunk::updateVisual() {
   if (m_renderFlag) {
-    glUseProgram(shaderProgram);
+    glUseProgram(getShader("chunk")->shaderProgram);
 
     // View code
-    setMat4("view", m_camera->getViewMatrix());
-    setMat4("projection", m_camera->getProjectionMatrix());
+    setMat4("view", m_camera->getViewMatrix(), "chunk");
+    setMat4("projection", m_camera->getProjectionMatrix(), "chunk");
 
     // Model projection code
     glm::mat4 model =
         glm::translate(glm::mat4(1.0f), glm::vec3(m_coordinates.first, m_coordinates.second, 0.0f)) * // translation
         glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                             // rotation
         glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));                                     // scale
-    setMat4("model", model);
+    setMat4("model", model, "chunk");
 
     // Update texture information
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBindTexture(GL_TEXTURE_2D, m_image->m_texture);
 
-    glBindVertexArray(VAO);
+    glBindVertexArray(getShader("chunk")->VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
   }
 }
