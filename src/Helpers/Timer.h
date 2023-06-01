@@ -12,8 +12,8 @@ struct timer_killer {
   }
   void kill() {
     std::unique_lock<std::mutex> lock(m);
-    terminate = true; // should be modified inside mutex lock
-    cv.notify_all();  // it is safe, and *sometimes* optimal, to do this outside the lock
+    terminate = true;
+    cv.notify_all();
   }
   // I like to explicitly delete/default special member functions:
   timer_killer() = default;

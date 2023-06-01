@@ -33,11 +33,11 @@
 - Max of 27 images generated before overwriting, decide on new naming format
 - Save canvas buffer coordinates not working correctly
 - Selection not offseting correctly on Y axis, constrained to initial screenspace (check transform logic)
-- Crash when docker closes and then ui is closed afterwards
 - Extra configuration i.e. trigger_prompt not being loaded from model yaml
 - Heartbeat bug on windows (no connectivity)
 - Multi string search doesn't work properly (Set union not working as intended?)
 
 # Done
 
+- Fix Crash when docker closes and then ui is closed afterwards
 - Add search and indexing system on prompt, image hash etc.. for image browser, will need some sort of metadata saved for each image generated (store inside image??)

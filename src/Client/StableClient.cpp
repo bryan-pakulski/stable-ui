@@ -14,6 +14,9 @@ StableClient::StableClient() {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableClient::StableClient Connecting main zmq interface", m_addr);
   m_socket = zmq::socket_t(m_ctx, zmq::socket_type::req);
   m_socket.connect(m_addr);
+  // Pending messages shall be discarded immediately when the socket is closed with zmq_close()
+  // see: http: //api.zeromq.org/2-1%3azmq-setsockopt#toc15
+  m_socket.set(zmq::sockopt::linger, 0);
 
   // Initialise heartbeat socket for keepalive status
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableClient::StableClient Connecting heartbeat zmq interface",
@@ -21,17 +24,10 @@ StableClient::StableClient() {
   m_heartbeatSocket = zmq::socket_t(m_ctx, zmq::socket_type::req);
   m_heartbeatSocket.connect(m_heartbeat_addr);
   m_heartbeatSocket.set(zmq::sockopt::rcvtimeo, 5000);
+  m_heartbeatSocket.set(zmq::sockopt::linger, 0);
 }
 
-StableClient::~StableClient() {
-  // TODO: close gets stuck if no connection to docker server is managed
-  m_socket.unbind(m_addr);
-  m_heartbeatSocket.unbind(m_heartbeat_addr);
-
-  zmq_close(&m_socket);
-  zmq_close(&m_heartbeatSocket);
-  zmq_ctx_destroy(&m_ctx);
-}
+StableClient::~StableClient() {}
 
 // Heartbeat ping/pong to determine server status
 void StableClient::heartbeat(int &state) {

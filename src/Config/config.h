@@ -49,9 +49,9 @@ static CString DOCKER_IP_ADDRESS(loadConfig<std::string>("DOCKER_IP_ADDRESS", ""
 static CString MODEL_CONFIGURATIONS_DIRECTORY(loadConfig<std::string>("MODEL_CONFIGURATIONS_DIRECTORY",
                                                                       "data/models/configs"));
 static CString MODELS_CONFIGURATION_FILE(loadConfig<std::string>("MODELS_CONFIGURATION_FILE",
-                                                                 "data/shared-config/model_config.yaml"));
+                                                                 "data/config/model_config.yaml"));
 static CString MODULES_CONFIGURATION_FILE(loadConfig<std::string>("MODULES_CONFIGURATION_FILE",
-                                                                  "data/shared-config/module_config.yaml"));
+                                                                  "data/config/module_config.yaml"));
 static CString VAE_FOLDER_PATH(loadConfig<std::string>("VAE_FOLDER_PATH", "data/models/vae"));
 static CString INDEX_CACHE(loadConfig<std::string>("INDEX_CACHE", "data/cache"));
 static CString CRAWLER_PATH(loadConfig<std::string>("CRAWLER_PATH", "data/output"));

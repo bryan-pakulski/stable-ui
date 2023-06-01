@@ -4,7 +4,7 @@ import os
 import yaml
 import shutil
 
-MODULE_CONFIG_PATH = "/shared-config/module_config.yaml"
+MODULE_CONFIG_PATH = "/config/module_config.yaml"
 
 
 # Set up a new module in the MODULE_CONFIG_PATH file, updates existing entries
