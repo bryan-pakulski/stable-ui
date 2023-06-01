@@ -18,7 +18,6 @@ public:
   void kill() {
     std::unique_lock<std::mutex> lock(m_mutex);
     killed = true;
-    lock.unlock();
     m_conditionVariable.notify_one();
   }
 

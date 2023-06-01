@@ -12,7 +12,8 @@
 #include "Rendering/RenderManager.h"
 #include "Config/config.h"
 #include "Menus/QDisplay_ContextMenu.h"
-#include "Menus/ToolsMenu/QDisplay_ToolsMenu.h"
+#include "Menus/LeftSideBar/QDisplay_LeftSideBar.h"
+#include "Menus/RightSideBar/QDisplay_RightSideBar.h"
 #include "Menus/TopBar/QDisplay_TopBar.h"
 #include "QDisplay_Base.h"
 
@@ -33,7 +34,8 @@ public:
 
     // Initialisation
     m_submenus.emplace_back(new QDisplay_TopBar(m_renderManager, m_window));
-    m_submenus.emplace_back(new QDisplay_ToolsMenu(m_renderManager, m_window));
+    m_submenus.emplace_back(new QDisplay_LeftSideBar(m_renderManager, m_window));
+    m_submenus.emplace_back(new QDisplay_RightSideBar(m_renderManager, m_window));
     m_submenus.emplace_back(new QDisplay_ContextMenu(m_renderManager, m_window));
 
     // Enable debug output

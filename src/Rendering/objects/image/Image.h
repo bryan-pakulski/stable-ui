@@ -11,7 +11,7 @@ class Image {
 
 public:
   GLuint m_texture = 0;
-  int renderState = Q_EXECUTION_STATE::PENDING;
+  int renderState = Q_RENDER_STATE::UNRENDERED;
   bool textured = false;
   std::string m_name;
   std::string m_image_source;

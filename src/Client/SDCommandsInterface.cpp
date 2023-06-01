@@ -29,15 +29,15 @@ void SDCommandsInterface::launchSDModelServer() {
 void SDCommandsInterface::releaseSDModelServer() {
   QLogger::GetInstance().Log(LOGLEVEL::INFO,
                              "SDCommandsInterface::restartSDModelServer shutting down SD Model Server...");
-  m_Thread =
-      std::thread(std::bind(&StableClient::releaseMemory, &StableClient::GetInstance(), std::ref(m_dockerState)));
+  StableManager::GetInstance().setModelState(Q_MODEL_STATUS::NONE_LOADED);
+  m_Thread = std::thread(std::bind(&StableClient::releaseMemory, &StableClient::GetInstance()));
   m_Thread.detach();
 }
 // Connect a new model to SD Server
 void SDCommandsInterface::attachModelToServer(std::string ckpt_path, std::string config_path, std::string vae_path,
                                               std::string precision, int &state) {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "SDCommandsInterface::attachModelToServer loading model to memory...");
-  state = Q_EXECUTION_STATE::LOADING;
+  state = Q_MODEL_STATUS::LOADING;
 
   m_Thread = std::thread(std::bind(&StableClient::loadModelToMemory, &StableClient::GetInstance(), ckpt_path,
                                    config_path, vae_path, precision, std::ref(state)));
@@ -49,7 +49,7 @@ void SDCommandsInterface::textToImage(std::string &canvasName, std::string promp
                                       std::string &samplerName, int batch_size, int steps, double cfg, int seed,
                                       int width, int height, int &renderState) {
   std::string outDir = CONFIG::OUTPUT_DIRECTORY.get();
-  renderState = Q_EXECUTION_STATE::LOADING;
+  renderState = Q_RENDER_STATE::RENDERING;
 
   model mdl = StableManager::GetInstance().getModel();
 
@@ -63,7 +63,7 @@ void SDCommandsInterface::imageToImage(std::string &canvasName, std::string &img
                                        std::string &negative_prompt, std::string &samplerName, int batch_size,
                                        int steps, double cfg, double strength, int seed, int &renderState) {
   std::string outDir = CONFIG::OUTPUT_DIRECTORY.get();
-  renderState = Q_EXECUTION_STATE::LOADING;
+  renderState = Q_RENDER_STATE::RENDERING;
 
   model mdl = StableManager::GetInstance().getModel();
 

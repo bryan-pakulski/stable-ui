@@ -1,7 +1,9 @@
 #include "StableClient.h"
 #include "Commands.h"
+#include "Display/ErrorHandler.h"
 #include "Helpers/States.h"
 #include "Helpers/QLogger.h"
+#include "ThirdParty/cppzmq/zmq.hpp"
 #include <sstream>
 
 StableClient::StableClient() {
@@ -50,9 +52,9 @@ void StableClient::heartbeat(int &state) {
 }
 
 // Reloads sd server in docker (release any models in memory)
-void StableClient::releaseMemory(int &state) {
+void StableClient::releaseMemory() {
   commands::restartServer cmd = commands::restartServer();
-  std::string msg = sendMessage(cmd.getCommandString(), state);
+  std::string msg = sendMessage(cmd.getCommandString());
 }
 
 // Load a stable diffusion model into memory in preperation for running inference commands
@@ -60,8 +62,12 @@ void StableClient::loadModelToMemory(std::string ckpt_path, std::string config_p
                                      std::string precision, int &state) {
 
   commands::loadModelToMemory cmd = commands::loadModelToMemory{ckpt_path, config_path, vae_path, precision};
-  std::string msg = sendMessage(cmd.getCommandString(), state);
-  state = Q_EXECUTION_STATE::SUCCESS;
+  std::string msg = sendMessage(cmd.getCommandString());
+  if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
+    state = Q_MODEL_STATUS::LOADED;
+  } else {
+    state = Q_MODEL_STATUS::FAILED;
+  }
 }
 
 // Text to image
@@ -72,8 +78,12 @@ void StableClient::textToImage(std::string hash, std::string outDir, std::string
   commands::textToImage cmd = commands::textToImage(hash, prompt, width, height, negative_prompt, canvasName,
                                                     samplerName, batch_size, 1, steps, cfg, seed, outDir);
 
-  std::string msg = sendMessage(cmd.getCommandString(), renderState);
-  renderState = Q_EXECUTION_STATE::SUCCESS;
+  std::string msg = sendMessage(cmd.getCommandString());
+  if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
+    renderState = Q_RENDER_STATE::RENDERED;
+  } else {
+    renderState = Q_RENDER_STATE::UNRENDERED;
+  }
 }
 
 // Image to image
@@ -85,18 +95,31 @@ void StableClient::imageToImage(std::string hash, std::string outDir, std::strin
       commands::imageToImage(hash, prompt, negative_prompt, canvas_name, img_path, sampler_name, batch_size, n_iter,
                              steps, cfg_scale, strength, seed, outDir);
 
-  std::string msg = sendMessage(cmd.getCommandString(), renderState);
-  renderState = Q_EXECUTION_STATE::SUCCESS;
+  std::string msg = sendMessage(cmd.getCommandString());
+  if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
+    renderState = Q_RENDER_STATE::RENDERED;
+  } else {
+    renderState = Q_RENDER_STATE::UNRENDERED;
+  }
 }
 
 // Send message to ZMQ server listening on m_socket
-std::string StableClient::sendMessage(const std::string &message, int &state) {
+std::string StableClient::sendMessage(const std::string &message) {
   std::lock_guard<std::mutex> guard(m_mutex);
+
+  m_dockerCommandStatus = Q_COMMAND_EXECUTION_STATE::PENDING;
 
   m_socket.send(zmq::buffer(message));
 
   zmq::message_t recv;
-  m_socket.recv(recv, zmq::recv_flags::none);
+  zmq::recv_result_t r = m_socket.recv(recv, zmq::recv_flags::none);
+
+  if (recv.str() == "FAILED" || !r.has_value()) {
+    m_dockerCommandStatus = Q_COMMAND_EXECUTION_STATE::FAILED;
+    ErrorHandler::GetInstance().setError("Docker command failed: " + message);
+  } else {
+    m_dockerCommandStatus = Q_COMMAND_EXECUTION_STATE::SUCCESS;
+  }
 
   return recv.str();
 }

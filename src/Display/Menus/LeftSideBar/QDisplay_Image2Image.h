@@ -6,6 +6,7 @@
 
 #include "Display/ErrorHandler.h"
 #include "Helpers/QLogger.h"
+#include "Helpers/States.h"
 #include "Rendering/RenderManager.h"
 #include "Config/config.h"
 #include "Display/QDisplay_Base.h"
@@ -88,7 +89,7 @@ public:
     if (ImGui::CollapsingHeader("Render Preview")) {
       if (m_image) {
         // Once image is marked as rendered display on screen
-        if (m_image->renderState == Q_EXECUTION_STATE::SUCCESS) {
+        if (m_image->renderState == Q_RENDER_STATE::RENDERED) {
           ImGui::Text("image width: %d image height:%d", m_image->m_width, m_image->m_height);
           if (ImGui::Button("Send to Canvas")) {
             // Send image to be rendered on canvas at selection coordinates
@@ -98,7 +99,7 @@ public:
           // Retrieve latest redered file
           if (!m_image->textured) {
             m_image->loadFromImage(getLatestFile());
-            m_image->textured = Q_EXECUTION_STATE::SUCCESS;
+            m_image->textured = Q_RENDER_STATE::RENDERED;
           }
 
           ImGui::Image((void *)(intptr_t)m_image->m_texture, ImVec2(m_image->m_width * 0.3, m_image->m_height * 0.3));
@@ -143,7 +144,7 @@ public:
   virtual void render() {
 
     // Generate option only available whilst a image isn't pending
-    if ((m_image && m_image->renderState != Q_EXECUTION_STATE::LOADING) || !m_image) {
+    if ((m_image && m_image->renderState != Q_RENDER_STATE::RENDERING) || !m_image) {
       static const ImVec4 currentColor{0, 0.5f, 0, 1.0f};
 
       ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
@@ -154,7 +155,7 @@ public:
         renderImage();
       }
       ImGui::PopStyleColor(3);
-    } else if (m_image && m_image->renderState == Q_EXECUTION_STATE::LOADING) {
+    } else if (m_image && m_image->renderState == Q_RENDER_STATE::RENDERING) {
       static const ImVec4 currentColor{0.5f, 0, 0, 1.0f};
       ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
       ImGui::PushStyleColor(ImGuiCol_ButtonActive, currentColor);

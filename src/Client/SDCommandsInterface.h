@@ -15,7 +15,6 @@
 class SDCommandsInterface {
 private:
   std::thread m_Thread;
-  int m_dockerState = Q_EXECUTION_STATE::PENDING;
 
   SDCommandsInterface();
   ~SDCommandsInterface();

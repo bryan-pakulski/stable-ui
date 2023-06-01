@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Config/structs.h"
+#include "Helpers/States.h"
 #include "Indexer/Indexer.h"
 #include "Rendering/RenderManager.h"
 
@@ -35,6 +36,7 @@ public:
   // Attach model to server
   void attachModel(YAML::Node model, std::string &hash, std::string &precision);
   // Return model state
+  void setModelState(int state);
   int getModelState();
   model getModel();
 
@@ -42,7 +44,7 @@ private:
   std::shared_ptr<RenderManager> m_renderManager;
   Indexer m_indexer;
 
-  int m_modelLoaded = Q_EXECUTION_STATE::PENDING;
+  int m_modelLoaded = Q_MODEL_STATUS::NONE_LOADED;
   model m_model;
 
   explicit StableManager();
