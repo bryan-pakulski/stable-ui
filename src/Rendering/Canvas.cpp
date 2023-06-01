@@ -61,7 +61,9 @@ void Canvas::updateLogic() {
 void Canvas::updateVisual() {
 
   // TODO: make background configurable i.e. grid / star system etc...
-  renderBackground();
+  if (CONFIG::STAR_FIELD.get() == 1) {
+    renderBackground();
+  }
 
   // Render FBO texture on top of background
   glUseProgram(getShader("fbo")->shaderProgram);

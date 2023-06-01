@@ -109,6 +109,9 @@ public:
   }
 
   void contentBrowser() {
+    ImGui::SetNextWindowSizeConstraints(
+        ImVec2(CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get(), CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get()),
+        ImVec2(CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get(), CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get()));
     ImGui::BeginChild("Content-Browser");
 
     if (m_current_directory != std::filesystem::path(c_base_content_directory) && m_filteredPaths.empty()) {
@@ -118,10 +121,10 @@ public:
     }
 
     static float padding = 6.0f;
-    static float thumbnailSize = 42.0f;
+    static float thumbnailSize = 46.0f;
     float cellSize = thumbnailSize + padding;
 
-    float panelWidth = ImGui::GetContentRegionAvail().x;
+    float panelWidth = ImGui::GetContentRegionAvail().x - (thumbnailSize);
     int columnCount = (int)(panelWidth / cellSize);
     if (columnCount < 1)
       columnCount = 1;

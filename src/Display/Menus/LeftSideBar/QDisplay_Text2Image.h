@@ -48,8 +48,8 @@ public:
     std::filesystem::file_time_type lastWrite;
 
     try {
-      for (const auto &entry : fs::directory_iterator("data" + CONFIG::OUTPUT_DIRECTORY.get() + "/" +
-                                                      m_renderManager->getActiveCanvas()->m_name)) {
+      for (const auto &entry :
+           fs::directory_iterator(CONFIG::OUTPUT_DIRECTORY.get() + "/" + m_renderManager->getActiveCanvas()->m_name)) {
         if (entry.is_regular_file()) {
           if (lastWrite < entry.last_write_time()) {
             lastWrite = entry.last_write_time();
@@ -69,7 +69,12 @@ public:
     m_image.reset();
     m_image = std::unique_ptr<Image>(
         new Image(CONFIG::IMAGE_SIZE_X_LIMIT.get(), CONFIG::IMAGE_SIZE_Y_LIMIT.get(), "txt2img"));
-    m_renderManager->textToImage(m_prompt, m_negative_prompt, m_selectedSampler, 1, m_steps, m_cfg, m_seed, m_width,
+
+    int seed = m_seed;
+    if (m_seed == 0) {
+      seed = rand() % INT_MAX + 1;
+    }
+    m_renderManager->textToImage(m_prompt, m_negative_prompt, m_selectedSampler, 1, m_steps, m_cfg, seed, m_width,
                                  m_height, m_image->renderState);
   }
 

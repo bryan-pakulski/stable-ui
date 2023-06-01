@@ -1,5 +1,6 @@
 #pragma once
 
+#include <climits>
 #include <fstream>
 #include <imgui.h>
 #include <filesystem>
@@ -49,8 +50,8 @@ public:
     std::filesystem::file_time_type lastWrite;
 
     try {
-      for (const auto &entry : fs::directory_iterator("data" + CONFIG::OUTPUT_DIRECTORY.get() + "/" +
-                                                      m_renderManager->getActiveCanvas()->m_name)) {
+      for (const auto &entry :
+           fs::directory_iterator(CONFIG::OUTPUT_DIRECTORY.get() + "/" + m_renderManager->getActiveCanvas()->m_name)) {
         if (entry.is_regular_file()) {
           if (lastWrite < entry.last_write_time()) {
             lastWrite = entry.last_write_time();
@@ -81,8 +82,13 @@ public:
     m_image = std::unique_ptr<Image>(
         new Image(CONFIG::IMAGE_SIZE_X_LIMIT.get(), CONFIG::IMAGE_SIZE_Y_LIMIT.get(), "img2img"));
     std::string path = m_renderManager->getImage();
+
+    int seed = m_seed;
+    if (m_seed == 0) {
+      seed = rand() % INT_MAX + 1;
+    }
     m_renderManager->imageToImage(path, m_prompt, m_negative_prompt, m_selectedSampler, 1, m_steps, m_cfg, m_strength,
-                                  m_seed, m_image->renderState);
+                                  seed, m_image->renderState);
   }
 
   void renderPreview() {

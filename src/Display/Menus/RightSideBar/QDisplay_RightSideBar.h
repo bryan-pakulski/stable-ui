@@ -53,6 +53,8 @@ public:
       CanvasToolsWindow->render();
     }
 
+    ImGui::Separator();
+
     ImGui::End();
   }
 };

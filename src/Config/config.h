@@ -28,13 +28,14 @@ static CString STABLE_DIFFUSION_DOCKER_PATH(loadConfig<std::string>("STABLE_DIFF
 static CString MODELS_DIRECTORY(loadConfig<std::string>("MODELS_DIRECTORY", "/sd/models/"));
 static CInt IMAGE_SIZE_X_LIMIT(loadConfig<int>("IMAGE_SIZE_X_LIMIT", 512));
 static CInt IMAGE_SIZE_Y_LIMIT(loadConfig<int>("IMAGE_SIZE_Y_LIMIT", 512));
-static CString OUTPUT_DIRECTORY(loadConfig<std::string>("OUTPUT_DIRECTORY", "/output"));
+static CString OUTPUT_DIRECTORY(loadConfig<std::string>("OUTPUT_DIRECTORY", "/data/output"));
 
 // ImGui configuration
 static CString PROGRAM_NAME("stable-ui");
 static CFloat HIGH_DPI_SCALE_FACTOR(loadConfig<float>("HIGH_DPI_SCALE_FACTOR", 1.0f));
 static CInt WINDOW_WIDTH(loadConfig("WINDOW_WIDTH", 1280));
 static CInt WINDOW_HEIGHT(loadConfig("WINDOW_HEIGHT", 720));
+static CInt STAR_FIELD(loadConfig("STAR_FIELD", 0));
 
 static CFloat IMGUI_TOOLS_WINDOW_WIDTH(loadConfig("IMGUI_TOOLS_WINDOW_WIDTH", 380.0f));
 static CFloat IMGUI_TOP_WINDOW_HEIGHT(loadConfig("IMGUI_TOP_WINDOW_HEIGHT", 18.0f));
