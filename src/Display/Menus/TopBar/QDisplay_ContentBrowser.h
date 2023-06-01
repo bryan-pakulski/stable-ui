@@ -84,6 +84,9 @@ public:
   void previewPanel() {
     if (!m_selected_file.empty() && m_preview_image->textured) {
       {
+        if (ImGui::Button("Send to img2img")) {
+          m_renderManager->useImage(m_preview_image->m_image_source);
+        }
         if (ImGui::Button("Send to Canvas")) {
           m_renderManager->sendImageToCanvas(*m_preview_image);
         }
@@ -140,6 +143,7 @@ public:
 
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
           selectImage(path);
+          m_renderManager->useImage(path);
         }
         if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
           selectImage(path);

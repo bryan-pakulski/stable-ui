@@ -11,6 +11,7 @@ int main() {
   QDisplay::GetInstance().AttachManager(StableManager::GetInstance().getRenderManager());
 
   // Initialise heartbeat to docker
+  StableClient::GetInstance();
   Heartbeat::GetInstance().start();
 
   while (!glfwWindowShouldClose(QDisplay::GetInstance().getWindow())) {

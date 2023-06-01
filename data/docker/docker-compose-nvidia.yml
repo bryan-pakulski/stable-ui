@@ -11,7 +11,7 @@ services:
     env_file: .env_docker
     volumes:
       - ../models:/models
-      - ../output:/output
+      - ../output:/data/output
       - ../module-data:/module-data
       - ../shared-config:/shared-config
       - ../logs:/logs

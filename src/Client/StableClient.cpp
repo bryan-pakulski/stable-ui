@@ -21,7 +21,15 @@ StableClient::StableClient() {
   m_heartbeatSocket.set(zmq::sockopt::rcvtimeo, 5000);
 }
 
-StableClient::~StableClient() {}
+StableClient::~StableClient() {
+  // TODO: close gets stuck if no connection to docker server is managed
+  m_socket.unbind(m_addr);
+  m_heartbeatSocket.unbind(m_heartbeat_addr);
+
+  zmq_close(&m_socket);
+  zmq_close(&m_heartbeatSocket);
+  zmq_ctx_destroy(&m_ctx);
+}
 
 // Heartbeat ping/pong to determine server status
 void StableClient::heartbeat(int &state) {
@@ -37,12 +45,6 @@ void StableClient::heartbeat(int &state) {
   } catch (const zmq::error_t &err) {
     QLogger::GetInstance().Log(LOGLEVEL::ERR, err.what());
     state = HEARTBEAT_STATE::DEAD;
-
-    // reset socket
-    m_heartbeatSocket.disconnect(m_heartbeat_addr);
-    m_heartbeatSocket = zmq::socket_t(m_ctx, zmq::socket_type::req);
-    m_heartbeatSocket.connect(m_heartbeat_addr);
-
     return;
   }
 }

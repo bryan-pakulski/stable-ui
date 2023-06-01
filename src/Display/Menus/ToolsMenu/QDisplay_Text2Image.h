@@ -42,15 +42,19 @@ public:
     m_samplerList.push_back(k);
   }
 
+  // TODO: replace this with a single helper function that can be called from txt2img / img2img
   std::string getLatestFile() {
     std::string outfile = "";
-    fs::file_time_type write_time;
+    std::filesystem::file_time_type lastWrite;
 
     try {
       for (const auto &entry : fs::directory_iterator("data" + CONFIG::OUTPUT_DIRECTORY.get() + "/" +
                                                       m_renderManager->getActiveCanvas()->m_name)) {
         if (entry.is_regular_file()) {
-          outfile = entry.path().string();
+          if (lastWrite < entry.last_write_time()) {
+            lastWrite = entry.last_write_time();
+            outfile = entry.path().string();
+          }
         }
       }
     } catch (const fs::filesystem_error &err) {

@@ -27,11 +27,12 @@ class QDisplay_Image2Image : public QDisplay_Base {
   std::vector<listItem> m_samplerList;
 
   std::unique_ptr<Image> m_image = 0;
-  std::unique_ptr<Image> m_image_mask = 0;
+  Image m_preview;
 
 public:
   // Initialise render manager references
-  QDisplay_Image2Image(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+  QDisplay_Image2Image(std::shared_ptr<RenderManager> rm, GLFWwindow *w)
+      : QDisplay_Base(rm, w), m_preview{Image(512, 512, "preview")} {
     m_prompt[0] = 0;
     m_negative_prompt[0] = 0;
 
@@ -44,12 +45,16 @@ public:
 
   std::string getLatestFile() {
     std::string outfile = "";
+    std::filesystem::file_time_type lastWrite;
 
     try {
       for (const auto &entry : fs::directory_iterator("data" + CONFIG::OUTPUT_DIRECTORY.get() + "/" +
                                                       m_renderManager->getActiveCanvas()->m_name)) {
         if (entry.is_regular_file()) {
-          outfile = entry.path().string();
+          if (lastWrite < entry.last_write_time()) {
+            lastWrite = entry.last_write_time();
+            outfile = entry.path().string();
+          }
         }
       }
     } catch (const fs::filesystem_error &err) {
@@ -58,6 +63,16 @@ public:
     }
 
     return outfile;
+  }
+
+  void baseImagePreview() {
+    if (ImGui::CollapsingHeader("Base Image")) {
+      if (m_renderManager->getImage() != "" && m_preview.m_image_source != m_renderManager->getImage()) {
+        m_preview.loadFromImage(m_renderManager->getImage());
+      } else {
+        ImGui::Image((void *)(intptr_t)m_preview.m_texture, ImVec2(m_preview.m_width * 0.3, m_preview.m_height * 0.3));
+      }
+    }
   }
 
   void renderImage() {
@@ -69,8 +84,8 @@ public:
                                   m_seed, m_image->renderState);
   }
 
-  void imageWindow() {
-    if (ImGui::CollapsingHeader("Render")) {
+  void renderPreview() {
+    if (ImGui::CollapsingHeader("Render Preview")) {
       if (m_image) {
         // Once image is marked as rendered display on screen
         if (m_image->renderState == Q_EXECUTION_STATE::SUCCESS) {
@@ -81,7 +96,7 @@ public:
           }
 
           // Retrieve latest redered file
-          if (!m_image->textured == Q_EXECUTION_STATE::SUCCESS) {
+          if (!m_image->textured) {
             m_image->loadFromImage(getLatestFile());
             m_image->textured = Q_EXECUTION_STATE::SUCCESS;
           }
@@ -150,9 +165,9 @@ public:
       }
       ImGui::PopStyleColor(3);
     }
-
+    baseImagePreview();
     promptHelper();
     promptConfig();
-    imageWindow();
+    renderPreview();
   }
 };

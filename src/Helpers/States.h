@@ -13,8 +13,14 @@ struct Q_EXECUTION_STATE {
   const static int LOADING = 2;
 };
 
-// Heartbeat status
+// Render status
+struct Q_RENDER_STATE {
+  const static int UNRENDERED = 0;
+  const static int RENDERING = 1;
+  const static int RENDERED = 2;
+};
 
+// Heartbeat status
 struct HEARTBEAT_STATE {
   const static int DEAD = -1;
   const static int POLL = 0;

@@ -12,7 +12,7 @@ class Image {
 public:
   GLuint m_texture = 0;
   int renderState = Q_EXECUTION_STATE::PENDING;
-  bool textured = Q_EXECUTION_STATE::PENDING;
+  bool textured = false;
   std::string m_name;
   std::string m_image_source;
   int m_width;

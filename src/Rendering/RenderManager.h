@@ -87,7 +87,7 @@ private:
   static GLuint fbo;
   static GLuint m_colorBufferTexture;
 
-  std::string m_useImage;
+  std::string m_baseImage;
   bool m_captureBuffer = false;
 
   // Process inputs

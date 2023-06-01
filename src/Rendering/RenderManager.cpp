@@ -142,8 +142,8 @@ std::shared_ptr<Canvas> RenderManager::getActiveCanvas() {
 }
 
 // Select an image to use as a base for generation
-void RenderManager::useImage(std::string path) { m_useImage = path; }
-const std::string RenderManager::getImage() { return m_useImage; }
+void RenderManager::useImage(std::string path) { m_baseImage = path; }
+const std::string RenderManager::getImage() { return m_baseImage; }
 
 // Get image from canvas, based on selection coordinates
 void RenderManager::sendImageToCanvas(Image &im) {
