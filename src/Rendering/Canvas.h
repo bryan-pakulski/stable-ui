@@ -33,7 +33,8 @@ public:
 
   void updateLogic() override;
   void updateVisual() override;
-  void renderBackground();
+  void renderStarField();
+  void renderGrid();
   void renderImages();
   void setTexture(GLuint *id);
 

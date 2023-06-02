@@ -27,24 +27,32 @@ Canvas::Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *
   };
 
   std::shared_ptr<shader> backgroundShader = std::shared_ptr<shader>(new shader);
+  std::shared_ptr<shader> gridShader = std::shared_ptr<shader>(new shader);
   std::shared_ptr<shader> fboShader = std::shared_ptr<shader>(new shader);
 
-  std::string vBackgroundShaderSource = readShader("data/shaders/MainWindow_V.glsl");
-  std::string fBackgroundShaderSource = readShader("data/shaders/MainWindow_F.glsl");
-  std::string vFBOShaderSource = readShader("data/shaders/Base_V.glsl");
-  std::string fFBOShaderSource = readShader("data/shaders/Base_F.glsl");
-
+  std::string vBackgroundShaderSource = readShader("data/shaders/StarField_V.glsl");
+  std::string fBackgroundShaderSource = readShader("data/shaders/StarField_F.glsl");
   unsigned int backgroundVertexShader = initVertexShader(vBackgroundShaderSource.c_str(), success);
   unsigned int backgroundFragmentShader = initFragmentShader(fBackgroundShaderSource.c_str(), success);
-  unsigned int fboVertexShader = initVertexShader(vFBOShaderSource.c_str(), success);
-  unsigned int fboFragmentShader = initFragmentShader(fFBOShaderSource.c_str(), success);
-
   linkShaders(backgroundVertexShader, backgroundFragmentShader, success, backgroundShader);
   setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices), backgroundShader);
+  createShader(backgroundShader, "background");
+
+  std::string vGridShaderSource = readShader("data/shaders/Grid_V.glsl");
+  std::string fGridShaderSource = readShader("data/shaders/Grid_F.glsl");
+  unsigned int gridVertexShader = initVertexShader(vGridShaderSource.c_str(), success);
+  unsigned int gridFragmentShader = initFragmentShader(fGridShaderSource.c_str(), success);
+  linkShaders(gridVertexShader, gridFragmentShader, success, gridShader);
+  setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices), gridShader);
+  createShader(gridShader, "background_grid");
+
+  std::string vFBOShaderSource = readShader("data/shaders/Base_V.glsl");
+  std::string fFBOShaderSource = readShader("data/shaders/Base_F.glsl");
+  unsigned int fboVertexShader = initVertexShader(vFBOShaderSource.c_str(), success);
+  unsigned int fboFragmentShader = initFragmentShader(fFBOShaderSource.c_str(), success);
   linkShaders(fboVertexShader, fboFragmentShader, success, fboShader);
   setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices), fboShader);
 
-  createShader(backgroundShader, "background");
   createShader(fboShader, "fbo");
 }
 
@@ -62,7 +70,9 @@ void Canvas::updateVisual() {
 
   // TODO: make background configurable i.e. grid / star system etc...
   if (CONFIG::STAR_FIELD.get() == 1) {
-    renderBackground();
+    renderStarField();
+  } else {
+    renderGrid();
   }
 
   // Render FBO texture on top of background
@@ -87,7 +97,7 @@ void Canvas::updateVisual() {
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }
 
-void Canvas::renderBackground() {
+void Canvas::renderStarField() {
   glUseProgram(getShader("background")->shaderProgram);
 
   // View code
@@ -112,6 +122,24 @@ void Canvas::renderBackground() {
   glUniform1f(glGetUniformLocation(getShader("background")->shaderProgram, "iTime"), m_time);
 
   glBindVertexArray(getShader("background")->VAO);
+  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+}
+
+void Canvas::renderGrid() {
+  glUseProgram(getShader("background_grid")->shaderProgram);
+
+  // View code
+  setMat4("view", m_camera->getViewMatrix(), "background_grid");
+  setMat4("projection", m_camera->getProjectionMatrix(), "background_grid");
+
+  glm::mat4 model =
+      glm::translate(glm::mat4(1.0f), glm::vec3(m_camera->m_position.x, m_camera->m_position.y, 0.0f)) * // translation
+      glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                                  // rotation
+      glm::scale(glm::mat4(1.0f), glm::vec3(m_camera->m_screen.first * m_camera->m_zoom,
+                                            m_camera->m_screen.second * m_camera->m_zoom, 1.0f)); // scale
+  setMat4("model", model, "background_grid");
+
+  glBindVertexArray(getShader("background_grid")->VAO);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }
 
