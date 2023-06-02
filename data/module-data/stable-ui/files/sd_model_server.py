@@ -426,7 +426,7 @@ class SDModelServer(MQServer):
                     response = "Invalid command"
             except Exception as e:
                 logging.error(traceback.format_exc())
-                response = f"Exception: {traceback.format_exc()}"
+                response = f"FAILED"
 
             #  Send reply back to client
             socket.send(response.encode())

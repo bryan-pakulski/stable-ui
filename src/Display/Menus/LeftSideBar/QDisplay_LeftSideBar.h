@@ -4,35 +4,39 @@
 #include <imgui.h>
 #include <filesystem>
 
+#include "Helpers/States.h"
+#include "StableManager.h"
 #include "Display/ErrorHandler.h"
-#include "QLogger.h"
-#include "Rendering/StableManager.h"
+#include "Helpers/QLogger.h"
+#include "Rendering/RenderManager.h"
 #include "Config/config.h"
 #include "Display/QDisplay_Base.h"
-#include "QDisplay_CanvasTools.h"
 #include "QDisplay_Text2Image.h"
 #include "QDisplay_Image2Image.h"
 
-class QDisplay_ToolsMenu : public QDisplay_Base {
+class QDisplay_LeftSideBar : public QDisplay_Base {
+
+  struct tabs {
+    static const int TXT2IMG = 0;
+    static const int IMG2IMG = 1;
+    static const int TRAINING = 2;
+  };
 
   std::unique_ptr<QDisplay_Text2Image> Text2ImageWindow;
   std::unique_ptr<QDisplay_Image2Image> Image2ImageWindow;
-  std::unique_ptr<QDisplay_CanvasTools> CanvasToolsWindow;
 
   // Window Options
   const std::string c_windowName = "Helper Window";
   std::pair<int, int> m_windowSize{};
-  int tab = 0;
+  int activeTab = tabs::TXT2IMG;
 
 public:
   // Initialise render manager references
-  QDisplay_ToolsMenu(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+  QDisplay_LeftSideBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
 
     // Initialise sub menus
     Text2ImageWindow = std::unique_ptr<QDisplay_Text2Image>(new QDisplay_Text2Image(rm, w));
     Image2ImageWindow = std::unique_ptr<QDisplay_Image2Image>(new QDisplay_Image2Image(rm, w));
-
-    CanvasToolsWindow = std::unique_ptr<QDisplay_CanvasTools>(new QDisplay_CanvasTools(rm, w));
 
     // Set drag drop callback
     glfwSetDropCallback(w, drop_callback);
@@ -57,42 +61,38 @@ public:
 
     // Rendering menus
     if (ImGui::CollapsingHeader("Rendering")) {
-      if (m_stableManager->getModelState() == Q_EXECUTION_STATE::SUCCESS) {
+      if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::LOADED) {
         {
-          if (ImGui::Button("txt2img")) {
-            tab = 0;
+          if (ImGui::Button("inference")) {
+            activeTab = tabs::TXT2IMG;
           }
           ImGui::SameLine();
           if (ImGui::Button("img2img")) {
-            tab = 1;
+            activeTab = tabs::IMG2IMG;
           }
           ImGui::SameLine();
           if (ImGui::Button("training")) {
-            tab = 2;
+            activeTab = tabs::TRAINING;
           }
         }
         ImGui::Separator();
 
-        if (tab == 0) {
+        if (activeTab == tabs::TXT2IMG) {
           Text2ImageWindow->render();
         }
-        if (tab == 1) {
+        if (activeTab == tabs::IMG2IMG) {
           Image2ImageWindow->render();
         }
-      } else if (m_stableManager->getModelState() == Q_EXECUTION_STATE::PENDING) {
+      } else if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::NONE_LOADED) {
         ImGui::Text("Please import and load a model first!");
-      } else if (m_stableManager->getModelState() == Q_EXECUTION_STATE::LOADING) {
-        ImGui::Text("Please wait for model to finish loading...");
-      } else if (m_stableManager->getModelState() == Q_EXECUTION_STATE::FAILED) {
-        ImGui::Text("Model failed to load, please check application logs");
+      } else if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::LOADING) {
+        ImGui::Text("Loading model to memory..");
+      } else if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::FAILED) {
+        ImGui::Text("Model failed to load, please check logs or reload");
       }
     }
 
     ImGui::Separator();
-
-    if (ImGui::CollapsingHeader("Tools")) {
-      CanvasToolsWindow->render();
-    }
 
     ImGui::End();
   }

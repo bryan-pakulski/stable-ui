@@ -5,12 +5,13 @@ if [ ! -d "src" ]; then
     exit 1
 fi
 
+export DYNAMIC_LIBS=OFF
+
 echo "Building ThirdParty libs..."
-./src/ThirdParty/XMP/build_xmp_libraries.sh
+./src/ThirdParty/XMP/build_xmp_libraries.sh $DYNAMIC_LIBS
 
 
 echo "Building stable-ui..."
-export DYNAMIC_LIBS=OFF
 
 mkdir -p build
 pushd build
@@ -27,4 +28,4 @@ pushd build
 popd
 
 echo "Packing docker container..."
-bash -c "./scripts/pipeline/package.sh"
+bash -c "./scripts/pipeline/package.sh" $DYNAMIC_LIBS

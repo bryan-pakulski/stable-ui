@@ -9,6 +9,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
+  DYNAMIC_LIBS: OFF
 
 jobs:
   build:
@@ -36,13 +37,13 @@ jobs:
       - name: Build
         # Build your program with the given configuration
         run: |
-          ./src/ThirdParty/XMP/build_xmp_libraries.sh
-          cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+          ./src/ThirdParty/XMP/build_xmp_libraries.sh $DYNAMIC_LIBS
+          cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} 
 
       - name: Package
         # Copy data folders and compress release
         run: |
-          ./scripts/pipeline/package.sh
+          ./scripts/pipeline/package.sh $DYNAMIC_LIBS
           tar -zcvf stable-ui.tar.gz build/stable-ui-bin
 
       - name: Artifacts

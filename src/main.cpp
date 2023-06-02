@@ -1,6 +1,6 @@
 #include "Display/ErrorHandler.h"
 #include "Display/QDisplay.h"
-#include "Rendering/StableManager.h"
+#include "StableManager.h"
 #include "Client/Heartbeat.h"
 #include <imgui_impl_glfw.h>
 #include <memory>
@@ -8,10 +8,10 @@
 int main() {
 
   // Initialise display and logic manager
-  std::shared_ptr<StableManager> rm(new StableManager(*QDisplay::GetInstance().getWindow()));
-  QDisplay::GetInstance().AttachManager(rm);
+  QDisplay::GetInstance().AttachManager(StableManager::GetInstance().getRenderManager());
 
   // Initialise heartbeat to docker
+  StableClient::GetInstance();
   Heartbeat::GetInstance().start();
 
   while (!glfwWindowShouldClose(QDisplay::GetInstance().getWindow())) {
@@ -24,8 +24,8 @@ int main() {
       // Sub menus rendering & logic
       QDisplay::GetInstance().drawMenus();
 
-      // Rendering loop for canvas
-      rm->update();
+      // Stable Manager loop
+      StableManager::GetInstance().update();
     }
 
     // Display any captured errors as a modal popup over the top of the screen

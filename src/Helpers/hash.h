@@ -1,4 +1,4 @@
-#include "QLogger.h"
+#include "Helpers/QLogger.h"
 #include "ThirdParty/sha1/sha1.h"
 
 inline std::string getFileHash(const char *fileName) {

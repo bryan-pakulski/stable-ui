@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Display/ErrorHandler.h"
-#include "QLogger.h"
+#include "Helpers/QLogger.h"
 #include "Config/config.h"
 #include "Helpers/GLHelper.h"
 #include "Display/QDisplay_Base.h"
@@ -9,24 +9,19 @@
 class QDisplay_ContextMenu : public QDisplay_Base {
 public:
   // Initialise render manager reference
-  QDisplay_ContextMenu(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {}
+  QDisplay_ContextMenu(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {}
 
   virtual void render() {
     // TODO: Make Popup menus a static definition
     if (ImGui::BeginPopup("context menu")) {
       {
-        if (m_stableManager->getModelState() == Q_EXECUTION_STATE::SUCCESS) {
-          if (ImGui::Selectable("Fill")) {
-            m_stableManager->genFromSelection();
-          }
-        }
         if (ImGui::Selectable("Send to buffer")) {
-          m_stableManager->captureBuffer();
+          m_renderManager->captureBuffer();
         }
         if (ImGui::Selectable("Info")) {
         }
         ImGui::EndPopup();
-        m_stableManager->m_contextWindowVisible = false;
+        m_renderManager->m_contextWindowVisible = false;
       }
     }
 
@@ -34,7 +29,7 @@ public:
   }
 
   void setPopup() {
-    if (m_stableManager->m_contextWindowVisible) {
+    if (m_renderManager->m_contextWindowVisible) {
       ImGui::OpenPopup("context menu");
     }
   }

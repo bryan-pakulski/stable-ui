@@ -26,14 +26,34 @@ Canvas::Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *
       1, 2, 3  // second triangle
   };
 
-  std::string vShaderSource = readShader("data/shaders/MainWindow_V.glsl");
-  std::string fShaderSource = readShader("data/shaders/MainWindow_F.glsl");
+  std::shared_ptr<shader> backgroundShader = std::shared_ptr<shader>(new shader);
+  std::shared_ptr<shader> gridShader = std::shared_ptr<shader>(new shader);
+  std::shared_ptr<shader> fboShader = std::shared_ptr<shader>(new shader);
 
-  unsigned int vertexShader = initVertexShader(vShaderSource.c_str(), success);
-  unsigned int fragmentShader = initFragmentShader(fShaderSource.c_str(), success);
+  std::string vBackgroundShaderSource = readShader("data/shaders/StarField_V.glsl");
+  std::string fBackgroundShaderSource = readShader("data/shaders/StarField_F.glsl");
+  unsigned int backgroundVertexShader = initVertexShader(vBackgroundShaderSource.c_str(), success);
+  unsigned int backgroundFragmentShader = initFragmentShader(fBackgroundShaderSource.c_str(), success);
+  linkShaders(backgroundVertexShader, backgroundFragmentShader, success, backgroundShader);
+  setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices), backgroundShader);
+  createShader(backgroundShader, "background");
 
-  linkShaders(vertexShader, fragmentShader, success);
-  setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices));
+  std::string vGridShaderSource = readShader("data/shaders/Grid_V.glsl");
+  std::string fGridShaderSource = readShader("data/shaders/Grid_F.glsl");
+  unsigned int gridVertexShader = initVertexShader(vGridShaderSource.c_str(), success);
+  unsigned int gridFragmentShader = initFragmentShader(fGridShaderSource.c_str(), success);
+  linkShaders(gridVertexShader, gridFragmentShader, success, gridShader);
+  setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices), gridShader);
+  createShader(gridShader, "background_grid");
+
+  std::string vFBOShaderSource = readShader("data/shaders/Base_V.glsl");
+  std::string fFBOShaderSource = readShader("data/shaders/Base_F.glsl");
+  unsigned int fboVertexShader = initVertexShader(vFBOShaderSource.c_str(), success);
+  unsigned int fboFragmentShader = initFragmentShader(fFBOShaderSource.c_str(), success);
+  linkShaders(fboVertexShader, fboFragmentShader, success, fboShader);
+  setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices), fboShader);
+
+  createShader(fboShader, "fbo");
 }
 
 void Canvas::updateLogic() {
@@ -47,35 +67,83 @@ void Canvas::updateLogic() {
 }
 
 void Canvas::updateVisual() {
-  glUseProgram(shaderProgram);
 
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  // TODO: make background configurable i.e. grid / star system etc...
+  if (CONFIG::STAR_FIELD.get() == 1) {
+    renderStarField();
+  } else {
+    renderGrid();
+  }
 
-  // View code
-  setMat4("view", m_camera->getViewMatrix());
-  setMat4("projection", m_camera->getProjectionMatrix());
+  // Render FBO texture on top of background
+  glUseProgram(getShader("fbo")->shaderProgram);
+
+  setMat4("view", m_camera->getViewMatrix(), "fbo");
+  setMat4("projection", m_camera->getProjectionMatrix(), "fbo");
 
   glm::mat4 model =
       glm::translate(glm::mat4(1.0f), glm::vec3(m_camera->m_position.x, m_camera->m_position.y, 0.0f)) * // translation
       glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                                  // rotation
       glm::scale(glm::mat4(1.0f), glm::vec3(m_camera->m_screen.first * m_camera->m_zoom,
                                             m_camera->m_screen.second * m_camera->m_zoom, 1.0f)); // scale
-  setMat4("model", model);
+  setMat4("model", model, "fbo");
 
-  // Set screen size, camera coords and time
-  glUniform2f(glGetUniformLocation(shaderProgram, "iResolution"), m_camera->m_screen.first, m_camera->m_screen.second);
-  glUniform2f(glGetUniformLocation(shaderProgram, "iMouse"), -m_camera->m_position.x, -m_camera->m_position.y);
+  glBindVertexArray(getShader("fbo")->VAO);
 
-  // TODO: increment time until we hit the max value for a float, then decrement to zero and repeat
-  m_time += 0.01;
-  glUniform1f(glGetUniformLocation(shaderProgram, "iTime"), m_time);
-
-  glBindVertexArray(VAO);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glBindTexture(GL_TEXTURE_2D, m_texture_id);
+  glBindVertexArray(getShader("background")->VAO);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }
 
-void Canvas::renderChunks() {
-  // TODO: render onto framebuffer
+void Canvas::renderStarField() {
+  glUseProgram(getShader("background")->shaderProgram);
+
+  // View code
+  setMat4("view", m_camera->getViewMatrix(), "background");
+  setMat4("projection", m_camera->getProjectionMatrix(), "background");
+
+  glm::mat4 model =
+      glm::translate(glm::mat4(1.0f), glm::vec3(m_camera->m_position.x, m_camera->m_position.y, 0.0f)) * // translation
+      glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                                  // rotation
+      glm::scale(glm::mat4(1.0f), glm::vec3(m_camera->m_screen.first * m_camera->m_zoom,
+                                            m_camera->m_screen.second * m_camera->m_zoom, 1.0f)); // scale
+  setMat4("model", model, "background");
+
+  // Set screen size, camera coords and time
+  glUniform2f(glGetUniformLocation(getShader("background")->shaderProgram, "iResolution"), m_camera->m_screen.first,
+              m_camera->m_screen.second);
+  glUniform2f(glGetUniformLocation(getShader("background")->shaderProgram, "iMouse"), -m_camera->m_position.x,
+              -m_camera->m_position.y);
+
+  // TODO: increment time until we hit the max value for a float, then decrement to zero and repeat
+  m_time += 0.01;
+  glUniform1f(glGetUniformLocation(getShader("background")->shaderProgram, "iTime"), m_time);
+
+  glBindVertexArray(getShader("background")->VAO);
+  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+}
+
+void Canvas::renderGrid() {
+  glUseProgram(getShader("background_grid")->shaderProgram);
+
+  // View code
+  setMat4("view", m_camera->getViewMatrix(), "background_grid");
+  setMat4("projection", m_camera->getProjectionMatrix(), "background_grid");
+
+  glm::mat4 model =
+      glm::translate(glm::mat4(1.0f), glm::vec3(m_camera->m_position.x, m_camera->m_position.y, 0.0f)) * // translation
+      glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                                  // rotation
+      glm::scale(glm::mat4(1.0f), glm::vec3(m_camera->m_screen.first * m_camera->m_zoom,
+                                            m_camera->m_screen.second * m_camera->m_zoom, 1.0f)); // scale
+  setMat4("model", model, "background_grid");
+
+  glBindVertexArray(getShader("background_grid")->VAO);
+  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+}
+
+void Canvas::renderImages() {
   // Check which chunks are in view and should be rendered
   for (auto &chunk : m_editorGrid) {
     if (chunk->visible(m_coords, m_screen)) {
@@ -87,13 +155,10 @@ void Canvas::renderChunks() {
 // Set Canvas Texture
 void Canvas::setTexture(GLuint *id) { m_texture_id = *id; }
 
-// TODO: Build a texture based on the visible grid chunks
-void Canvas::updateMainWindowTexture() {}
-
 // TODO: Create a new grid chunk object/s based on provided image & coordinates
-void Canvas::createChunk(std::shared_ptr<Image> image, std::pair<int, int> chunk_coordinates) {
+void Canvas::createImage(std::shared_ptr<Image> image, std::pair<int, int> chunk_coordinates) {
   QLogger::GetInstance().Log(LOGLEVEL::INFO,
-                             "Canvas::createChunk Creating new image chunk at coordinates: ", chunk_coordinates.first,
+                             "Canvas::createImage Creating new image chunk at coordinates: ", chunk_coordinates.first,
                              chunk_coordinates.second, "on canvas: ", m_name);
   m_editorGrid.emplace_back(
       new Chunk(image, m_camera, chunk_coordinates.first, chunk_coordinates.second, m_editorGrid.size()));

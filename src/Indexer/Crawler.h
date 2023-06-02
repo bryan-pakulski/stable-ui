@@ -8,7 +8,7 @@
 #include <unordered_map>
 
 #include "Indexer/asyncQueue.h"
-#include "QLogger.h"
+#include "Helpers/QLogger.h"
 
 // Files to actually index
 static const std::set<std::string> s_filetypes = {".png", ".jpg", ".jpeg"};

@@ -4,10 +4,11 @@
 #include "GLHelper.h"
 
 bool GLHELPER::LoadTextureFromFile(const char *filename, GLuint *out_texture, int *out_width, int *out_height,
-                                   bool tiled) {
+                                   bool tiled, bool flipImage) {
   // Load from file
   int image_width = 0;
   int image_height = 0;
+  stbi_set_flip_vertically_on_load(flipImage);
   unsigned char *image_data = stbi_load(filename, &image_width, &image_height, NULL, 4);
   if (image_data == NULL)
     return false;

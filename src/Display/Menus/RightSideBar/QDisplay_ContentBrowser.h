@@ -1,12 +1,13 @@
 #pragma once
 
-#include <imgui.h>
-#include <filesystem>
-
+#include "StableManager.h"
 #include "Display/ErrorHandler.h"
 #include "Display/QDisplay_Base.h"
-#include <imgui_stdlib.h>
 #include "Indexer/MetaData.h"
+
+#include <imgui.h>
+#include <filesystem>
+#include <imgui_stdlib.h>
 
 class QDisplay_ContentBrowser : public QDisplay_Base {
 
@@ -26,7 +27,7 @@ private:
   std::set<std::string> m_filteredPaths;
 
 public:
-  QDisplay_ContentBrowser(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+  QDisplay_ContentBrowser(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     // Initialise content browser
     m_directory_icon = std::unique_ptr<Image>(new Image(256, 256, "dir_icon"));
     m_file_icon = std::unique_ptr<Image>(new Image(256, 256, "file_icon"));
@@ -35,13 +36,11 @@ public:
     m_current_directory = std::filesystem::path(c_base_content_directory);
   }
 
-  void openWindow() { m_isOpen = true; }
-
   void searchPanel() {
     ImGui::InputText("filter", &m_searchString);
     if (ImGui::Button("Search")) {
       QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Searching for: ", m_searchString);
-      m_filteredPaths = m_stableManager->searchIndex(m_searchString);
+      m_filteredPaths = StableManager::GetInstance().searchIndex(m_searchString);
     }
     ImGui::SameLine();
     if (ImGui::Button("Clear")) {
@@ -82,8 +81,18 @@ public:
 
   void previewPanel() {
     if (!m_selected_file.empty() && m_preview_image->textured) {
+      {
+        if (ImGui::Button("Send to img2img")) {
+          m_renderManager->useImage(m_preview_image->m_image_source);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Send to Canvas")) {
+          m_renderManager->sendImageToCanvas(*m_preview_image);
+        }
+      }
+      ImGui::Separator();
       ImGui::Image((void *)(intptr_t)m_preview_image->m_texture,
-                   ImVec2(m_preview_image->m_width, m_preview_image->m_height));
+                   ImVec2(m_preview_image->m_width * 0.3, m_preview_image->m_height * 0.3));
     }
   }
 
@@ -100,6 +109,9 @@ public:
   }
 
   void contentBrowser() {
+    ImGui::SetNextWindowSizeConstraints(
+        ImVec2(CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get(), CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get()),
+        ImVec2(CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get(), CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get()));
     ImGui::BeginChild("Content-Browser");
 
     if (m_current_directory != std::filesystem::path(c_base_content_directory) && m_filteredPaths.empty()) {
@@ -109,10 +121,10 @@ public:
     }
 
     static float padding = 6.0f;
-    static float thumbnailSize = 64.0f;
+    static float thumbnailSize = 46.0f;
     float cellSize = thumbnailSize + padding;
 
-    float panelWidth = ImGui::GetContentRegionAvail().x;
+    float panelWidth = ImGui::GetContentRegionAvail().x - (thumbnailSize);
     int columnCount = (int)(panelWidth / cellSize);
     if (columnCount < 1)
       columnCount = 1;
@@ -133,10 +145,21 @@ public:
 
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
           selectImage(path);
-          m_stableManager->useImage(path);
+          m_renderManager->useImage(path);
         }
         if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
           selectImage(path);
+        }
+
+        if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1)) {
+          ImGui::OpenPopup(path.c_str());
+        }
+
+        if (ImGui::BeginPopup(path.c_str())) {
+          if (ImGui::Selectable("Delete")) {
+            // TODO: delete file
+          }
+          ImGui::EndPopup();
         }
 
         ImGui::TextWrapped("%s", path.c_str());
@@ -171,7 +194,7 @@ public:
           } else {
             // Send image to be used for further processing
             selectImage(path);
-            m_stableManager->useImage(path.string());
+            m_renderManager->useImage(path.string());
           }
         }
         if (!directoryEntry.is_directory() && ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
@@ -189,53 +212,19 @@ public:
   }
 
   virtual void render() {
-    if (m_isOpen) {
 
-      ImGui::Begin("Content Browser");
-
-      static float w = 300.0f;
-      static float h = 400.0f;
-
-      // Child window 1, search & filterwindow
-      ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-      ImGui::BeginChild("child1", ImVec2(w, h), true);
-      ImGui::Text("Search & Filter: ");
+    if (ImGui::CollapsingHeader("Search")) {
       searchPanel();
+    }
+    ImGui::Separator();
 
-      ImGui::InvisibleButton("hsplitter", ImVec2(-1, 8.0f));
-      if (ImGui::IsItemActive())
-        h += ImGui::GetIO().MouseDelta.y;
+    contentBrowser();
+    ImGui::Separator();
+    previewPanel();
+    ImGui::Separator();
 
-      ImGui::Text("Metadata: ");
+    if (ImGui::CollapsingHeader("Metadata")) {
       metadataPanel();
-      ImGui::EndChild();
-
-      ImGui::SameLine();
-      ImGui::InvisibleButton("vsplitter", ImVec2(8.0f, h));
-      if (ImGui::IsItemActive())
-        w += ImGui::GetIO().MouseDelta.x;
-      ImGui::SameLine();
-
-      // Child window 2, content browser / search
-      ImGui::BeginChild("child3", ImVec2(0, h), true);
-      previewPanel();
-      ImGui::EndChild();
-
-      ImGui::InvisibleButton("hsplitter", ImVec2(-1, 8.0f));
-      if (ImGui::IsItemActive())
-        h += ImGui::GetIO().MouseDelta.y;
-
-      // Child window 3, content browser
-      ImGui::BeginChild("child4", ImVec2(0, 0), true);
-      contentBrowser();
-      ImGui::EndChild();
-      ImGui::PopStyleVar();
-
-      if (ImGui::Button("Close")) {
-        m_isOpen = false;
-      }
-
-      ImGui::End();
     }
   }
 };

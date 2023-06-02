@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include "QLogger.h"
+#include "Helpers/QLogger.h"
 #include "Helpers/GLHelper.h"
 #include "Camera.h"
 
@@ -23,8 +23,6 @@ private:
   GLuint m_texture_id;
   float m_time = 0.0f;
 
-  void setTexture(GLuint *id);
-
 public:
   bool m_active = false;
   std::vector<std::unique_ptr<Chunk>> m_editorGrid;
@@ -35,13 +33,13 @@ public:
 
   void updateLogic() override;
   void updateVisual() override;
-  void renderChunks();
-
-  // Checks which grids are visible and creates a texture to apply to the main window
-  void updateMainWindowTexture();
+  void renderStarField();
+  void renderGrid();
+  void renderImages();
+  void setTexture(GLuint *id);
 
   // Update or create new chunk for a given Image
-  void createChunk(std::shared_ptr<Image>, std::pair<int, int> chunk_coordinates);
+  void createImage(std::shared_ptr<Image>, std::pair<int, int> chunk_coordinates);
 
   // Delete chunk by index
   void deleteChunk(int index);

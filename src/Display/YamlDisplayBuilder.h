@@ -1,12 +1,12 @@
 #pragma once
 
-#include "ErrorHandler.h"
-#include "QLogger.h"
 #include "Config/config.h"
-#include "Helpers/GLHelper.h"
-#include "Display/QDisplay_Base.h"
-
 #include "Config/types.h"
+#include "Display/ErrorHandler.h"
+#include "Display/QDisplay_Base.h"
+#include "Helpers/GLHelper.h"
+#include "Helpers/QLogger.h"
+
 class YamlDisplayBuilder : public QDisplay_Base {
 public:
   bool m_terminate = false;
@@ -15,7 +15,7 @@ public:
   std::map<std::string, BaseType> m_variables;
 
   // Initialise render manager reference
-  YamlDisplayBuilder(std::string yamlPath, std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+  YamlDisplayBuilder(std::string yamlPath, std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
 
     static YAML::Node guiConfig = YAML::LoadFile(yamlPath);
     YAML::Node windows = guiConfig["windows"];

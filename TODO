@@ -9,11 +9,13 @@
 
 - initialise string with a maximum length, this is important as if we reload configuration by editing the string manually via ImGui we don't have the hooks to re-size memory and we risk overwriting if the initial string is too short (This can potentially be resolved by using std::string as a resizable datatype, see imgui_stdlib.h)
 - Add input sanitisation on sd_client on messages being sent, delimit or convert " to '?
+- Document Indexing / Crawling engine
 - Refactor main rendering code
 - Move to huggingface diffusers library system to load models (see: https://github.com/huggingface/diffusers)
 - use Xformers library https://github.com/facebookresearch/xformers/tree/main
 - Look at implementing additional optimisations: https://huggingface.co/docs/diffusers/optimization/fp16
 - Look at any performance improvements that can be used from openvino: https://github.com/bes-dev/stable_diffusion.openvino/tree/master
+- Refactor generation code to use commands and avoid passing multiple members
 
 # Functionality
 
@@ -31,11 +33,11 @@
 - Max of 27 images generated before overwriting, decide on new naming format
 - Save canvas buffer coordinates not working correctly
 - Selection not offseting correctly on Y axis, constrained to initial screenspace (check transform logic)
-- Crash when docker closes and then ui is closed afterwards
 - Extra configuration i.e. trigger_prompt not being loaded from model yaml
 - Heartbeat bug on windows (no connectivity)
 - Multi string search doesn't work properly (Set union not working as intended?)
 
 # Done
 
+- Fix Crash when docker closes and then ui is closed afterwards
 - Add search and indexing system on prompt, image hash etc.. for image browser, will need some sort of metadata saved for each image generated (store inside image??)

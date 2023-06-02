@@ -171,7 +171,7 @@ public:
     reloadFiles();
   };
 
-  QDisplay_ConfigureModel(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {}
+  QDisplay_ConfigureModel(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {}
 
   virtual void render() {
     // Render configure modules popup

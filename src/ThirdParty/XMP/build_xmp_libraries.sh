@@ -11,6 +11,7 @@ if [ ! -d "src" ]; then
     exit 1
 fi
 
+DYNAMIC_LIBS=$1
 mkdir -p lib
 lib_output=$(pwd)/lib
 
@@ -19,10 +20,6 @@ pushd src/ThirdParty/XMP
 if [ ! -d "XMP-Toolkit-SDK" ]; then
     # Setup base library
     git clone https://github.com/adobe/XMP-Toolkit-SDK
-
-    # Copy and replace cmake configuration to allow us to build in non secure mode
-    cp overrides/ProductConfig.cmake XMP-Toolkit-SDK/build/ProductConfig.cmake
-    cp overrides/ToolchainGCC.cmake XMP-Toolkit-SDK/build/shared/ToolchainGCC.cmake
 
     # Setup zlib
     wget https://www.zlib.net/zlib-1.2.13.tar.gz
@@ -38,6 +35,10 @@ if [ ! -d "XMP-Toolkit-SDK" ]; then
     rm -rf libexpat
 fi
 
+# Copy and replace cmake configuration to allow us to build in non secure mode
+cp overrides/ProductConfig.cmake XMP-Toolkit-SDK/build/ProductConfig.cmake
+cp overrides/ToolchainGCC.cmake XMP-Toolkit-SDK/build/shared/ToolchainGCC.cmake
+
 pushd XMP-Toolkit-SDK/build
 
 # Get the list of GCC library paths and append the paths to the $LD_LIBRARY_PATH
@@ -48,12 +49,18 @@ done
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/libuuid.so
 
 # Build
-./cmake.command 64 Static ToolchainGCC.cmake
-cmake --build gcc/static/i80386linux_64/Release
+echo "Dynamic Libs: $DYNAMIC_LIBS"
+if [[ $DYNAMIC_LIBS == "ON" ]]; then
+    ./cmake.command 64 Dynamic ToolchainGCC.cmake
+    cmake --build gcc/dynamic/i80386linux_64/Release
+else
+    ./cmake.command 64 Static ToolchainGCC.cmake
+    cmake --build gcc/static/i80386linux_64/Release
+fi
 
 popd
 
-# Copy static libs
+# Copy libs
 cp XMP-Toolkit-SDK/public/libraries/i80386linux_x64/release/* $lib_output
 
 popd

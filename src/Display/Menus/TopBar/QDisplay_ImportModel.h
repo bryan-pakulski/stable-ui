@@ -1,17 +1,15 @@
 #pragma once
 
-#include <imgui.h>
-#include "Helpers/hash.h"
 #include "Display/ErrorHandler.h"
-#include "ThirdParty/imgui/imfilebrowser.h"
 #include "Display/QDisplay_Base.h"
+#include "Helpers/hash.h"
 
+#include <imgui.h>
+#include "ThirdParty/imgui/imfilebrowser.h"
 #include <imgui_stdlib.h>
-
 #include "yaml-cpp/emittermanip.h"
 #include <yaml-cpp/yaml.h>
 #include <yaml-cpp/exceptions.h>
-
 #include <filesystem>
 #include <thread>
 
@@ -155,7 +153,7 @@ public:
     reloadFiles();
   };
 
-  QDisplay_ImportModel(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+  QDisplay_ImportModel(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     fileDialog.SetTitle("Import Models");
     fileDialog.SetTypeFilters({".ckpt", ".safetensors"});
 

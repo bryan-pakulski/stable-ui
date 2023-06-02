@@ -1,13 +1,12 @@
 #pragma once
 
-#include <imgui.h>
-#include <filesystem>
-
 #include "Display/ErrorHandler.h"
 #include "Display/QDisplay_Base.h"
 #include "Display/YamlDisplayBuilder.h"
-#include <imgui_stdlib.h>
 
+#include <imgui.h>
+#include <filesystem>
+#include <imgui_stdlib.h>
 #include "yaml-cpp/emittermanip.h"
 #include "yaml-cpp/node/detail/iterator_fwd.h"
 #include <yaml-cpp/yaml.h>
@@ -21,7 +20,7 @@ private:
   std::vector<std::unique_ptr<YamlDisplayBuilder>> m_VisibleModules;
 
 public:
-  QDisplay_PluginsWindow(std::shared_ptr<StableManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+  QDisplay_PluginsWindow(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     // Load modules list from yaml
     try {
       static YAML::Node configFile = YAML::LoadFile(CONFIG::MODULES_CONFIGURATION_FILE.get());
@@ -61,7 +60,7 @@ public:
       if (ImGui::MenuItem(item.m_name.c_str())) {
         // TODO: only push back if doesn't already exist
         m_VisibleModules.push_back(
-            std::unique_ptr<YamlDisplayBuilder>(new YamlDisplayBuilder(item.m_key, m_stableManager, m_window)));
+            std::unique_ptr<YamlDisplayBuilder>(new YamlDisplayBuilder(item.m_key, m_renderManager, m_window)));
       }
     }
   }

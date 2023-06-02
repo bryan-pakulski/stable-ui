@@ -9,7 +9,7 @@
 class GLHELPER {
 public:
   static bool LoadTextureFromFile(const char *filename, GLuint *out_texture, int *out_width, int *out_height,
-                                  bool tiled);
+                                  bool tiled, bool flipImage);
 
   static void SaveTextureToFile(const char *filename, GLuint *texture, int width, int height);
 };

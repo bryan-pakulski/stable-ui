@@ -3,8 +3,8 @@
 #include <fstream>
 #include <imgui.h>
 
-#include "QLogger.h"
-#include "Rendering/StableManager.h"
+#include "Helpers/QLogger.h"
+#include "Rendering/RenderManager.h"
 
 // Basic menu class
 // QDisplay uses this base class as a reference via smart pointer, this is to
@@ -18,13 +18,13 @@ struct listItem {
 class QDisplay_Base {
 
 protected:
-  std::shared_ptr<StableManager> m_stableManager;
+  std::shared_ptr<RenderManager> m_renderManager;
   GLFWwindow *m_window;
 
   void getWindowSize(std::pair<int, int> &size) { glfwGetFramebufferSize(m_window, &size.first, &size.second); }
 
 public:
   bool m_isOpen = false;
-  QDisplay_Base(std::shared_ptr<StableManager> rm, GLFWwindow *w) : m_stableManager(rm), m_window(w) {}
+  QDisplay_Base(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : m_renderManager(rm), m_window(w) {}
   virtual void render() {}
 };

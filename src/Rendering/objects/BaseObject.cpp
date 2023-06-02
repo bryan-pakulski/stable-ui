@@ -6,12 +6,7 @@ BaseObject::BaseObject(std::pair<int, int> pixelCoords) : pixelCoords{pixelCoord
                              pixelCoords.second);
 }
 
-BaseObject::~BaseObject() {
-  glDeleteVertexArrays(1, &VAO);
-  glDeleteBuffers(1, &VBO);
-  glDeleteBuffers(1, &EBO);
-  glDeleteProgram(shaderProgram);
-}
+BaseObject::~BaseObject() {}
 
 // Read shader file
 std::string BaseObject::readShader(const char *filePath) {
@@ -31,17 +26,18 @@ std::string BaseObject::readShader(const char *filePath) {
 }
 
 // Link shaders
-void BaseObject::linkShaders(unsigned int vertexShader, unsigned int fragmentShader, int &success) {
+void BaseObject::linkShaders(unsigned int vertexShader, unsigned int fragmentShader, int &success,
+                             std::shared_ptr<shader> sh) {
   char errorInfo[512] = "";
-  shaderProgram = glCreateProgram();
+  sh->shaderProgram = glCreateProgram();
 
-  glAttachShader(shaderProgram, vertexShader);
-  glAttachShader(shaderProgram, fragmentShader);
-  glLinkProgram(shaderProgram);
-  glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+  glAttachShader(sh->shaderProgram, vertexShader);
+  glAttachShader(sh->shaderProgram, fragmentShader);
+  glLinkProgram(sh->shaderProgram);
+  glGetProgramiv(sh->shaderProgram, GL_LINK_STATUS, &success);
 
   if (!success) {
-    glGetProgramInfoLog(shaderProgram, 512, nullptr, errorInfo);
+    glGetProgramInfoLog(sh->shaderProgram, 512, nullptr, errorInfo);
     QLogger::GetInstance().Log(LOGLEVEL::ERR, "BaseObject::linkShaders ERROR::PROGRAM::LINKING_FAILED\n", errorInfo);
   }
 
@@ -51,23 +47,23 @@ void BaseObject::linkShaders(unsigned int vertexShader, unsigned int fragmentSha
 }
 
 // Set shader buffers
-void BaseObject::setShaderBuffers(float *vertices, int sv, unsigned int *indices, int si) {
+void BaseObject::setShaderBuffers(float *vertices, int sv, unsigned int *indices, int si, std::shared_ptr<shader> sh) {
   // Set vertex buffer object and vertex array object and element buffer
   // objects
-  glGenVertexArrays(1, &VAO);
-  glGenBuffers(1, &VBO);
-  glGenBuffers(1, &EBO);
+  glGenVertexArrays(1, &sh->VAO);
+  glGenBuffers(1, &sh->VBO);
+  glGenBuffers(1, &sh->EBO);
 
   // bind vertex array object
-  glBindVertexArray(VAO);
+  glBindVertexArray(sh->VAO);
 
   // bind vertex buffer object
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, sh->VBO);
   glBufferData(GL_ARRAY_BUFFER, sv, vertices, GL_STATIC_DRAW);
 
   // bind element buffer objects
   // EBO is stored in the VAO
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sh->EBO);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, si, indices, GL_STATIC_DRAW);
 
   // position attribute
@@ -88,7 +84,13 @@ void BaseObject::setShaderBuffers(float *vertices, int sv, unsigned int *indices
 }
 
 // Set matrix coordinates for projection
-void BaseObject::setMat4(std::string uniformName, glm::mat4x4 mat) {
-  int location = glGetUniformLocation(shaderProgram, uniformName.c_str());
+void BaseObject::setMat4(std::string uniformName, glm::mat4x4 mat, std::string shaderName) {
+  int location = glGetUniformLocation(m_shaders.at(shaderName)->shaderProgram, uniformName.c_str());
   glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat));
 }
+
+// Create shader
+void BaseObject::createShader(std::shared_ptr<shader> sh, std::string name) { m_shaders.emplace(name, sh); }
+
+// Get shader
+std::shared_ptr<shader> BaseObject::getShader(std::string name) { return m_shaders.at(name); }

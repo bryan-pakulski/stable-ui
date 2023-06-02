@@ -3,8 +3,9 @@
 #include "asyncQueue.h"
 #include "Config/config.h"
 #include "Config/config.h"
-#include "QLogger.h"
+#include "Helpers/QLogger.h"
 
+#include <chrono>
 #include <thread>
 
 Indexer::Indexer(std::string folder_path) {
@@ -26,39 +27,53 @@ Indexer::Indexer(std::string folder_path) {
   // TODO: launch save to filesystem on seperate thread, cache saved periodically
 }
 
-Indexer::~Indexer() {}
+Indexer::~Indexer() {
+  // Kill crawler sleeping thread
+  m_kill_timer.kill();
+  // Kill queue watching thread
+  m_crawlerQueue->kill();
+  m_queueConditionVariable.notify_all();
+
+  m_crawlerThread.join();
+  m_queueThread.join();
+}
 
 // Run crawler traversal function every X time period to identify any filesystem changes
 void Indexer::crawlerThreadWorker() {
-  while (m_crawl) {
+  while (m_kill_timer.wait_for(std::chrono::milliseconds(c_crawlerSleepTime))) {
     QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Indexer::crawlerThreadWorker firing");
     m_crawler.traverse();
-    std::this_thread::sleep_for(c_crawlerSleepTime);
   }
 }
 
 // Run indexer queue monitor on another thread and update the inverted index whenever the crawler discovers changes to
 // the filesystem
 void Indexer::indexerCrawlerQueueThreadWorker() {
-  std::pair<std::string, QUEUE_STATUS> queueEntry;
+  std::unique_lock<std::mutex> lock(m_queueMutex);
+  while (!m_crawlerQueue->killed) {
+    m_queueConditionVariable.wait(lock, [this] { return !m_crawlerQueue->empty() || m_crawlerQueue->killed; });
 
-  while (m_crawl) {
+    if (m_crawlerQueue->killed) {
+      continue;
+    }
+
     // This is locked behind a mutex and so will only pop once there is data on the queue
-    m_crawlerQueue->wait_and_pop(queueEntry);
-
-    if (queueEntry.second == QUEUE_STATUS::ADDED) {
-      QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Indexer::indexerCrawlerQueueThreadWorker Getting XMP data for",
-                                 queueEntry.first);
-      std::pair<meta_node, metadata> data = XMP::GetInstance().readFile(queueEntry.first);
-      m_II.add(data.second, data.first);
-    } else if (queueEntry.second == QUEUE_STATUS::UPDATED) {
-      QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Indexer::indexerCrawlerQueueThreadWorker Updating XMP data for",
-                                 queueEntry.first);
-      // TODO: implement updating existing index entries
-    } else if (queueEntry.second == QUEUE_STATUS::DELETED) {
-      QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Indexer::indexerCrawlerQueueThreadWorker Removing XMP data for",
-                                 queueEntry.first);
-      // TODO: implement deleting index entries
+    std::pair<std::string, QUEUE_STATUS> queueEntry;
+    if (m_crawlerQueue->try_pop(queueEntry)) {
+      if (queueEntry.second == QUEUE_STATUS::ADDED) {
+        QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Indexer::indexerCrawlerQueueThreadWorker Getting XMP data for",
+                                   queueEntry.first);
+        std::pair<meta_node, metadata> data = XMP::GetInstance().readFile(queueEntry.first);
+        m_II.add(data.second, data.first);
+      } else if (queueEntry.second == QUEUE_STATUS::UPDATED) {
+        QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Indexer::indexerCrawlerQueueThreadWorker Updating XMP data for",
+                                   queueEntry.first);
+        // TODO: implement updating existing index entries
+      } else if (queueEntry.second == QUEUE_STATUS::DELETED) {
+        QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Indexer::indexerCrawlerQueueThreadWorker Removing XMP data for",
+                                   queueEntry.first);
+        // TODO: implement deleting index entries
+      }
     }
   }
 }
