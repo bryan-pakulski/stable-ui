@@ -1,9 +1,4 @@
-import sys
-import os
-import shlex
-import contextlib
 import torch
-from packaging import version
 
 cpu = torch.device("cpu")
 weight_load_location = "cpu"
@@ -32,19 +27,8 @@ def torch_gc():
             torch.cuda.empty_cache()
             torch.cuda.ipc_collect()
 
-
-def get_precision_scope(precision="full"):
-    if dtype == torch.float32 or precision == "full":
-        return contextlib.nullcontext
-    elif precision == "autocast":
-        return torch.autocast
-    else:
-        return contextlib.nullcontext
-
-
 def enable_tf32():
     if torch.cuda.is_available():
-
         # enabling benchmark option seems to enable a range of cards to do fp16 when they otherwise can't
         # see https://github.com/AUTOMATIC1111/stable-diffusion-webui/pull/4407
         if any([torch.cuda.get_device_capability(devid) == (7, 5) for devid in range(0, torch.cuda.device_count())]):

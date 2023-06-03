@@ -22,7 +22,7 @@ private:
   void clear() { fileDialog.ClearSelected(); }
 
   // Save model configuration to model config file
-  static void saveVAEConfiguration(std::string vae_path, std::shared_ptr<bool> m_saving) {
+  static void saveVAE(std::string vae_path, std::shared_ptr<bool> m_saving) {
     std::filesystem::path modelPath(vae_path);
 
     // Copy model file
@@ -40,7 +40,7 @@ public:
 
   QDisplay_ImportVAE(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     fileDialog.SetTitle("Import Models");
-    fileDialog.SetTypeFilters({".ckpt", ".safetensors", ".pth", ".vae"});
+    fileDialog.SetTypeFilters({".ckpt", ".safetensors", ".pth", ".bin", ".vae"});
 
     *m_saving = false;
   }
@@ -50,7 +50,7 @@ public:
     fileDialog.Display();
     if (fileDialog.HasSelected()) {
       *m_saving = true;
-      std::thread t(saveVAEConfiguration, fileDialog.GetSelected().string(), m_saving);
+      std::thread t(saveVAE, fileDialog.GetSelected().string(), m_saving);
       t.detach();
       clear();
     }

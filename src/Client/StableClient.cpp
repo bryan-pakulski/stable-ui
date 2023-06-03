@@ -54,10 +54,9 @@ void StableClient::releaseMemory() {
 }
 
 // Load a stable diffusion model into memory in preperation for running inference commands
-void StableClient::loadModelToMemory(std::string ckpt_path, std::string config_path, std::string vae_path,
-                                     std::string precision, int &state) {
+void StableClient::loadModelToMemory(ModelConfig model, int &state) {
 
-  commands::loadModelToMemory cmd = commands::loadModelToMemory{ckpt_path, config_path, vae_path, precision};
+  commands::loadModelToMemory cmd = commands::loadModelToMemory{model};
   std::string msg = sendMessage(cmd.getCommandString());
   if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
     state = Q_MODEL_STATUS::LOADED;
@@ -67,11 +66,11 @@ void StableClient::loadModelToMemory(std::string ckpt_path, std::string config_p
 }
 
 // Text to image
-void StableClient::textToImage(std::string hash, std::string outDir, std::string &canvasName, std::string prompt,
+void StableClient::textToImage(ModelConfig model, std::string outDir, std::string &canvasName, std::string prompt,
                                std::string negative_prompt, std::string &samplerName, int batch_size, int steps,
                                double cfg, int seed, int width, int height, int &renderState) {
 
-  commands::textToImage cmd = commands::textToImage(hash, prompt, width, height, negative_prompt, canvasName,
+  commands::textToImage cmd = commands::textToImage(model, prompt, width, height, negative_prompt, canvasName,
                                                     samplerName, batch_size, 1, steps, cfg, seed, outDir);
 
   std::string msg = sendMessage(cmd.getCommandString());
@@ -83,12 +82,12 @@ void StableClient::textToImage(std::string hash, std::string outDir, std::string
 }
 
 // Image to image
-void StableClient::imageToImage(std::string hash, std::string outDir, std::string &prompt, std::string &negative_prompt,
-                                std::string &canvas_name, std::string &img_path, std::string &sampler_name,
-                                int batch_size, int n_iter, int steps, double cfg_scale, double strength, int seed,
-                                int &renderState) {
+void StableClient::imageToImage(ModelConfig model, std::string outDir, std::string &prompt,
+                                std::string &negative_prompt, std::string &canvas_name, std::string &img_path,
+                                std::string &sampler_name, int batch_size, int n_iter, int steps, double cfg_scale,
+                                double strength, int seed, int &renderState) {
   commands::imageToImage cmd =
-      commands::imageToImage(hash, prompt, negative_prompt, canvas_name, img_path, sampler_name, batch_size, n_iter,
+      commands::imageToImage(model, prompt, negative_prompt, canvas_name, img_path, sampler_name, batch_size, n_iter,
                              steps, cfg_scale, strength, seed, outDir);
 
   std::string msg = sendMessage(cmd.getCommandString());

@@ -3,14 +3,9 @@
 # If a module is provided the model will be run using the custom module provided
 
 # List of available functions:
-# 'working_dir' - Module path, used as working directory when model is loaded
-# 'config' - Additional config passed to SD commands when model is run i.e. yaml config path
-# 'trigger_prompt' - Inserts trigger keywords for a given model into the prompt when run
-# 'name' - Name of model
-# 'vae'  - Path to a vae
+# 'name'           - Name of model
+# 'config'         - Additional config passed to SD commands when model is run i.e. yaml config path
+# 'trigger_prompt' - Inserts trigger keywords for a given model into the prompt when run, space seperated
+# 'vae'            - Path to a vae
+# 'xformers'       - Enable xformers
 models:
-  # Default configuration, do not delete or modify!!
-  default:
-    working_dir: "/modules/stable-ui"
-    name: "default"
-    trigger_prompt: ""

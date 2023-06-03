@@ -34,13 +34,12 @@ void SDCommandsInterface::releaseSDModelServer() {
   m_Thread.detach();
 }
 // Connect a new model to SD Server
-void SDCommandsInterface::attachModelToServer(std::string ckpt_path, std::string config_path, std::string vae_path,
-                                              std::string precision, int &state) {
+void SDCommandsInterface::attachModelToServer(ModelConfig model, int &state) {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "SDCommandsInterface::attachModelToServer loading model to memory...");
   state = Q_MODEL_STATUS::LOADING;
 
-  m_Thread = std::thread(std::bind(&StableClient::loadModelToMemory, &StableClient::GetInstance(), ckpt_path,
-                                   config_path, vae_path, precision, std::ref(state)));
+  m_Thread =
+      std::thread(std::bind(&StableClient::loadModelToMemory, &StableClient::GetInstance(), model, std::ref(state)));
   m_Thread.detach();
 }
 
@@ -51,11 +50,11 @@ void SDCommandsInterface::textToImage(std::string &canvasName, std::string promp
   std::string outDir = CONFIG::OUTPUT_DIRECTORY.get();
   renderState = Q_RENDER_STATE::RENDERING;
 
-  model mdl = StableManager::GetInstance().getModel();
+  ModelConfig model = StableManager::GetInstance().getLoadedModel();
 
-  m_Thread = std::thread(std::bind(&StableClient::textToImage, &StableClient::GetInstance(), mdl.hash, outDir,
-                                   canvasName, prompt, negative_prompt, samplerName, batch_size, steps, cfg, seed,
-                                   width, height, std::ref(renderState)));
+  m_Thread = std::thread(std::bind(&StableClient::textToImage, &StableClient::GetInstance(), model, outDir, canvasName,
+                                   prompt, negative_prompt, samplerName, batch_size, steps, cfg, seed, width, height,
+                                   std::ref(renderState)));
   m_Thread.detach();
 }
 
@@ -65,9 +64,9 @@ void SDCommandsInterface::imageToImage(std::string &canvasName, std::string &img
   std::string outDir = CONFIG::OUTPUT_DIRECTORY.get();
   renderState = Q_RENDER_STATE::RENDERING;
 
-  model mdl = StableManager::GetInstance().getModel();
+  ModelConfig model = StableManager::GetInstance().getLoadedModel();
 
-  m_Thread = std::thread(std::bind(&StableClient::imageToImage, &StableClient::GetInstance(), mdl.hash, outDir, prompt,
+  m_Thread = std::thread(std::bind(&StableClient::imageToImage, &StableClient::GetInstance(), model, outDir, prompt,
                                    negative_prompt, canvasName, imgPath, samplerName, batch_size, 1, steps, cfg,
                                    strength, seed, std::ref(renderState)));
   m_Thread.detach();

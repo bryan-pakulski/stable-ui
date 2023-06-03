@@ -1,7 +1,10 @@
 #pragma once
 
+#include <fstream>
 #include <yaml-cpp/yaml.h>
 #include <yaml-cpp/exceptions.h>
+
+#include "Config/structs.h"
 #include "types.h"
 
 namespace CONFIG {
@@ -47,12 +50,13 @@ static CFloat IMGUI_LOG_WINDOW_WIDTH(loadConfig("IMGUI_LOG_WINDOW_WIDTH", 820.0f
 static CInt DEFAULT_BUFFER_LENGTH(loadConfig("DEFAULT_BUFFER_LENGTH", 200));
 static CString DOCKER_IP_ADDRESS(loadConfig<std::string>("DOCKER_IP_ADDRESS", ""));
 static CString MODEL_CONFIGURATIONS_DIRECTORY(loadConfig<std::string>("MODEL_CONFIGURATIONS_DIRECTORY",
-                                                                      "data/models/configs"));
+                                                                      "data/models/configs/models"));
 static CString MODELS_CONFIGURATION_FILE(loadConfig<std::string>("MODELS_CONFIGURATION_FILE",
                                                                  "data/config/model_config.yaml"));
 static CString MODULES_CONFIGURATION_FILE(loadConfig<std::string>("MODULES_CONFIGURATION_FILE",
                                                                   "data/config/module_config.yaml"));
 static CString VAE_FOLDER_PATH(loadConfig<std::string>("VAE_FOLDER_PATH", "data/models/vae"));
+static CString VAE_CONFIG_FOLDER_PATH(loadConfig<std::string>("VAE_FOLDER_PATH", "data/models/configs/vae"));
 static CString INDEX_CACHE(loadConfig<std::string>("INDEX_CACHE", "data/cache"));
 static CString CRAWLER_PATH(loadConfig<std::string>("CRAWLER_PATH", "data/output"));
 

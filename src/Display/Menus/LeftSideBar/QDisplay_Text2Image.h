@@ -10,8 +10,7 @@
 #include "Rendering/RenderManager.h"
 #include "Config/config.h"
 #include "Display/QDisplay_Base.h"
-
-namespace fs = std::filesystem;
+#include "StableManager.h"
 
 class QDisplay_Text2Image : public QDisplay_Base {
 
@@ -42,29 +41,6 @@ public:
     m_samplerList.push_back(k);
   }
 
-  // TODO: replace this with a single helper function that can be called from txt2img / img2img
-  std::string getLatestFile() {
-    std::string outfile = "";
-    std::filesystem::file_time_type lastWrite;
-
-    try {
-      for (const auto &entry :
-           fs::directory_iterator(CONFIG::OUTPUT_DIRECTORY.get() + "/" + m_renderManager->getActiveCanvas()->m_name)) {
-        if (entry.is_regular_file()) {
-          if (lastWrite < entry.last_write_time()) {
-            lastWrite = entry.last_write_time();
-            outfile = entry.path().string();
-          }
-        }
-      }
-    } catch (const fs::filesystem_error &err) {
-      ErrorHandler::GetInstance().setConfigError(CONFIG::OUTPUT_DIRECTORY, "OUTPUT_DIRECTORY");
-      QLogger::GetInstance().Log(LOGLEVEL::ERR, err.what());
-    }
-
-    return outfile;
-  }
-
   void renderImage() {
     m_image.reset();
     m_image = std::unique_ptr<Image>(
@@ -91,7 +67,8 @@ public:
 
           // Retrieve texture file
           if (!m_image->textured) {
-            m_image->loadFromImage(getLatestFile());
+            m_image->loadFromImage(StableManager::GetInstance().getLatestFile(
+                CONFIG::OUTPUT_DIRECTORY.get() + "/" + m_renderManager->getActiveCanvas()->m_name));
             m_image->textured = true;
           }
 

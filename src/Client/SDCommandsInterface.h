@@ -32,8 +32,7 @@ public:
   // SD Server Specific Commands
   void launchSDModelServer();
   void releaseSDModelServer();
-  void attachModelToServer(std::string ckpt_path, std::string config_path, std::string vae_path, std::string precision,
-                           int &modelLoadState);
+  void attachModelToServer(ModelConfig model, int &state);
 
   // Commands that can be used by modules
   void textToImage(std::string &canvasName, std::string prompt, std::string negative_prompt, std::string &samplerName,

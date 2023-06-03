@@ -34,18 +34,21 @@ public:
   */
 
   // Attach model to server
-  void attachModel(YAML::Node model, std::string &hash, std::string &precision);
+  void attachModel(ModelConfig model);
   // Return model state
   void setModelState(int state);
   int getModelState();
-  model getModel();
+  ModelConfig getLoadedModel();
+
+  // Retrieve last modified file from path
+  std::string getLatestFile(const std::string &path);
 
 private:
   std::shared_ptr<RenderManager> m_renderManager;
   Indexer m_indexer;
 
   int m_modelLoaded = Q_MODEL_STATUS::NONE_LOADED;
-  model m_model;
+  ModelConfig m_model;
 
   explicit StableManager();
   ~StableManager();

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Config/model_config.h"
 #include "StableManager.h"
 #include "Display/ErrorHandler.h"
 #include "Display/QDisplay_Base.h"
@@ -12,17 +13,14 @@ class QDisplay_LoadModel : public QDisplay_Base {
 
 private:
   std::vector<listItem> m_ModelList;
-  std::vector<listItem> m_precisionList;
 
   std::string m_selected_model = "";
   std::string m_selected_hash = "";
-  std::string m_selected_precision = "full";
 
   void clear() {
     m_ModelList.clear();
     m_selected_model = "";
     m_selected_hash = "";
-    m_selected_precision = "";
   }
 
   void reloadFiles() {
@@ -46,25 +44,13 @@ private:
   // Attempt to load model
   void loadModel() {
     // Retrieve root node and dump back to file
-    YAML::Node node, _baseNode = YAML::LoadFile(CONFIG::MODELS_CONFIGURATION_FILE.get());
-    YAML::Node model = _baseNode["models"][m_selected_hash];
-
-    StableManager::GetInstance().attachModel(model, m_selected_hash, m_selected_precision);
+    ModelConfig model = MODEL_CONFIG::loadModelConfig(m_selected_hash);
+    StableManager::GetInstance().attachModel(model);
     m_isOpen = false;
   }
 
 public:
-  QDisplay_LoadModel(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
-    listItem i{.m_name = "full"};
-    listItem j{.m_name = "autocast"};
-    listItem k{.m_name = "mid"};
-    listItem l{.m_name = "low"};
-
-    m_precisionList.push_back(i);
-    m_precisionList.push_back(j);
-    m_precisionList.push_back(k);
-    m_precisionList.push_back(l);
-  }
+  QDisplay_LoadModel(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {}
 
   void openWindow() {
     clear();
@@ -88,19 +74,7 @@ public:
         ImGui::EndCombo();
       }
 
-      if (ImGui::BeginCombo("Precision", m_selected_precision.c_str(), ImGuiComboFlags_NoArrowButton)) {
-        for (auto &item : m_precisionList) {
-          if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
-            m_selected_precision = item.m_name;
-          }
-          if (item.m_isSelected) {
-            ImGui::SetItemDefaultFocus();
-          }
-        }
-        ImGui::EndCombo();
-      }
-
-      if (m_selected_hash != "default" && m_selected_hash != "") {
+      if (m_selected_hash != "") {
         if (ImGui::Button("Load Model")) {
           loadModel();
         }

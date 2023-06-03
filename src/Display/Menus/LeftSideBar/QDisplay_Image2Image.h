@@ -12,8 +12,7 @@
 #include "Config/config.h"
 #include "Display/QDisplay_Base.h"
 #include "Rendering/objects/image/Image.h"
-
-namespace fs = std::filesystem;
+#include "StableManager.h"
 
 class QDisplay_Image2Image : public QDisplay_Base {
 
@@ -43,28 +42,6 @@ public:
     listItem j{.m_name = "UNIPC"};
     m_samplerList.push_back(i);
     m_samplerList.push_back(j);
-  }
-
-  std::string getLatestFile() {
-    std::string outfile = "";
-    std::filesystem::file_time_type lastWrite;
-
-    try {
-      for (const auto &entry :
-           fs::directory_iterator(CONFIG::OUTPUT_DIRECTORY.get() + "/" + m_renderManager->getActiveCanvas()->m_name)) {
-        if (entry.is_regular_file()) {
-          if (lastWrite < entry.last_write_time()) {
-            lastWrite = entry.last_write_time();
-            outfile = entry.path().string();
-          }
-        }
-      }
-    } catch (const fs::filesystem_error &err) {
-      ErrorHandler::GetInstance().setConfigError(CONFIG::OUTPUT_DIRECTORY, "OUTPUT_DIRECTORY");
-      QLogger::GetInstance().Log(LOGLEVEL::ERR, err.what());
-    }
-
-    return outfile;
   }
 
   void baseImagePreview() {
@@ -104,7 +81,8 @@ public:
 
           // Retrieve latest redered file
           if (!m_image->textured) {
-            m_image->loadFromImage(getLatestFile());
+            m_image->loadFromImage(StableManager::GetInstance().getLatestFile(
+                CONFIG::OUTPUT_DIRECTORY.get() + "/" + m_renderManager->getActiveCanvas()->m_name));
             m_image->textured = Q_RENDER_STATE::RENDERED;
           }
 

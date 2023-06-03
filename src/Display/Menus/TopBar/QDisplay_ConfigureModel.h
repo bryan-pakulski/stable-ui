@@ -3,6 +3,8 @@
 #include <imgui.h>
 #include <filesystem>
 
+#include "Config/model_config.h"
+#include "Config/structs.h"
 #include "Display/ErrorHandler.h"
 #include "Display/QDisplay_Base.h"
 #include <imgui_stdlib.h>
@@ -17,25 +19,18 @@ namespace fs = std::filesystem;
 class QDisplay_ConfigureModel : public QDisplay_Base {
 
 private:
-  std::string m_selected_model = "";
-  std::string m_selected_hash = "";
-  std::string m_selected_model_config = "";
-
+  ModelConfig m_modelConfig;
   std::vector<listItem> m_ModelList;
   std::vector<listItem> m_ModelConfigList;
   std::vector<listItem> m_VAEList;
-  std::string m_triggerWords = "";
-  std::string m_selected_vae = "";
+  std::vector<listItem> m_VAEConfigList;
 
   void clear() {
+    m_modelConfig = ModelConfig{};
     m_ModelList.clear();
     m_ModelConfigList.clear();
     m_VAEList.clear();
-
-    m_selected_model = "";
-    m_selected_hash = "";
-    m_triggerWords = "";
-    m_selected_vae = "";
+    m_VAEConfigList.clear();
   }
 
   void reloadFiles() {
@@ -77,26 +72,17 @@ private:
       ErrorHandler::GetInstance().setConfigError(CONFIG::VAE_FOLDER_PATH, "VAE_FOLDER_PATH");
       QLogger::GetInstance().Log(LOGLEVEL::ERR, err.what());
     }
-  }
 
-  // Save model configuration to model config file
-  static void saveModelConfiguration(std::string model_name, std::string model_config_file, std::string hash,
-                                     std::string trigger_words, std::string vae) {
-    // Build yaml node to attach to model configuration file
-    YAML::Node model_node;
-    model_node["config"] = "/models/configs/" + model_config_file;
-    model_node["name"] = model_name;
-    model_node["path"] = "/models/" + model_name;
-    model_node["trigger_prompt"] = trigger_words;
-    if (vae != "") {
-      model_node["vae"] = "/models/vae/" + vae;
+    // Load VAE Config List
+    try {
+      for (const auto &entry : fs::directory_iterator(CONFIG::VAE_CONFIG_FOLDER_PATH.get())) {
+        listItem i{.m_name = entry.path().filename().string()};
+        m_VAEConfigList.push_back(i);
+      }
+    } catch (const fs::filesystem_error &err) {
+      ErrorHandler::GetInstance().setConfigError(CONFIG::VAE_FOLDER_PATH, "VAE_CONFIG_FOLDER_PATH");
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, err.what());
     }
-
-    // Retrieve root node and dump back to file
-    YAML::Node node, _baseNode = YAML::LoadFile(CONFIG::MODELS_CONFIGURATION_FILE.get());
-    _baseNode["models"][hash] = model_node;
-    std::ofstream fout(CONFIG::MODELS_CONFIGURATION_FILE.get());
-    fout << _baseNode;
   }
 
   void configureModelPopup() {
@@ -104,11 +90,10 @@ private:
       ImGui::Begin("Configure Models");
 
       ImGui::Text("Select a model to configure");
-      if (ImGui::BeginCombo("model", m_selected_model.c_str(), ImGuiComboFlags_NoArrowButton)) {
+      if (ImGui::BeginCombo("model", m_modelConfig.name.c_str(), ImGuiComboFlags_NoArrowButton)) {
         for (auto &item : m_ModelList) {
           if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
-            m_selected_model = item.m_name;
-            m_selected_hash = item.m_key;
+            m_modelConfig = MODEL_CONFIG::loadModelConfig(item.m_key);
           }
           if (item.m_isSelected) {
             ImGui::SetItemDefaultFocus();
@@ -117,12 +102,14 @@ private:
         ImGui::EndCombo();
       }
 
-      if (m_selected_model != "") {
+      if (m_modelConfig.name != "") {
+
         // Model config file
-        if (ImGui::BeginCombo("model config", m_selected_model_config.c_str(), ImGuiComboFlags_NoArrowButton)) {
+        if (ImGui::BeginCombo("Model Configuration File", m_modelConfig.config.c_str(),
+                              ImGuiComboFlags_NoArrowButton)) {
           for (auto &item : m_ModelConfigList) {
             if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
-              m_selected_model_config = item.m_name;
+              m_modelConfig.config = "/models/configs/" + item.m_name;
             }
             if (item.m_isSelected) {
               ImGui::SetItemDefaultFocus();
@@ -131,10 +118,11 @@ private:
           ImGui::EndCombo();
         }
 
-        if (ImGui::BeginCombo("Custom VAE", m_selected_vae.c_str(), ImGuiComboFlags_NoArrowButton)) {
+        // VAE path
+        if (ImGui::BeginCombo("Custom VAE", m_modelConfig.vae.c_str(), ImGuiComboFlags_NoArrowButton)) {
           for (auto &item : m_VAEList) {
             if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
-              m_selected_vae = item.m_name;
+              m_modelConfig.vae = "/models/vae/" + item.m_name;
             }
             if (item.m_isSelected) {
               ImGui::SetItemDefaultFocus();
@@ -143,14 +131,43 @@ private:
           ImGui::EndCombo();
         }
 
-        ImGui::InputText("Trigger Words: ", &m_triggerWords);
+        // VAE Config
+        if (m_modelConfig.vae != "") {
+          if (ImGui::BeginCombo("VAE Config", m_modelConfig.vae_config.c_str(), ImGuiComboFlags_NoArrowButton)) {
+            for (auto &item : m_VAEConfigList) {
+              if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
+                m_modelConfig.vae_config = "/models/configs/vae/" + item.m_name;
+              }
+              if (item.m_isSelected) {
+                ImGui::SetItemDefaultFocus();
+              }
+            }
+            ImGui::EndCombo();
+          }
+        }
 
-        // Save available once we fill in information
-        if (m_selected_model_config != "") {
+        ImGui::Separator();
+
+        // Trigger words
+        ImGui::InputText("Trigger Words: ", &m_modelConfig.trigger_prompt);
+
+        ImGui::Separator();
+        ImGui::Text("Optimisations");
+        ImGui::Separator();
+
+        // TODO: mouse over popups with context information
+        ImGui::Checkbox("Enable xFormers", &m_modelConfig.enable_xformers);
+        ImGui::Checkbox("Enable TF32", &m_modelConfig.enable_tf32);
+        ImGui::Checkbox("Torch16 weights", &m_modelConfig.enable_t16);
+        ImGui::Checkbox("Enable VAE tiling", &m_modelConfig.enable_vaeTiling);
+        ImGui::Checkbox("Enable VAE slicing", &m_modelConfig.enable_vaeSlicing);
+        ImGui::Checkbox("Enable sequential CPU offload", &m_modelConfig.enable_seqCPUOffload);
+
+        // Save available once we fill in mandatory information
+        if (m_modelConfig.config != "") {
           if (ImGui::Button("Save")) {
             m_isOpen = false;
-            saveModelConfiguration(m_selected_model, m_selected_model_config, m_selected_hash,
-                                   std::string(m_triggerWords), m_selected_vae);
+            MODEL_CONFIG::saveModelConfig(m_modelConfig);
             clear();
           }
           ImGui::SameLine();

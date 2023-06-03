@@ -71,8 +71,13 @@ class MQServer():
 
             # Set type
             if arg_name in command_args:
-                cmd.arguments[arg_name] = arg_details["type"](
-                    cmd.arguments[arg_name])
+                # As we encode our true/false values as a 0/1 string we want to cast to int
+                # a cast to bool will always return true for any string value
+                if arg_details["type"] == bool:
+                    cmd.arguments[arg_name] = bool(int(cmd.arguments[arg_name]))
+                else:
+                    cmd.arguments[arg_name] = arg_details["type"](
+                        cmd.arguments[arg_name])
 
         # Return True if the command has all the required arguments
         return True
@@ -191,11 +196,42 @@ class SDModelServer(MQServer):
                         "required": False,
                         "type": str
                     },
-                    "precision": {
-                        "help": "Model precision, [full, med, low, autocast]",
+                    "vae_config": {
+                        "help": "Configuration for vae, mandatory if vae_path is set",
                         "required": False,
                         "type": str
-                    }
+                    },
+                    "enable_xformers": {
+                        "help": "Memory efficient transformers",
+                        "required": False,
+                        "type": bool
+                    },
+                    "enable_tf32": {
+                        "help": "Lower precision floating point for certain nvidia gpus",
+                        "required": False,
+                        "type": bool
+                    },
+                    "enable_t16": {
+                        "help": "16 bit precision",
+                        "required": False,
+                        "type": bool
+                    },
+                    "enable_vaeTiling": {
+                        "help": "Allow for lower vram consumption at high image resolutions",
+                        "required": False,
+                        "type": bool
+                    },
+                    "enable_vaeSlicing": {
+                        "help": "Allow for lower vram consumption at high batch sizes",
+                        "required": False,
+                        "type": bool
+                    },
+                    "enable_seqCPUOffload": {
+                        "help": "offload memory to cpu, low vram requirements but slower inference time",
+                        "required": False,
+                        "type": bool
+                    },
+                    
                 },
                 "function": self.__load_model
             },
@@ -392,12 +428,12 @@ class SDModelServer(MQServer):
 
     def __text2image(self, cmd):
         result = txt2img.generate(
-            **cmd.arguments, model=self.model.model, precision=self.model.get_precision())
+            **cmd.arguments, model=self.model.model)
         return f"{result}"
 
     def __image2image(self, cmd):
         result = img2img.generate(
-            **cmd.arguments, model=self.model.model, precision=self.model.get_precision())
+            **cmd.arguments, model=self.model.model)
         return f"{result}"
 
     # Main loop

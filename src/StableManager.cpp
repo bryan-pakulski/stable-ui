@@ -27,28 +27,17 @@ std::shared_ptr<RenderManager> StableManager::getRenderManager() { return m_rend
 void StableManager::update() { m_renderManager->update(); }
 
 // Send Command to attach a model on the docker server
-void StableManager::attachModel(YAML::Node model, std::string &hash, std::string &precision) {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO,
-                             "StableManager::attachModel Attaching model: ", model["name"].as<std::string>(),
+void StableManager::attachModel(ModelConfig model) {
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableManager::attachModel Attaching model: ", model.name,
                              " to Stable Diffusion Docker Server");
-  // Optional parameters
-  std::string vae = "";
-  if (model["vae"]) {
-    vae = model["vae"].as<std::string>();
-  }
+  m_model = model;
 
-  // Build model struct
-  m_model.name = model["name"].as<std::string>();
-  m_model.hash = hash;
-  m_model.path = model["path"].as<std::string>();
-
-  SDCommandsInterface::GetInstance().attachModelToServer(
-      model["path"].as<std::string>(), model["config"].as<std::string>(), vae, precision, m_modelLoaded);
+  SDCommandsInterface::GetInstance().attachModelToServer(model, m_modelLoaded);
 }
 
 int StableManager::getModelState() { return m_modelLoaded; }
 void StableManager::setModelState(int state) { m_modelLoaded = state; }
-model StableManager::getModel() { return m_model; }
+ModelConfig StableManager::getLoadedModel() { return m_model; }
 
 // Search our inverted index for a term
 std::set<std::string> StableManager::searchIndex(const std::string &searchTerm) {
@@ -60,4 +49,28 @@ std::set<std::string> StableManager::searchIndex(const std::string &searchTerm) 
   }
 
   return results;
+}
+
+std::string StableManager::getLatestFile(const std::string &path) {
+  std::string outfile = "";
+  std::filesystem::file_time_type lastWrite;
+
+  try {
+    for (const auto &entry : fs::directory_iterator(path)) {
+      if (entry.is_regular_file()) {
+        if (outfile == "") {
+          lastWrite = entry.last_write_time();
+          outfile = entry.path().string();
+        } else if (lastWrite < entry.last_write_time()) {
+          lastWrite = entry.last_write_time();
+          outfile = entry.path().string();
+        }
+      }
+    }
+  } catch (const fs::filesystem_error &err) {
+    ErrorHandler::GetInstance().setError("Failed to parse path for new files");
+    QLogger::GetInstance().Log(LOGLEVEL::ERR, err.what());
+  }
+
+  return outfile;
 }

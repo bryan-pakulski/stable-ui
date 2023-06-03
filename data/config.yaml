@@ -22,8 +22,8 @@ DOCKER_IP_ADDRESS: "127.0.0.1"
 ######################################
 MODELS_DIRECTORY: "data/models"
 PROMPT_LENGTH_LIMIT: 2048
-IMAGE_SIZE_X_LIMIT: 1024
-IMAGE_SIZE_Y_LIMIT: 1024
+IMAGE_SIZE_X_LIMIT: 4096
+IMAGE_SIZE_Y_LIMIT: 4096
 STAR_FIELD: 0
 
 ##############################
