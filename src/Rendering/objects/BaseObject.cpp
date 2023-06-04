@@ -28,7 +28,6 @@ std::string BaseObject::readShader(const char *filePath) {
 // Link shaders
 void BaseObject::linkShaders(unsigned int vertexShader, unsigned int fragmentShader, int &success,
                              std::shared_ptr<shader> sh) {
-  char errorInfo[512] = "";
   sh->shaderProgram = glCreateProgram();
 
   glAttachShader(sh->shaderProgram, vertexShader);
@@ -37,8 +36,11 @@ void BaseObject::linkShaders(unsigned int vertexShader, unsigned int fragmentSha
   glGetProgramiv(sh->shaderProgram, GL_LINK_STATUS, &success);
 
   if (!success) {
-    glGetProgramInfoLog(sh->shaderProgram, 512, nullptr, errorInfo);
-    QLogger::GetInstance().Log(LOGLEVEL::ERR, "BaseObject::linkShaders ERROR::PROGRAM::LINKING_FAILED\n", errorInfo);
+    GLint length = 0;
+    glGetShaderiv(sh->shaderProgram, GL_INFO_LOG_LENGTH, &length);
+    std::string errorLog(length, ' '); // Resize and fill with space character
+    glGetProgramInfoLog(sh->shaderProgram, length, &length, &errorLog[0]);
+    QLogger::GetInstance().Log(LOGLEVEL::ERR, "BaseObject::linkShaders ERROR::PROGRAM::LINKING_FAILED\n", errorLog);
   }
 
   // delete shaders after linking

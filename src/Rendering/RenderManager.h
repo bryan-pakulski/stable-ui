@@ -10,7 +10,7 @@
 #include "Rendering/objects/BaseObject.h"
 #include "Rendering/objects/image/Image.h"
 #include "Rendering/objects/Selection.h"
-#include "Rendering/Camera.h"
+#include "Rendering/OrthographicCamera.h"
 #include "Rendering/Canvas.h"
 
 #include <glad/glad.h>
@@ -29,7 +29,7 @@ public:
   std::vector<std::shared_ptr<Canvas>> m_canvas;
   // Camera details
   bool m_cameraDrag = false;
-  std::shared_ptr<Camera> m_camera;
+  std::shared_ptr<OrthographicCamera> m_camera;
   // Selection
   std::shared_ptr<Selection> m_selection;
   // Right click context window
@@ -84,8 +84,10 @@ public:
 
 private:
   GLFWwindow &m_window;
-  static GLuint fbo;
-  static GLuint m_colorBufferTexture;
+
+  // Mouse positions for dragging across screen
+  glm::vec2 m_prev_mouse = {0.0f, 0.0f};
+  glm::vec2 m_cur_mouse = {0.0f, 0.0f};
 
   std::string m_baseImage;
   bool m_captureBuffer = false;

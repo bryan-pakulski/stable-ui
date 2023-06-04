@@ -6,7 +6,7 @@
 
 #include "Helpers/QLogger.h"
 #include "Helpers/GLHelper.h"
-#include "Camera.h"
+#include "Rendering/OrthographicCamera.h"
 
 #include "Rendering/objects/BaseObject.h"
 #include "Rendering/objects/chunk/Chunk.h"
@@ -17,7 +17,7 @@ private:
   std::pair<int, int> m_coords{}; // Pixel Coordinates (top left)
   std::pair<int, int> m_screen{}; // Screen size
 
-  std::shared_ptr<Camera> m_camera;
+  std::shared_ptr<OrthographicCamera> m_camera;
 
   // Reference to texture for main window
   GLuint m_texture_id;
@@ -28,7 +28,7 @@ public:
   std::vector<std::unique_ptr<Chunk>> m_editorGrid;
   std::string m_name;
 
-  Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *w, std::shared_ptr<Camera> c);
+  Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *w, std::shared_ptr<OrthographicCamera> c);
   virtual ~Canvas();
 
   void updateLogic() override;

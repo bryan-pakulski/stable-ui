@@ -46,3 +46,12 @@ public:
   float *ref() { return &m_float; }
   float get() { return m_float; }
 };
+
+class CBool : public BaseType {
+  bool m_bool;
+
+public:
+  CBool(bool value) { m_bool = value; }
+  bool *ref() { return &m_bool; }
+  bool get() { return m_bool; }
+};

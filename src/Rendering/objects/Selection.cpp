@@ -1,12 +1,14 @@
 #include "Selection.h"
+#include "Rendering/OrthographicCamera.h"
 #include <vector>
 
 Selection::~Selection() {}
 
-Selection::Selection(std::pair<int, int> coords, GLFWwindow *w, std::shared_ptr<Camera> c) : BaseObject(coords) {
+Selection::Selection(std::pair<int, int> coords, GLFWwindow *w, std::shared_ptr<OrthographicCamera> c)
+    : BaseObject(coords) {
   int success;
   m_window = w;
-  m_camera = std::shared_ptr<Camera>(c);
+  m_camera = std::shared_ptr<OrthographicCamera>(c);
   m_position = glm::vec3(0.0f);
 
   // Vertex data
@@ -65,15 +67,15 @@ void Selection::updateVisual() {
   glUseProgram(getShader("selection")->shaderProgram);
 
   // View code
-  setMat4("view", m_camera->getViewMatrix(), "selection");
+  setMat4("view", m_camera->GetViewMatrix(), "selection");
 
   // Projection code
-  setMat4("projection", m_camera->getProjectionMatrix(), "selection");
+  setMat4("projection", m_camera->GetProjectionMatrix(), "selection");
 
   // Model code
-  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(m_position.x, m_position.y, 0.0f)) * // translation
-                    glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *              // rotation
-                    glm::scale(glm::mat4(1.0f), glm::vec3(m_size.first, m_size.second, 1.0f));     // scale
+  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(m_position.x, m_position.y, 0.0f)) *  // translation
+                    glm::rotate(glm::mat4(1.0f), glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * // rotation
+                    glm::scale(glm::mat4(1.0f), glm::vec3(m_size.first, m_size.second, 1.0f));      // scale
   setMat4("model", model, "selection");
 
   // Render the square

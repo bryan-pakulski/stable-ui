@@ -137,7 +137,7 @@ add_executable( stable-ui
                 src/Client/SDCommandsInterface.cpp
                 src/Helpers/GLHelper.cpp
                 src/Indexer/Indexer.cpp
-                src/Rendering/Camera.cpp
+                src/Rendering/OrthographicCamera.cpp
                 src/Rendering/Canvas.cpp 
                 src/Rendering/RenderManager.cpp
                 src/Rendering/objects/BaseObject.cpp 

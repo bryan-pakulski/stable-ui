@@ -38,7 +38,7 @@ static CString PROGRAM_NAME("stable-ui");
 static CFloat HIGH_DPI_SCALE_FACTOR(loadConfig<float>("HIGH_DPI_SCALE_FACTOR", 1.0f));
 static CInt WINDOW_WIDTH(loadConfig("WINDOW_WIDTH", 1280));
 static CInt WINDOW_HEIGHT(loadConfig("WINDOW_HEIGHT", 720));
-static CInt STAR_FIELD(loadConfig("STAR_FIELD", 0));
+static CBool STAR_FIELD(loadConfig("STAR_FIELD", 0));
 
 static CFloat IMGUI_TOOLS_WINDOW_WIDTH(loadConfig("IMGUI_TOOLS_WINDOW_WIDTH", 380.0f));
 static CFloat IMGUI_TOP_WINDOW_HEIGHT(loadConfig("IMGUI_TOP_WINDOW_HEIGHT", 18.0f));

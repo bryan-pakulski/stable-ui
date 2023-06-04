@@ -63,7 +63,6 @@ static float getLC(const int &pixelCoord, const int &max) { return (((float)pixe
 
 // Initialise vertex shader for GLFW
 static unsigned int initVertexShader(const char *vertexShaderSource, int &success) {
-  char errorInfo[512] = "";
   unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
   glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
@@ -71,9 +70,12 @@ static unsigned int initVertexShader(const char *vertexShaderSource, int &succes
   glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 
   if (!success) {
-    glGetShaderInfoLog(vertexShader, 512, nullptr, errorInfo);
+    GLint length = 0;
+    glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &length);
+    std::string errorLog(length, ' ');
+    glGetShaderInfoLog(vertexShader, length, &length, &errorLog[0]);
     QLogger::GetInstance().Log(LOGLEVEL::ERR,
-                               "BaseObject::initVertexShader ERROR::VERTEX::SHADER::COMPILATION_FAILED\n", errorInfo);
+                               "BaseObject::initVertexShader ERROR::VERTEX::SHADER::COMPILATION_FAILED\n", errorLog);
   }
 
   return vertexShader;
@@ -81,7 +83,6 @@ static unsigned int initVertexShader(const char *vertexShaderSource, int &succes
 
 // Initialise fragment shader for GLFW
 static unsigned int initFragmentShader(const char *fragmentShaderSource, int &success) {
-  char errorInfo[512] = "";
   unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
   glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
@@ -89,9 +90,12 @@ static unsigned int initFragmentShader(const char *fragmentShaderSource, int &su
   glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
 
   if (!success) {
-    glGetShaderInfoLog(fragmentShader, 512, nullptr, errorInfo);
+    GLint length = 0;
+    glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &length);
+    std::string errorLog(length, ' ');
+    glGetShaderInfoLog(fragmentShader, length, &length, &errorLog[0]);
     QLogger::GetInstance().Log(
-        LOGLEVEL::ERR, "BaseObject::initFragmentShader ERROR::FRAGMENT::SHADER::COMPILATION_FAILED\n", errorInfo);
+        LOGLEVEL::ERR, "BaseObject::initFragmentShader ERROR::FRAGMENT::SHADER::COMPILATION_FAILED\n", errorLog);
   }
 
   return fragmentShader;

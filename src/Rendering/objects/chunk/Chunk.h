@@ -6,7 +6,7 @@
 #include <memory>
 #include <utility>
 
-#include "Rendering/Camera.h"
+#include "Rendering/OrthographicCamera.h"
 #include "Rendering/objects/BaseObject.h"
 #include "Rendering/objects/image/Image.h"
 
@@ -14,14 +14,14 @@
 // Camera and world coordinates
 class Chunk : public BaseObject {
   std::pair<int, int> m_screen{}; // Screen size
-  std::shared_ptr<Camera> m_camera;
+  std::shared_ptr<OrthographicCamera> m_camera;
 
 public:
   std::shared_ptr<Image> m_image;
   std::pair<int, int> m_coordinates;
   bool m_renderFlag = true;
 
-  Chunk(std::shared_ptr<Image> im, std::shared_ptr<Camera> c, int x, int y, int id);
+  Chunk(std::shared_ptr<Image> im, std::shared_ptr<OrthographicCamera> c, int x, int y, int id);
   ~Chunk();
 
   // Check if grid is currently visible based on world coordinates and window size

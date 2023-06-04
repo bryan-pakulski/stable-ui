@@ -1,11 +1,10 @@
 #include "RenderManager.h"
+#include "Config/config.h"
 #include "GLFW/glfw3.h"
+#include "Rendering/OrthographicCamera.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "Indexer/MetaData.h"
-
-GLuint RenderManager::fbo = 0;
-GLuint RenderManager::m_colorBufferTexture = 0;
 
 // Initialise render manager
 RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
@@ -15,36 +14,10 @@ RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
   glfwSetWindowUserPointer(&m_window, (void *)this);
 
   // Create objects
-  m_camera = std::shared_ptr<Camera>(new Camera(&m_window));
+  m_camera = std::shared_ptr<OrthographicCamera>(new OrthographicCamera(&m_window));
   m_selection = std::shared_ptr<Selection>(new Selection(std::pair<int, int>(0, 0), &m_window, m_camera));
 
   createCanvas(0, 0, "default");
-
-  RenderManager::recalculateFramebuffer(m_camera->m_screen.first, m_camera->m_screen.second);
-}
-
-void RenderManager::recalculateFramebuffer(int width, int height) {
-
-  glGenFramebuffers(1, &fbo);
-  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-  // Attach color buffer
-  glGenTextures(1, &m_colorBufferTexture);
-  glBindTexture(GL_TEXTURE_2D, m_colorBufferTexture);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-  glGenerateMipmap(GL_TEXTURE_2D);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glBindTexture(GL_TEXTURE_2D, 0);
-
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colorBufferTexture, 0);
-
-  GLenum framebuffer_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-  if (framebuffer_status != GL_FRAMEBUFFER_COMPLETE) {
-    // Handle error with framebuffer here
-  }
-
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 // Destructor, destroy remaining instances
@@ -72,33 +45,20 @@ void RenderManager::logicLoop() {
 void RenderManager::renderLoop() {
   m_camera->updateVisual();
 
-  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-  glColorMask(true, true, true, true);
-  glClearColor(0, 0, 0, 0);
-  glClear(GL_COLOR_BUFFER_BIT);
-
-  getActiveCanvas()->renderImages();
-  getActiveCanvas()->setTexture(&m_colorBufferTexture);
-
-  // Capture render buffer to texture if flag is set
+  // TODO: capture raw pixel data based on selection coordinates and chunks
   if (m_captureBuffer == true) {
     m_selection->captureBuffer();
     m_captureBuffer = false;
   }
 
-  // Render canvas background / fbo of our images / selection
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  glClear(GL_COLOR_BUFFER_BIT);
-  glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
   getActiveCanvas()->updateVisual();
+  getActiveCanvas()->renderImages();
 
   m_selection->updateVisual();
 }
 
 // Set capture render buffer flag, check for out of bounds condition and raise error if required
 void RenderManager::captureBuffer() {
-  // TODO: Check camera x / y offset in conjunction with selection offset and display size
   m_captureBuffer = true;
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::captureBuffer Setting capture buffer flag to ",
                              m_captureBuffer);
@@ -112,15 +72,13 @@ void RenderManager::genFromSelection() {
   // TODO: call img2img with selection buffer
 }
 
-// Make a canvas active, pass texture to main window
+// Make a canvas active
 void RenderManager::selectCanvas(int id) {
-  // Disable old canvas
   if (getActiveCanvas()) {
     m_canvas[m_activeId]->m_active = false;
   }
 
   m_activeId = id;
-  // Set new canvas to active
   m_canvas[m_activeId]->m_active = true;
 }
 
@@ -172,10 +130,9 @@ void RenderManager::mouse_cursor_callback(GLFWwindow *window, double xposIn, dou
 
   // Move camera view
   if (rm->m_cameraDrag) {
-    rm->m_camera->moveCameraPosition(static_cast<float>(xposIn) - rm->m_camera->prev_mouse.x,
-                                     static_cast<float>(yposIn) - rm->m_camera->prev_mouse.y);
-    rm->m_camera->prev_mouse.x = xposIn;
-    rm->m_camera->prev_mouse.y = yposIn;
+    rm->m_camera->SetPosition(glm::vec3(xposIn - rm->m_prev_mouse.x, yposIn - rm->m_prev_mouse.y, 1.0f));
+    rm->m_prev_mouse.x = xposIn;
+    rm->m_prev_mouse.y = yposIn;
   }
 
   // Catch selection coordinates
@@ -183,8 +140,8 @@ void RenderManager::mouse_cursor_callback(GLFWwindow *window, double xposIn, dou
     rm->m_selection->updateCapture(xposIn, yposIn);
   }
 
-  rm->m_camera->cur_mouse.x = xposIn;
-  rm->m_camera->cur_mouse.y = yposIn;
+  rm->m_prev_mouse.x = xposIn;
+  rm->m_prev_mouse.y = yposIn;
 }
 
 // Mouse button callback function for dragging camera and interacting with canvas
@@ -199,8 +156,8 @@ void RenderManager::mouse_btn_callback(GLFWwindow *window, int button, int actio
 
   if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
     if (GLFW_PRESS == action) {
-      rm->m_camera->prev_mouse.x = rm->m_camera->cur_mouse.x;
-      rm->m_camera->prev_mouse.y = rm->m_camera->cur_mouse.y;
+      rm->m_prev_mouse.x = rm->m_prev_mouse.x;
+      rm->m_prev_mouse.y = rm->m_prev_mouse.y;
       rm->m_cameraDrag = true;
     } else if (GLFW_RELEASE == action) {
       rm->m_cameraDrag = false;
@@ -227,7 +184,7 @@ void RenderManager::mouse_scroll_callback(GLFWwindow *window, double xoffset, do
   }
 
   RenderManager *rm = (RenderManager *)glfwGetWindowUserPointer(window);
-  rm->m_camera->m_zoom -= (yoffset * rm->m_camera->m_zoomSpeed);
+  rm->m_camera->m_zoom -= yoffset * rm->m_camera->m_zoomSpeed;
 }
 
 // Callback to log GL errors

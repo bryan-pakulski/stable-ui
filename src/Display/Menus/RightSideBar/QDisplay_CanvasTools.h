@@ -78,14 +78,14 @@ private:
     // Debug menu to view camera coordinates
     ImGui::Text("Camera X: %s", std::to_string(m_renderManager->m_camera->m_position.x).c_str());
     ImGui::Text("Camera Y: %s", std::to_string(m_renderManager->m_camera->m_position.y).c_str());
-    ImGui::Text("Camera Z: %s", std::to_string(m_renderManager->m_camera->m_position.z).c_str());
+    ImGui::Text("Camera Zoom: %s", std::to_string(m_renderManager->m_camera->m_zoom).c_str());
   }
 
   // Camera helper
   void cameraHelper() {
     // Almost all widgets return true when their value changes
-    ImGui::SliderFloat("Zoom", &m_renderManager->m_camera->m_zoom, m_renderManager->m_camera->c_zoom_minmax.first,
-                       m_renderManager->m_camera->c_zoom_minmax.second, "");
+    ImGui::SliderFloat("Zoom", &m_renderManager->m_camera->m_zoom, m_renderManager->m_camera->c_zoomLimits.x,
+                       m_renderManager->m_camera->c_zoomLimits.y, "");
     if (ImGui::BeginPopupContextItem("Zoom")) {
       if (ImGui::MenuItem("Reset")) {
         m_renderManager->m_camera->m_zoom = m_renderManager->m_camera->c_defaultZoom;

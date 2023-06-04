@@ -12,8 +12,8 @@ Camera::Camera(GLFWwindow *w) : m_window(w) {
 
   // Generate the orthographic projection matrix
   m_projectionMatrix =
-      glm::ortho(m_position.x - (m_screen.first * m_zoom) / 2.0f, m_position.x + (m_screen.first * m_zoom) / 2.0f,
-                 m_position.y + (m_screen.second * m_zoom) / 2.0f, m_position.y - (m_screen.second * m_zoom) / 2.0f,
+      glm::ortho(m_position.x - (m_screen.first / 2.0f) * m_zoom, m_position.x + (m_screen.first / 2.0f) * m_zoom,
+                 m_position.y + (m_screen.second / 2.0f) * m_zoom, m_position.y - (m_screen.second / 2.0f) * m_zoom,
                  -10.0f, 10.0f);
 
   m_viewMatrix = glm::lookAt(m_position,                               // Camera is at coordinates, in World Space
@@ -76,13 +76,13 @@ void Camera::updateVisual() {
   recalculateViewMatrix();
 
   glMatrixMode(GL_PROJECTION);
-  glOrtho(0, m_screen.first, m_screen.second, 0.0, -1.0, 1.0);
+  glOrtho(0, float(m_screen.first), float(m_screen.second), 0.0, -1.0, 1.0);
 
   glLoadIdentity();
 
   m_projectionMatrix =
-      glm::ortho(m_position.x - (m_screen.first * m_zoom) / 2.0f, m_position.x + (m_screen.first * m_zoom) / 2.0f,
-                 m_position.y + (m_screen.second * m_zoom) / 2.0f, m_position.y - (m_screen.second * m_zoom) / 2.0f,
+      glm::ortho(m_position.x - (m_screen.first / 2.0f) * m_zoom, m_position.x + (m_screen.first / 2.0f) * m_zoom,
+                 m_position.y + (m_screen.second / 2.0f) * m_zoom, m_position.y - (m_screen.second / 2.0f) * m_zoom,
                  -10.0f, 10.0f);
 
   // Set the modelview matrix

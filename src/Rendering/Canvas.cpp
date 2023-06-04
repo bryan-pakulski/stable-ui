@@ -3,11 +3,12 @@
 
 Canvas::~Canvas() {}
 
-Canvas::Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *w, std::shared_ptr<Camera> c)
+Canvas::Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *w,
+               std::shared_ptr<OrthographicCamera> c)
     : BaseObject(coords), m_coords{coords}, m_name{name} {
   int success;
   m_window = w;
-  m_camera = std::shared_ptr<Camera>(c);
+  m_camera = std::shared_ptr<OrthographicCamera>(c);
 
   glfwGetFramebufferSize(m_window, &m_screen.first, &m_screen.second);
 
@@ -45,15 +46,6 @@ Canvas::Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *
   linkShaders(gridVertexShader, gridFragmentShader, success, gridShader);
   setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices), gridShader);
   createShader(gridShader, "background_grid");
-
-  std::string vFBOShaderSource = readShader("data/shaders/Base_V.glsl");
-  std::string fFBOShaderSource = readShader("data/shaders/Base_F.glsl");
-  unsigned int fboVertexShader = initVertexShader(vFBOShaderSource.c_str(), success);
-  unsigned int fboFragmentShader = initFragmentShader(fFBOShaderSource.c_str(), success);
-  linkShaders(fboVertexShader, fboFragmentShader, success, fboShader);
-  setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices), fboShader);
-
-  createShader(fboShader, "fbo");
 }
 
 void Canvas::updateLogic() {
@@ -67,53 +59,29 @@ void Canvas::updateLogic() {
 }
 
 void Canvas::updateVisual() {
-
-  // TODO: make background configurable i.e. grid / star system etc...
-  if (CONFIG::STAR_FIELD.get() == 1) {
+  if (CONFIG::STAR_FIELD.get()) {
     renderStarField();
   } else {
     renderGrid();
   }
-
-  // Render FBO texture on top of background
-  glUseProgram(getShader("fbo")->shaderProgram);
-
-  setMat4("view", m_camera->getViewMatrix(), "fbo");
-  setMat4("projection", m_camera->getProjectionMatrix(), "fbo");
-
-  glm::mat4 model =
-      glm::translate(glm::mat4(1.0f), glm::vec3(m_camera->m_position.x, m_camera->m_position.y, 0.0f)) * // translation
-      glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                                  // rotation
-      glm::scale(glm::mat4(1.0f), glm::vec3(m_camera->m_screen.first * m_camera->m_zoom,
-                                            m_camera->m_screen.second * m_camera->m_zoom, 1.0f)); // scale
-  setMat4("model", model, "fbo");
-
-  glBindVertexArray(getShader("fbo")->VAO);
-
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glBindTexture(GL_TEXTURE_2D, m_texture_id);
-  glBindVertexArray(getShader("background")->VAO);
-  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }
 
 void Canvas::renderStarField() {
   glUseProgram(getShader("background")->shaderProgram);
 
   // View code
-  setMat4("view", m_camera->getViewMatrix(), "background");
-  setMat4("projection", m_camera->getProjectionMatrix(), "background");
+  setMat4("view", m_camera->GetViewMatrix(), "background");
+  setMat4("projection", m_camera->GetProjectionMatrix(), "background");
 
   glm::mat4 model =
-      glm::translate(glm::mat4(1.0f), glm::vec3(m_camera->m_position.x, m_camera->m_position.y, 0.0f)) * // translation
+      glm::translate(glm::mat4(1.0f), glm::vec3(m_camera->m_position.x, m_camera->m_position.y, 1.0f)) * // translation
       glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                                  // rotation
-      glm::scale(glm::mat4(1.0f), glm::vec3(m_camera->m_screen.first * m_camera->m_zoom,
-                                            m_camera->m_screen.second * m_camera->m_zoom, 1.0f)); // scale
+      glm::scale(glm::mat4(1.0f), glm::vec3(m_camera->m_screen.x, m_camera->m_screen.y, 1.0f));          // scale
   setMat4("model", model, "background");
 
   // Set screen size, camera coords and time
-  glUniform2f(glGetUniformLocation(getShader("background")->shaderProgram, "iResolution"), m_camera->m_screen.first,
-              m_camera->m_screen.second);
+  glUniform2f(glGetUniformLocation(getShader("background")->shaderProgram, "iResolution"), m_camera->m_screen.x,
+              m_camera->m_screen.y);
   glUniform2f(glGetUniformLocation(getShader("background")->shaderProgram, "iMouse"), -m_camera->m_position.x,
               -m_camera->m_position.y);
 
@@ -129,15 +97,21 @@ void Canvas::renderGrid() {
   glUseProgram(getShader("background_grid")->shaderProgram);
 
   // View code
-  setMat4("view", m_camera->getViewMatrix(), "background_grid");
-  setMat4("projection", m_camera->getProjectionMatrix(), "background_grid");
+  setMat4("view", m_camera->GetViewMatrix(), "background_grid");
+  setMat4("projection", m_camera->GetProjectionMatrix(), "background_grid");
 
   glm::mat4 model =
       glm::translate(glm::mat4(1.0f), glm::vec3(m_camera->m_position.x, m_camera->m_position.y, 0.0f)) * // translation
       glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                                  // rotation
-      glm::scale(glm::mat4(1.0f), glm::vec3(m_camera->m_screen.first * m_camera->m_zoom,
-                                            m_camera->m_screen.second * m_camera->m_zoom, 1.0f)); // scale
+      glm::scale(glm::mat4(1.0f), glm::vec3(m_camera->m_screen.x * m_camera->m_zoom,
+                                            m_camera->m_screen.y * m_camera->m_zoom, 1.0f)); // scale
   setMat4("model", model, "background_grid");
+
+  glUniform2f(glGetUniformLocation(getShader("background_grid")->shaderProgram, "iResolution"), m_camera->m_screen.x,
+              m_camera->m_screen.y);
+  glUniform2f(glGetUniformLocation(getShader("background_grid")->shaderProgram, "iPos"), -m_camera->m_position.x,
+              m_camera->m_position.y);
+  glUniform1f(glGetUniformLocation(getShader("background_grid")->shaderProgram, "zoom"), m_camera->m_zoom);
 
   glBindVertexArray(getShader("background_grid")->VAO);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
