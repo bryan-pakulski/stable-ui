@@ -3,7 +3,7 @@
 - Basic drawing tools (draw, erase, colour)
 - Save canvas to file
 - Load saved canvas
-- Render chunk objects to seperate framebuffer, this is used for the selection window as it will include an alpha channel, final render step is to copy to main framebuffer
+- Render chunk objects to data structure that orders images based on X/Y position, add lookup function to sample pixel values at coordinates for img2img and inpainting/outpainting
 
 # Core systems
 
@@ -36,6 +36,7 @@
 - Extra configuration i.e. trigger_prompt not being loaded from model yaml
 - Heartbeat bug on windows (no connectivity)
 - Multi string search doesn't work properly (Set union not working as intended?)
+- Generated images don't seem to look correct, possible an issue with loading VAE? maybe other configuration is breaking, investigate image pipeline..
 
 # Done
 
