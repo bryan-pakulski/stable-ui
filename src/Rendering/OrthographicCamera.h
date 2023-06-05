@@ -27,6 +27,12 @@ public:
     RecalculateViewMatrix();
   }
 
+  void OffsetPosition(glm::vec2 offset) {
+    m_position.x += (-offset.x);
+    m_position.y += (-offset.y);
+    RecalculateViewMatrix();
+  }
+
   void SetRotation(float rotation) {
     m_rotation = rotation;
     RecalculateViewMatrix();

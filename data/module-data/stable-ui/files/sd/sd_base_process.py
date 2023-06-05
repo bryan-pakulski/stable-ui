@@ -1,8 +1,9 @@
 import os
 import logging
+import torch
 
 from PIL import Image
-from common import samplers
+from common import schedulers
 from common import metadata
 
 from diffusers import StableDiffusionPipeline
@@ -18,8 +19,8 @@ class StableDiffusionBaseProcess():
         self.negative_prompt = negative_prompt
         self.seed = seed
         self.model = model
-        # TODO: fix sampler selection
-        #self.sampler = samplers.getSampler(sampler_name, self.model)
+        self.sampler_name = sampler_name
+        self.sampler = schedulers.getSheduler(sampler_name, self.model.scheduler)
         self.batch_size = batch_size
         self.n_iter = n_iter
         self.steps = steps
@@ -27,12 +28,7 @@ class StableDiffusionBaseProcess():
         self.width = width
         self.height = height
 
-        # ddim eta (eta=0.0 corresponds to deterministic sampling",
-        self.ddim_eta = 0.0
-        self.latent_channels = 4
-        self.downsampling_factor = 8
-
-        self.iteration = 0
+        self.generator = torch.Generator(device="cuda").manual_seed(seed)
 
         # Initialise logging
         logging.basicConfig(
@@ -73,9 +69,9 @@ class StableDiffusionTxt2Img(StableDiffusionBaseProcess):
         data = {
             "prompt": self.prompt,
             "negative_prompt": self.negative_prompt,
-            "model_hash": "",
+            "model_hash": self.model.model_hash,
             "seed": self.seed,
-            "sampler": "",
+            "sampler": self.sampler_name,
             "steps": self.steps,
             "cfg": self.cfg_scale,
             "width": self.width,
@@ -86,7 +82,8 @@ class StableDiffusionTxt2Img(StableDiffusionBaseProcess):
         md.save()
 
     def cpu_sample(self):
-        outputs = self.model(prompt=self.prompt, negative_prompt=self.prompt, width=self.width, height=self.height, num_inference_steps=self.steps, guidance_scale=self.cfg_scale, num_images_per_prompt=self.n_iter)
+        self.model.scheduler = self.sampler
+        outputs = self.model(prompt=self.prompt, negative_prompt=self.prompt, width=self.width, height=self.height, generator=self.generator, num_inference_steps=self.steps, guidance_scale=self.cfg_scale, num_images_per_prompt=self.n_iter)
         for image in outputs.images:
             base_count = len(os.listdir(self.outpath_samples))
             img_name = os.path.join(self.outpath_samples, f"{base_count:05}.png")
@@ -94,7 +91,8 @@ class StableDiffusionTxt2Img(StableDiffusionBaseProcess):
             self.save_metadata(img_name)
     
     def sample(self):
-        outputs = self.model(prompt=self.prompt, negative_prompt=self.prompt, width=self.width, height=self.height, num_inference_steps=self.steps, guidance_scale=self.cfg_scale, num_images_per_prompt=self.n_iter)
+        self.model.scheduler = self.sampler
+        outputs = self.model(prompt=self.prompt, negative_prompt=self.prompt, width=self.width, height=self.height, generator=self.generator, num_inference_steps=self.steps, guidance_scale=self.cfg_scale, num_images_per_prompt=self.n_iter)
         for image in outputs.images:
             base_count = len(os.listdir(self.outpath_samples))
             img_name = os.path.join(self.outpath_samples, f"{base_count:05}.png")
@@ -120,10 +118,10 @@ class StableDiffusionImg2Img(StableDiffusionBaseProcess):
         data = {
             "prompt": self.prompt,
             "negative_prompt": self.negative_prompt,
-            "model_hash": "",
+            "model_hash": self.model.model_hash,
             "init_img": self.init_img,
             "seed": self.seed,
-            "sampler": "",
+            "sampler": self.sampler_name,
             "steps": self.steps,
             "cfg": self.cfg_scale,
             "strength": self.strength,

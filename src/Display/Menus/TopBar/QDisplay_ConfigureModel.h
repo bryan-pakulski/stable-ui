@@ -24,6 +24,9 @@ private:
   std::vector<listItem> m_ModelConfigList;
   std::vector<listItem> m_VAEList;
   std::vector<listItem> m_VAEConfigList;
+  std::vector<listItem> m_SchedulerList = {{.m_name = "pndm"},  {.m_name = "lms"},       {.m_name = "heun"},
+                                           {.m_name = "euler"}, {.m_name = "ancestral"}, {.m_name = "dpm"},
+                                           {.m_name = "ddim"}};
 
   void clear() {
     m_modelConfig = ModelConfig{};
@@ -36,6 +39,7 @@ private:
   void reloadFiles() {
     // Load model config files
     try {
+      m_ModelConfigList.push_back(listItem{.m_name = "CLEAR"});
       for (const auto &entry : fs::directory_iterator(CONFIG::MODEL_CONFIGURATIONS_DIRECTORY.get())) {
         listItem i{.m_name = entry.path().filename().string()};
         m_ModelConfigList.push_back(i);
@@ -51,22 +55,23 @@ private:
       static YAML::Node configFile = YAML::LoadFile(CONFIG::MODELS_CONFIGURATION_FILE.get());
       YAML::Node models = configFile["models"];
       for (YAML::const_iterator it = models.begin(); it != models.end(); ++it) {
-        if (it->second["name"].as<std::string>() != "default") {
-          listItem i{.m_name = it->second["name"].as<std::string>(), .m_key = it->first.as<std::string>()};
-          m_ModelList.push_back(i);
-        }
+        listItem i{.m_name = it->second["name"].as<std::string>(), .m_key = it->first.as<std::string>()};
+        m_ModelList.push_back(i);
       }
-    } catch (const YAML::Exception &) {
+    } catch (const YAML::Exception &err) {
       QLogger::GetInstance().Log(LOGLEVEL::ERR, "QDisplay_ConfigureModel::reloadFiles Failed to parse yaml file: ",
-                                 CONFIG::MODELS_CONFIGURATION_FILE.get());
+                                 CONFIG::MODELS_CONFIGURATION_FILE.get(), err.what());
       return;
     }
 
     // Load VAE List
     try {
+      m_VAEList.push_back(listItem{.m_name = "CLEAR"});
       for (const auto &entry : fs::directory_iterator(CONFIG::VAE_FOLDER_PATH.get())) {
-        listItem i{.m_name = entry.path().filename().string()};
-        m_VAEList.push_back(i);
+        if (entry.path().filename().string() != ".placeholder") {
+          listItem i{.m_name = entry.path().filename().string()};
+          m_VAEList.push_back(i);
+        }
       }
     } catch (const fs::filesystem_error &err) {
       ErrorHandler::GetInstance().setConfigError(CONFIG::VAE_FOLDER_PATH, "VAE_FOLDER_PATH");
@@ -75,9 +80,12 @@ private:
 
     // Load VAE Config List
     try {
+      m_VAEConfigList.push_back(listItem{.m_name = "CLEAR"});
       for (const auto &entry : fs::directory_iterator(CONFIG::VAE_CONFIG_FOLDER_PATH.get())) {
-        listItem i{.m_name = entry.path().filename().string()};
-        m_VAEConfigList.push_back(i);
+        if (entry.path().filename().string() != ".placeholder") {
+          listItem i{.m_name = entry.path().filename().string()};
+          m_VAEConfigList.push_back(i);
+        }
       }
     } catch (const fs::filesystem_error &err) {
       ErrorHandler::GetInstance().setConfigError(CONFIG::VAE_FOLDER_PATH, "VAE_CONFIG_FOLDER_PATH");
@@ -109,7 +117,11 @@ private:
                               ImGuiComboFlags_NoArrowButton)) {
           for (auto &item : m_ModelConfigList) {
             if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
-              m_modelConfig.config = "/models/configs/" + item.m_name;
+              if (item.m_name == "CLEAR") {
+                m_modelConfig.config = "";
+              } else {
+                m_modelConfig.config = "/models/configs/models/" + item.m_name;
+              }
             }
             if (item.m_isSelected) {
               ImGui::SetItemDefaultFocus();
@@ -122,7 +134,11 @@ private:
         if (ImGui::BeginCombo("Custom VAE", m_modelConfig.vae.c_str(), ImGuiComboFlags_NoArrowButton)) {
           for (auto &item : m_VAEList) {
             if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
-              m_modelConfig.vae = "/models/vae/" + item.m_name;
+              if (item.m_name == "CLEAR") {
+                m_modelConfig.vae = "";
+              } else {
+                m_modelConfig.vae = "/models/vae/" + item.m_name;
+              }
             }
             if (item.m_isSelected) {
               ImGui::SetItemDefaultFocus();
@@ -136,7 +152,11 @@ private:
           if (ImGui::BeginCombo("VAE Config", m_modelConfig.vae_config.c_str(), ImGuiComboFlags_NoArrowButton)) {
             for (auto &item : m_VAEConfigList) {
               if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
-                m_modelConfig.vae_config = "/models/configs/vae/" + item.m_name;
+                if (item.m_name == "CLEAR") {
+                  m_modelConfig.vae_config = "";
+                } else {
+                  m_modelConfig.vae_config = "/models/configs/vae/" + item.m_name;
+                }
               }
               if (item.m_isSelected) {
                 ImGui::SetItemDefaultFocus();
@@ -144,6 +164,19 @@ private:
             }
             ImGui::EndCombo();
           }
+        }
+
+        // Scheduler
+        if (ImGui::BeginCombo("Scheduler", m_modelConfig.scheduler.c_str(), ImGuiComboFlags_NoArrowButton)) {
+          for (auto &item : m_SchedulerList) {
+            if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
+              m_modelConfig.scheduler = item.m_name;
+            }
+            if (item.m_isSelected) {
+              ImGui::SetItemDefaultFocus();
+            }
+          }
+          ImGui::EndCombo();
         }
 
         ImGui::Separator();

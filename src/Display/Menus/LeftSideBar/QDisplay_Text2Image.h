@@ -17,8 +17,10 @@ class QDisplay_Text2Image : public QDisplay_Base {
   // Window variables & flags
   char *m_prompt = new char[CONFIG::PROMPT_LENGTH_LIMIT.get()]();
   char *m_negative_prompt = new char[CONFIG::PROMPT_LENGTH_LIMIT.get()]();
-  std::string m_selectedSampler = "DDIM";
-  std::vector<listItem> m_samplerList;
+  std::string m_selectedSampler = "pndm";
+  std::vector<listItem> m_samplerList = {{.m_name = "ddim"}, {.m_name = "ddiminverse"},    {.m_name = "ddpm"},
+                                         {.m_name = "deis"}, {.m_name = "eulerancestral"}, {.m_name = "euler"},
+                                         {.m_name = "heun"}, {.m_name = "pndm"},           {.m_name = "unipc"}};
   int m_width = 512;
   int m_height = 512;
   int m_steps = 70;
@@ -32,13 +34,6 @@ public:
   QDisplay_Text2Image(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     m_prompt[0] = 0;
     m_negative_prompt[0] = 0;
-
-    listItem i{.m_name = "DDIM"};
-    listItem j{.m_name = "PLMS"};
-    listItem k{.m_name = "UNIPC"};
-    m_samplerList.push_back(i);
-    m_samplerList.push_back(j);
-    m_samplerList.push_back(k);
   }
 
   void renderImage() {

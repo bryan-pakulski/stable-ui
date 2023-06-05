@@ -21,17 +21,17 @@ int main() {
 
     // Only render if no errors detected
     if (!ErrorHandler::GetInstance().hasError()) {
-      // Sub menus rendering & logic
+      // UI logic
       QDisplay::GetInstance().drawMenus();
 
-      // Stable Manager loop
+      // Stable Manager loop (rendering)
       StableManager::GetInstance().update();
     }
 
     // Display any captured errors as a modal popup over the top of the screen
     ErrorHandler::GetInstance().pollErrors();
 
-    // Process and catch events
+    // Process and catch events, draw ui
     QDisplay::processFrameAndEvents();
   }
 

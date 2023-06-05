@@ -11,7 +11,7 @@ from diffusers.models import AutoencoderKL
 from common import devices
 
 class StableDiffusionModel():
-    def __init__(self, checkpoint_path: str = "", vae_path: str = "", vae_config: str = "", checkpoint_config_path: str = "", enable_xformers: bool = False, enable_tf32: bool = False, enable_t16: bool = False, enable_vaeTiling: bool = False, enable_vaeSlicing: bool = False, enable_seqCPUOffload: bool = False):
+    def __init__(self, checkpoint_path: str = "", vae_path: str = "", vae_config: str = "", checkpoint_config_path: str = "", scheduler: str = "pndm", hash: str = "", enable_xformers: bool = False, enable_tf32: bool = False, enable_t16: bool = False, enable_vaeTiling: bool = False, enable_vaeSlicing: bool = False, enable_seqCPUOffload: bool = False):
         # Initialise logging
         logging.basicConfig(
             filename="/logs/sd_pipeline.log",
@@ -30,6 +30,8 @@ class StableDiffusionModel():
         self.checkpoint_config = checkpoint_config_path
         self.vae_path = vae_path
         self.vae_config = vae_config
+        self.scheduler = scheduler
+        self.model_hash = hash
 
         if (self.checkpoint_path.endswith(".safetensors")):
             self.safe_tensors=True
@@ -121,7 +123,7 @@ class StableDiffusionModel():
             self.load_vae(self.vae_config)
 
             # Load Model
-            self.model = download_from_original_stable_diffusion_ckpt(self.checkpoint_path, self.checkpoint_config, device=devices.get_cuda_device_string(), from_safetensors=self.safe_tensors, load_safety_checker=False)
+            self.model = download_from_original_stable_diffusion_ckpt(self.checkpoint_path, self.checkpoint_config, scheduler_type=self.scheduler, device=devices.get_cuda_device_string(), from_safetensors=self.safe_tensors, load_safety_checker=False)
             if self.vae != None:
                 self.model.vae = self.vae
                 self.model = StableDiffusionPipeline(**self.model.components, requires_safety_checker=False)
@@ -134,6 +136,9 @@ class StableDiffusionModel():
             # Optimise and send to device
             self.enableOptimisations()
             self.model.to(devices.get_cuda_device_string(), torch_dtype=devices.dtype)
+
+            # Store hash for future use when we pass model by reference
+            self.model.model_hash = self.model_hash
         except:
             self.clean()
             logging.error('Failed to create model', file=sys.stderr)

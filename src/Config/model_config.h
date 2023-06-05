@@ -24,7 +24,9 @@ static ModelConfig loadModelConfig(std::string hash) {
     config.trigger_prompt = data["trigger_prompt"].as<std::string>();
     config.vae = data["vae"].as<std::string>();
     config.vae_config = data["vae_config"].as<std::string>();
+    config.scheduler = data["scheduler"].as<std::string>();
     config.enable_xformers = data["xformers"].as<bool>();
+    config.enable_tf32 = data["tf32"].as<bool>();
     config.enable_t16 = data["t16"].as<bool>();
     config.enable_vaeTiling = data["vae_tiling"].as<bool>();
     config.enable_vaeSlicing = data["vae_slicing"].as<bool>();
@@ -50,6 +52,7 @@ static void saveModelConfig(const ModelConfig &config) {
     model_node["trigger_prompt"] = config.trigger_prompt;
     model_node["vae"] = config.vae;
     model_node["vae_config"] = config.vae_config;
+    model_node["scheduler"] = config.scheduler;
     model_node["xformers"] = config.enable_xformers;
     model_node["tf32"] = config.enable_tf32;
     model_node["t16"] = config.enable_t16;

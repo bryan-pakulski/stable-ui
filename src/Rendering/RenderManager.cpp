@@ -130,7 +130,7 @@ void RenderManager::mouse_cursor_callback(GLFWwindow *window, double xposIn, dou
 
   // Move camera view
   if (rm->m_cameraDrag) {
-    rm->m_camera->SetPosition(glm::vec3(xposIn - rm->m_prev_mouse.x, yposIn - rm->m_prev_mouse.y, 1.0f));
+    rm->m_camera->OffsetPosition(glm::vec3(xposIn - rm->m_prev_mouse.x, yposIn - rm->m_prev_mouse.y, 1.0f));
     rm->m_prev_mouse.x = xposIn;
     rm->m_prev_mouse.y = yposIn;
   }
@@ -140,8 +140,8 @@ void RenderManager::mouse_cursor_callback(GLFWwindow *window, double xposIn, dou
     rm->m_selection->updateCapture(xposIn, yposIn);
   }
 
-  rm->m_prev_mouse.x = xposIn;
-  rm->m_prev_mouse.y = yposIn;
+  rm->m_cur_mouse.x = xposIn;
+  rm->m_cur_mouse.y = yposIn;
 }
 
 // Mouse button callback function for dragging camera and interacting with canvas
@@ -156,8 +156,8 @@ void RenderManager::mouse_btn_callback(GLFWwindow *window, int button, int actio
 
   if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
     if (GLFW_PRESS == action) {
-      rm->m_prev_mouse.x = rm->m_prev_mouse.x;
-      rm->m_prev_mouse.y = rm->m_prev_mouse.y;
+      rm->m_prev_mouse.x = rm->m_cur_mouse.x;
+      rm->m_prev_mouse.y = rm->m_cur_mouse.y;
       rm->m_cameraDrag = true;
     } else if (GLFW_RELEASE == action) {
       rm->m_cameraDrag = false;

@@ -201,6 +201,16 @@ class SDModelServer(MQServer):
                         "required": False,
                         "type": str
                     },
+                    "scheduler": {
+                        "help": "Scheduler to use, defaults to pndm, options available: [pndm, lms, heun, euler, ancestral, dpm, ddim]",
+                        "required": False,
+                        "type": str
+                    },
+                    "hash": {
+                        "help": "Model hash, used for saving XMP metadata",
+                        "required": False,
+                        "type": str  
+                    },
                     "enable_xformers": {
                         "help": "Memory efficient transformers",
                         "required": False,
