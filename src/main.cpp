@@ -1,6 +1,7 @@
 #include "Display/ErrorHandler.h"
 #include "Display/QDisplay.h"
 #include "StableManager.h"
+#include "Client/StableClient.h"
 #include "Client/Heartbeat.h"
 #include <imgui_impl_glfw.h>
 #include <memory>

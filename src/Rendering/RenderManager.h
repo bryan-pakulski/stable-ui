@@ -4,7 +4,6 @@
 #include "Config/types.h"
 #include "Indexer/Indexer.h"
 #include "Helpers/QLogger.h"
-#include "Client/SDCommandsInterface.h"
 #include "Helpers/States.h"
 
 #include "Rendering/objects/BaseObject.h"

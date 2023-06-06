@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <imgui.h>
+#include <imgui_stdlib.h>
 #include <filesystem>
 
 #include "Display/ErrorHandler.h"
@@ -16,8 +17,8 @@
 class QDisplay_Text2Image : public QDisplay_Base {
 
   // Window variables & flags
-  char *m_prompt = new char[CONFIG::PROMPT_LENGTH_LIMIT.get()]();
-  char *m_negative_prompt = new char[CONFIG::PROMPT_LENGTH_LIMIT.get()]();
+  std::string m_prompt;
+  std::string m_negativePrompt;
   std::string m_selectedSampler = "pndm";
   std::vector<listItem> m_samplerList = {
       {.m_name = "ddim"},      {.m_name = "ddiminverse"}, {.m_name = "ddpm"},           {.m_name = "deis"},
@@ -29,16 +30,14 @@ class QDisplay_Text2Image : public QDisplay_Base {
   int m_height = 512;
   int m_steps = 35;
   int m_seed = 0;
+  int m_nIter = 1;
   double m_cfg = 7.5;
 
   std::unique_ptr<GLImage> m_image = 0;
 
 public:
   // Initialise render manager references
-  QDisplay_Text2Image(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
-    m_prompt[0] = 0;
-    m_negative_prompt[0] = 0;
-  }
+  QDisplay_Text2Image(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {}
 
   void renderImage() {
     m_image.reset();
@@ -49,8 +48,8 @@ public:
     if (m_seed == 0) {
       seed = rand() % INT_MAX + 1;
     }
-    m_renderManager->textToImage(m_prompt, m_negative_prompt, m_selectedSampler, 1, m_steps, m_cfg, seed, m_width,
-                                 m_height, m_image->renderState);
+    StableManager::GetInstance().textToImage(m_prompt, m_negativePrompt, m_selectedSampler, m_nIter, m_steps, m_cfg,
+                                             seed, m_width, m_height, m_image->renderState);
   }
 
   void imageWindow() {
@@ -81,9 +80,9 @@ public:
   void promptHelper() {
     if (ImGui::CollapsingHeader("Prompts")) {
       ImGui::Text("Prompt");
-      ImGui::InputTextMultiline("##prompt", m_prompt, CONFIG::PROMPT_LENGTH_LIMIT.get());
+      ImGui::InputTextMultiline("##prompt", &m_prompt);
       ImGui::Text("Negative Prompt");
-      ImGui::InputTextMultiline("##neg prompt", m_negative_prompt, CONFIG::PROMPT_LENGTH_LIMIT.get());
+      ImGui::InputTextMultiline("##neg prompt", &m_negativePrompt);
     }
   }
 
@@ -122,6 +121,7 @@ public:
       ImGui::InputInt("steps", &m_steps);
       ImGui::InputInt("seed", &m_seed);
       ImGui::InputDouble("cfg scale", &m_cfg, 0.1);
+      ImGui::InputInt("Iterations", &m_nIter);
     }
   }
 

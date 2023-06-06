@@ -35,7 +35,7 @@ Image::Image(std::shared_ptr<GLImage> im, std::shared_ptr<OrthographicCamera> c,
   createShader(sh, "image");
 
   if (!success) {
-    QLogger::GetInstance().Log(LOGLEVEL::ERR, "Image::Image Error creating new chunk");
+    QLogger::GetInstance().Log(LOGLEVEL::ERR, "Image::Image Error creating new image");
   }
 }
 
@@ -46,24 +46,24 @@ void Image::updateLogic() {}
 // Render onto screen, offset based on world coordinates & window size
 void Image::updateVisual() {
   if (m_renderFlag) {
-    glUseProgram(getShader("chunk")->shaderProgram);
+    glUseProgram(getShader("image")->shaderProgram);
 
     // View code
-    setMat4("view", m_camera->GetViewMatrix(), "chunk");
-    setMat4("projection", m_camera->GetProjectionMatrix(), "chunk");
+    setMat4("view", m_camera->GetViewMatrix(), "image");
+    setMat4("projection", m_camera->GetProjectionMatrix(), "image");
 
     // Model projection code
     glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(m_position.x, m_position.y, 0.0f)) *     // translation
                       glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                  // rotation
                       glm::scale(glm::mat4(1.0f), glm::vec3(m_image->m_width, m_image->m_height, 1.0f)); // scale
-    setMat4("model", model, "chunk");
+    setMat4("model", model, "image");
 
     // Update texture information
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBindTexture(GL_TEXTURE_2D, m_image->m_texture);
 
-    glBindVertexArray(getShader("chunk")->VAO);
+    glBindVertexArray(getShader("image")->VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
   }
 }

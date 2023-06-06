@@ -1,7 +1,7 @@
 #include "StableManager.h"
 
-#include "Client/SDCommandsInterface.h"
 #include "Client/Commands.h"
+#include "Client/StableClient.h"
 #include "Config/config.h"
 #include "Indexer/MetaData.h"
 #include "Display/QDisplay.h"
@@ -14,7 +14,7 @@ StableManager::StableManager() : m_indexer(CONFIG::CRAWLER_PATH.get()) {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableManager::StableManager initialized");
 
   // Intialise zmq server within docker to receive commands from client
-  SDCommandsInterface::GetInstance().launchSDModelServer();
+  launchSDModelServer();
 
   m_renderManager = std::shared_ptr<RenderManager>(new RenderManager(*QDisplay::GetInstance().getWindow()));
 
@@ -65,20 +65,24 @@ void StableManager::textToImage(std::string prompt, std::string negativePrompt, 
   renderState = Q_RENDER_STATE::RENDERING;
 
   m_Thread =
-      std::thread(std::bind(&StableClient::textToImage, &StableClient::GetInstance(), command, std::ref(renderState)));
+      std::thread(std::bind(&StableClient::textToImage, &StableClient::GetInstance(), cmd, std::ref(renderState)));
   m_Thread.detach();
 }
 
 // Image to Image, render result to canvas
 void StableManager::imageToImage(std::string &imgPath, std::string &prompt, std::string &negativePrompt,
-                                 std::string &samplerName, int samples, int steps, double cfg, double strength,
-                                 int seed, int &renderState) {
+                                 std::string &samplerName, int nIter, int steps, double cfg, double strength, int seed,
+                                 int &renderState) {
   commands::imageToImage cmd =
       commands::imageToImage{m_model, prompt,      negativePrompt, m_renderManager->getActiveCanvas()->m_name,
-                             imgPath, samplerName, samples,        steps,
+                             imgPath, samplerName, nIter,          steps,
                              cfg,     strength,    seed,           CONFIG::OUTPUT_DIRECTORY.get()};
 
-  SDCommandsInterface::GetInstance().imageToImage(cmd, renderState);
+  renderState = Q_RENDER_STATE::RENDERING;
+
+  m_Thread =
+      std::thread(std::bind(&StableClient::imageToImage, &StableClient::GetInstance(), cmd, std::ref(renderState)));
+  m_Thread.detach();
 }
 
 std::string StableManager::getLatestFile(const std::string &path) {

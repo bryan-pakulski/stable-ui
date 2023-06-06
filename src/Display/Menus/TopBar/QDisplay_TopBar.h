@@ -11,6 +11,7 @@
 #include "QDisplay_ImportVAE.h"
 #include "QDisplay_LoadModel.h"
 #include "QDisplay_PluginsWindow.h"
+#include "StableManager.h"
 
 #include <fstream>
 #include <imgui.h>
@@ -222,11 +223,11 @@ public:
       if (ImGui::BeginMenu("Debug")) {
 
         if (ImGui::MenuItem("Release model from memory")) {
-          SDCommandsInterface::GetInstance().releaseSDModelServer();
+          StableManager::GetInstance().releaseSDModel();
         }
 
         if (ImGui::MenuItem("Restart SD Server")) {
-          SDCommandsInterface::GetInstance().launchSDModelServer();
+          StableManager::GetInstance().launchSDModelServer();
         }
 
         if (ImGui::MenuItem("Open Log")) {

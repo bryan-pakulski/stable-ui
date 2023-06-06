@@ -134,7 +134,6 @@ add_executable( stable-ui
                 src/StableManager.cpp
                 src/Client/Heartbeat.cpp
                 src/Client/StableClient.cpp
-                src/Client/SDCommandsInterface.cpp
                 src/Helpers/GLHelper.cpp
                 src/Indexer/Indexer.cpp
                 src/Rendering/OrthographicCamera.cpp

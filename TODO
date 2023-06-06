@@ -19,9 +19,7 @@
 - Add support for textual inversion, see: https://towardsdatascience.com/how-to-fine-tune-stable-diffusion-using-textual-inversion-b995d7ecc095
 - Delete models & configurations window
 - Save output to temporary folder - "gen??" This way you can generate multiple item etc.. and move them automatically after generation is finished to an output folder
-- Show existing configuration when editing model config
 - Power of two scaling for selection box
-- Adjustable grid snapping
 - Render grid
 - Load module progress bar or status window
 - Weighted prompts: https://huggingface.co/docs/diffusers/using-diffusers/weighted_prompts
@@ -43,3 +41,5 @@
 - Move to huggingface diffusers library system to load models (see: https://github.com/huggingface/diffusers)
 - use Xformers library https://github.com/facebookresearch/xformers/tree/main
 - Look at implementing additional optimisations: https://huggingface.co/docs/diffusers/optimization/fp16
+- Show existing configuration when editing model config
+- Adjustable grid snapping
