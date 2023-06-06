@@ -1,7 +1,7 @@
 #include "Rendering/objects/Image.h"
 
 Image::Image(std::shared_ptr<GLImage> im, std::shared_ptr<OrthographicCamera> c, glm::ivec2 position)
-    : m_image{im}, BaseObject(position) {
+    : BaseObject(position), m_image{im} {
   int success = 0;
   m_camera = std::shared_ptr<OrthographicCamera>(c);
   m_image->loadFromImage(m_image->m_image_source.c_str());
@@ -38,10 +38,6 @@ Image::Image(std::shared_ptr<GLImage> im, std::shared_ptr<OrthographicCamera> c,
     QLogger::GetInstance().Log(LOGLEVEL::ERR, "Image::Image Error creating new image");
   }
 }
-
-Image::~Image() {}
-
-void Image::updateLogic() {}
 
 // Render onto screen, offset based on world coordinates & window size
 void Image::updateVisual() {

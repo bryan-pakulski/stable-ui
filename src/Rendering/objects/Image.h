@@ -13,18 +13,21 @@
 // This class wraps an image class and contains some flags to check for visibility based on
 // Camera and world coordinates
 class Image : public BaseObject {
-  std::shared_ptr<OrthographicCamera> m_camera;
 
 public:
   std::shared_ptr<GLImage> m_image;
   bool m_renderFlag = true;
 
+public:
   Image(std::shared_ptr<GLImage> im, std::shared_ptr<OrthographicCamera> c, glm::ivec2 position);
-  ~Image();
+  ~Image() {}
 
-  // Check if grid is currently visible based on world coordinates and window size
+  // Check if image is currently visible based on world coordinates and window size
   bool visible(const std::pair<int, int> &windowCoords, const std::pair<int, int> &windowSize);
 
-  void updateLogic() override;
+  void updateLogic() override {}
   void updateVisual() override;
+
+private:
+  std::shared_ptr<OrthographicCamera> m_camera;
 };

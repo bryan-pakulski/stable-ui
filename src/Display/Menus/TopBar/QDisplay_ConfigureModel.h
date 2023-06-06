@@ -17,6 +17,18 @@
 namespace fs = std::filesystem;
 
 class QDisplay_ConfigureModel : public QDisplay_Base {
+public:
+  QDisplay_ConfigureModel(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {}
+
+  void openWindow() {
+    m_isOpen = true;
+    reloadFiles();
+  };
+
+  virtual void render() {
+    // Render configure modules popup
+    configureModelPopup();
+  }
 
 private:
   ModelConfig m_modelConfig;
@@ -28,6 +40,7 @@ private:
                                            {.m_name = "euler"}, {.m_name = "ancestral"}, {.m_name = "dpm"},
                                            {.m_name = "ddim"}};
 
+private:
   void clear() {
     m_modelConfig = ModelConfig{};
     m_ModelList.clear();
@@ -213,18 +226,5 @@ private:
       }
       ImGui::End();
     }
-  }
-
-public:
-  void openWindow() {
-    m_isOpen = true;
-    reloadFiles();
-  };
-
-  QDisplay_ConfigureModel(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {}
-
-  virtual void render() {
-    // Render configure modules popup
-    configureModelPopup();
   }
 };

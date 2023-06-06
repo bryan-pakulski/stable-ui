@@ -13,20 +13,12 @@
 #include "Rendering/objects/GLImage/GLImage.h"
 
 class Canvas : public BaseObject {
-private:
-  std::pair<int, int> m_screen{}; // Screen size
-
-  std::shared_ptr<OrthographicCamera> m_camera;
-
-  // Reference to texture for main window
-  GLuint m_texture_id;
-  float m_time = 0.0f;
-
 public:
   bool m_active = false;
   std::vector<std::unique_ptr<Image>> m_editorGrid;
   std::string m_name;
 
+public:
   Canvas(glm::ivec2 position, const std::string &name, GLFWwindow *w, std::shared_ptr<OrthographicCamera> c);
   virtual ~Canvas();
 
@@ -37,13 +29,17 @@ public:
   void renderImages();
   void setTexture(GLuint *id);
 
-  // Update or create new chunk for a given Image
+  // Update or create new image wrapper from a basic GL image
   void createImage(std::shared_ptr<GLImage>, glm::ivec2 position);
 
-  // Delete chunk by index
-  void deleteChunk(int index);
+  // Delete image by index
+  void deleteChunk(int index) { m_editorGrid.erase(m_editorGrid.begin() + index); }
 
-  // Hide chunk by index
-  void hideChunk(int index);
-  void showChunk(int index);
+  // image visibility control
+  void hideChunk(int index) { m_editorGrid[index]->m_renderFlag = false; }
+  void showChunk(int index) { m_editorGrid[index]->m_renderFlag = true; }
+
+private:
+  std::shared_ptr<OrthographicCamera> m_camera;
+  float m_time = 0.0f;
 };

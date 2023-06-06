@@ -19,11 +19,39 @@ namespace fs = std::filesystem;
 
 class QDisplay_ImportModel : public QDisplay_Base {
 
+public:
+  QDisplay_ImportModel(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+    fileDialog.SetTitle("Import Models");
+    fileDialog.SetTypeFilters({".ckpt", ".safetensors"});
+
+    *m_saving = false;
+  }
+
+  void openWindow() { fileDialog.Open(); };
+
+  virtual void render() {
+    // File browser management
+    fileDialog.Display();
+    if (fileDialog.HasSelected()) {
+      *m_saving = true;
+      std::thread t(saveModelConfiguration, fileDialog.GetSelected().string(), m_saving);
+      t.detach();
+      clear();
+    }
+
+    if (*m_saving) {
+      ImGui::Begin("Saving Model Configuration");
+      ImGui::Text("Saving model configuration and copying to docker image, please wait...");
+      ImGui::End();
+    }
+  }
+
 private:
   ImGui::FileBrowser fileDialog;
   bool shared_bool = false;
   std::shared_ptr<bool> m_saving = std::make_shared<bool>(shared_bool);
 
+private:
   void clear() { fileDialog.ClearSelected(); }
 
   // Save model configuration to model config file
@@ -44,32 +72,5 @@ private:
     }
 
     *m_saving = false;
-  }
-
-public:
-  void openWindow() { fileDialog.Open(); };
-
-  QDisplay_ImportModel(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
-    fileDialog.SetTitle("Import Models");
-    fileDialog.SetTypeFilters({".ckpt", ".safetensors"});
-
-    *m_saving = false;
-  }
-
-  virtual void render() {
-    // File browser management
-    fileDialog.Display();
-    if (fileDialog.HasSelected()) {
-      *m_saving = true;
-      std::thread t(saveModelConfiguration, fileDialog.GetSelected().string(), m_saving);
-      t.detach();
-      clear();
-    }
-
-    if (*m_saving) {
-      ImGui::Begin("Saving Model Configuration");
-      ImGui::Text("Saving model configuration and copying to docker image, please wait...");
-      ImGui::End();
-    }
   }
 };

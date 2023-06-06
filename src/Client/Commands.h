@@ -6,14 +6,13 @@
 #include <string>
 #include <sstream>
 
-// TODO: get additional configurations for certain commands
-
 // Base command class
 class command {
 public:
   std::string m_name;
   std::vector<std::pair<std::string, std::string>> m_parameters;
 
+public:
   // Return a formatted and delimited command string i.e. "command:k1=v1:k2=v2"
   std::string getCommandString() {
     std::stringstream cmdStream;

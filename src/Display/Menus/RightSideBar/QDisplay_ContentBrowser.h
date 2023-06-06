@@ -11,6 +11,33 @@
 
 class QDisplay_ContentBrowser : public QDisplay_Base {
 
+public:
+  QDisplay_ContentBrowser(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+    // Initialise content browser
+    m_directory_icon = std::unique_ptr<GLImage>(new GLImage(256, 256, "dir_icon"));
+    m_file_icon = std::unique_ptr<GLImage>(new GLImage(256, 256, "file_icon"));
+    m_directory_icon->loadFromImage("data/images/directory_icon.png");
+    m_file_icon->loadFromImage("data/images/file_icon.png");
+    m_current_directory = std::filesystem::path(c_base_content_directory);
+  }
+
+  virtual void render() {
+
+    if (ImGui::CollapsingHeader("Search")) {
+      searchPanel();
+    }
+    ImGui::Separator();
+
+    contentBrowser();
+    ImGui::Separator();
+    previewPanel();
+    ImGui::Separator();
+
+    if (ImGui::CollapsingHeader("Metadata")) {
+      metadataPanel();
+    }
+  }
+
 private:
   // Content Browser Config
   std::unique_ptr<GLImage> m_directory_icon;
@@ -26,15 +53,8 @@ private:
   std::pair<meta_node, metadata> m_xmpData;
   std::set<std::string> m_filteredPaths;
 
-public:
-  QDisplay_ContentBrowser(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
-    // Initialise content browser
-    m_directory_icon = std::unique_ptr<GLImage>(new GLImage(256, 256, "dir_icon"));
-    m_file_icon = std::unique_ptr<GLImage>(new GLImage(256, 256, "file_icon"));
-    m_directory_icon->loadFromImage("data/images/directory_icon.png");
-    m_file_icon->loadFromImage("data/images/file_icon.png");
-    m_current_directory = std::filesystem::path(c_base_content_directory);
-  }
+private:
+  void loadImageXMPData(const std::string &filepath) { m_xmpData = XMP::GetInstance().readFile(filepath); }
 
   void searchPanel() {
     ImGui::InputText("filter", &m_searchString);
@@ -48,8 +68,6 @@ public:
       m_searchString.clear();
     }
   }
-
-  void loadImageXMPData(const std::string &filepath) { m_xmpData = XMP::GetInstance().readFile(filepath); }
 
   void metadataPanel() {
     if (!m_selected_file.empty()) {
@@ -210,22 +228,5 @@ public:
     }
 
     ImGui::EndChild();
-  }
-
-  virtual void render() {
-
-    if (ImGui::CollapsingHeader("Search")) {
-      searchPanel();
-    }
-    ImGui::Separator();
-
-    contentBrowser();
-    ImGui::Separator();
-    previewPanel();
-    ImGui::Separator();
-
-    if (ImGui::CollapsingHeader("Metadata")) {
-      metadataPanel();
-    }
   }
 };

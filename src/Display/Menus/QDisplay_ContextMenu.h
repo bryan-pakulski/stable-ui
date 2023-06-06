@@ -33,6 +33,4 @@ public:
       ImGui::OpenPopup("context menu");
     }
   }
-
-private:
 };

@@ -6,15 +6,6 @@
 
 class Selection : public BaseObject {
 
-private:
-  std::shared_ptr<OrthographicCamera> m_camera; // Camera ptr
-
-  // Mouse positions for dragging across screen
-  glm::vec2 prev_mouse;
-  glm::vec2 cur_mouse;
-
-  void setTexture(GLuint *id);
-
 public:
   GLuint m_selection_texture_buffer = 0;
   glm::ivec2 m_size{512, 512}; // Selection image size
@@ -22,6 +13,7 @@ public:
   int m_pixelSnap = 256;       // Size of pixel snapping
   bool m_snap = true;
 
+public:
   Selection(glm::ivec2 position, GLFWwindow *w, std::shared_ptr<OrthographicCamera> c);
   virtual ~Selection();
 
@@ -31,6 +23,15 @@ public:
   void captureBuffer();
   void saveBuffer();
 
-  void updateLogic() override;
+  void updateLogic() override {}
   void updateVisual() override;
+
+private:
+  std::shared_ptr<OrthographicCamera> m_camera; // Camera ptr
+
+  // Mouse positions for dragging across screen
+  glm::vec2 prev_mouse;
+  glm::vec2 cur_mouse;
+
+  void setTexture(GLuint *id);
 };

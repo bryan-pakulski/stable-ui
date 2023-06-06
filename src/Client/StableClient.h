@@ -36,8 +36,9 @@ private:
   std::string m_addr = "tcp://" + CONFIG::DOCKER_IP_ADDRESS.get() + ":5555";
   std::string m_heartbeat_addr = "tcp://" + CONFIG::DOCKER_IP_ADDRESS.get() + ":5556";
 
+private:
   std::string sendMessage(const std::string &message);
 
   StableClient();
-  ~StableClient();
+  ~StableClient() {}
 };

@@ -27,8 +27,6 @@ StableClient::StableClient() {
   m_heartbeatSocket.set(zmq::sockopt::linger, 0);
 }
 
-StableClient::~StableClient() {}
-
 // Heartbeat ping/pong to determine server status
 void StableClient::heartbeat(int &state) {
   commands::heartbeat cmd = commands::heartbeat();

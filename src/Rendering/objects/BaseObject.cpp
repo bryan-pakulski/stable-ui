@@ -5,8 +5,6 @@ BaseObject::BaseObject(glm::ivec2 position) : m_position{position} {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "BaseObject::BaseObject Object initialized at", position.x, position.y);
 }
 
-BaseObject::~BaseObject() {}
-
 // Read shader file
 std::string BaseObject::readShader(const char *filePath) {
   std::ifstream fileStream(filePath, std::ios::in);

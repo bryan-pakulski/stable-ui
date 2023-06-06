@@ -16,20 +16,6 @@
 
 class QDisplay_LeftSideBar : public QDisplay_Base {
 
-  struct tabs {
-    static const int TXT2IMG = 0;
-    static const int IMG2IMG = 1;
-    static const int TRAINING = 2;
-  };
-
-  std::unique_ptr<QDisplay_Text2Image> Text2ImageWindow;
-  std::unique_ptr<QDisplay_Image2Image> Image2ImageWindow;
-
-  // Window Options
-  const std::string c_windowName = "Helper Window";
-  std::pair<int, int> m_windowSize{};
-  int activeTab = tabs::TXT2IMG;
-
 public:
   // Initialise render manager references
   QDisplay_LeftSideBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
@@ -43,7 +29,9 @@ public:
   }
 
   // Drag Drop callback for use with img2img
-  static void drop_callback(GLFWwindow *window, int count, const char **paths) {}
+  static void drop_callback(GLFWwindow *window, int count, const char **paths) {
+    // TODO: do something with drag/drop operations
+  }
 
   virtual void render() {
     getWindowSize(m_windowSize);
@@ -96,4 +84,19 @@ public:
 
     ImGui::End();
   }
+
+private:
+  struct tabs {
+    static const int TXT2IMG = 0;
+    static const int IMG2IMG = 1;
+    static const int TRAINING = 2;
+  };
+
+  std::unique_ptr<QDisplay_Text2Image> Text2ImageWindow;
+  std::unique_ptr<QDisplay_Image2Image> Image2ImageWindow;
+
+  // Window Options
+  const std::string c_windowName = "Helper Window";
+  std::pair<int, int> m_windowSize{};
+  int activeTab = tabs::TXT2IMG;
 };

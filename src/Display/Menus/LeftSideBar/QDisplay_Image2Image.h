@@ -17,6 +17,43 @@
 
 class QDisplay_Image2Image : public QDisplay_Base {
 
+public:
+  // Initialise render manager references
+  QDisplay_Image2Image(std::shared_ptr<RenderManager> rm, GLFWwindow *w)
+      : QDisplay_Base(rm, w), m_preview{GLImage(512, 512, "preview")} {}
+
+  virtual void render() {
+
+    // Generate option only available whilst a image isn't pending
+    if ((m_image && m_image->renderState != Q_RENDER_STATE::RENDERING) || !m_image) {
+      static const ImVec4 currentColor{0, 0.5f, 0, 1.0f};
+
+      ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
+      ImGui::PushStyleColor(ImGuiCol_ButtonActive, currentColor);
+      ImGui::PushStyleColor(ImGuiCol_ButtonHovered, currentColor);
+
+      if (ImGui::Button("Generate", ImVec2(150, 40))) {
+        renderImage();
+      }
+      ImGui::PopStyleColor(3);
+    } else if (m_image && m_image->renderState == Q_RENDER_STATE::RENDERING) {
+      static const ImVec4 currentColor{0.5f, 0, 0, 1.0f};
+      ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
+      ImGui::PushStyleColor(ImGuiCol_ButtonActive, currentColor);
+      ImGui::PushStyleColor(ImGuiCol_ButtonHovered, currentColor);
+
+      if (ImGui::Button("Cancel", ImVec2(150, 40))) {
+        // TODO: cut render short?
+      }
+      ImGui::PopStyleColor(3);
+    }
+    baseImagePreview();
+    promptHelper();
+    promptConfig();
+    renderPreview();
+  }
+
+private:
   // Window variables & flags
   std::string m_prompt;
   std::string m_negativePrompt;
@@ -36,11 +73,7 @@ class QDisplay_Image2Image : public QDisplay_Base {
   std::unique_ptr<GLImage> m_image = 0;
   GLImage m_preview;
 
-public:
-  // Initialise render manager references
-  QDisplay_Image2Image(std::shared_ptr<RenderManager> rm, GLFWwindow *w)
-      : QDisplay_Base(rm, w), m_preview{GLImage(512, 512, "preview")} {}
-
+private:
   void baseImagePreview() {
     if (ImGui::CollapsingHeader("Base Image")) {
       if (m_renderManager->getImage() != "" && m_preview.m_image_source != m_renderManager->getImage()) {
@@ -122,36 +155,5 @@ public:
       ImGui::InputDouble("cfg scale", &m_cfg, 0.1);
       ImGui::InputInt("Iterations", &m_nIter);
     }
-  }
-
-  virtual void render() {
-
-    // Generate option only available whilst a image isn't pending
-    if ((m_image && m_image->renderState != Q_RENDER_STATE::RENDERING) || !m_image) {
-      static const ImVec4 currentColor{0, 0.5f, 0, 1.0f};
-
-      ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
-      ImGui::PushStyleColor(ImGuiCol_ButtonActive, currentColor);
-      ImGui::PushStyleColor(ImGuiCol_ButtonHovered, currentColor);
-
-      if (ImGui::Button("Generate", ImVec2(150, 40))) {
-        renderImage();
-      }
-      ImGui::PopStyleColor(3);
-    } else if (m_image && m_image->renderState == Q_RENDER_STATE::RENDERING) {
-      static const ImVec4 currentColor{0.5f, 0, 0, 1.0f};
-      ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
-      ImGui::PushStyleColor(ImGuiCol_ButtonActive, currentColor);
-      ImGui::PushStyleColor(ImGuiCol_ButtonHovered, currentColor);
-
-      if (ImGui::Button("Cancel", ImVec2(150, 40))) {
-        // TODO: cut render short?
-      }
-      ImGui::PopStyleColor(3);
-    }
-    baseImagePreview();
-    promptHelper();
-    promptConfig();
-    renderPreview();
   }
 };

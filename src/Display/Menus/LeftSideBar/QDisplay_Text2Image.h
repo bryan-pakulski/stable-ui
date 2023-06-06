@@ -16,6 +16,42 @@
 
 class QDisplay_Text2Image : public QDisplay_Base {
 
+public:
+  // Initialise render manager references
+  QDisplay_Text2Image(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {}
+
+  virtual void render() {
+
+    // Generate option only available whilst a image isn't pending
+    if ((m_image && m_image->renderState != Q_RENDER_STATE::RENDERING) || !m_image) {
+      static const ImVec4 currentColor{0, 0.5f, 0, 1.0f};
+
+      ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
+      ImGui::PushStyleColor(ImGuiCol_ButtonActive, currentColor);
+      ImGui::PushStyleColor(ImGuiCol_ButtonHovered, currentColor);
+
+      if (ImGui::Button("Generate", ImVec2(150, 40))) {
+        renderImage();
+      }
+      ImGui::PopStyleColor(3);
+    } else if (m_image && m_image->renderState == Q_RENDER_STATE::RENDERING) {
+      static const ImVec4 currentColor{0.5f, 0, 0, 1.0f};
+      ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
+      ImGui::PushStyleColor(ImGuiCol_ButtonActive, currentColor);
+      ImGui::PushStyleColor(ImGuiCol_ButtonHovered, currentColor);
+
+      if (ImGui::Button("Cancel", ImVec2(150, 40))) {
+        // TODO: cut render short?
+      }
+      ImGui::PopStyleColor(3);
+    }
+
+    promptHelper();
+    promptConfig();
+    imageWindow();
+  }
+
+private:
   // Window variables & flags
   std::string m_prompt;
   std::string m_negativePrompt;
@@ -35,10 +71,7 @@ class QDisplay_Text2Image : public QDisplay_Base {
 
   std::unique_ptr<GLImage> m_image = 0;
 
-public:
-  // Initialise render manager references
-  QDisplay_Text2Image(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {}
-
+private:
   void renderImage() {
     m_image.reset();
     m_image = std::unique_ptr<GLImage>(
@@ -123,36 +156,5 @@ public:
       ImGui::InputDouble("cfg scale", &m_cfg, 0.1);
       ImGui::InputInt("Iterations", &m_nIter);
     }
-  }
-
-  virtual void render() {
-
-    // Generate option only available whilst a image isn't pending
-    if ((m_image && m_image->renderState != Q_RENDER_STATE::RENDERING) || !m_image) {
-      static const ImVec4 currentColor{0, 0.5f, 0, 1.0f};
-
-      ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
-      ImGui::PushStyleColor(ImGuiCol_ButtonActive, currentColor);
-      ImGui::PushStyleColor(ImGuiCol_ButtonHovered, currentColor);
-
-      if (ImGui::Button("Generate", ImVec2(150, 40))) {
-        renderImage();
-      }
-      ImGui::PopStyleColor(3);
-    } else if (m_image && m_image->renderState == Q_RENDER_STATE::RENDERING) {
-      static const ImVec4 currentColor{0.5f, 0, 0, 1.0f};
-      ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
-      ImGui::PushStyleColor(ImGuiCol_ButtonActive, currentColor);
-      ImGui::PushStyleColor(ImGuiCol_ButtonHovered, currentColor);
-
-      if (ImGui::Button("Cancel", ImVec2(150, 40))) {
-        // TODO: cut render short?
-      }
-      ImGui::PopStyleColor(3);
-    }
-
-    promptHelper();
-    promptConfig();
-    imageWindow();
   }
 };

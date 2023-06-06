@@ -15,14 +15,6 @@
 #include "QDisplay_CanvasTools.h"
 
 class QDisplay_RightSideBar : public QDisplay_Base {
-private:
-  std::unique_ptr<QDisplay_ContentBrowser> m_contentBrowserWindow;
-  std::unique_ptr<QDisplay_CanvasTools> CanvasToolsWindow;
-
-  // Window Options
-  const std::string c_windowName = "Tools";
-  std::pair<int, int> m_windowSize{};
-
 public:
   // Initialise render manager reference
   QDisplay_RightSideBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
@@ -57,4 +49,12 @@ public:
 
     ImGui::End();
   }
+
+private:
+  std::unique_ptr<QDisplay_ContentBrowser> m_contentBrowserWindow;
+  std::unique_ptr<QDisplay_CanvasTools> CanvasToolsWindow;
+
+  // Window Options
+  const std::string c_windowName = "Tools";
+  std::pair<int, int> m_windowSize{};
 };

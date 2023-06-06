@@ -13,12 +13,6 @@
 #include <yaml-cpp/exceptions.h>
 
 class QDisplay_PluginsWindow : public QDisplay_Base {
-
-private:
-  void loadPluginList() {}
-  std::vector<listItem> m_ModulesList;
-  std::vector<std::unique_ptr<YamlDisplayBuilder>> m_VisibleModules;
-
 public:
   QDisplay_PluginsWindow(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     // Load modules list from yaml
@@ -64,4 +58,11 @@ public:
       }
     }
   }
+
+private:
+  std::vector<listItem> m_ModulesList;
+  std::vector<std::unique_ptr<YamlDisplayBuilder>> m_VisibleModules;
+
+private:
+  void loadPluginList() {}
 };

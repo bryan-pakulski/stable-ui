@@ -8,12 +8,14 @@
 #include "Helpers/QLogger.h"
 
 class YamlDisplayBuilder : public QDisplay_Base {
+
 public:
   bool m_terminate = false;
 
   std::vector<YAML::Node> m_windows;
   std::map<std::string, BaseType> m_variables;
 
+public:
   // Initialise render manager reference
   YamlDisplayBuilder(std::string yamlPath, std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
 

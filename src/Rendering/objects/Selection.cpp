@@ -5,7 +5,7 @@
 Selection::~Selection() {}
 
 Selection::Selection(glm::ivec2 position, GLFWwindow *w, std::shared_ptr<OrthographicCamera> c) : BaseObject(position) {
-  int success;
+  int shaderInitSuccess;
   m_window = w;
   m_camera = std::shared_ptr<OrthographicCamera>(c);
 
@@ -29,10 +29,10 @@ Selection::Selection(glm::ivec2 position, GLFWwindow *w, std::shared_ptr<Orthogr
   std::string vShaderSource = readShader("data/shaders/Selection_V.glsl");
   std::string fShaderSource = readShader("data/shaders/Selection_F.glsl");
 
-  unsigned int vertexShader = initVertexShader(vShaderSource.c_str(), success);
-  unsigned int fragmentShader = initFragmentShader(fShaderSource.c_str(), success);
+  unsigned int vertexShader = initVertexShader(vShaderSource.c_str(), shaderInitSuccess);
+  unsigned int fragmentShader = initFragmentShader(fShaderSource.c_str(), shaderInitSuccess);
 
-  linkShaders(vertexShader, fragmentShader, success, sh);
+  linkShaders(vertexShader, fragmentShader, shaderInitSuccess, sh);
   setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices), sh);
 
   createShader(sh, "selection");
@@ -53,10 +53,6 @@ void Selection::UpdateDrag(glm::vec2 position) {
   m_position.y = -static_cast<int>(std::round(convertedCoords.y / m_pixelSnap)) * snapSize;
 }
 
-void Selection::updateLogic() {
-  // TODO: Check if selection was updated? if so trigger texture to be regenerated?
-}
-
 void Selection::updateVisual() {
   glUseProgram(getShader("selection")->shaderProgram);
 
@@ -72,11 +68,7 @@ void Selection::updateVisual() {
                     glm::scale(glm::mat4(1.0f), glm::vec3(m_size.x, m_size.y, 1.0f));               // scale
   setMat4("model", model, "selection");
 
-  // Render the square
-  // Set the line width
   glLineWidth(1.0f);
-
-  // Draw the square
   glBindVertexArray(getShader("selection")->VAO);
   glDrawArrays(GL_LINE_LOOP, 0, 4);
   glBindVertexArray(0);

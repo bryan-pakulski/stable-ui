@@ -2,7 +2,7 @@
 #include "Helpers/QLogger.h"
 #include <cstddef>
 
-GLImage::GLImage(int width, int height, std::string name) : m_width(width), m_height(height), m_name(name) {
+GLImage::GLImage(int width, int height, std::string name) : m_name(name), m_width(width), m_height(height) {
   float color[] = {0.0f, 0.0f, 0.0f, 1.0f};
 
   glGenTextures(1, &m_texture);

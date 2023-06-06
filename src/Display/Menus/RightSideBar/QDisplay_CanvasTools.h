@@ -47,6 +47,7 @@ private:
   std::unique_ptr<GLImage> m_hidden_icon;
   float c_visibilityIconSize = 12.0f;
 
+private:
   // Selection preview
   void selectionPreview() {
 

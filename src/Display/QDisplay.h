@@ -83,6 +83,7 @@ private:
   float backgroundG = 0.44f;
   float backgroundB = 0.48f;
 
+private:
   // Window resize callback
   static void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     // make sure the viewport matches the new window dimensions; note that width and

@@ -9,8 +9,6 @@ Canvas::Canvas(glm::ivec2 position, const std::string &name, GLFWwindow *w, std:
   m_window = w;
   m_camera = std::shared_ptr<OrthographicCamera>(c);
 
-  glfwGetFramebufferSize(m_window, &m_screen.first, &m_screen.second);
-
   // Set vertex data
   float vertices[] = {
       // positions        // colors         // texture coords
@@ -48,8 +46,6 @@ Canvas::Canvas(glm::ivec2 position, const std::string &name, GLFWwindow *w, std:
 }
 
 void Canvas::updateLogic() {
-  // Get updated screen size
-  glfwGetFramebufferSize(m_window, &m_screen.first, &m_screen.second);
 
   // Check which chunks are in view and should be rendered
   for (auto &chunk : m_editorGrid) {
@@ -122,9 +118,6 @@ void Canvas::renderImages() {
   }
 }
 
-// Set Canvas Texture
-void Canvas::setTexture(GLuint *id) { m_texture_id = *id; }
-
 // TODO: Create a new grid chunk object/s based on provided image & coordinates
 void Canvas::createImage(std::shared_ptr<GLImage> image, glm::ivec2 position) {
   QLogger::GetInstance().Log(LOGLEVEL::INFO,
@@ -132,10 +125,3 @@ void Canvas::createImage(std::shared_ptr<GLImage> image, glm::ivec2 position) {
                              "on canvas: ", m_name);
   m_editorGrid.emplace_back(new Image(image, m_camera, position));
 }
-
-void Canvas::deleteChunk(int index) { m_editorGrid.erase(m_editorGrid.begin() + index); }
-
-// Chunk visibility control
-void Canvas::hideChunk(int index) { m_editorGrid[index]->m_renderFlag = false; }
-
-void Canvas::showChunk(int index) { m_editorGrid[index]->m_renderFlag = true; }

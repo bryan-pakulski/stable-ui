@@ -15,148 +15,10 @@
 
 #include <fstream>
 #include <imgui.h>
+#include <imgui_stdlib.h>
 #include <memory>
 
 class QDisplay_TopBar : public QDisplay_Base {
-
-private:
-  // Window triggers
-  bool newFileOpen = false;
-  bool logFileOpen = false;
-  bool loadFileOpen = false;
-  bool selectCanvasOpen = false;
-
-  std::unique_ptr<QDisplay_ConfigureModel> m_configureModelWindow;
-  std::unique_ptr<QDisplay_ImportModel> m_importModelWindow;
-  std::unique_ptr<QDisplay_ImportVAE> m_importVAEWindow;
-  std::unique_ptr<QDisplay_LoadModel> m_loadModelWindow;
-  std::unique_ptr<QDisplay_PluginsWindow> m_pluginsWindow;
-
-  // Docker status icons
-  std::unique_ptr<GLImage> m_docker_connected_icon;
-  std::unique_ptr<GLImage> m_docker_disconnected_icon;
-  float c_dockerIconSize = 15.0f;
-
-  // Log config
-  std::ifstream logStream;
-  std::stringstream logFileBuffer;
-  bool logUpdated = true;
-  clock_t lastLogReadTime;
-
-  // New file config
-  char m_canvasName[256] = "new";
-
-  /*
-   * Popup for displaying log file output
-   */
-  void QDisplay_LogFile() {
-
-    if (logFileOpen) {
-      ImGui::SetNextWindowBgAlpha(0.9f);
-      ImGui::SetNextWindowSize(ImVec2(CONFIG::IMGUI_LOG_WINDOW_WIDTH.get(), CONFIG::IMGUI_LOG_WINDOW_HEIGHT.get()));
-      ImGui::Begin("Log");
-
-      if (ImGui::Button("Close")) {
-        logFileOpen = false;
-      }
-
-      ImGui::SameLine();
-
-      if (ImGui::Button("Clear")) {
-        logStream.close();
-        QLogger::GetInstance().resetLog();
-      }
-
-      ImGui::Separator();
-
-      ImGui::BeginChild("ScrollingLog");
-
-      // Only update text if required
-      if (QLogger::GetInstance().m_LAST_WRITE_TIME != lastLogReadTime) {
-        logStream.open(QLOGGER_LOGFILE, std::ios::in);
-
-        logFileBuffer.clear();
-        logFileBuffer.str(std::string());
-
-        lastLogReadTime = QLogger::GetInstance().m_LAST_WRITE_TIME;
-        logFileBuffer << logStream.rdbuf();
-        logStream.close();
-        logUpdated = true;
-      }
-
-      ImGui::TextUnformatted(logFileBuffer.str().c_str());
-
-      // Move to bottom of screen
-      if (logUpdated) {
-        ImGui::SetScrollY(ImGui::GetScrollMaxY() + ImGui::GetStyle().ItemSpacing.y * 2);
-        logUpdated = false;
-      }
-      ImGui::EndChild();
-
-      ImGui::End();
-    }
-  }
-
-  void QDisplay_NewFile() {
-    if (newFileOpen) {
-      ImGui::OpenPopup("NEW_FILE");
-      if (ImGui::BeginPopupModal("NEW_FILE")) {
-
-        ImGui::InputText("canvas name", m_canvasName, 256);
-
-        if (ImGui::Button("Create Canvas")) {
-          m_renderManager->createCanvas(0, 0, std::string(m_canvasName));
-          newFileOpen = false;
-        }
-
-        if (ImGui::Button("Cancel")) {
-          newFileOpen = false;
-        }
-        ImGui::EndPopup();
-      }
-    }
-  }
-
-  void QDisplay_LoadFile() {
-    if (loadFileOpen) {
-
-      // Todo: Load file
-
-      loadFileOpen = false;
-    }
-  }
-
-  void QDisplay_SelectCanvasOpen() {
-    if (selectCanvasOpen) {
-      ImGui::OpenPopup("SELECTCANVAS");
-      if (ImGui::BeginPopupModal("SELECTCANVAS")) {
-        if (ImGui::BeginListBox("Canvas")) {
-          for (auto &item : m_renderManager->m_canvas) {
-            const char *item_name = item->m_name.c_str();
-            int index = std::addressof(item) - std::addressof(m_renderManager->m_canvas.front());
-            const bool is_selected = index == m_renderManager->m_activeId;
-
-            if (ImGui::Selectable(item_name, is_selected)) {
-              m_renderManager->selectCanvas(index);
-              selectCanvasOpen = false;
-            }
-
-            // Set the initial focus when opening the combo (scrolling +
-            // keyboard navigation focus)
-            if (is_selected) {
-              ImGui::SetItemDefaultFocus();
-            }
-          }
-          ImGui::EndListBox();
-        }
-      }
-      if (ImGui::Button("close")) {
-        selectCanvasOpen = false;
-      }
-      ImGui::EndPopup();
-    }
-  }
-
 public:
   // Initialise render manager reference
   QDisplay_TopBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
@@ -266,5 +128,144 @@ public:
     m_importVAEWindow->render();
     m_loadModelWindow->render();
     m_pluginsWindow->render();
+  }
+
+private:
+  // Window triggers
+  bool newFileOpen = false;
+  bool logFileOpen = false;
+  bool loadFileOpen = false;
+  bool selectCanvasOpen = false;
+
+  std::unique_ptr<QDisplay_ConfigureModel> m_configureModelWindow;
+  std::unique_ptr<QDisplay_ImportModel> m_importModelWindow;
+  std::unique_ptr<QDisplay_ImportVAE> m_importVAEWindow;
+  std::unique_ptr<QDisplay_LoadModel> m_loadModelWindow;
+  std::unique_ptr<QDisplay_PluginsWindow> m_pluginsWindow;
+
+  // Docker status icons
+  std::unique_ptr<GLImage> m_docker_connected_icon;
+  std::unique_ptr<GLImage> m_docker_disconnected_icon;
+  float c_dockerIconSize = 15.0f;
+
+  // Log config
+  std::ifstream logStream;
+  std::stringstream logFileBuffer;
+  bool logUpdated = true;
+  clock_t lastLogReadTime;
+
+  // New file config
+  std::string m_canvasName = "new";
+
+private:
+  /*
+   * Popup for displaying log file output
+   */
+  void QDisplay_LogFile() {
+
+    if (logFileOpen) {
+      ImGui::SetNextWindowBgAlpha(0.9f);
+      ImGui::SetNextWindowSize(ImVec2(CONFIG::IMGUI_LOG_WINDOW_WIDTH.get(), CONFIG::IMGUI_LOG_WINDOW_HEIGHT.get()));
+      ImGui::Begin("Log");
+
+      if (ImGui::Button("Close")) {
+        logFileOpen = false;
+      }
+
+      ImGui::SameLine();
+
+      if (ImGui::Button("Clear")) {
+        logStream.close();
+        QLogger::GetInstance().resetLog();
+      }
+
+      ImGui::Separator();
+
+      ImGui::BeginChild("ScrollingLog");
+
+      // Only update text if required
+      if (QLogger::GetInstance().m_LAST_WRITE_TIME != lastLogReadTime) {
+        logStream.open(QLOGGER_LOGFILE, std::ios::in);
+
+        logFileBuffer.clear();
+        logFileBuffer.str(std::string());
+
+        lastLogReadTime = QLogger::GetInstance().m_LAST_WRITE_TIME;
+        logFileBuffer << logStream.rdbuf();
+        logStream.close();
+        logUpdated = true;
+      }
+
+      ImGui::TextUnformatted(logFileBuffer.str().c_str());
+
+      // Move to bottom of screen
+      if (logUpdated) {
+        ImGui::SetScrollY(ImGui::GetScrollMaxY() + ImGui::GetStyle().ItemSpacing.y * 2);
+        logUpdated = false;
+      }
+      ImGui::EndChild();
+
+      ImGui::End();
+    }
+  }
+
+  void QDisplay_NewFile() {
+    if (newFileOpen) {
+      ImGui::OpenPopup("NEW_FILE");
+      if (ImGui::BeginPopupModal("NEW_FILE")) {
+
+        ImGui::InputText("canvas name", &m_canvasName);
+
+        if (ImGui::Button("Create Canvas")) {
+          m_renderManager->createCanvas(0, 0, m_canvasName);
+          newFileOpen = false;
+        }
+
+        if (ImGui::Button("Cancel")) {
+          newFileOpen = false;
+        }
+        ImGui::EndPopup();
+      }
+    }
+  }
+
+  void QDisplay_LoadFile() {
+    if (loadFileOpen) {
+
+      // Todo: Load file
+
+      loadFileOpen = false;
+    }
+  }
+
+  void QDisplay_SelectCanvasOpen() {
+    if (selectCanvasOpen) {
+      ImGui::OpenPopup("SELECTCANVAS");
+      if (ImGui::BeginPopupModal("SELECTCANVAS")) {
+        if (ImGui::BeginListBox("Canvas")) {
+          for (auto &item : m_renderManager->m_canvas) {
+            const char *item_name = item->m_name.c_str();
+            int index = std::addressof(item) - std::addressof(m_renderManager->m_canvas.front());
+            const bool is_selected = index == m_renderManager->m_activeId;
+
+            if (ImGui::Selectable(item_name, is_selected)) {
+              m_renderManager->selectCanvas(index);
+              selectCanvasOpen = false;
+            }
+
+            // Set the initial focus when opening the combo (scrolling +
+            // keyboard navigation focus)
+            if (is_selected) {
+              ImGui::SetItemDefaultFocus();
+            }
+          }
+          ImGui::EndListBox();
+        }
+      }
+      if (ImGui::Button("close")) {
+        selectCanvasOpen = false;
+      }
+      ImGui::EndPopup();
+    }
   }
 };

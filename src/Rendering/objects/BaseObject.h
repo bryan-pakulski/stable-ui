@@ -26,15 +26,10 @@ struct shader {
 
 class BaseObject {
 
-protected:
-  glm::ivec2 m_position;
-  std::map<std::string, std::shared_ptr<shader>> m_shaders;
-  GLFWwindow *m_window = 0;
-
 public:
   BaseObject(glm::ivec2 m_position);
 
-  virtual ~BaseObject();
+  virtual ~BaseObject() {}
 
   virtual void updateLogic() = 0;
   virtual void updateVisual() = 0;
@@ -59,6 +54,11 @@ public:
 
   // Set matrix coordinates for projection
   void setMat4(std::string uniformName, glm::mat4x4 mat, std::string shaderName);
+
+protected:
+  glm::ivec2 m_position;
+  std::map<std::string, std::shared_ptr<shader>> m_shaders;
+  GLFWwindow *m_window = 0;
 };
 
 // Linear convert X/Y coordinates to local coordinates (-1, 1.0)

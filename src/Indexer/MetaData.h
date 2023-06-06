@@ -150,6 +150,7 @@ public:
 private:
   bool m_initialised = true;
 
+private:
   XMP() { initialise(); }
   ~XMP() {
     // Terminate the toolkit

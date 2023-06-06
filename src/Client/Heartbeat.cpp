@@ -2,10 +2,6 @@
 #include "Display/ErrorHandler.h"
 #include "Client/StableClient.h"
 
-Heartbeat::Heartbeat() {}
-
-Heartbeat::~Heartbeat() {}
-
 void Heartbeat::start() {
   m_thread = std::thread([this] { run(); });
 }
