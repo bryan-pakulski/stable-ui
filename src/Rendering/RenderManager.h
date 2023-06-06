@@ -8,7 +8,7 @@
 #include "Helpers/States.h"
 
 #include "Rendering/objects/BaseObject.h"
-#include "Rendering/objects/image/Image.h"
+#include "Rendering/objects/GLImage/GLImage.h"
 #include "Rendering/objects/Selection.h"
 #include "Rendering/OrthographicCamera.h"
 #include "Rendering/Canvas.h"
@@ -16,14 +16,14 @@
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
-#include <memory>
 #include <vector>
+
+/*
+  This class is responsible for managing the camera and rendering of our main canvas / providing canvas interaction
+*/
 
 class RenderManager {
 public:
-  explicit RenderManager(GLFWwindow &w);
-  ~RenderManager();
-
   // Actively rendered canvas
   int m_activeId = 0;
   std::vector<std::shared_ptr<Canvas>> m_canvas;
@@ -34,6 +34,11 @@ public:
   std::shared_ptr<Selection> m_selection;
   // Right click context window
   bool m_contextWindowVisible = false;
+
+public:
+  explicit RenderManager(GLFWwindow &w);
+  ~RenderManager();
+
   // Main update loop
   void update();
 
@@ -48,27 +53,12 @@ public:
   // Make a canvas active
   void selectCanvas(int id);
   // Send an image to current active canvas
-  void sendImageToCanvas(Image &im);
+  void sendImageToCanvas(GLImage &im);
   // Set capture buffer flag (Move pixels inside selection to a texture)
   void captureBuffer();
-
-  /*
-    IMAGE GENERATION
-  */
-
-  // Get / Set image to use for base rendering
+  void genFromSelection();
   void useImage(std::string path);
   const std::string getImage();
-
-  // Generate txt2img
-  void textToImage(std::string prompt, std::string negative_prompt, std::string &sampler_name, int samples, int steps,
-                   double cfg, int seed, int width, int height, int &renderState);
-
-  // Generate img2img
-  void imageToImage(std::string &imgPath, std::string prompt, std::string negative_prompt, std::string &samplerName,
-                    int samples, int steps, double cfg, double strength, int seed, int &renderState);
-
-  void genFromSelection();
 
   /*
     CALLBACKS

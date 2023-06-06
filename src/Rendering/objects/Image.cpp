@@ -1,7 +1,7 @@
-#include "Chunk.h"
+#include "Rendering/objects/Image.h"
 
-Chunk::Chunk(std::shared_ptr<Image> im, std::shared_ptr<OrthographicCamera> c, int x, int y, int id)
-    : m_image{im}, m_coordinates{std::pair<int, int>(x, y)}, BaseObject(std::pair<int, int>(x, y)) {
+Image::Image(std::shared_ptr<GLImage> im, std::shared_ptr<OrthographicCamera> c, glm::ivec2 position)
+    : m_image{im}, BaseObject(position) {
   int success = 0;
   m_camera = std::shared_ptr<OrthographicCamera>(c);
   m_image->loadFromImage(m_image->m_image_source.c_str());
@@ -32,33 +32,19 @@ Chunk::Chunk(std::shared_ptr<Image> im, std::shared_ptr<OrthographicCamera> c, i
   linkShaders(vertexShader, fragmentShader, success, sh);
   setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices), sh);
 
-  createShader(sh, "chunk");
+  createShader(sh, "image");
 
   if (!success) {
-    QLogger::GetInstance().Log(LOGLEVEL::ERR, "Chunk::Chunk Error creating new chunk");
+    QLogger::GetInstance().Log(LOGLEVEL::ERR, "Image::Image Error creating new chunk");
   }
 }
 
-Chunk::~Chunk() {}
+Image::~Image() {}
 
-// Check if grid is currently visible based on world coordinates and window size
-bool Chunk::visible(const std::pair<int, int> &windowCoords, const std::pair<int, int> &windowSize) {
-  // TODO: use simple box boundary check to see if 512x512 grid is within the window (offsetting the window for world
-  // coordinates)
-  if (m_coordinates.first < windowCoords.first + windowSize.first &&
-      m_coordinates.first + m_image->m_width > windowCoords.first &&
-      m_coordinates.second < windowCoords.second + windowSize.second &&
-      m_coordinates.second + m_image->m_height > windowCoords.second) {
-    return true;
-  } else {
-    return true;
-  }
-}
-
-void Chunk::updateLogic() {}
+void Image::updateLogic() {}
 
 // Render onto screen, offset based on world coordinates & window size
-void Chunk::updateVisual() {
+void Image::updateVisual() {
   if (m_renderFlag) {
     glUseProgram(getShader("chunk")->shaderProgram);
 
@@ -67,10 +53,9 @@ void Chunk::updateVisual() {
     setMat4("projection", m_camera->GetProjectionMatrix(), "chunk");
 
     // Model projection code
-    glm::mat4 model =
-        glm::translate(glm::mat4(1.0f), glm::vec3(m_coordinates.first, m_coordinates.second, 0.0f)) * // translation
-        glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                             // rotation
-        glm::scale(glm::mat4(1.0f), glm::vec3(m_image->m_width, m_image->m_height, 1.0f));            // scale
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(m_position.x, m_position.y, 0.0f)) *     // translation
+                      glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                  // rotation
+                      glm::scale(glm::mat4(1.0f), glm::vec3(m_image->m_width, m_image->m_height, 1.0f)); // scale
     setMat4("model", model, "chunk");
 
     // Update texture information

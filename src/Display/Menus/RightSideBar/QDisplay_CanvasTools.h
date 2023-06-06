@@ -5,13 +5,14 @@
 #include "Config/config.h"
 #include "Helpers/GLHelper.h"
 #include "Display/QDisplay_Base.h"
+#include "imgui.h"
 
 class QDisplay_CanvasTools : public QDisplay_Base {
 public:
   // Initialise render manager reference
   QDisplay_CanvasTools(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
-    m_visible_icon = std::unique_ptr<Image>(new Image(32, 32, "visible_icon"));
-    m_hidden_icon = std::unique_ptr<Image>(new Image(32, 32, "hidden_icon"));
+    m_visible_icon = std::unique_ptr<GLImage>(new GLImage(32, 32, "visible_icon"));
+    m_hidden_icon = std::unique_ptr<GLImage>(new GLImage(32, 32, "hidden_icon"));
 
     m_visible_icon->loadFromImage("data/images/visible.png");
     m_hidden_icon->loadFromImage("data/images/hidden.png");
@@ -42,36 +43,41 @@ private:
 
   // Layer options
   int m_selectedLayerIndex = -1;
-  std::unique_ptr<Image> m_visible_icon;
-  std::unique_ptr<Image> m_hidden_icon;
+  std::unique_ptr<GLImage> m_visible_icon;
+  std::unique_ptr<GLImage> m_hidden_icon;
   float c_visibilityIconSize = 12.0f;
 
   // Selection preview
   void selectionPreview() {
 
-    ImGui::SliderInt("Selection X", &m_renderManager->m_selection->m_size.first, 0, 1024);
+    ImGui::SliderInt("Selection X", &m_renderManager->m_selection->m_size.x, 0, 1024);
     if (ImGui::BeginPopupContextItem("Selection X")) {
       if (ImGui::MenuItem("Reset")) {
-        m_renderManager->m_selection->m_size.first = 512;
+        m_renderManager->m_selection->m_size.x = 512;
       }
       ImGui::EndPopup();
     }
 
-    ImGui::SliderInt("Selection Y", &m_renderManager->m_selection->m_size.second, 0, 1024);
+    ImGui::SliderInt("Selection Y", &m_renderManager->m_selection->m_size.y, 0, 1024);
     if (ImGui::BeginPopupContextItem("Selection Y")) {
       if (ImGui::MenuItem("Reset")) {
-        m_renderManager->m_selection->m_size.second = 512;
+        m_renderManager->m_selection->m_size.y = 512;
       }
       ImGui::EndPopup();
+    }
+
+    ImGui::Checkbox("Snap to grid", &m_renderManager->m_selection->m_snap);
+
+    if (m_renderManager->m_selection->m_snap) {
+      ImGui::SliderInt("Selection Snap", &m_renderManager->m_selection->m_pixelSnap, 1, 512);
     }
 
     // TODO: add send to img2img
     if (ImGui::Button("Save Buffer to tmp")) {
       m_renderManager->m_selection->saveBuffer();
     }
-    ImGui::Image(
-        (void *)(intptr_t)m_renderManager->m_selection->m_selection_texture_buffer,
-        ImVec2(m_renderManager->m_selection->m_size.first * 0.4, m_renderManager->m_selection->m_size.second * 0.4));
+    ImGui::Image((void *)(intptr_t)m_renderManager->m_selection->m_selection_texture_buffer,
+                 ImVec2(m_renderManager->m_selection->m_size.x * 0.4, m_renderManager->m_selection->m_size.y * 0.4));
   }
 
   void debugInfo() {
@@ -105,7 +111,7 @@ private:
         // Visibility icons
         ImGui::PushID(static_cast<const void *>(&*item)); // We need a unique identifier for images to allow ImGui to
                                                           // perform interaction, hence using memory location
-        Image icon = item->m_renderFlag ? *m_visible_icon : *m_hidden_icon;
+        GLImage icon = item->m_renderFlag ? *m_visible_icon : *m_hidden_icon;
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
         ImGui::ImageButton((void *)(intptr_t)icon.m_texture, {c_visibilityIconSize, c_visibilityIconSize}, {1, 0},
                            {0, 1});
@@ -136,9 +142,9 @@ private:
       // TODO: scaling is not consistent with the coordinates of other resources, look to bring together all resources
       // under the same coordinate format
       ImGui::InputInt("img x",
-                      &m_renderManager->getActiveCanvas()->m_editorGrid[m_selectedLayerIndex]->m_coordinates.first);
+                      &m_renderManager->getActiveCanvas()->m_editorGrid[m_selectedLayerIndex]->getPosition().x);
       ImGui::InputInt("img y",
-                      &m_renderManager->getActiveCanvas()->m_editorGrid[m_selectedLayerIndex]->m_coordinates.second);
+                      &m_renderManager->getActiveCanvas()->m_editorGrid[m_selectedLayerIndex]->getPosition().y);
 
       if (ImGui::Button("Delete Layer")) {
         m_renderManager->getActiveCanvas()->deleteChunk(m_selectedLayerIndex);

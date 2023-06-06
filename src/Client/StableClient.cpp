@@ -48,16 +48,20 @@ void StableClient::heartbeat(int &state) {
 }
 
 // Reloads sd server in docker (release any models in memory)
-void StableClient::releaseMemory() {
+void StableClient::releaseModel(int &state) {
   commands::restartServer cmd = commands::restartServer();
   std::string msg = sendMessage(cmd.getCommandString());
+  if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
+    state = Q_MODEL_STATUS::NONE_LOADED;
+  } else {
+    state = Q_MODEL_STATUS::FAILED;
+  }
 }
 
 // Load a stable diffusion model into memory in preperation for running inference commands
-void StableClient::loadModelToMemory(ModelConfig model, int &state) {
+void StableClient::loadModelToMemory(commands::loadModelToMemory command, int &state) {
 
-  commands::loadModelToMemory cmd = commands::loadModelToMemory{model};
-  std::string msg = sendMessage(cmd.getCommandString());
+  std::string msg = sendMessage(command.getCommandString());
   if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
     state = Q_MODEL_STATUS::LOADED;
   } else {
@@ -66,14 +70,9 @@ void StableClient::loadModelToMemory(ModelConfig model, int &state) {
 }
 
 // Text to image
-void StableClient::textToImage(ModelConfig model, std::string outDir, std::string &canvasName, std::string prompt,
-                               std::string negative_prompt, std::string &samplerName, int batch_size, int steps,
-                               double cfg, int seed, int width, int height, int &renderState) {
+void StableClient::textToImage(commands::textToImage command, int &renderState) {
 
-  commands::textToImage cmd = commands::textToImage(model, prompt, width, height, negative_prompt, canvasName,
-                                                    samplerName, batch_size, 1, steps, cfg, seed, outDir);
-
-  std::string msg = sendMessage(cmd.getCommandString());
+  std::string msg = sendMessage(command.getCommandString());
   if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
     renderState = Q_RENDER_STATE::RENDERED;
   } else {
@@ -82,15 +81,9 @@ void StableClient::textToImage(ModelConfig model, std::string outDir, std::strin
 }
 
 // Image to image
-void StableClient::imageToImage(ModelConfig model, std::string outDir, std::string &prompt,
-                                std::string &negative_prompt, std::string &canvas_name, std::string &img_path,
-                                std::string &sampler_name, int batch_size, int n_iter, int steps, double cfg_scale,
-                                double strength, int seed, int &renderState) {
-  commands::imageToImage cmd =
-      commands::imageToImage(model, prompt, negative_prompt, canvas_name, img_path, sampler_name, batch_size, n_iter,
-                             steps, cfg_scale, strength, seed, outDir);
+void StableClient::imageToImage(commands::imageToImage command, int &renderState) {
 
-  std::string msg = sendMessage(cmd.getCommandString());
+  std::string msg = sendMessage(command.getCommandString());
   if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
     renderState = Q_RENDER_STATE::RENDERED;
   } else {

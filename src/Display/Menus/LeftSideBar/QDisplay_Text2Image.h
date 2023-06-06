@@ -9,6 +9,7 @@
 #include "Helpers/States.h"
 #include "Rendering/RenderManager.h"
 #include "Config/config.h"
+#include "Rendering/objects/GLImage/GLImage.h"
 #include "Display/QDisplay_Base.h"
 #include "StableManager.h"
 
@@ -18,16 +19,19 @@ class QDisplay_Text2Image : public QDisplay_Base {
   char *m_prompt = new char[CONFIG::PROMPT_LENGTH_LIMIT.get()]();
   char *m_negative_prompt = new char[CONFIG::PROMPT_LENGTH_LIMIT.get()]();
   std::string m_selectedSampler = "pndm";
-  std::vector<listItem> m_samplerList = {{.m_name = "ddim"}, {.m_name = "ddiminverse"},    {.m_name = "ddpm"},
-                                         {.m_name = "deis"}, {.m_name = "eulerancestral"}, {.m_name = "euler"},
-                                         {.m_name = "heun"}, {.m_name = "pndm"},           {.m_name = "unipc"}};
+  std::vector<listItem> m_samplerList = {
+      {.m_name = "ddim"},      {.m_name = "ddiminverse"}, {.m_name = "ddpm"},           {.m_name = "deis"},
+      {.m_name = "dpmsmulti"}, {.m_name = "dpmssingle"},  {.m_name = "eulerancestral"}, {.m_name = "euler"},
+      {.m_name = "heun"},      {.m_name = "kdpm2"},       {.m_name = "kdpm2ancestral"}, {.m_name = "lms"},
+      {.m_name = "pndm"},      {.m_name = "unipc"}};
+
   int m_width = 512;
   int m_height = 512;
-  int m_steps = 70;
+  int m_steps = 35;
   int m_seed = 0;
   double m_cfg = 7.5;
 
-  std::unique_ptr<Image> m_image = 0;
+  std::unique_ptr<GLImage> m_image = 0;
 
 public:
   // Initialise render manager references
@@ -38,8 +42,8 @@ public:
 
   void renderImage() {
     m_image.reset();
-    m_image = std::unique_ptr<Image>(
-        new Image(CONFIG::IMAGE_SIZE_X_LIMIT.get(), CONFIG::IMAGE_SIZE_Y_LIMIT.get(), "txt2img"));
+    m_image = std::unique_ptr<GLImage>(
+        new GLImage(CONFIG::IMAGE_SIZE_X_LIMIT.get(), CONFIG::IMAGE_SIZE_Y_LIMIT.get(), "txt2img"));
 
     int seed = m_seed;
     if (m_seed == 0) {

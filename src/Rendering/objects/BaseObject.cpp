@@ -1,9 +1,8 @@
 #include "BaseObject.h"
 #include <sstream>
 
-BaseObject::BaseObject(std::pair<int, int> pixelCoords) : pixelCoords{pixelCoords} {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "BaseObject::BaseObject Object initialized at", pixelCoords.first,
-                             pixelCoords.second);
+BaseObject::BaseObject(glm::ivec2 position) : m_position{position} {
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "BaseObject::BaseObject Object initialized at", position.x, position.y);
 }
 
 BaseObject::~BaseObject() {}

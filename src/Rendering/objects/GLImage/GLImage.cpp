@@ -1,8 +1,8 @@
-#include "Image.h"
+#include "Rendering/objects/GLImage/GLImage.h"
 #include "Helpers/QLogger.h"
 #include <cstddef>
 
-Image::Image(int width, int height, std::string name) : m_width(width), m_height(height), m_name(name) {
+GLImage::GLImage(int width, int height, std::string name) : m_width(width), m_height(height), m_name(name) {
   float color[] = {0.0f, 0.0f, 0.0f, 1.0f};
 
   glGenTextures(1, &m_texture);
@@ -22,7 +22,7 @@ Image::Image(int width, int height, std::string name) : m_width(width), m_height
   QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Image::Image Successfully created blank texture", m_name);
 }
 
-void Image::loadFromImage(std::string path, bool flipImage) {
+void GLImage::loadFromImage(std::string path, bool flipImage) {
   if (!GLHELPER::LoadTextureFromFile(path.c_str(), &m_texture, &m_width, &m_height, false, flipImage)) {
     QLogger::GetInstance().Log(LOGLEVEL::ERR, "Image::loadFromImage Failed to load image from file: ", path.c_str());
   }

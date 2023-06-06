@@ -7,7 +7,7 @@
 #include <GLFW/glfw3.h>
 #include <string>
 
-class Image {
+class GLImage {
 
 public:
   GLuint m_texture = 0;
@@ -18,8 +18,8 @@ public:
   int m_width;
   int m_height;
 
-  Image(int width, int height, std::string name);
-  ~Image() = default;
+  GLImage(int width, int height, std::string name);
+  ~GLImage() = default;
 
   void loadFromImage(std::string path, bool flipImage = false);
 };

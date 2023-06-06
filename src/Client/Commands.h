@@ -103,8 +103,8 @@ Parameters:
 class textToImage : public command {
 public:
   textToImage(ModelConfig model, std::string &prompt, int width, int height, std::string &negative_prompt,
-              std::string &canvas_name, std::string &sampler_name, int batch_size, int n_iter, int steps,
-              double cfg_scale, int seed, std::string &out_path) {
+              std::string canvas_name, std::string &sampler_name, int n_iter, int steps, double cfg_scale, int seed,
+              std::string out_path) {
     m_name = "txt2img";
 
     prompt.append(" " + model.trigger_prompt);
@@ -132,7 +132,7 @@ Parameters:
     - subfolder_name                (Subfolder to store images in, named after canvas)
     - img_path                      (Path to reference image)
     - sampler_name                  (Sampler i.e. DPMS)
-    - n_iter                        (Number of imgaes)
+    - n_iter                        (Number of images)
     - steps                         (Number of steps to generate)
     - cfg_scale                     (CFG scale value 0.0 -> 12.0)
     - strength                      (Signal noise ratio of reference image 0 - 1.0)
@@ -141,9 +141,9 @@ Parameters:
 */
 class imageToImage : public command {
 public:
-  imageToImage(ModelConfig model, std::string &prompt, std::string &negative_prompt, std::string &canvas_name,
-               std::string &img_path, std::string &sampler_name, int batch_size, int n_iter, int steps,
-               double cfg_scale, double strength, int seed, std::string &out_path) {
+  imageToImage(ModelConfig &model, std::string &prompt, std::string &negative_prompt, std::string canvas_name,
+               std::string &img_path, std::string &sampler_name, int n_iter, int steps, double cfg_scale,
+               double strength, int seed, std::string out_path) {
     m_name = "img2img";
 
     prompt.append(" " + model.trigger_prompt);

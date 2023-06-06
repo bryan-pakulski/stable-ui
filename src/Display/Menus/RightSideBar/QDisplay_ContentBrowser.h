@@ -13,9 +13,9 @@ class QDisplay_ContentBrowser : public QDisplay_Base {
 
 private:
   // Content Browser Config
-  std::unique_ptr<Image> m_directory_icon;
-  std::unique_ptr<Image> m_file_icon;
-  std::unique_ptr<Image> m_preview_image;
+  std::unique_ptr<GLImage> m_directory_icon;
+  std::unique_ptr<GLImage> m_file_icon;
+  std::unique_ptr<GLImage> m_preview_image;
 
   const char *c_base_content_directory = "data/output";
   std::filesystem::path m_current_directory;
@@ -29,8 +29,8 @@ private:
 public:
   QDisplay_ContentBrowser(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     // Initialise content browser
-    m_directory_icon = std::unique_ptr<Image>(new Image(256, 256, "dir_icon"));
-    m_file_icon = std::unique_ptr<Image>(new Image(256, 256, "file_icon"));
+    m_directory_icon = std::unique_ptr<GLImage>(new GLImage(256, 256, "dir_icon"));
+    m_file_icon = std::unique_ptr<GLImage>(new GLImage(256, 256, "file_icon"));
     m_directory_icon->loadFromImage("data/images/directory_icon.png");
     m_file_icon->loadFromImage("data/images/file_icon.png");
     m_current_directory = std::filesystem::path(c_base_content_directory);
@@ -101,7 +101,7 @@ public:
 
     // Create new texture
     m_preview_image.reset();
-    m_preview_image = std::unique_ptr<Image>(new Image(512, 512, "preview"));
+    m_preview_image = std::unique_ptr<GLImage>(new GLImage(512, 512, "preview"));
     m_preview_image->loadFromImage(path.string());
     m_preview_image->textured = true;
 
@@ -136,7 +136,7 @@ public:
       // Our set contains full file paths (including data directory)
       for (auto &path : m_filteredPaths) {
         ImGui::PushID(path.c_str());
-        Image icon = *m_file_icon;
+        GLImage icon = *m_file_icon;
 
         // Create texture
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
@@ -174,14 +174,15 @@ public:
         const auto &path = directoryEntry.path();
 
         // skip this item if it's not an image or directory
-        if (directoryEntry.is_regular_file() && (path.extension() != ".png" && path.extension() != ".jpg")) {
+        if (directoryEntry.is_regular_file() &&
+            (path.extension() != ".png" && path.extension() != ".jpg" && path.extension() != ".jpeg")) {
           continue;
         }
 
         std::string filenameString = path.filename().string();
 
         ImGui::PushID(filenameString.c_str());
-        Image icon = directoryEntry.is_directory() ? *m_directory_icon : *m_file_icon;
+        GLImage icon = directoryEntry.is_directory() ? *m_directory_icon : *m_file_icon;
 
         // Create texture
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));

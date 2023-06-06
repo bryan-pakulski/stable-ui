@@ -15,7 +15,7 @@ RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
 
   // Create objects
   m_camera = std::shared_ptr<OrthographicCamera>(new OrthographicCamera(&m_window));
-  m_selection = std::shared_ptr<Selection>(new Selection(std::pair<int, int>(0, 0), &m_window, m_camera));
+  m_selection = std::shared_ptr<Selection>(new Selection(glm::ivec2{0, 0}, &m_window, m_camera));
 
   createCanvas(0, 0, "default");
 }
@@ -85,7 +85,7 @@ void RenderManager::selectCanvas(int id) {
 // Create new canvas object & return a reference
 std::shared_ptr<Canvas> RenderManager::createCanvas(int x, int y, const std::string &name) {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::createCanvas Creating new canvas");
-  m_canvas.emplace_back(new Canvas(std::pair<int, int>{x, y}, name, &m_window, m_camera));
+  m_canvas.emplace_back(new Canvas(glm::ivec2{x, y}, name, &m_window, m_camera));
   selectCanvas(m_canvas.size() - 1);
   return m_canvas.back();
 }
@@ -104,23 +104,8 @@ void RenderManager::useImage(std::string path) { m_baseImage = path; }
 const std::string RenderManager::getImage() { return m_baseImage; }
 
 // Get image from canvas, based on selection coordinates
-void RenderManager::sendImageToCanvas(Image &im) {
-  m_canvas[m_activeId]->createImage(std::shared_ptr<Image>(new Image(im)), m_selection->getCoordinates());
-}
-
-// Text to Image, render result to canvas
-void RenderManager::textToImage(std::string prompt, std::string negative_prompt, std::string &samplerName, int samples,
-                                int steps, double cfg, int seed, int width, int height, int &renderState) {
-  SDCommandsInterface::GetInstance().textToImage(getActiveCanvas()->m_name, prompt, negative_prompt, samplerName,
-                                                 samples, steps, cfg, seed, width, height, renderState);
-}
-
-// Image to Image, render result to canvas
-void RenderManager::imageToImage(std::string &imgPath, std::string prompt, std::string negative_prompt,
-                                 std::string &samplerName, int samples, int steps, double cfg, double strength,
-                                 int seed, int &renderState) {
-  SDCommandsInterface::GetInstance().imageToImage(getActiveCanvas()->m_name, imgPath, prompt, negative_prompt,
-                                                  samplerName, samples, steps, cfg, strength, seed, renderState);
+void RenderManager::sendImageToCanvas(GLImage &im) {
+  m_canvas[m_activeId]->createImage(std::shared_ptr<GLImage>(new GLImage(im)), m_selection->getPosition());
 }
 
 // Mouse movement callback
@@ -131,17 +116,15 @@ void RenderManager::mouse_cursor_callback(GLFWwindow *window, double xposIn, dou
   // Move camera view
   if (rm->m_cameraDrag) {
     rm->m_camera->OffsetPosition(glm::vec3(xposIn - rm->m_prev_mouse.x, yposIn - rm->m_prev_mouse.y, 1.0f));
-    rm->m_prev_mouse.x = xposIn;
-    rm->m_prev_mouse.y = yposIn;
+    rm->m_prev_mouse = {xposIn, yposIn};
   }
 
   // Catch selection coordinates
-  if (rm->m_selection->m_captureInProgress) {
-    rm->m_selection->updateCapture(xposIn, yposIn);
+  if (rm->m_selection->m_dragging) {
+    rm->m_selection->UpdateDrag(glm::vec2{xposIn, yposIn});
   }
 
-  rm->m_cur_mouse.x = xposIn;
-  rm->m_cur_mouse.y = yposIn;
+  rm->m_cur_mouse = {xposIn, yposIn};
 }
 
 // Mouse button callback function for dragging camera and interacting with canvas
@@ -156,8 +139,7 @@ void RenderManager::mouse_btn_callback(GLFWwindow *window, int button, int actio
 
   if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
     if (GLFW_PRESS == action) {
-      rm->m_prev_mouse.x = rm->m_cur_mouse.x;
-      rm->m_prev_mouse.y = rm->m_cur_mouse.y;
+      rm->m_prev_mouse = rm->m_cur_mouse;
       rm->m_cameraDrag = true;
     } else if (GLFW_RELEASE == action) {
       rm->m_cameraDrag = false;
@@ -165,11 +147,9 @@ void RenderManager::mouse_btn_callback(GLFWwindow *window, int button, int actio
   }
 
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-    double xpos, ypos;
-    glfwGetCursorPos(window, &xpos, &ypos);
-    rm->m_selection->startCapture(xpos, ypos);
+    rm->m_selection->m_dragging = true;
   } else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
-    rm->m_selection->m_captureInProgress = false;
+    rm->m_selection->m_dragging = false;
   }
 
   if (button == GLFW_MOUSE_BUTTON_RIGHT) {

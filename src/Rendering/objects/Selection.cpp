@@ -4,12 +4,10 @@
 
 Selection::~Selection() {}
 
-Selection::Selection(std::pair<int, int> coords, GLFWwindow *w, std::shared_ptr<OrthographicCamera> c)
-    : BaseObject(coords) {
+Selection::Selection(glm::ivec2 position, GLFWwindow *w, std::shared_ptr<OrthographicCamera> c) : BaseObject(position) {
   int success;
   m_window = w;
   m_camera = std::shared_ptr<OrthographicCamera>(c);
-  m_position = glm::vec3(0.0f);
 
   // Vertex data
   float vertices[] = {
@@ -43,20 +41,16 @@ Selection::Selection(std::pair<int, int> coords, GLFWwindow *w, std::shared_ptr<
   glGenTextures(1, &m_selection_texture_buffer);
 }
 
-std::pair<int, int> Selection::getCoordinates() { return std::pair<int, int>{m_position.x, m_position.y}; }
+void Selection::UpdateDrag(glm::vec2 position) {
+  // If snap to grid is disabled then default to a single pixel as our snap size
+  int snapSize = m_snap ? m_pixelSnap : 1;
 
-void Selection::startCapture(float x, float y) { m_captureInProgress = true; }
-
-void Selection::updateCapture(float x, float y) {
-  glm::vec2 convertedCoords = m_camera->screenToGlobalCoordinates(x, y);
-
-  // Round coordinates to nearest multiple of snapping distance
-  int roundedX = static_cast<int>(std::round(convertedCoords.x / m_pixelSnap)) * m_pixelSnap;
-  int roundedY = static_cast<int>(std::round(convertedCoords.y / m_pixelSnap)) * m_pixelSnap;
+  glm::ivec2 convertedCoords =
+      m_camera->screenToGlobalCoordinates(glm::vec2{std::round(position.x), std::round(position.y)});
 
   // Assign to m_position
-  m_position.x = static_cast<float>(roundedX);
-  m_position.y = -static_cast<float>(roundedY);
+  m_position.x = static_cast<int>(std::round(convertedCoords.x / m_pixelSnap)) * snapSize;
+  m_position.y = -static_cast<int>(std::round(convertedCoords.y / m_pixelSnap)) * snapSize;
 }
 
 void Selection::updateLogic() {
@@ -75,7 +69,7 @@ void Selection::updateVisual() {
   // Model code
   glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(m_position.x, m_position.y, 0.0f)) *  // translation
                     glm::rotate(glm::mat4(1.0f), glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * // rotation
-                    glm::scale(glm::mat4(1.0f), glm::vec3(m_size.first, m_size.second, 1.0f));      // scale
+                    glm::scale(glm::mat4(1.0f), glm::vec3(m_size.x, m_size.y, 1.0f));               // scale
   setMat4("model", model, "selection");
 
   // Render the square
@@ -91,20 +85,20 @@ void Selection::updateVisual() {
 void Selection::captureBuffer() {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "Selection::captureBuffer Capturing at screenspace coords: ", m_position.x,
                              m_position.y, "\n\tWorld space coords: ", m_position.x, m_position.y,
-                             "Capture size: ", m_size.first, m_size.second);
+                             "Capture size: ", m_size.x, m_size.y);
 
   // Allocate memory block size of pixel count
-  std::vector<unsigned char> pixels(m_size.first * m_size.second * 4);
+  std::vector<unsigned char> pixels(m_size.x * m_size.y * 4);
 
   // Read pixels starting from position with specified width, height, format and type
   glReadBuffer(GL_COLOR_ATTACHMENT0);
-  glReadPixels(m_position.x, m_position.y, m_size.first, m_size.second, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+  glReadPixels(m_position.x, m_position.y, m_size.x, m_size.y, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
   // Check for errors here
 
   // Create the texture buffer with correct format, internal format and properties
   glGenTextures(1, &m_selection_texture_buffer);
   glBindTexture(GL_TEXTURE_2D, m_selection_texture_buffer);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_size.first, m_size.second, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_size.x, m_size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
 
   // If filtering is requred:
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -114,5 +108,5 @@ void Selection::captureBuffer() {
 void Selection::saveBuffer() {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "Selection::saveBuffer Saving selection buffer to file ",
                              "data/output/buffer.png");
-  GLHELPER::SaveTextureToFile("data/output/buffer.png", &m_selection_texture_buffer, m_size.first, m_size.second);
+  GLHELPER::SaveTextureToFile("data/output/buffer.png", &m_selection_texture_buffer, m_size.x, m_size.y);
 }

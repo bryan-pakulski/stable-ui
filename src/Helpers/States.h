@@ -10,6 +10,7 @@ struct Q_COMMAND_EXECUTION_STATE {
   const static int FAILED = -1;
   const static int PENDING = 0;
   const static int SUCCESS = 1;
+  const static int NONE = 2;
 };
 
 // Docker status

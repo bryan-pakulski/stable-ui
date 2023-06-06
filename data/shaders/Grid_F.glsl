@@ -175,8 +175,8 @@ void main() {
 
   // ---------------------
 
-  // Origin moves based on camera position
-  origin = vec2(iPos.x + iResolution.x / 2, iPos.y + iResolution.y / 2);
+  // Origin moves based on camera position, we center at the screen hence the use of iResolution/2
+  origin = vec2(iPos.x + (iResolution.x / 2), iPos.y + (iResolution.y / 2));
 
   // Zoom
   int minZoom = 100;

@@ -32,8 +32,8 @@ private:
   std::unique_ptr<QDisplay_PluginsWindow> m_pluginsWindow;
 
   // Docker status icons
-  std::unique_ptr<Image> m_docker_connected_icon;
-  std::unique_ptr<Image> m_docker_disconnected_icon;
+  std::unique_ptr<GLImage> m_docker_connected_icon;
+  std::unique_ptr<GLImage> m_docker_disconnected_icon;
   float c_dockerIconSize = 15.0f;
 
   // Log config
@@ -166,8 +166,8 @@ public:
     m_pluginsWindow = std::unique_ptr<QDisplay_PluginsWindow>(new QDisplay_PluginsWindow(rm, w));
 
     // Load images
-    m_docker_connected_icon = std::unique_ptr<Image>(new Image(32, 32, "connected_icon"));
-    m_docker_disconnected_icon = std::unique_ptr<Image>(new Image(32, 32, "disconnected_icon"));
+    m_docker_connected_icon = std::unique_ptr<GLImage>(new GLImage(32, 32, "connected_icon"));
+    m_docker_disconnected_icon = std::unique_ptr<GLImage>(new GLImage(32, 32, "disconnected_icon"));
 
     m_docker_connected_icon->loadFromImage("data/images/connected.png");
     m_docker_disconnected_icon->loadFromImage("data/images/disconnected.png");
@@ -244,7 +244,7 @@ public:
       // Docker connection state
       ImGui::Separator();
       {
-        Image icon = Heartbeat::GetInstance().getState() ? *m_docker_connected_icon : *m_docker_disconnected_icon;
+        GLImage icon = Heartbeat::GetInstance().getState() ? *m_docker_connected_icon : *m_docker_disconnected_icon;
         ImGui::Image((void *)(intptr_t)icon.m_texture, {c_dockerIconSize, c_dockerIconSize}, {1, 0}, {0, 1});
         std::string dockerState = Heartbeat::GetInstance().getState() ? "Docker Connected" : "Docker Disconnected";
         ImGui::MenuItem(dockerState.c_str());

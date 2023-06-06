@@ -4,7 +4,8 @@
 #include "Config/structs.h"
 #include "Helpers/QLogger.h"
 
-#include "StableClient.h"
+#include "Client/Commands.h"
+#include "Client/StableClient.h"
 #include "Helpers/States.h"
 
 #include <memory>
@@ -14,8 +15,6 @@
 // Runs on seperate thread for non-blocking operations
 class SDCommandsInterface {
 private:
-  std::thread m_Thread;
-
   SDCommandsInterface();
   ~SDCommandsInterface();
 
@@ -35,10 +34,7 @@ public:
   void attachModelToServer(ModelConfig model, int &state);
 
   // Commands that can be used by modules
-  void textToImage(std::string &canvasName, std::string prompt, std::string negative_prompt, std::string &samplerName,
-                   int samples, int steps, double cfg, int seed, int width, int height, int &renderState);
+  void textToImage(commands::textToImage command, int &renderState);
 
-  void imageToImage(std::string &canvasName, std::string &imgPath, std::string &prompt, std::string &negative_prompt,
-                    std::string &samplerName, int batch_size, int steps, double cfg, double strength, int seed,
-                    int &renderState);
+  void imageToImage(commands::imageToImage command, int &renderState);
 };

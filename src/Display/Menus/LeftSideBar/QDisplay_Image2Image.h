@@ -11,7 +11,7 @@
 #include "Rendering/RenderManager.h"
 #include "Config/config.h"
 #include "Display/QDisplay_Base.h"
-#include "Rendering/objects/image/Image.h"
+#include "Rendering/objects/GLImage/GLImage.h"
 #include "StableManager.h"
 
 class QDisplay_Image2Image : public QDisplay_Base {
@@ -19,29 +19,27 @@ class QDisplay_Image2Image : public QDisplay_Base {
   // Window variables & flags
   char *m_prompt = new char[CONFIG::PROMPT_LENGTH_LIMIT.get()]();
   char *m_negative_prompt = new char[CONFIG::PROMPT_LENGTH_LIMIT.get()]();
-  int m_steps = 70;
+  std::string m_selectedSampler = "pndm";
+  std::vector<listItem> m_samplerList = {
+      {.m_name = "ddim"},      {.m_name = "ddiminverse"}, {.m_name = "ddpm"},           {.m_name = "deis"},
+      {.m_name = "dpmsmulti"}, {.m_name = "dpmssingle"},  {.m_name = "eulerancestral"}, {.m_name = "euler"},
+      {.m_name = "heun"},      {.m_name = "kdpm2"},       {.m_name = "kdpm2ancestral"}, {.m_name = "lms"},
+      {.m_name = "pndm"},      {.m_name = "unipc"}};
+
+  int m_steps = 35;
   int m_seed = 0;
   float m_strength = 0.5;
   double m_cfg = 7.5;
 
-  std::string m_selectedSampler = "DDIM";
-  std::vector<listItem> m_samplerList;
-
-  std::unique_ptr<Image> m_image = 0;
-  Image m_preview;
+  std::unique_ptr<GLImage> m_image = 0;
+  GLImage m_preview;
 
 public:
   // Initialise render manager references
   QDisplay_Image2Image(std::shared_ptr<RenderManager> rm, GLFWwindow *w)
-      : QDisplay_Base(rm, w), m_preview{Image(512, 512, "preview")} {
+      : QDisplay_Base(rm, w), m_preview{GLImage(512, 512, "preview")} {
     m_prompt[0] = 0;
     m_negative_prompt[0] = 0;
-
-    // Sampler menu
-    listItem i{.m_name = "DDIM"};
-    listItem j{.m_name = "UNIPC"};
-    m_samplerList.push_back(i);
-    m_samplerList.push_back(j);
   }
 
   void baseImagePreview() {
@@ -56,8 +54,8 @@ public:
 
   void renderImage() {
     m_image.reset();
-    m_image = std::unique_ptr<Image>(
-        new Image(CONFIG::IMAGE_SIZE_X_LIMIT.get(), CONFIG::IMAGE_SIZE_Y_LIMIT.get(), "img2img"));
+    m_image = std::unique_ptr<GLImage>(
+        new GLImage(CONFIG::IMAGE_SIZE_X_LIMIT.get(), CONFIG::IMAGE_SIZE_Y_LIMIT.get(), "img2img"));
     std::string path = m_renderManager->getImage();
 
     int seed = m_seed;

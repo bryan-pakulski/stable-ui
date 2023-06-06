@@ -28,10 +28,10 @@ void OrthographicCamera::RecalculateViewMatrix() {
   m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
 }
 
-glm::vec2 OrthographicCamera::screenToGlobalCoordinates(float x, float y) {
+glm::ivec2 OrthographicCamera::screenToGlobalCoordinates(glm::ivec2 position) {
   // Step 1: Normalize coordinates
-  float normX = 2.0f * x / m_screen.x - 1.0f;
-  float normY = 2.0f * y / m_screen.y - 1.0f;
+  float normX = 2.0f * position.x / m_screen.x - 1.0f;
+  float normY = 2.0f * position.y / m_screen.y - 1.0f;
 
   // HOMOGENEOUS SPACE
   glm::vec4 screenPos = glm::vec4(normX, normY, -1.0f, 1.0f);
@@ -40,7 +40,7 @@ glm::vec2 OrthographicCamera::screenToGlobalCoordinates(float x, float y) {
   glm::mat4 ProjectView = GetProjectionMatrix() * GetViewMatrix();
   glm::mat4 viewProjectionInverse = glm::inverse(ProjectView);
   glm::vec4 worldPos = viewProjectionInverse * screenPos;
-  return glm::vec2(worldPos.x, worldPos.y);
+  return glm::ivec2(round(worldPos.x), round(worldPos.y));
 }
 
 void OrthographicCamera::updateLogic() {

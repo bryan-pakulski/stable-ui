@@ -3,9 +3,8 @@
 
 Canvas::~Canvas() {}
 
-Canvas::Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *w,
-               std::shared_ptr<OrthographicCamera> c)
-    : BaseObject(coords), m_coords{coords}, m_name{name} {
+Canvas::Canvas(glm::ivec2 position, const std::string &name, GLFWwindow *w, std::shared_ptr<OrthographicCamera> c)
+    : BaseObject(position), m_name{name} {
   int success;
   m_window = w;
   m_camera = std::shared_ptr<OrthographicCamera>(c);
@@ -100,9 +99,8 @@ void Canvas::renderGrid() {
   setMat4("view", m_camera->GetViewMatrix(), "background_grid");
   setMat4("projection", m_camera->GetProjectionMatrix(), "background_grid");
 
-  glm::mat4 model = glm::translate(glm::mat4(1.0f),
-                                   glm::vec3(-m_camera->m_position.x, -m_camera->m_position.y, 0.0f)) * // translation
-                    glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                   // rotation
+  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(m_position.x, m_position.y, 0.0f)) * // translation
+                    glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *              // rotation
                     glm::scale(glm::mat4(1.0f), glm::vec3(m_camera->m_screen.x * m_camera->m_zoom,
                                                           m_camera->m_screen.y * m_camera->m_zoom, 1.0f)); // scale
   setMat4("model", model, "background_grid");
@@ -119,10 +117,8 @@ void Canvas::renderGrid() {
 
 void Canvas::renderImages() {
   // Check which chunks are in view and should be rendered
-  for (auto &chunk : m_editorGrid) {
-    if (chunk->visible(m_coords, m_screen)) {
-      chunk->updateVisual();
-    }
+  for (auto &image : m_editorGrid) {
+    image->updateVisual();
   }
 }
 
@@ -130,12 +126,11 @@ void Canvas::renderImages() {
 void Canvas::setTexture(GLuint *id) { m_texture_id = *id; }
 
 // TODO: Create a new grid chunk object/s based on provided image & coordinates
-void Canvas::createImage(std::shared_ptr<Image> image, std::pair<int, int> chunk_coordinates) {
+void Canvas::createImage(std::shared_ptr<GLImage> image, glm::ivec2 position) {
   QLogger::GetInstance().Log(LOGLEVEL::INFO,
-                             "Canvas::createImage Creating new image chunk at coordinates: ", chunk_coordinates.first,
-                             chunk_coordinates.second, "on canvas: ", m_name);
-  m_editorGrid.emplace_back(
-      new Chunk(image, m_camera, chunk_coordinates.first, chunk_coordinates.second, m_editorGrid.size()));
+                             "Canvas::createImage Creating new image chunk at coordinates: ", position.x, position.y,
+                             "on canvas: ", m_name);
+  m_editorGrid.emplace_back(new Image(image, m_camera, position));
 }
 
 void Canvas::deleteChunk(int index) { m_editorGrid.erase(m_editorGrid.begin() + index); }

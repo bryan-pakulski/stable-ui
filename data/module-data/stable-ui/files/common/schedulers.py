@@ -1,20 +1,23 @@
-from diffusers import DDIMScheduler
-from diffusers import DDPMScheduler
-from diffusers import PNDMScheduler
-from diffusers import LMSDiscreteScheduler
-from diffusers import EulerDiscreteScheduler
-from diffusers import HeunDiscreteScheduler
-from diffusers import EulerAncestralDiscreteScheduler
-from diffusers import DPMSolverMultistepScheduler
-from diffusers import DPMSolverSinglestepScheduler
-from diffusers import KDPM2DiscreteScheduler
-from diffusers import KDPM2AncestralDiscreteScheduler
-from diffusers import DEISMultistepScheduler
-from diffusers import UniPCMultistepScheduler
+from diffusers import (DDIMScheduler, 
+  DDPMScheduler, 
+  PNDMScheduler, 
+  LMSDiscreteScheduler, 
+  EulerDiscreteScheduler, 
+  HeunDiscreteScheduler, 
+  EulerAncestralDiscreteScheduler, 
+  DPMSolverMultistepScheduler, 
+  DPMSolverSinglestepScheduler, 
+  KDPM2DiscreteScheduler, 
+  KDPM2AncestralDiscreteScheduler, 
+  DEISMultistepScheduler, 
+  UniPCMultistepScheduler,
+  DDIMInverseScheduler
+)
 
 
 SCHEDULERS = {
     "ddim": DDIMScheduler,
+    "ddiminverse": DDIMInverseScheduler,
     "ddpm": DDPMScheduler,
     "deis": DEISMultistepScheduler,
     "dpmsmulti": DPMSolverMultistepScheduler,
@@ -29,34 +32,29 @@ SCHEDULERS = {
     "unipc": UniPCMultistepScheduler
 }
 
-DDIMScheduler.from_config
-
 def isCompatibleScheduler(current, scheduler):
-    if SCHEDULERS[scheduler] in current.compatibles:
-        return True
-    else:
-        return False
+    return SCHEDULERS[scheduler] in current.compatibles
 
+# Return first compatible scheduler with current one
 def getCompatibleSampler(current):
-    for item in current.compatibles:
-        for k,v in SCHEDULERS:
-            if v == item:
-                return k;
+    for scheduler in SCHEDULERS.keys():
+        if isCompatibleScheduler(current, scheduler):
+            print(f"Using first found compatible scheduler: {scheduler}")
+            return scheduler
     
-    print(f"No compatible Scheduler found!")
+    print(f"No compatible Scheduler found, no change made!")
     return ""
 
 def getSheduler(sampler_name, current):
-    if (sampler_name == "") or sampler_name not in SCHEDULERS:
-        print(f"Scheduler name not provided, {sampler_name}")
+    if (sampler_name == "") or sampler_name not in SCHEDULERS.keys():
+        print(f"Scheduler name invalid, got: '{sampler_name}'")
         sampler_name = getCompatibleSampler(current)
-
-    if not isCompatibleScheduler(current, sampler_name):
+    elif not isCompatibleScheduler(current, sampler_name):
         print(f"Scheduler not compatible, {sampler_name}")
         sampler_name = getCompatibleSampler(current)
 
     if sampler_name == "":
-        print("No modification made to scheduler!")
-        return current
+        print("No modification made to scheduler! using existing...")
+        return (current, "")
 
-    return SCHEDULERS[sampler_name].from_config(current.config, local_files_only=True)
+    return (SCHEDULERS[sampler_name].from_config(current.config, local_files_only=True), sampler_name)

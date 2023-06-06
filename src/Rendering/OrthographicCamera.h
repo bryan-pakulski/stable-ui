@@ -27,7 +27,7 @@ public:
     RecalculateViewMatrix();
   }
 
-  void OffsetPosition(glm::vec2 offset) {
+  void OffsetPosition(glm::ivec2 offset) {
     m_position.x += (-offset.x);
     m_position.y += (-offset.y);
     RecalculateViewMatrix();
@@ -38,7 +38,7 @@ public:
     RecalculateViewMatrix();
   }
 
-  glm::vec2 screenToGlobalCoordinates(float x, float y);
+  glm::ivec2 screenToGlobalCoordinates(glm::ivec2 position);
 
   const glm::mat4 &GetProjectionMatrix() const { return m_projectionMatrix; }
   const glm::mat4 &GetViewMatrix() const { return m_viewMatrix; }

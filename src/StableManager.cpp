@@ -1,54 +1,84 @@
 #include "StableManager.h"
 
 #include "Client/SDCommandsInterface.h"
+#include "Client/Commands.h"
 #include "Config/config.h"
 #include "Indexer/MetaData.h"
 #include "Display/QDisplay.h"
 #include "Helpers/QLogger.h"
 #include "Helpers/States.h"
 #include "Rendering/RenderManager.h"
+#include <functional>
 
-#include <memory>
-
-// Initialise render manager
 StableManager::StableManager() : m_indexer(CONFIG::CRAWLER_PATH.get()) {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableManager::StableManager StableManager initialized");
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableManager::StableManager initialized");
 
   // Intialise zmq server within docker to receive commands from client
   SDCommandsInterface::GetInstance().launchSDModelServer();
+
   m_renderManager = std::shared_ptr<RenderManager>(new RenderManager(*QDisplay::GetInstance().getWindow()));
+
+  // TODO: make a command queue
 }
 
-// Destructor, destroy remaining instances
 StableManager::~StableManager() {}
 
-std::shared_ptr<RenderManager> StableManager::getRenderManager() { return m_renderManager; }
+void StableManager::launchSDModelServer() {
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableManager::launchSDModelServer starting up SD Model Server...");
 
-void StableManager::update() { m_renderManager->update(); }
-
-// Send Command to attach a model on the docker server
-void StableManager::attachModel(ModelConfig model) {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableManager::attachModel Attaching model: ", model.name,
-                             " to Stable Diffusion Docker Server");
-  m_model = model;
-
-  SDCommandsInterface::GetInstance().attachModelToServer(model, m_modelLoaded);
+  // Launch SD Server inside docker on startup
+#ifdef _WIN32
+  std::string commandStr = "data\\scripts\\start_sd_server.bat";
+  system(commandStr.c_str());
+#else
+  system("./data/scripts/start_sd_server.sh");
+#endif
 }
 
-int StableManager::getModelState() { return m_modelLoaded; }
-void StableManager::setModelState(int state) { m_modelLoaded = state; }
-ModelConfig StableManager::getLoadedModel() { return m_model; }
+// Send Command to attach a model on the docker server
+void StableManager::attachModel(ModelConfig modelConfig) {
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableManager::attachModel Attaching model: ", modelConfig.name,
+                             " to Stable Diffusion Docker Server");
+  m_model = modelConfig;
+  m_modelState = Q_MODEL_STATUS::LOADING;
 
-// Search our inverted index for a term
-std::set<std::string> StableManager::searchIndex(const std::string &searchTerm) {
-  std::set<std::string> results;
+  commands::loadModelToMemory cmd = commands::loadModelToMemory{modelConfig};
 
-  std::set<meta_node> data = m_indexer.find(searchTerm);
-  for (auto &node : data) {
-    results.insert(node.m_filepath);
-  }
+  m_Thread = std::thread(
+      std::bind(&StableClient::loadModelToMemory, &StableClient::GetInstance(), cmd, std::ref(m_modelState)));
+  m_Thread.detach();
+}
 
-  return results;
+void StableManager::releaseSDModel() {
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableManager::releaseSDModel releasing model from server...");
+
+  m_Thread = std::thread(std::bind(&StableClient::releaseModel, &StableClient::GetInstance(), m_modelState));
+  m_Thread.detach();
+}
+// Text to Image, render result to canvas
+void StableManager::textToImage(std::string prompt, std::string negativePrompt, std::string &samplerName, int nIter,
+                                int steps, double cfg, int seed, int width, int height, int &renderState) {
+  commands::textToImage cmd = commands::textToImage{
+      m_model,     prompt, width, height, negativePrompt, m_renderManager->getActiveCanvas()->m_name,
+      samplerName, nIter,  steps, cfg,    seed,           CONFIG::OUTPUT_DIRECTORY.get()};
+
+  renderState = Q_RENDER_STATE::RENDERING;
+
+  m_Thread =
+      std::thread(std::bind(&StableClient::textToImage, &StableClient::GetInstance(), command, std::ref(renderState)));
+  m_Thread.detach();
+}
+
+// Image to Image, render result to canvas
+void StableManager::imageToImage(std::string &imgPath, std::string &prompt, std::string &negativePrompt,
+                                 std::string &samplerName, int samples, int steps, double cfg, double strength,
+                                 int seed, int &renderState) {
+  commands::imageToImage cmd =
+      commands::imageToImage{m_model, prompt,      negativePrompt, m_renderManager->getActiveCanvas()->m_name,
+                             imgPath, samplerName, samples,        steps,
+                             cfg,     strength,    seed,           CONFIG::OUTPUT_DIRECTORY.get()};
+
+  SDCommandsInterface::GetInstance().imageToImage(cmd, renderState);
 }
 
 std::string StableManager::getLatestFile(const std::string &path) {
@@ -73,4 +103,16 @@ std::string StableManager::getLatestFile(const std::string &path) {
   }
 
   return outfile;
+}
+
+// Search our inverted index for a term
+std::set<std::string> StableManager::searchIndex(const std::string &searchTerm) {
+  std::set<std::string> results;
+
+  std::set<meta_node> data = m_indexer.find(searchTerm);
+  for (auto &node : data) {
+    results.insert(node.m_filepath);
+  }
+
+  return results;
 }

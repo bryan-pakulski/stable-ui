@@ -117,8 +117,6 @@ class StableDiffusionModel():
 
     def load_model(self):
         try:
-            #TODO: Add configuration options on model creation to define what optimisations to enable
-
             # Load VAE
             self.load_vae(self.vae_config)
 
@@ -126,9 +124,6 @@ class StableDiffusionModel():
             self.model = download_from_original_stable_diffusion_ckpt(self.checkpoint_path, self.checkpoint_config, scheduler_type=self.scheduler, device=devices.get_cuda_device_string(), from_safetensors=self.safe_tensors, load_safety_checker=False)
             if self.vae != None:
                 self.model.vae = self.vae
-                self.model = StableDiffusionPipeline(**self.model.components, requires_safety_checker=False)
-            else:
-                self.model = StableDiffusionPipeline(**self.model.components, requires_safety_checker=False)
             
             # Load LORA
             self.loadLORA()

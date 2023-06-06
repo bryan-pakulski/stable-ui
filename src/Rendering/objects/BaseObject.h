@@ -27,12 +27,12 @@ struct shader {
 class BaseObject {
 
 protected:
-  std::pair<int, int> pixelCoords;
+  glm::ivec2 m_position;
   std::map<std::string, std::shared_ptr<shader>> m_shaders;
   GLFWwindow *m_window = 0;
 
 public:
-  BaseObject(std::pair<int, int> pixelCoords);
+  BaseObject(glm::ivec2 m_position);
 
   virtual ~BaseObject();
 
@@ -53,6 +53,9 @@ public:
 
   // Get shader
   std::shared_ptr<shader> getShader(std::string name);
+
+  // Get Position
+  glm::ivec2 &getPosition() { return m_position; };
 
   // Set matrix coordinates for projection
   void setMat4(std::string uniformName, glm::mat4x4 mat, std::string shaderName);

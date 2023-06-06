@@ -8,21 +8,19 @@
 
 #include "Rendering/OrthographicCamera.h"
 #include "Rendering/objects/BaseObject.h"
-#include "Rendering/objects/image/Image.h"
+#include "Rendering/objects/GLImage/GLImage.h"
 
 // This class wraps an image class and contains some flags to check for visibility based on
 // Camera and world coordinates
-class Chunk : public BaseObject {
-  std::pair<int, int> m_screen{}; // Screen size
+class Image : public BaseObject {
   std::shared_ptr<OrthographicCamera> m_camera;
 
 public:
-  std::shared_ptr<Image> m_image;
-  std::pair<int, int> m_coordinates;
+  std::shared_ptr<GLImage> m_image;
   bool m_renderFlag = true;
 
-  Chunk(std::shared_ptr<Image> im, std::shared_ptr<OrthographicCamera> c, int x, int y, int id);
-  ~Chunk();
+  Image(std::shared_ptr<GLImage> im, std::shared_ptr<OrthographicCamera> c, glm::ivec2 position);
+  ~Image();
 
   // Check if grid is currently visible based on world coordinates and window size
   bool visible(const std::pair<int, int> &windowCoords, const std::pair<int, int> &windowSize);

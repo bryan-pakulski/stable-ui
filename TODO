@@ -11,9 +11,6 @@
 - Add input sanitisation on sd_client on messages being sent, delimit or convert " to '?
 - Document Indexing / Crawling engine
 - Refactor main rendering code
-- Move to huggingface diffusers library system to load models (see: https://github.com/huggingface/diffusers)
-- use Xformers library https://github.com/facebookresearch/xformers/tree/main
-- Look at implementing additional optimisations: https://huggingface.co/docs/diffusers/optimization/fp16
 - Look at any performance improvements that can be used from openvino: https://github.com/bes-dev/stable_diffusion.openvino/tree/master
 - Refactor generation code to use commands and avoid passing multiple members
 
@@ -27,6 +24,7 @@
 - Adjustable grid snapping
 - Render grid
 - Load module progress bar or status window
+- Weighted prompts: https://huggingface.co/docs/diffusers/using-diffusers/weighted_prompts
 
 # Bugs
 
@@ -42,3 +40,6 @@
 
 - Fix Crash when docker closes and then ui is closed afterwards
 - Add search and indexing system on prompt, image hash etc.. for image browser, will need some sort of metadata saved for each image generated (store inside image??)
+- Move to huggingface diffusers library system to load models (see: https://github.com/huggingface/diffusers)
+- use Xformers library https://github.com/facebookresearch/xformers/tree/main
+- Look at implementing additional optimisations: https://huggingface.co/docs/diffusers/optimization/fp16
