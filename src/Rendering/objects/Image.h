@@ -22,8 +22,8 @@ public:
   Image(std::shared_ptr<GLImage> im, std::shared_ptr<OrthographicCamera> c, glm::ivec2 position);
   ~Image() {}
 
-  // Check if image is currently visible based on world coordinates and window size
-  bool visible(const std::pair<int, int> &windowCoords, const std::pair<int, int> &windowSize);
+  // Check if image intersects a given selection space
+  bool intersects(const glm::ivec2 &l1, const glm::ivec2 &r1, const glm::ivec2 &l2, const glm::ivec2 &r2);
 
   void updateLogic() override {}
   void updateVisual() override;

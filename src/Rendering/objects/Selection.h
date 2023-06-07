@@ -7,7 +7,6 @@
 class Selection : public BaseObject {
 
 public:
-  GLuint m_selection_texture_buffer = 0;
   glm::ivec2 m_size{512, 512}; // Selection image size
   bool m_dragging = false;     // Dragging flag
   int m_pixelSnap = 64;        // Size of pixel snapping
@@ -20,8 +19,6 @@ public:
   glm::ivec2 &getPosition() { return m_position; }
 
   void UpdateDrag(glm::vec2 position);
-  void captureBuffer();
-  void saveBuffer();
 
   void updateLogic() override {}
   void updateVisual() override;

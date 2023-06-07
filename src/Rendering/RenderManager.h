@@ -45,17 +45,14 @@ public:
     CANVAS FUNCTIONS
   */
 
-  // Create new canvas object for rendering
   std::shared_ptr<Canvas> createCanvas(int x, int y, const std::string &name);
-  // Get current active canvas
   std::shared_ptr<Canvas> getActiveCanvas();
-  // Make a canvas active
   void selectCanvas(int id);
-  // Send an image to current active canvas
   void sendImageToCanvas(GLImage &im);
-  // Set capture buffer flag (Move pixels inside selection to a texture)
   void captureBuffer();
-  void genFromSelection();
+  void saveBuffer();
+  std::shared_ptr<GLImage> getBuffer() { return m_selectionBuffer; }
+  void outpaintSelection();
   void useImage(std::string path);
   const std::string getImage();
 
@@ -75,6 +72,7 @@ private:
   GLFWwindow &m_window;
 
   std::string m_baseImage;
+  std::shared_ptr<GLImage> m_selectionBuffer;
   bool m_captureBuffer = false;
 
   // Process inputs

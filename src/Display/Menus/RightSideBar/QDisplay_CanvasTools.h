@@ -74,11 +74,11 @@ private:
     }
 
     // TODO: add send to img2img
-    if (ImGui::Button("Save Buffer to tmp")) {
-      m_renderManager->m_selection->saveBuffer();
+    if (ImGui::Button("Save buffer to file")) {
+      m_renderManager->saveBuffer();
     }
-    ImGui::Image((void *)(intptr_t)m_renderManager->m_selection->m_selection_texture_buffer,
-                 ImVec2(m_renderManager->m_selection->m_size.x * 0.4, m_renderManager->m_selection->m_size.y * 0.4));
+    ImGui::Image((void *)(intptr_t)m_renderManager->getBuffer()->m_texture,
+                 ImVec2(m_renderManager->getBuffer()->m_width * 0.4, m_renderManager->getBuffer()->m_height * 0.4));
   }
 
   void debugInfo() {
@@ -148,7 +148,7 @@ private:
                       &m_renderManager->getActiveCanvas()->m_editorGrid[m_selectedLayerIndex]->getPosition().y);
 
       if (ImGui::Button("Delete Layer")) {
-        m_renderManager->getActiveCanvas()->deleteChunk(m_selectedLayerIndex);
+        m_renderManager->getActiveCanvas()->deleteImage(m_selectedLayerIndex);
         m_selectedLayerIndex = -1;
       }
     }

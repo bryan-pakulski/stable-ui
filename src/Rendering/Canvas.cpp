@@ -45,6 +45,63 @@ Canvas::Canvas(glm::ivec2 position, const std::string &name, GLFWwindow *w, std:
   createShader(gridShader, "background_grid");
 }
 
+// Retrieve raw pixel data from all images that fall space between two world space coordinates
+std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::ivec2 size) {
+
+  // Raw pixel data, treat as 2d array
+  std::vector<RGBAPixel> pixels(size.x * size.y);
+
+  // We are assuming that our m_editorGrid stays sorted, which should be true as we only emplace data at the end of the
+  // vector
+  for (auto &image : m_editorGrid) {
+
+    // Convert the origin as center to top left for simpler calculation
+    glm::ivec2 l1 = {(position.x - size.x) / 2, (position.y + size.y) / 2};
+    glm::ivec2 r1 = {(position.x + size.x) / 2, (position.y - size.y) / 2};
+
+    glm::ivec2 l2 = {(image->getPosition().x - image->m_image->m_width) / 2,
+                     (image->getPosition().y + image->m_image->m_height) / 2};
+    glm::ivec2 r2 = {(image->getPosition().x + image->m_image->m_width) / 2,
+                     (image->getPosition().y - image->m_image->m_height) / 2};
+
+    if (image->intersects(l1, r1, l2, r2)) {
+
+      // Calculate intersection between two rectangle areas
+
+      // Calculate size and offset for selection
+
+      // Stores x, y size of the actual intersection of our selection
+      glm::ivec2 intersection = {512, 512};
+
+      // Bind image texture and read pixel data for overlapping area
+      glBindTexture(GL_TEXTURE_2D, image->m_image->m_texture);
+
+      std::vector<RGBAPixel> imgPixels(intersection.x * intersection.y);
+      // glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgPixels.data());
+      glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+      /*
+      // Treat top left of selection as our 0,0 origin, so we need to adjust the pixel coordinates accordingly
+      for (int i = 0; i < selSize.x * selSize.y; ++i) {
+        int x = i % selSize.x;
+        int y = i / selSize.x;
+        int imgX = x - selOffset.x + imgOffset.x;
+        int imgY = y - selOffset.y + imgOffset.y;
+
+        std::cout << x << ", " << y << std::endl;
+        if (imgX >= 0 && imgY >= 0 && imgX < imgSize.x && imgY < imgSize.y) {
+          pixels[i] = imgPixels[imgY * imgSize.x + imgX];
+        }
+      }
+      */
+      glBindTexture(GL_TEXTURE_2D, 0);
+
+      return pixels;
+    }
+  }
+
+  return pixels;
+}
+
 void Canvas::updateLogic() {
 
   // Check which chunks are in view and should be rendered

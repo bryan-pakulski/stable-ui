@@ -7,6 +7,13 @@
 #include <GLFW/glfw3.h>
 #include <string>
 
+struct RGBAPixel {
+  unsigned char red = 0xFF;
+  unsigned char green = 0x00;
+  unsigned char blue = 0x00;
+  unsigned char alpha = 0x99;
+};
+
 class GLImage {
 
 public:
@@ -18,8 +25,10 @@ public:
   int m_width;
   int m_height;
 
+public:
   GLImage(int width, int height, std::string name);
   ~GLImage() = default;
 
   void loadFromImage(std::string path, bool flipImage = false);
+  void resize(int width, int height);
 };

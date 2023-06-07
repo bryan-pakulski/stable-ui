@@ -15,8 +15,12 @@ public:
     // TODO: Make Popup menus a static definition
     if (ImGui::BeginPopup("context menu")) {
       {
-        if (ImGui::Selectable("Send to buffer")) {
+        // TODO: add flags to make sure we can only use these options when models are loaded etc...
+        if (ImGui::Selectable("Capture to buffer")) {
           m_renderManager->captureBuffer();
+        }
+        if (ImGui::Selectable("Outpaint")) {
+          m_renderManager->outpaintSelection();
         }
         if (ImGui::Selectable("Info")) {
         }

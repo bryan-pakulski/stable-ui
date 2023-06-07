@@ -17,6 +17,9 @@ RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
   m_camera = std::shared_ptr<OrthographicCamera>(new OrthographicCamera(&m_window));
   m_selection = std::shared_ptr<Selection>(new Selection(glm::ivec2{0, 0}, &m_window, m_camera));
 
+  // Initialise selection buffer texture
+  m_selectionBuffer = std::shared_ptr<GLImage>(new GLImage(m_selection->m_size.x, m_selection->m_size.y, "buffer"));
+
   createCanvas(0, 0, "default");
 }
 
@@ -45,12 +48,6 @@ void RenderManager::logicLoop() {
 void RenderManager::renderLoop() {
   m_camera->updateVisual();
 
-  // TODO: capture raw pixel data based on selection coordinates and chunks
-  if (m_captureBuffer == true) {
-    m_selection->captureBuffer();
-    m_captureBuffer = false;
-  }
-
   getActiveCanvas()->updateVisual();
   getActiveCanvas()->renderImages();
 
@@ -59,17 +56,38 @@ void RenderManager::renderLoop() {
 
 // Set capture render buffer flag, check for out of bounds condition and raise error if required
 void RenderManager::captureBuffer() {
-  m_captureBuffer = true;
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::captureBuffer Setting capture buffer flag to ",
-                             m_captureBuffer);
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::captureBuffer capturing to texture");
+
+  std::vector<RGBAPixel> pixels =
+      getActiveCanvas()->getPixelsAtSelection(m_selection->getPosition(), m_selection->m_size);
+  m_selectionBuffer->resize(m_selection->m_size.x, m_selection->m_size.y);
+
+  // Create the texture buffer with correct format, internal format and properties
+  glBindTexture(GL_TEXTURE_2D, m_selectionBuffer->m_texture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_selectionBuffer->m_width, m_selectionBuffer->m_width, 0, GL_RGBA,
+               GL_UNSIGNED_BYTE, pixels.data());
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-// Generate img2img from the selection buffer, check for out of bounds condition and raise error if required
-void RenderManager::genFromSelection() {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO,
-                             "RenderManager::genFromSelection Generating img2img from selection on canvas ");
+void RenderManager::saveBuffer() {
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::captureBuffer saving to data/output/buffer.png");
+  GLHELPER::SaveTextureToFile("data/output/buffer.png", &m_selectionBuffer->m_texture, m_selectionBuffer->m_width,
+                              m_selectionBuffer->m_height);
+}
 
-  // TODO: call img2img with selection buffer
+void RenderManager::outpaintSelection() {
+  QLogger::GetInstance().Log(LOGLEVEL::INFO,
+                             "RenderManager::outpaintSelection outpainting coordinates: ", m_selection->getPosition().x,
+                             m_selection->getPosition().y);
+
+  std::vector<RGBAPixel> pixels =
+      getActiveCanvas()->getPixelsAtSelection(m_selection->getPosition(), m_selection->m_size);
+
+  // TODO: process pixels and send to outpainting pipeline
 }
 
 // Make a canvas active

@@ -29,15 +29,18 @@ public:
   void renderImages();
   void setTexture(GLuint *id);
 
+  // Retrieve raw pixel data from all images that fall space between two world space coordinates
+  std::vector<RGBAPixel> getPixelsAtSelection(glm::ivec2 position, glm::ivec2 size);
+
   // Update or create new image wrapper from a basic GL image
   void createImage(std::shared_ptr<GLImage>, glm::ivec2 position);
 
   // Delete image by index
-  void deleteChunk(int index) { m_editorGrid.erase(m_editorGrid.begin() + index); }
+  void deleteImage(int index) { m_editorGrid.erase(m_editorGrid.begin() + index); }
 
   // image visibility control
-  void hideChunk(int index) { m_editorGrid[index]->m_renderFlag = false; }
-  void showChunk(int index) { m_editorGrid[index]->m_renderFlag = true; }
+  void hideImage(int index) { m_editorGrid[index]->m_renderFlag = false; }
+  void showImage(int index) { m_editorGrid[index]->m_renderFlag = true; }
 
 private:
   std::shared_ptr<OrthographicCamera> m_camera;

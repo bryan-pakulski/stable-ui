@@ -36,9 +36,6 @@ Selection::Selection(glm::ivec2 position, GLFWwindow *w, std::shared_ptr<Orthogr
   setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices), sh);
 
   createShader(sh, "selection");
-
-  // Initialise selection buffer texture
-  glGenTextures(1, &m_selection_texture_buffer);
 }
 
 void Selection::UpdateDrag(glm::vec2 position) {
@@ -69,33 +66,4 @@ void Selection::updateVisual() {
   glBindVertexArray(getShader("selection")->VAO);
   glDrawArrays(GL_LINE_LOOP, 0, 4);
   glBindVertexArray(0);
-}
-
-void Selection::captureBuffer() {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Selection::captureBuffer Capturing at screenspace coords: ", m_position.x,
-                             m_position.y, "\n\tWorld space coords: ", m_position.x, m_position.y,
-                             "Capture size: ", m_size.x, m_size.y);
-
-  // Allocate memory block size of pixel count
-  std::vector<unsigned char> pixels(m_size.x * m_size.y * 4);
-
-  // Read pixels starting from position with specified width, height, format and type
-  glReadBuffer(GL_COLOR_ATTACHMENT0);
-  glReadPixels(m_position.x, m_position.y, m_size.x, m_size.y, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
-  // Check for errors here
-
-  // Create the texture buffer with correct format, internal format and properties
-  glGenTextures(1, &m_selection_texture_buffer);
-  glBindTexture(GL_TEXTURE_2D, m_selection_texture_buffer);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_size.x, m_size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
-
-  // If filtering is requred:
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void Selection::saveBuffer() {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Selection::saveBuffer Saving selection buffer to file ",
-                             "data/output/buffer.png");
-  GLHELPER::SaveTextureToFile("data/output/buffer.png", &m_selection_texture_buffer, m_size.x, m_size.y);
 }
