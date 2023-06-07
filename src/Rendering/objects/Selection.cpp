@@ -42,15 +42,12 @@ Selection::Selection(glm::ivec2 position, GLFWwindow *w, std::shared_ptr<Orthogr
 }
 
 void Selection::UpdateDrag(glm::vec2 position) {
-  // If snap to grid is disabled then default to a single pixel as our snap size
-  int snapSize = m_snap ? m_pixelSnap : 1;
+  m_position = m_camera->screenToGlobalCoordinates(glm::vec2{std::round(position.x), std::round(position.y)});
 
-  glm::ivec2 convertedCoords =
-      m_camera->screenToGlobalCoordinates(glm::vec2{std::round(position.x), std::round(position.y)});
-
-  // Assign to m_position
-  m_position.x = static_cast<int>(std::round(convertedCoords.x / m_pixelSnap)) * snapSize;
-  m_position.y = -static_cast<int>(std::round(convertedCoords.y / m_pixelSnap)) * snapSize;
+  if (m_snap) {
+    m_position.x = roundUp(m_position.x, m_pixelSnap * 2);
+    m_position.y = roundUp(m_position.y, m_pixelSnap * 2);
+  }
 }
 
 void Selection::updateVisual() {

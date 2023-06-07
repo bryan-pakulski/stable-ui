@@ -23,6 +23,8 @@
 - Render grid
 - Load module progress bar or status window
 - Weighted prompts: https://huggingface.co/docs/diffusers/using-diffusers/weighted_prompts
+- Inpainting: https://huggingface.co/docs/diffusers/using-diffusers/inpaint
+- Depth to Img: https://huggingface.co/docs/diffusers/using-diffusers/depth2img
 
 # Bugs
 

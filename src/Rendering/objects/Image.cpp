@@ -4,7 +4,7 @@ Image::Image(std::shared_ptr<GLImage> im, std::shared_ptr<OrthographicCamera> c,
     : BaseObject(position), m_image{im} {
   int success = 0;
   m_camera = std::shared_ptr<OrthographicCamera>(c);
-  m_image->loadFromImage(m_image->m_image_source.c_str());
+  m_image->loadFromImage(m_image->m_image_source.c_str(), true);
 
   // Vertex data
   float vertices[] = {

@@ -10,7 +10,7 @@ public:
   GLuint m_selection_texture_buffer = 0;
   glm::ivec2 m_size{512, 512}; // Selection image size
   bool m_dragging = false;     // Dragging flag
-  int m_pixelSnap = 256;       // Size of pixel snapping
+  int m_pixelSnap = 64;        // Size of pixel snapping
   bool m_snap = true;
 
 public:
@@ -33,5 +33,12 @@ private:
   glm::vec2 prev_mouse;
   glm::vec2 cur_mouse;
 
+private:
   void setTexture(GLuint *id);
+
+  // Round to nearest multiple, works with negative numbers
+  int roundUp(int x, int multiple) {
+    int isPositive = (int)(x >= 0);
+    return ((x + isPositive * (multiple - 1)) / multiple) * multiple;
+  }
 };

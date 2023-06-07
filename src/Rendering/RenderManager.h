@@ -74,10 +74,6 @@ public:
 private:
   GLFWwindow &m_window;
 
-  // Mouse positions for dragging across screen
-  glm::vec2 m_prev_mouse = {0.0f, 0.0f};
-  glm::vec2 m_cur_mouse = {0.0f, 0.0f};
-
   std::string m_baseImage;
   bool m_captureBuffer = false;
 

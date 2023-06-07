@@ -9,12 +9,14 @@ class OrthographicCamera {
 public:
   glm::ivec2 m_screen = {0, 0};
   glm::vec3 m_position = {0.0f, 0.0f, 1.0f};
+  glm::vec3 m_offset;
   float m_rotation = 0.0f;
+  glm::vec2 m_prevMouse = {0.0f, 0.0f};
 
-  float m_zoom = 0.5f;
+  float m_zoom = 2.5f;
   float m_zoomSpeed = 0.05f;
   const float c_defaultZoom = 1.0f;
-  const glm::vec2 c_zoomLimits = {0.05f, 5.0f};
+  const glm::vec2 c_zoomLimits = {0.5f, 5.0f};
 
 public:
   OrthographicCamera(GLFWwindow *w);
@@ -22,15 +24,24 @@ public:
   void updateLogic();
   void updateVisual();
 
-  void SetPosition(glm::vec3 position) {
-    m_position = position;
-    RecalculateViewMatrix();
-  }
+  void onMousePressed(glm::vec2 position) { m_prevMouse = position; }
 
-  void OffsetPosition(glm::ivec2 offset) {
-    m_position.x += (-offset.x);
-    m_position.y += (-offset.y);
-    RecalculateViewMatrix();
+  void moveCamera(glm::ivec2 mouse) {
+    // find the difference between new position, and last, in pixels
+    int offsetX = mouse.x - m_prevMouse.x;
+    int offsetY = mouse.y - m_prevMouse.y;
+
+    // update mouse pos
+    m_prevMouse.x = mouse.x;
+    m_prevMouse.y = mouse.y;
+
+    // get as ratio +/- 1
+    float dx = ((float)offsetX) / m_screen.x;
+    float dy = ((float)offsetY) / m_screen.y;
+
+    // now move camera by offset (might need to multiply by 2 here?)
+    m_position.x += round(m_offset.x * dx * 2);
+    m_position.y -= round(m_offset.y * dy * 2);
   }
 
   void SetRotation(float rotation) {
@@ -47,6 +58,7 @@ public:
 private:
   void RecalculateViewMatrix();
   void RecalculateProjection();
+  void RecalculateViewProjectionMatrix();
 
 private:
   glm::mat4 m_projectionMatrix;

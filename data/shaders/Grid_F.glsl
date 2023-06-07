@@ -146,10 +146,10 @@ void main() {
   bool squaredDots = false;
 
   // size of the grid
-  vec2 gridSize = vec2(100);
+  vec2 gridSize = vec2(64);
 
   // number of subdivisions of the sub-grid
-  vec2 subGridDiv = vec2(3, 3);
+  vec2 subGridDiv = vec2(4, 4);
 
   // ---------------------
   // grid colors
@@ -176,7 +176,7 @@ void main() {
   // ---------------------
 
   // Origin moves based on camera position, we center at the screen hence the use of iResolution/2
-  origin = vec2(iPos.x + (iResolution.x / 2), iPos.y + (iResolution.y / 2));
+  origin = vec2(iPos.x / zoom + (iResolution.x / 2), iPos.y / zoom + (iResolution.y / 2));
 
   // Zoom
   int minZoom = 100;

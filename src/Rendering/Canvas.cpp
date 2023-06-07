@@ -95,16 +95,17 @@ void Canvas::renderGrid() {
   setMat4("view", m_camera->GetViewMatrix(), "background_grid");
   setMat4("projection", m_camera->GetProjectionMatrix(), "background_grid");
 
-  glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(m_position.x, m_position.y, 0.0f)) * // translation
-                    glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *              // rotation
-                    glm::scale(glm::mat4(1.0f), glm::vec3(m_camera->m_screen.x * m_camera->m_zoom,
-                                                          m_camera->m_screen.y * m_camera->m_zoom, 1.0f)); // scale
+  glm::mat4 model =
+      glm::translate(glm::mat4(1.0f), glm::vec3(m_camera->m_position.x, m_camera->m_position.y, 0.0f)) * // translation
+      glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                                  // rotation
+      glm::scale(glm::mat4(1.0f), glm::vec3(m_camera->m_screen.x * m_camera->m_zoom,
+                                            m_camera->m_screen.y * m_camera->m_zoom, 1.0f)); // scale
   setMat4("model", model, "background_grid");
 
   glUniform2f(glGetUniformLocation(getShader("background_grid")->shaderProgram, "iResolution"), m_camera->m_screen.x,
               m_camera->m_screen.y);
   glUniform2f(glGetUniformLocation(getShader("background_grid")->shaderProgram, "iPos"), -m_camera->m_position.x,
-              m_camera->m_position.y);
+              -m_camera->m_position.y);
   glUniform1f(glGetUniformLocation(getShader("background_grid")->shaderProgram, "zoom"), m_camera->m_zoom);
 
   glBindVertexArray(getShader("background_grid")->VAO);

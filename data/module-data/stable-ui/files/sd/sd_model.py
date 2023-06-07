@@ -92,12 +92,6 @@ class StableDiffusionModel():
 
     # Optimisations, see https://huggingface.co/docs/diffusers/optimization/fp16
     def enableOptimisations(self):
-        # Determine type size
-        if devices.get_cuda_device_string() == "cpu" or not self.enable_t16:
-            devices.dtype, devices.dtype_vae = torch.float32, torch.float32
-        else:
-            devices.dtype, devices.dtype_vae = torch.float16, torch.float16
-
         if self.enable_xformers:
             logging.info("Enabling xformers memory efficient attention")
             self.model.enable_xformers_memory_efficient_attention()
@@ -117,6 +111,12 @@ class StableDiffusionModel():
 
     def load_model(self):
         try:
+            # Determine type size
+            if devices.get_cuda_device_string() == "cpu" or not self.enable_t16:
+                devices.dtype, devices.dtype_vae = torch.float32, torch.float32
+            else:
+                devices.dtype, devices.dtype_vae = torch.float16, torch.float16
+
             # Load VAE
             self.load_vae(self.vae_config)
 
