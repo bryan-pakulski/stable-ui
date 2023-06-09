@@ -1,4 +1,8 @@
 #include "Canvas.h"
+#include "Display/ErrorHandler.h"
+#include "Helpers/QLogger.h"
+#include "Helpers/GLHelper.h"
+#include "Rendering/objects/GLImage/GLImage.h"
 #include <chrono>
 
 Canvas::~Canvas() {}
@@ -56,8 +60,8 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
   for (auto &image : m_editorGrid) {
 
     // Convert the origin as center to top left for simpler calculation
-    glm::ivec2 l1 = {(position.x - size.x) / 2, (position.y + size.y) / 2};
-    glm::ivec2 r1 = {(position.x + size.x) / 2, (position.y - size.y) / 2};
+    glm::ivec2 l1 = {(position.x - (size.x / 2)), (position.y + (size.y / 2))};
+    glm::ivec2 r1 = {(position.x + (size.x / 2)), (position.y - (size.y / 2))};
 
     glm::ivec2 l2 = {(image->getPosition().x - image->m_image->m_width) / 2,
                      (image->getPosition().y + image->m_image->m_height) / 2};
@@ -66,36 +70,55 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
 
     if (image->intersects(l1, r1, l2, r2)) {
 
-      // Calculate intersection between two rectangle areas
+      // Calculate intersection rectangle
+      // As these fall on the cartesian plane, these can be negative!
+      int leftX = std::max(l1.x, l2.x);
+      int rightX = std::min(r1.x, r2.x);
+      int topY = std::min(l1.y, l2.y);
+      int bottomY = std::max(r1.y, r2.y);
 
-      // Calculate size and offset for selection
+      int width = rightX - leftX;
+      int height = topY - bottomY;
 
-      // Stores x, y size of the actual intersection of our selection
-      glm::ivec2 intersection = {512, 512};
-
-      // Bind image texture and read pixel data for overlapping area
+      // Bind image texture and read pixel data for our selected area
       glBindTexture(GL_TEXTURE_2D, image->m_image->m_texture);
 
-      std::vector<RGBAPixel> imgPixels(intersection.x * intersection.y);
-      // glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgPixels.data());
-      glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
-      /*
-      // Treat top left of selection as our 0,0 origin, so we need to adjust the pixel coordinates accordingly
-      for (int i = 0; i < selSize.x * selSize.y; ++i) {
-        int x = i % selSize.x;
-        int y = i / selSize.x;
-        int imgX = x - selOffset.x + imgOffset.x;
-        int imgY = y - selOffset.y + imgOffset.y;
+      std::vector<RGBAPixel> imgPixels(image->m_image->m_width * image->m_image->m_height);
+      glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgPixels.data());
 
-        std::cout << x << ", " << y << std::endl;
-        if (imgX >= 0 && imgY >= 0 && imgX < imgSize.x && imgY < imgSize.y) {
-          pixels[i] = imgPixels[imgY * imgSize.x + imgX];
+      QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Canvas::getPixelsAtSelection Intersection Rect: {", leftX, topY, "}",
+                                 "{", rightX, bottomY, "}");
+
+      // TODO: Iterate over the pixels in the intersection rectangle and extract the relative pixels from imgPixels into
+      // pixels vector, note that openGL textures are indexed from the bottom left opposed to our coordinates which
+      // index from the top left
+      for (int x = leftX - l2.x; x < (leftX - l2.x) + width; x++) {
+        for (int y = l2.y - topY; y < l2.y - bottomY; y++) {
+          int index = (y * size.y) + x;
+
+          int xoffset = l1.x - leftX;
+          int yoffset = l2.y - topY;
+          int offsetIndex = ((y - yoffset) * size.y) + (x - xoffset);
+
+          if (offsetIndex >= size.x * size.y || offsetIndex < 0) {
+            QLogger::GetInstance().Log(LOGLEVEL::ERR, "Invalid buffer captured! expected max size ", size.x * size.y,
+                                       " got out of bounds index at", offsetIndex);
+            ErrorHandler::GetInstance().setError("Invalid image buffer captured!");
+
+            return pixels;
+            glBindTexture(GL_TEXTURE_2D, 0);
+          } else {
+            pixels[offsetIndex] = imgPixels[index];
+          }
         }
       }
-      */
-      glBindTexture(GL_TEXTURE_2D, 0);
 
-      return pixels;
+      // Rotate to correct orientation
+      // GLHELPER::MatrixInplaceTranspose<RGBAPixel>(pixels.front(), size.x, size.y);
+      // pixels = GLHELPER::Rotate1DSquareMatrixClockwise<RGBAPixel>(pixels);
+      // pixels = GLHELPER::Rotate1DSquareMatrixClockwise<RGBAPixel>(pixels);
+
+      glBindTexture(GL_TEXTURE_2D, 0);
     }
   }
 
