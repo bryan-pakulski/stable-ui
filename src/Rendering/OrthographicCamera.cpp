@@ -20,7 +20,7 @@ void OrthographicCamera::RecalculateProjection() {
 }
 
 void OrthographicCamera::RecalculateViewMatrix() {
-  m_offset = glm::vec3{-m_screen.x / 2.0 * m_zoom, -m_screen.y / 2.0 * m_zoom, 0.0f};
+  m_offset = glm::vec3{(-m_screen.x / 2.0) * m_zoom, (-m_screen.y / 2.0) * m_zoom, 0.0f};
 
   glm::mat4 transform = glm::translate(glm::mat4(1.0f), m_position + m_offset) *
                         glm::rotate(glm::mat4(1.0f), glm::radians(m_rotation), glm::vec3(0, 0, 1.0f));

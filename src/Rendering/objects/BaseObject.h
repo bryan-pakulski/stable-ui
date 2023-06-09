@@ -61,9 +61,6 @@ protected:
   GLFWwindow *m_window = 0;
 };
 
-// Linear convert X/Y coordinates to local coordinates (-1, 1.0)
-static float getLC(const int &pixelCoord, const int &max) { return (((float)pixelCoord / (float)max) * 2) - 1; }
-
 // Initialise vertex shader for GLFW
 static unsigned int initVertexShader(const char *vertexShaderSource, int &success) {
   unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);

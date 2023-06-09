@@ -56,7 +56,8 @@ void RenderManager::renderLoop() {
 
 // Set capture render buffer flag, check for out of bounds condition and raise error if required
 void RenderManager::captureBuffer() {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::captureBuffer capturing to texture");
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::captureBuffer capturing to texture, selection at: ",
+                             m_selection->getPosition().x, m_selection->getPosition().y);
 
   std::vector<RGBAPixel> pixels =
       getActiveCanvas()->getPixelsAtSelection(m_selection->getPosition(), m_selection->m_size);

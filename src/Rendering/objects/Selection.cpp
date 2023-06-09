@@ -12,10 +12,10 @@ Selection::Selection(glm::ivec2 position, GLFWwindow *w, std::shared_ptr<Orthogr
   // Vertex data
   float vertices[] = {
       // positions        // colors         // texture coords
-      1.0f,  1.0f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
-      1.0f,  -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-      -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-      -1.0f, 1.0f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
+      0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
+      0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+      -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+      -0.5f, 0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
   };
 
   // Index buffer // Element Buffer Objects (EBO)
@@ -42,8 +42,8 @@ void Selection::UpdateDrag(glm::vec2 position) {
   m_position = m_camera->screenToGlobalCoordinates(glm::vec2{std::round(position.x), std::round(position.y)});
 
   if (m_snap) {
-    m_position.x = roundUp(m_position.x, m_pixelSnap * 2);
-    m_position.y = roundUp(m_position.y, m_pixelSnap * 2);
+    m_position.x = roundUp(m_position.x, m_pixelSnap);
+    m_position.y = roundUp(m_position.y, m_pixelSnap);
   }
 }
 

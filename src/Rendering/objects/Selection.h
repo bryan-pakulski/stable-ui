@@ -16,7 +16,7 @@ public:
   Selection(glm::ivec2 position, GLFWwindow *w, std::shared_ptr<OrthographicCamera> c);
   virtual ~Selection();
 
-  glm::ivec2 getPosition() { return glm::ivec2{m_position.x / 2, m_position.y / 2}; }
+  glm::ivec2 getPosition() { return glm::ivec2{m_position.x, m_position.y}; }
 
   void UpdateDrag(glm::vec2 position);
 

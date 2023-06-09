@@ -63,12 +63,12 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
     glm::ivec2 l1 = {(position.x - (size.x / 2)), (position.y + (size.y / 2))};
     glm::ivec2 r1 = {(position.x + (size.x / 2)), (position.y - (size.y / 2))};
 
-    glm::ivec2 l2 = {(image->getPosition().x - image->m_image->m_width) / 2,
-                     (image->getPosition().y + image->m_image->m_height) / 2};
-    glm::ivec2 r2 = {(image->getPosition().x + image->m_image->m_width) / 2,
-                     (image->getPosition().y - image->m_image->m_height) / 2};
+    glm::ivec2 l2 = {(image->getPosition().x - image->m_image->m_width / 2),
+                     (image->getPosition().y + image->m_image->m_height / 2)};
+    glm::ivec2 r2 = {(image->getPosition().x + image->m_image->m_width / 2),
+                     (image->getPosition().y - image->m_image->m_height / 2)};
 
-    if (image->intersects(l1, r1, l2, r2)) {
+    if (image->intersects(l1, r1, l2, r2) && image->m_renderFlag) {
 
       // Calculate intersection rectangle
       // As these fall on the cartesian plane, these can be negative!

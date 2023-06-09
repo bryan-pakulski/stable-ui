@@ -10,10 +10,10 @@ Image::Image(std::shared_ptr<GLImage> im, std::shared_ptr<OrthographicCamera> c,
   // Vertex data
   float vertices[] = {
       // positions        // colors         // texture coords
-      1.0f,  1.0f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
-      1.0f,  -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-      -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-      -1.0f, 1.0f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
+      0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
+      0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+      -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+      -0.5f, 0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
   };
 
   // Index buffer // Element Buffer Objects (EBO)
@@ -73,10 +73,9 @@ void Image::updateVisual() {
 
     // Model projection code
     // Offset position x2 to account for the centering effect
-    glm::mat4 model =
-        glm::translate(glm::mat4(1.0f), glm::vec3(m_position.x * 2.0, m_position.y * 2.0, 0.0f)) * // translation
-        glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                          // rotation
-        glm::scale(glm::mat4(1.0f), glm::vec3(m_image->m_width, m_image->m_height, 1.0f));         // scale
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(m_position.x, m_position.y, 0.0f)) *     // translation
+                      glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                  // rotation
+                      glm::scale(glm::mat4(1.0f), glm::vec3(m_image->m_width, m_image->m_height, 1.0f)); // scale
     setMat4("model", model, "image");
 
     // Update texture information
