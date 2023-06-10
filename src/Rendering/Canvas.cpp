@@ -113,10 +113,12 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
         }
       }
 
-      // Rotate to correct orientation
-      // GLHELPER::MatrixInplaceTranspose<RGBAPixel>(pixels.front(), size.x, size.y);
-      // pixels = GLHELPER::Rotate1DSquareMatrixClockwise<RGBAPixel>(pixels);
-      // pixels = GLHELPER::Rotate1DSquareMatrixClockwise<RGBAPixel>(pixels);
+      pixels = GLHELPER::Rotate1DSquareMatrixClockwise<RGBAPixel>(pixels);
+      pixels = GLHELPER::Rotate1DSquareMatrixClockwise<RGBAPixel>(pixels);
+
+      for (int i = 0; i < size.y - 1; i++) {
+        std::reverse(&pixels.at(i * size.x), &pixels.at(i * size.x + size.x)); // reverse row
+      }
 
       glBindTexture(GL_TEXTURE_2D, 0);
     }
