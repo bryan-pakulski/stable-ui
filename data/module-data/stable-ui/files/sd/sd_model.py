@@ -22,6 +22,7 @@ class StableDiffusionModel():
         logging.addLevelName(logging.INFO, "INFO")
         logging.addLevelName(logging.WARNING, "WARN")
         logging.addLevelName(logging.ERROR, "ERR")
+        logging.addLevelName(logging.DEBUG, "DGB")
 
         self.model = None
         self.vae = None
@@ -45,6 +46,7 @@ class StableDiffusionModel():
         # }
         self.loras = []
 
+        # TODO: if CPU is enabled we don't want any of these optimisations enabled
         # Optimisations
         self.enable_xformers = enable_xformers
         self.enable_tf32 = enable_tf32

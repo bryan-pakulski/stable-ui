@@ -1,3 +1,4 @@
+import gc
 import os
 import logging
 import torch
@@ -12,6 +13,7 @@ from common import devices
 from diffusers import DiffusionPipeline
 from diffusers import StableDiffusionPipeline
 from diffusers import StableDiffusionImg2ImgPipeline
+from compel import Compel
 
 # TODO: implement weighted prompts see:
 # https://huggingface.co/docs/diffusers/using-diffusers/weighted_prompts
@@ -24,6 +26,7 @@ class StableDiffusionBaseProcess():
     def __init__(self, outpath_samples: str = "", prompt: str = "", negative_prompt: str = "", seed: int = -1, sampler_name: str = "", batch_size: int = 1, n_iter: int = 1, steps: int = 50, cfg_scale: float = 7.0, width: int = 512, height: int = 512, model: object = DiffusionPipeline):
         self.outpath_samples = outpath_samples
         self.prompt = prompt
+        self.prompt_embeds = None
         self.negative_prompt = negative_prompt
         self.seed = seed
         self.model = model
@@ -47,19 +50,30 @@ class StableDiffusionBaseProcess():
         logging.addLevelName(logging.INFO, "INFO")
         logging.addLevelName(logging.WARNING, "WARN")
         logging.addLevelName(logging.ERROR, "ERR")
+        logging.addLevelName(logging.DEBUG, "DBG")
 
         logging.info("Starting up sd_server")
 
     # Create subfolder for our images
     def create_sub_folder(self, name, default):
         if (self.outpath_samples != ""):
-            logging.info(f"Creating folder: {self.outpath_samples}")
+            logging.debug(f"Creating folder: {self.outpath_samples}")
             os.makedirs(self.outpath_samples, exist_ok=True)
         if name == "":
             name = default
-        logging.info(f"Creating subfolder: {name}")
+        logging.debug(f"Creating subfolder: {name}")
         self.outpath_samples = os.path.join(self.outpath_samples, name)
         os.makedirs(self.outpath_samples, exist_ok=True)
+
+    # Get prompt embeds
+    def get_prompt_embeds(self, pipe):
+      compel = Compel(tokenizer=pipe.tokenizer, text_encoder=pipe.text_encoder)
+      self.prompt_embeds = compel.build_conditioning_tensor(self.prompt)
+
+    # Cleanup
+    def cleanup(self):
+        self.prompt_embeds = None
+        gc.collect()
 
 class StableDiffusionTxt2Img(StableDiffusionBaseProcess):
 
@@ -69,8 +83,8 @@ class StableDiffusionTxt2Img(StableDiffusionBaseProcess):
 
         self.pipe = StableDiffusionPipeline(**self.model.components, requires_safety_checker=False)
         self.pipe.scheduler = self.sampler
+        self.get_prompt_embeds(self.pipe)
         self.create_sub_folder(subfolder_name, "txt2img")
-        self.data = [self.batch_size * [self.prompt]]
 
     def save_metadata(self, img):
         md = metadata.StableMetaData(img)
@@ -92,22 +106,17 @@ class StableDiffusionTxt2Img(StableDiffusionBaseProcess):
 
     def cpu_sample(self):
         #TODO: CPU specific changes here???
-        self.model.scheduler = self.sampler
-        outputs = self.model(prompt=self.prompt, negative_prompt=self.prompt, width=self.width, height=self.height, generator=self.generator, num_inference_steps=self.steps, guidance_scale=self.cfg_scale, num_images_per_prompt=self.n_iter)
-        for image in outputs.images:
-            base_count = len(os.listdir(self.outpath_samples))
-            img_name = os.path.join(self.outpath_samples, f"{base_count:05}.png")
-            image.save(img_name)
-            self.save_metadata(img_name)
+        pass
     
     def sample(self):
         self.model.scheduler = self.sampler
-        outputs = self.model(prompt=self.prompt, negative_prompt=self.prompt, width=self.width, height=self.height, generator=self.generator, num_inference_steps=self.steps, guidance_scale=self.cfg_scale, num_images_per_prompt=self.n_iter)
+        outputs = self.model(prompt_embeds=self.prompt_embeds, negative_prompt=self.prompt, width=self.width, height=self.height, generator=self.generator, num_inference_steps=self.steps, guidance_scale=self.cfg_scale, num_images_per_prompt=self.n_iter)
         for image in outputs.images:
             base_count = len(os.listdir(self.outpath_samples))
             img_name = os.path.join(self.outpath_samples, f"{base_count:05}.png")
             image.save(img_name)
             self.save_metadata(img_name)
+        self.cleanup()
 
 
 class StableDiffusionImg2Img(StableDiffusionBaseProcess):
@@ -118,8 +127,8 @@ class StableDiffusionImg2Img(StableDiffusionBaseProcess):
 
         self.pipe = StableDiffusionImg2ImgPipeline(**self.model.components, requires_safety_checker=False)
         self.pipe.scheduler = self.sampler
+        self.get_prompt_embeds(self.pipe)
         self.create_sub_folder(subfolder_name, "img2img")
-        self.data = [self.batch_size * [self.prompt]]
 
         self.init_img = init_img
         self.strength = strength
@@ -160,9 +169,10 @@ class StableDiffusionImg2Img(StableDiffusionBaseProcess):
         pass
 
     def sample(self):
-      outputs = self.pipe(prompt=self.prompt, negative_prompt=self.prompt, image=self.load_img(self.init_img), generator=self.generator, num_inference_steps=self.steps, strength=self.strength, guidance_scale = self.cfg_scale, num_images_per_prompt=self.n_iter)
+      outputs = self.pipe(prompt_embeds=self.prompt_embeds, negative_prompt=self.prompt, image=self.load_img(self.init_img), generator=self.generator, num_inference_steps=self.steps, strength=self.strength, guidance_scale = self.cfg_scale, num_images_per_prompt=self.n_iter)
       for image in outputs.images:
           base_count = len(os.listdir(self.outpath_samples))
           img_name = os.path.join(self.outpath_samples, f"{base_count:05}.png")
           image.save(img_name)
           self.save_metadata(img_name)
+      self.cleanup()

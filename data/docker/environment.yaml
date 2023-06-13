@@ -13,6 +13,7 @@ dependencies:
   - pip:
     - albumentations==1.3.0
     - diffusers
+    - compel
     - opencv-python==4.6.0.66
     - opencv-python-headless==4.1.2.30
     - pudb==2019.2

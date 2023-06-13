@@ -22,7 +22,6 @@
 - Power of two scaling for selection box
 - Render grid
 - Load module progress bar or status window
-- Weighted prompts: https://huggingface.co/docs/diffusers/using-diffusers/weighted_prompts
 - Inpainting: https://huggingface.co/docs/diffusers/using-diffusers/inpaint
 - Depth to Img: https://huggingface.co/docs/diffusers/using-diffusers/depth2img
 - Outpainting workflow: https://github.com/lkwq007/stablediffusion-infinity
@@ -30,6 +29,7 @@
 # Bugs
 
 - Max of 27 images generated before overwriting, decide on new naming format
+- Logging order is incorrect due to multiprocess access (gui C++ application, multiple python docker processes)
 - Save canvas buffer coordinates not working correctly
 - Selection not offseting correctly on Y axis, constrained to initial screenspace (check transform logic)
 - Extra configuration i.e. trigger_prompt not being loaded from model yaml
@@ -46,3 +46,4 @@
 - Look at implementing additional optimisations: https://huggingface.co/docs/diffusers/optimization/fp16
 - Show existing configuration when editing model config
 - Adjustable grid snapping
+- Weighted prompts: https://huggingface.co/docs/diffusers/using-diffusers/weighted_prompts
