@@ -49,6 +49,8 @@ Canvas::Canvas(glm::ivec2 position, const std::string &name, GLFWwindow *w, std:
   createShader(gridShader, "background_grid");
 }
 
+// TODO: This function doesn't work with non-matching aspect ratios
+// i.e. 512x768 causes issues
 // Retrieve raw pixel data from all images that fall space between two world space coordinates
 std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::ivec2 size) {
 
@@ -77,8 +79,23 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
       int topY = std::min(l1.y, l2.y);
       int bottomY = std::max(r1.y, r2.y);
 
-      int width = rightX - leftX;
-      int height = topY - bottomY;
+      // Treat image as our origin (bottom left cartesion)
+      glm::ivec2 imageOffset = {(image->getPosition().x - image->m_image->m_width / 2),
+                                (image->getPosition().y - image->m_image->m_height / 2)};
+
+      glm::ivec4 boundaryCoordinates = {leftX - imageOffset.x, rightX - imageOffset.x, topY - imageOffset.y,
+                                        bottomY - imageOffset.y};
+
+      // Get offset selection coordinates so we know where to copy the raw data
+      glm::ivec2 selectionOffset = {(position.x - (size.x / 2)), (position.y - (size.y / 2))};
+      glm::ivec4 offsetCoordinates = {leftX - selectionOffset.x, rightX - selectionOffset.x, topY - selectionOffset.y,
+                                      bottomY - selectionOffset.y};
+
+      QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Canvas::getPixelsAtSelection Source Rect: {", boundaryCoordinates.x,
+                                 boundaryCoordinates.w, "}", "{", boundaryCoordinates.y, boundaryCoordinates.z, "}");
+      QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Canvas::getPixelsAtSelection Destination Rect: {",
+                                 offsetCoordinates.x, offsetCoordinates.w, "}", "{", offsetCoordinates.y,
+                                 offsetCoordinates.z, "}");
 
       // Bind image texture and read pixel data for our selected area
       glBindTexture(GL_TEXTURE_2D, image->m_image->m_texture);
@@ -86,44 +103,43 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
       std::vector<RGBAPixel> imgPixels(image->m_image->m_width * image->m_image->m_height);
       glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgPixels.data());
 
-      QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Canvas::getPixelsAtSelection Intersection Rect: {", leftX, topY, "}",
-                                 "{", rightX, bottomY, "}");
-
-      // TODO: Iterate over the pixels in the intersection rectangle and extract the relative pixels from imgPixels into
-      // pixels vector, note that openGL textures are indexed from the bottom left opposed to our coordinates which
+      // Iterate over the pixels in the intersection rectangle and extract the relative pixels from the image into
+      // its own vector, note that openGL textures are indexed from the bottom left opposed to our coordinates which
       // index from the top left
-      for (int x = leftX - l2.x; x < (leftX - l2.x) + width; x++) {
-        for (int y = l2.y - topY; y < l2.y - bottomY; y++) {
-          int index = (y * size.y) + x;
-
-          int xoffset = l1.x - leftX;
-          int yoffset = l2.y - topY;
-          int offsetIndex = ((y - yoffset) * size.y) + (x - xoffset);
-
-          if (offsetIndex >= size.x * size.y || offsetIndex < 0) {
-            QLogger::GetInstance().Log(LOGLEVEL::ERR, "Invalid buffer captured! expected max size ", size.x * size.y,
-                                       " got out of bounds index at", offsetIndex);
-            ErrorHandler::GetInstance().setError("Invalid image buffer captured!");
-
-            return pixels;
-            glBindTexture(GL_TEXTURE_2D, 0);
-          } else {
-            pixels[offsetIndex] = imgPixels[index];
-          }
+      std::vector<RGBAPixel> selectionPixels;
+      for (int x = boundaryCoordinates.x; x < boundaryCoordinates.y; x++) {
+        for (int y = boundaryCoordinates.w; y < boundaryCoordinates.z; y++) {
+          int index = (y * image->m_image->m_height) + x;
+          selectionPixels.push_back(imgPixels[index]);
         }
       }
 
-      pixels = GLHELPER::Rotate1DSquareMatrixClockwise<RGBAPixel>(pixels);
-      pixels = GLHELPER::Rotate1DSquareMatrixClockwise<RGBAPixel>(pixels);
+      // Copy the selectionPixels to our main image
+      int i = 0;
+      for (int x = offsetCoordinates.x; x < offsetCoordinates.y; x++) {
+        for (int y = offsetCoordinates.w; y < offsetCoordinates.z; y++) {
+          int index = (y * size.y) + x;
 
-      for (int i = 0; i < size.y - 1; i++) {
-        std::reverse(&pixels.at(i * size.x), &pixels.at(i * size.x + size.x)); // reverse row
+          if (index >= size.x * size.y || index < 0) {
+            QLogger::GetInstance().Log(LOGLEVEL::ERR, "Invalid buffer captured! expected max size ", size.x * size.y,
+                                       " got out of bounds index at", index);
+            ErrorHandler::GetInstance().setError("Invalid image buffer captured!");
+
+            glBindTexture(GL_TEXTURE_2D, 0);
+            return pixels;
+          } else {
+            pixels[index] = selectionPixels.at(i);
+            i++;
+          }
+        }
       }
 
       glBindTexture(GL_TEXTURE_2D, 0);
     }
   }
 
+  // Inverse Y
+  pixels = GLHELPER::FlipMatrixY(pixels, size.x, size.y);
   return pixels;
 }
 

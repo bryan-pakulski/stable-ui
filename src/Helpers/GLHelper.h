@@ -17,15 +17,29 @@ public:
 
   static void SaveTextureToFile(const char *filename, GLuint *texture, int width, int height);
 
-  template <class T> static std::vector<T> Rotate1DSquareMatrixClockwise(std::vector<T> matrix) {
+  template <class T> static std::vector<T> FlipMatrixY(std::vector<T> matrix, int width, int height) {
+    std::vector<T> pixels(matrix.size());
+
+    for (int i = 0; i < pixels.size(); i++) {
+
+      pixels[(i / width) * width + (i % width)] = matrix[(height - (i / width) - 1) * width + (i % width)];
+    }
+    return pixels;
+  }
+
+  template <class T> static std::vector<T> Rotate1DSquareMatrixClockwise(std::vector<T> matrix, int rotations = 1) {
     int size = (int)sqrt(matrix.size());
     std::vector<T> result(matrix.size());
 
-    for (int i = 0; i < size; ++i) {
-      for (int j = 0; j < size; ++j) {
-        result[i * size + j] = matrix[(size - j - 1) * size + i];
+    do {
+      for (int i = 0; i < size; ++i) {
+        for (int j = 0; j < size; ++j) {
+          result[i * size + j] = matrix[(size - j - 1) * size + i];
+        }
       }
-    }
+      rotations--;
+      matrix = result;
+    } while (rotations > 0);
 
     return result;
   }
