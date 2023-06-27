@@ -106,7 +106,7 @@ class Command():
         if (len(command_and_args) > 1):
             for pair in command_and_args[1:]:
                 print(pair)
-                arg, val = pair.split("=")
+                arg, val = pair.split("=", 1)
                 self.arguments[arg] = val
 
 class HeartBeatServer(MQServer):

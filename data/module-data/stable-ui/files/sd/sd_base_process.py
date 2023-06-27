@@ -2,6 +2,7 @@ import gc
 import os
 import logging
 import torch
+import base64
 
 import PIL
 from PIL import Image
@@ -215,7 +216,11 @@ class StableDiffusionOutpainting(StableDiffusionBaseProcess):
         md.save()
 
     def convert_img(self, data):
-        image = Image.fromarray(np.uint8([ord(c) for c in data.decode('base64')])).convert('RGBA')
+        base64_bytes = data.encode('ascii')
+        message_bytes = base64.b64decode(base64_bytes)
+        message = message_bytes.decode('ascii')
+
+        image = Image.fromarray(np.uint8([ord(c) for c in message])).convert('RGBA')
         w, h = image.size
         print(f"loaded input image of size ({w}, {h}) from base64 data")
         # resize to integer multiple of 32
