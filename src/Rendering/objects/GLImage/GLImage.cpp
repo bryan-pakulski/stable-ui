@@ -7,7 +7,7 @@ GLImage::GLImage(int width, int height, std::string name) : m_name(name), m_widt
 
   glGenTextures(1, &m_texture);
   glBindTexture(GL_TEXTURE_2D, m_texture);
-  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, color);
+  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, color);
   glBindTexture(GL_TEXTURE_2D, 0);
 
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -31,7 +31,7 @@ void GLImage::resize(int width, int height) {
 
   glGenTextures(1, &m_texture);
   glBindTexture(GL_TEXTURE_2D, m_texture);
-  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, color);
+  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, color);
   glBindTexture(GL_TEXTURE_2D, 0);
 
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

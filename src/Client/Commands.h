@@ -161,4 +161,43 @@ public:
   }
 };
 
+/*
+Call command for outpainting
+
+Parameters:
+    - prompt                        (Prompt)
+    - negative_prompt               (Negative prompt string)
+    - subfolder_name                (Subfolder to store images in, named after canvas)
+    - img_data                      (Base64 encoded image)
+    - sampler_name                  (Sampler i.e. DPMS)
+    - n_iter                        (Number of images)
+    - steps                         (Number of steps to generate)
+    - cfg_scale                     (CFG scale value 0.0 -> 12.0)
+    - strength                      (Signal noise ratio of reference image 0 - 1.0)
+    - seed                          (RNG seed, -1 for random)
+    - outpath_samples               (output directory)
+*/
+class outpainting : public command {
+public:
+  outpainting(ModelConfig &model, std::string &prompt, std::string &negative_prompt, std::string canvas_name,
+              std::string &img_data, std::string &sampler_name, int n_iter, int steps, double cfg_scale,
+              double strength, int seed, std::string out_path) {
+    m_name = "outpaint";
+
+    prompt.append(" " + model.trigger_prompt);
+
+    m_parameters.push_back(makePair("prompt", prompt));
+    m_parameters.push_back(makePair("negative_prompt", negative_prompt));
+    m_parameters.push_back(makePair("subfolder_name", canvas_name));
+    m_parameters.push_back(makePair("img_data", img_data));
+    m_parameters.push_back(makePair("sampler_name", sampler_name));
+    m_parameters.push_back(makePair("n_iter", n_iter));
+    m_parameters.push_back(makePair("steps", steps));
+    m_parameters.push_back(makePair("cfg_scale", cfg_scale));
+    m_parameters.push_back(makePair("strength", strength));
+    m_parameters.push_back(makePair("seed", seed));
+    m_parameters.push_back(makePair("outpath_samples", out_path));
+  }
+};
+
 } // namespace commands

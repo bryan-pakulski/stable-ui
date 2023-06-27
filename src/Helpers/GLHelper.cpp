@@ -2,6 +2,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
 #include "GLHelper.h"
+#include "ThirdParty/base64/base64.h"
 
 bool GLHELPER::LoadTextureFromFile(const char *filename, GLuint *out_texture, int *out_width, int *out_height,
                                    bool tiled, bool flipImage) {
@@ -46,14 +47,39 @@ bool GLHELPER::LoadTextureFromFile(const char *filename, GLuint *out_texture, in
 
 void GLHELPER::SaveTextureToFile(const char *filename, GLuint *texture, int width, int height) {
   // Allocate array of pixels
-  unsigned char *pixels = (unsigned char *)malloc(width * height * 4);
+  uint8_t *pixels = new uint8_t[width * height * 4];
 
   // Get texture data
   glGetTexImage(*texture, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
   // Save texture as png file
-  stbi_write_png(filename, width, height, 4, pixels, 0);
+  stbi_flip_vertically_on_write(1);
+  stbi_write_png(filename, width, height, 4, pixels, width * 4);
 
   // Free array of pixels
   free(pixels);
+}
+
+// Converts OpenGL Texture into a Base64 string
+// This assumes an RGBA texture
+std::string GLHELPER::textureToBase64String(GLuint *texture, int width, int height) {
+  uint8_t *pixels = new uint8_t[width * height * 4];
+  glGetTexImage(*texture, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
+  int data_length = width * height * 4;
+  int encoded_data_length = Base64encode_len(data_length);
+  std::string base64_string(encoded_data_length, ' ');
+
+  Base64encode(base64_string.data(), pixels, data_length);
+
+  /* Decode can be done as follows
+  char* data = NULL;
+  int data_length = 0;
+  int alloc_length = Base64decode_len(base64_string);
+  some_random_data = malloc(alloc_length);
+  data_length = Base64decode(data, base64_string);
+  */
+
+  free(pixels);
+  return base64_string;
 }

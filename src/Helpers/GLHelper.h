@@ -16,6 +16,7 @@ public:
                                   bool tiled, bool flipImage);
 
   static void SaveTextureToFile(const char *filename, GLuint *texture, int width, int height);
+  static std::string textureToBase64String(GLuint *texture, int width, int height);
 
   template <class T> static std::vector<T> FlipMatrixY(std::vector<T> matrix, int width, int height) {
     std::vector<T> pixels(matrix.size());

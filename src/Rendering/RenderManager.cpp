@@ -75,7 +75,7 @@ void RenderManager::captureBuffer() {
 }
 
 void RenderManager::saveBuffer() {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::captureBuffer saving to data/output/buffer.png");
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::saveBuffer saving to data/output/buffer.png");
   GLHELPER::SaveTextureToFile("data/output/buffer.png", &m_selectionBuffer->m_texture, m_selectionBuffer->m_width,
                               m_selectionBuffer->m_height);
 }
@@ -85,10 +85,15 @@ void RenderManager::outpaintSelection() {
                              "RenderManager::outpaintSelection outpainting coordinates: ", m_selection->getPosition().x,
                              m_selection->getPosition().y);
 
-  std::vector<RGBAPixel> pixels =
-      getActiveCanvas()->getPixelsAtSelection(m_selection->getPosition(), m_selection->m_size);
+  // Get image as base64 string
+  captureBuffer();
+  std::string b64Image = GLHELPER::textureToBase64String(&m_selectionBuffer->m_texture, m_selectionBuffer->m_width,
+                                                         m_selectionBuffer->m_height);
+
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, b64Image);
 
   // TODO: process pixels and send to outpainting pipeline
+  // TODO: Use PIL Processesing to create mask for outpainting https: // note.nkmk.me/en/python-pillow-composite/
 }
 
 // Make a canvas active

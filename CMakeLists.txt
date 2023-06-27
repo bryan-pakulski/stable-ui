@@ -144,6 +144,7 @@ add_executable( stable-ui
                 src/Rendering/objects/Image.cpp
                 src/Rendering/objects/GLImage/GLImage.cpp
                 src/ThirdParty/sha1/sha1.cpp
+                src/ThirdParty/base64/base64.c
         )
 
 # XMP has to be built manually (see src/ThirdParty/build_xmp_libraries.sh)
