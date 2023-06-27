@@ -3,6 +3,7 @@
 #include "Client/Commands.h"
 #include "Client/StableClient.h"
 #include "Config/config.h"
+#include "Config/structs.h"
 #include "Indexer/MetaData.h"
 #include "Display/QDisplay.h"
 #include "Helpers/QLogger.h"
@@ -55,12 +56,20 @@ void StableManager::releaseSDModel() {
   m_Thread = std::thread(std::bind(&StableClient::releaseModel, &StableClient::GetInstance(), m_modelState));
   m_Thread.detach();
 }
-// Text to Image, render result to canvas
-void StableManager::textToImage(std::string prompt, std::string negativePrompt, std::string &samplerName, int nIter,
-                                int steps, double cfg, int seed, int width, int height, int &renderState) {
-  commands::textToImage cmd = commands::textToImage{
-      m_model,     prompt, width, height, negativePrompt, m_renderManager->getActiveCanvas()->m_name,
-      samplerName, nIter,  steps, cfg,    seed,           CONFIG::OUTPUT_DIRECTORY.get()};
+// Text to Image, save and preview result
+void StableManager::textToImage(pipelineConfig &config, int &renderState) {
+  commands::textToImage cmd = commands::textToImage{m_model,
+                                                    config.prompt,
+                                                    config.width,
+                                                    config.height,
+                                                    config.negative_prompt,
+                                                    m_renderManager->getActiveCanvas()->m_name,
+                                                    config.sampler,
+                                                    config.iterations,
+                                                    config.steps,
+                                                    config.cfg,
+                                                    config.seed,
+                                                    CONFIG::OUTPUT_DIRECTORY.get()};
 
   renderState = Q_RENDER_STATE::RENDERING;
 
@@ -69,19 +78,48 @@ void StableManager::textToImage(std::string prompt, std::string negativePrompt, 
   m_Thread.detach();
 }
 
-// Image to Image, render result to canvas
-void StableManager::imageToImage(std::string &imgPath, std::string &prompt, std::string &negativePrompt,
-                                 std::string &samplerName, int nIter, int steps, double cfg, double strength, int seed,
-                                 int &renderState) {
-  commands::imageToImage cmd =
-      commands::imageToImage{m_model, prompt,      negativePrompt, m_renderManager->getActiveCanvas()->m_name,
-                             imgPath, samplerName, nIter,          steps,
-                             cfg,     strength,    seed,           CONFIG::OUTPUT_DIRECTORY.get()};
+// Image to Image, save and preview
+void StableManager::imageToImage(std::string &imgPath, pipelineConfig &config, int &renderState) {
+  commands::imageToImage cmd = commands::imageToImage{m_model,
+                                                      config.prompt,
+                                                      config.negative_prompt,
+                                                      m_renderManager->getActiveCanvas()->m_name,
+                                                      imgPath,
+                                                      config.sampler,
+                                                      config.iterations,
+                                                      config.steps,
+                                                      config.cfg,
+                                                      config.strength,
+                                                      config.seed,
+                                                      CONFIG::OUTPUT_DIRECTORY.get()};
 
   renderState = Q_RENDER_STATE::RENDERING;
 
   m_Thread =
       std::thread(std::bind(&StableClient::imageToImage, &StableClient::GetInstance(), cmd, std::ref(renderState)));
+  m_Thread.detach();
+}
+
+// Outpaint, render result to canvas
+void StableManager::outpaint(std::string &imgData, std::string &imgMask, pipelineConfig &config, int &renderState) {
+  commands::outpainting cmd = commands::outpainting{m_model,
+                                                    config.prompt,
+                                                    config.negative_prompt,
+                                                    m_renderManager->getActiveCanvas()->m_name,
+                                                    imgData,
+                                                    imgMask,
+                                                    config.sampler,
+                                                    config.iterations,
+                                                    config.steps,
+                                                    config.cfg,
+                                                    config.strength,
+                                                    config.seed,
+                                                    CONFIG::OUTPUT_DIRECTORY.get()};
+
+  renderState = Q_RENDER_STATE::RENDERING;
+
+  m_Thread =
+      std::thread(std::bind(&StableClient::outpainting, &StableClient::GetInstance(), cmd, std::ref(renderState)));
   m_Thread.detach();
 }
 

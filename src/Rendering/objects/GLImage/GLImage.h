@@ -9,9 +9,9 @@
 #include <string>
 
 struct RGBAPixel {
-  unsigned char red = 0xFF;
-  unsigned char green = 0xFF;
-  unsigned char blue = 0xFF;
+  unsigned char red = 0x00;
+  unsigned char green = 0x00;
+  unsigned char blue = 0x00;
   unsigned char alpha = 0xFF;
 };
 

@@ -180,8 +180,8 @@ Parameters:
 class outpainting : public command {
 public:
   outpainting(ModelConfig &model, std::string &prompt, std::string &negative_prompt, std::string canvas_name,
-              std::string &img_data, std::string &sampler_name, int n_iter, int steps, double cfg_scale,
-              double strength, int seed, std::string out_path) {
+              std::string &img_data, std::string &img_mask, std::string &sampler_name, int n_iter, int steps,
+              double cfg_scale, double strength, int seed, std::string out_path) {
     m_name = "outpaint";
 
     prompt.append(" " + model.trigger_prompt);
@@ -190,6 +190,7 @@ public:
     m_parameters.push_back(makePair("negative_prompt", negative_prompt));
     m_parameters.push_back(makePair("subfolder_name", canvas_name));
     m_parameters.push_back(makePair("img_data", img_data));
+    m_parameters.push_back(makePair("img_mask", img_mask));
     m_parameters.push_back(makePair("sampler_name", sampler_name));
     m_parameters.push_back(makePair("n_iter", n_iter));
     m_parameters.push_back(makePair("steps", steps));

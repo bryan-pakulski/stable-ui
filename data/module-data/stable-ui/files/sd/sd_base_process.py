@@ -13,6 +13,7 @@ from common import devices
 from diffusers import DiffusionPipeline
 from diffusers import StableDiffusionPipeline
 from diffusers import StableDiffusionImg2ImgPipeline
+from diffusers import StableDiffusionInpaintPipeline
 from compel import Compel
 
 # TODO: implement weighted prompts see:
@@ -170,6 +171,66 @@ class StableDiffusionImg2Img(StableDiffusionBaseProcess):
 
     def sample(self):
       outputs = self.pipe(prompt_embeds=self.prompt_embeds, negative_prompt=self.prompt, image=self.load_img(self.init_img), generator=self.generator, num_inference_steps=self.steps, strength=self.strength, guidance_scale = self.cfg_scale, num_images_per_prompt=self.n_iter)
+      for image in outputs.images:
+          base_count = len(os.listdir(self.outpath_samples))
+          img_name = os.path.join(self.outpath_samples, f"{base_count:05}.png")
+          image.save(img_name)
+          self.save_metadata(img_name)
+      self.cleanup()
+
+class StableDiffusionOutpainting(StableDiffusionBaseProcess):
+
+    def __init__(self, outpath_samples, subfolder_name, prompt, negative_prompt, img_data, img_mask, seed, sampler_name, batch_size, strength, n_iter, steps, cfg_scale, model):
+        super().__init__(outpath_samples=outpath_samples, prompt=prompt, negative_prompt=negative_prompt, seed=seed,
+                         sampler_name=sampler_name, batch_size=batch_size, n_iter=n_iter, steps=steps, cfg_scale=cfg_scale, model=model)
+
+        self.pipe = StableDiffusionInpaintPipeline(**self.model.components, requires_safety_checker=False)
+        self.pipe.scheduler = self.sampler
+        self.get_prompt_embeds(self.pipe)
+        self.create_sub_folder(subfolder_name, "outpaint")
+
+        # Process base64 img data into PIL image for sd pipeline
+        self.image = self.convert_img(img_data)
+        self.mask = self.convert_img(img_mask)
+        
+        self.strength = strength
+
+    def save_metadata(self, img):
+        md = metadata.StableMetaData(img)
+
+        data = {
+            "prompt": self.prompt,
+            "negative_prompt": self.negative_prompt,
+            "model_hash": self.model.model_hash,
+            "seed": self.seed,
+            "sampler": self.sampler_name,
+            "steps": self.steps,
+            "cfg": self.cfg_scale,
+            "strength": self.strength,
+            "width": self.width,
+            "height": self.height
+        }
+
+        md.addMetaData(data)
+        md.save()
+
+    def convert_img(self, data):
+        image = Image.fromarray(np.uint8([ord(c) for c in data.decode('base64')])).convert('RGBA')
+        w, h = image.size
+        print(f"loaded input image of size ({w}, {h}) from base64 data")
+        # resize to integer multiple of 32
+        w, h = map(lambda x: x - x % 32, (w, h))
+        image = image.resize((w, h), resample=PIL.Image.LANCZOS)
+        image = np.array(image).astype(np.float32) / 255.0
+        image = image[None].transpose(0, 3, 1, 2)
+        image = torch.from_numpy(image)
+        return 2.*image - 1.
+    
+    def cpu_sample(self):
+        pass
+
+    def sample(self):
+      outputs = self.pipe(prompt_embeds=self.prompt_embeds, negative_prompt=self.prompt, image=self.image, mask_image=self.mask, generator=self.generator, num_inference_steps=self.steps, strength=self.strength, guidance_scale = self.cfg_scale, num_images_per_prompt=self.n_iter)
       for image in outputs.images:
           base_count = len(os.listdir(self.outpath_samples))
           img_name = os.path.join(self.outpath_samples, f"{base_count:05}.png")

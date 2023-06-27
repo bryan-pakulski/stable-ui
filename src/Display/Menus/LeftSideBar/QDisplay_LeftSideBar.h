@@ -51,16 +51,16 @@ public:
     if (ImGui::CollapsingHeader("Rendering")) {
       if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::LOADED) {
         {
-          if (ImGui::Button("inference")) {
+          if (ImGui::Button("text")) {
             activeTab = tabs::TXT2IMG;
           }
           ImGui::SameLine();
-          if (ImGui::Button("img2img")) {
+          if (ImGui::Button("image")) {
             activeTab = tabs::IMG2IMG;
           }
           ImGui::SameLine();
-          if (ImGui::Button("training")) {
-            activeTab = tabs::TRAINING;
+          if (ImGui::Button("painting")) {
+            activeTab = tabs::PAINTING;
           }
         }
         ImGui::Separator();
@@ -71,6 +71,9 @@ public:
         if (activeTab == tabs::IMG2IMG) {
           Image2ImageWindow->render();
         }
+        if (activeTab == tabs::PAINTING) {
+        }
+
       } else if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::NONE_LOADED) {
         ImGui::Text("Please import and load a model first!");
       } else if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::LOADING) {
@@ -89,7 +92,8 @@ private:
   struct tabs {
     static const int TXT2IMG = 0;
     static const int IMG2IMG = 1;
-    static const int TRAINING = 2;
+    static const int PAINTING = 2;
+    static const int TRAINING = 3;
   };
 
   std::unique_ptr<QDisplay_Text2Image> Text2ImageWindow;

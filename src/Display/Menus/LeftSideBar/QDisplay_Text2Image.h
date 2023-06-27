@@ -10,6 +10,7 @@
 #include "Helpers/States.h"
 #include "Rendering/RenderManager.h"
 #include "Config/config.h"
+#include "Config/structs.h"
 #include "Rendering/objects/GLImage/GLImage.h"
 #include "Display/QDisplay_Base.h"
 #include "StableManager.h"
@@ -18,7 +19,9 @@ class QDisplay_Text2Image : public QDisplay_Base {
 
 public:
   // Initialise render manager references
-  QDisplay_Text2Image(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {}
+  QDisplay_Text2Image(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+    m_config = rm->getPipeline(PIPELINE::TXT);
+  }
 
   virtual void render() {
 
@@ -52,22 +55,14 @@ public:
   }
 
 private:
-  // Window variables & flags
-  std::string m_prompt;
-  std::string m_negativePrompt;
-  std::string m_selectedSampler = "pndm";
+  std::shared_ptr<pipelineConfig> m_config;
+  bool m_randomSeed = true;
+
   std::vector<listItem> m_samplerList = {
       {.m_name = "ddim"},      {.m_name = "ddiminverse"}, {.m_name = "ddpm"},           {.m_name = "deis"},
       {.m_name = "dpmsmulti"}, {.m_name = "dpmssingle"},  {.m_name = "eulerancestral"}, {.m_name = "euler"},
       {.m_name = "heun"},      {.m_name = "kdpm2"},       {.m_name = "kdpm2ancestral"}, {.m_name = "lms"},
       {.m_name = "pndm"},      {.m_name = "unipc"}};
-
-  int m_width = 512;
-  int m_height = 512;
-  int m_steps = 35;
-  int m_seed = 0;
-  int m_nIter = 1;
-  double m_cfg = 7.5;
 
   std::unique_ptr<GLImage> m_image = 0;
 
@@ -77,12 +72,10 @@ private:
     m_image = std::unique_ptr<GLImage>(
         new GLImage(CONFIG::IMAGE_SIZE_X_LIMIT.get(), CONFIG::IMAGE_SIZE_Y_LIMIT.get(), "txt2img"));
 
-    int seed = m_seed;
-    if (m_seed == 0) {
-      seed = rand() % INT_MAX + 1;
+    if (m_randomSeed) {
+      m_config->seed = rand() % INT_MAX + 1;
     }
-    StableManager::GetInstance().textToImage(m_prompt, m_negativePrompt, m_selectedSampler, m_nIter, m_steps, m_cfg,
-                                             seed, m_width, m_height, m_image->renderState);
+    StableManager::GetInstance().textToImage(*m_config, m_image->renderState);
   }
 
   void imageWindow() {
@@ -113,36 +106,38 @@ private:
   void promptHelper() {
     if (ImGui::CollapsingHeader("Prompts")) {
       ImGui::Text("Prompt");
-      ImGui::InputTextMultiline("##prompt", &m_prompt);
+      ImGui::InputTextMultiline("##prompt", &m_config->prompt, ImVec2(260, ImGui::GetWindowContentRegionWidth()));
+
       ImGui::Text("Negative Prompt");
-      ImGui::InputTextMultiline("##neg prompt", &m_negativePrompt);
+      ImGui::InputTextMultiline("##negative prompt", &m_config->negative_prompt,
+                                ImVec2(260, ImGui::GetWindowContentRegionWidth()));
     }
   }
 
   void promptConfig() {
     if (ImGui::CollapsingHeader("Gen Config")) {
       // Width control
-      ImGui::SliderInt("width", &m_width, 1, CONFIG::IMAGE_SIZE_X_LIMIT.get());
+      ImGui::SliderInt("width", &m_config->width, 1, CONFIG::IMAGE_SIZE_X_LIMIT.get());
       if (ImGui::BeginPopupContextItem("width")) {
-        ImGui::InputInt("value", &m_width);
+        ImGui::InputInt("value", &m_config->width);
         if (ImGui::MenuItem("Reset to default: 512"))
-          m_width = 512;
+          m_config->width = 512;
         ImGui::EndPopup();
       }
 
       // Height control
-      ImGui::SliderInt("height", &m_height, 1, CONFIG::IMAGE_SIZE_Y_LIMIT.get());
+      ImGui::SliderInt("height", &m_config->height, 1, CONFIG::IMAGE_SIZE_Y_LIMIT.get());
       if (ImGui::BeginPopupContextItem("height")) {
-        ImGui::InputInt("value", &m_height);
+        ImGui::InputInt("value", &m_config->height);
         if (ImGui::MenuItem("Reset to default: 512"))
-          m_height = 512;
+          m_config->height = 512;
         ImGui::EndPopup();
       }
 
-      if (ImGui::BeginCombo("Sampler", m_selectedSampler.c_str(), ImGuiComboFlags_NoArrowButton)) {
+      if (ImGui::BeginCombo("Sampler", m_config->sampler.c_str(), ImGuiComboFlags_NoArrowButton)) {
         for (auto &item : m_samplerList) {
           if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
-            m_selectedSampler = item.m_name;
+            m_config->sampler = item.m_name;
           }
           if (item.m_isSelected) {
             ImGui::SetItemDefaultFocus();
@@ -151,10 +146,13 @@ private:
         ImGui::EndCombo();
       }
 
-      ImGui::InputInt("steps", &m_steps);
-      ImGui::InputInt("seed", &m_seed);
-      ImGui::InputDouble("cfg scale", &m_cfg, 0.1);
-      ImGui::InputInt("Iterations", &m_nIter);
+      ImGui::InputInt("steps", &m_config->steps);
+      if (!m_randomSeed) {
+        ImGui::InputInt("seed", &m_config->seed);
+      }
+      ImGui::Checkbox("Randomize Seed", &m_randomSeed);
+      ImGui::InputDouble("cfg scale", &m_config->cfg, 0.1);
+      ImGui::InputInt("Iterations", &m_config->iterations);
     }
   }
 };

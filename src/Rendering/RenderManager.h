@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Config/config.h"
+#include "Config/structs.h"
 #include "Config/types.h"
 #include "Indexer/Indexer.h"
 #include "Helpers/QLogger.h"
@@ -15,6 +16,7 @@
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
+#include <memory>
 #include <vector>
 
 /*
@@ -52,9 +54,26 @@ public:
   void captureBuffer();
   void saveBuffer();
   std::shared_ptr<GLImage> getBuffer() { return m_selectionBuffer; }
-  void outpaintSelection();
+  std::shared_ptr<GLImage> getMask() { return m_selectionMask; }
   void useImage(std::string path);
   const std::string getImage();
+
+  /*
+    PIPELINE CONFIGURATION
+  */
+  std::shared_ptr<pipelineConfig> getPipeline(int pipeline) {
+    if (pipeline == PIPELINE::TXT) {
+      return m_txtPipeline;
+    } else if (pipeline == PIPELINE::IMG) {
+      return m_imgPipeline;
+    } else if (pipeline == PIPELINE::PAINT) {
+      return m_paintPipeline;
+    } else {
+      QLogger::GetInstance().Log(LOGLEVEL::ERR,
+                                 "RenderManager::getPipeline Invalid pipeline enum, not found in config!");
+      return nullptr;
+    }
+  }
 
   /*
     CALLBACKS
@@ -73,7 +92,14 @@ private:
 
   std::string m_baseImage;
   std::shared_ptr<GLImage> m_selectionBuffer;
+  std::shared_ptr<GLImage> m_selectionMask;
   bool m_captureBuffer = false;
+
+  // These hold our pipeline configurations statically so that they can be accessed from anywhere in the front end (
+  // every display holds a reference to this class )
+  std::shared_ptr<pipelineConfig> m_txtPipeline;
+  std::shared_ptr<pipelineConfig> m_imgPipeline;
+  std::shared_ptr<pipelineConfig> m_paintPipeline;
 
   // Process inputs
   void logicLoop();

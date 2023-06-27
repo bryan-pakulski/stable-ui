@@ -89,6 +89,17 @@ void StableClient::imageToImage(commands::imageToImage command, int &renderState
   }
 }
 
+// Outpainting
+void StableClient::outpainting(commands::outpainting command, int &renderState) {
+
+  std::string msg = sendMessage(command.getCommandString());
+  if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
+    renderState = Q_RENDER_STATE::RENDERED;
+  } else {
+    renderState = Q_RENDER_STATE::UNRENDERED;
+  }
+}
+
 // Send message to ZMQ server listening on m_socket
 std::string StableClient::sendMessage(const std::string &message) {
   std::lock_guard<std::mutex> guard(m_mutex);

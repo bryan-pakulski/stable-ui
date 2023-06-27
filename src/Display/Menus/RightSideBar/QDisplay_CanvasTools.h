@@ -79,6 +79,8 @@ private:
     }
     ImGui::Image((void *)(intptr_t)m_renderManager->getBuffer()->m_texture,
                  ImVec2(m_renderManager->getBuffer()->m_width * 0.4, m_renderManager->getBuffer()->m_height * 0.4));
+    ImGui::Image((void *)(intptr_t)m_renderManager->getMask()->m_texture,
+                 ImVec2(m_renderManager->getMask()->m_width * 0.4, m_renderManager->getMask()->m_height * 0.4));
   }
 
   void debugInfo() {

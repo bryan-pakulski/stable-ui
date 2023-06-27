@@ -46,11 +46,11 @@ public:
 
   void setRenderState(int state);
   int getRenderState() { return m_renderState; }
-  void textToImage(std::string prompt, std::string negative_prompt, std::string &samplerName, int nIter, int steps,
-                   double cfg, int seed, int width, int height, int &renderState);
+  void textToImage(pipelineConfig &config, int &renderState);
 
-  void imageToImage(std::string &imgPath, std::string &prompt, std::string &negativePrompt, std::string &samplerName,
-                    int nIter, int steps, double cfg, double strength, int seed, int &renderState);
+  void imageToImage(std::string &imgPath, pipelineConfig &config, int &renderState);
+
+  void outpaint(std::string &imgData, std::string &imgMask, pipelineConfig &config, int &renderState);
 
   // Retrieve last modified file from path
   std::string getLatestFile(const std::string &path);

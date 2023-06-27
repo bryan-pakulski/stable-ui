@@ -1,7 +1,9 @@
 #include "RenderManager.h"
+#include "Client/StableClient.h"
 #include "Config/config.h"
 #include "GLFW/glfw3.h"
 #include "Rendering/OrthographicCamera.h"
+#include "StableManager.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "Indexer/MetaData.h"
@@ -19,6 +21,11 @@ RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
 
   // Initialise selection buffer texture
   m_selectionBuffer = std::shared_ptr<GLImage>(new GLImage(m_selection->m_size.x, m_selection->m_size.y, "buffer"));
+  m_selectionMask = std::shared_ptr<GLImage>(new GLImage(m_selection->m_size.x, m_selection->m_size.y, "buffer_mask"));
+
+  m_txtPipeline = std::shared_ptr<pipelineConfig>(new pipelineConfig());
+  m_imgPipeline = std::shared_ptr<pipelineConfig>(new pipelineConfig());
+  m_paintPipeline = std::shared_ptr<pipelineConfig>(new pipelineConfig());
 
   createCanvas(0, 0, "default");
 }
@@ -61,12 +68,25 @@ void RenderManager::captureBuffer() {
 
   std::vector<RGBAPixel> pixels =
       getActiveCanvas()->getPixelsAtSelection(m_selection->getPosition(), m_selection->m_size);
+  std::vector<RGBAPixel> mask =
+      getActiveCanvas()->getPixelsAtSelection(m_selection->getPosition(), m_selection->m_size, true);
+
   m_selectionBuffer->resize(m_selection->m_size.x, m_selection->m_size.y);
+  m_selectionMask->resize(m_selection->m_size.x, m_selection->m_size.y);
 
   // Create the texture buffer with correct format, internal format and properties
   glBindTexture(GL_TEXTURE_2D, m_selectionBuffer->m_texture);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_selectionBuffer->m_width, m_selectionBuffer->m_width, 0, GL_RGBA,
                GL_UNSIGNED_BYTE, pixels.data());
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindTexture(GL_TEXTURE_2D, m_selectionMask->m_texture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_selectionMask->m_width, m_selectionMask->m_width, 0, GL_RGBA,
+               GL_UNSIGNED_BYTE, mask.data());
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -78,22 +98,6 @@ void RenderManager::saveBuffer() {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::saveBuffer saving to data/output/buffer.png");
   GLHELPER::SaveTextureToFile("data/output/buffer.png", &m_selectionBuffer->m_texture, m_selectionBuffer->m_width,
                               m_selectionBuffer->m_height);
-}
-
-void RenderManager::outpaintSelection() {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO,
-                             "RenderManager::outpaintSelection outpainting coordinates: ", m_selection->getPosition().x,
-                             m_selection->getPosition().y);
-
-  // Get image as base64 string
-  captureBuffer();
-  std::string b64Image = GLHELPER::textureToBase64String(&m_selectionBuffer->m_texture, m_selectionBuffer->m_width,
-                                                         m_selectionBuffer->m_height);
-
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, b64Image);
-
-  // TODO: process pixels and send to outpainting pipeline
-  // TODO: Use PIL Processesing to create mask for outpainting https: // note.nkmk.me/en/python-pillow-composite/
 }
 
 // Make a canvas active

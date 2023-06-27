@@ -24,6 +24,7 @@ public:
   void loadModelToMemory(commands::loadModelToMemory command, int &state);
   void textToImage(commands::textToImage command, int &renderState);
   void imageToImage(commands::imageToImage command, int &renderState);
+  void outpainting(commands::outpainting command, int &renderState);
 
 private:
   zmq::context_t m_ctx;

@@ -3,14 +3,12 @@
 - Basic drawing tools (draw, erase, colour)
 - Save canvas to file
 - Load saved canvas
-- Render chunk objects to data structure that orders images based on X/Y position, add lookup function to sample pixel values at coordinates for img2img and inpainting/outpainting
 
 # Core systems
 
 - initialise string with a maximum length, this is important as if we reload configuration by editing the string manually via ImGui we don't have the hooks to re-size memory and we risk overwriting if the initial string is too short (This can potentially be resolved by using std::string as a resizable datatype, see imgui_stdlib.h)
 - Add input sanitisation on sd_client on messages being sent, delimit or convert " to '?
 - Document Indexing / Crawling engine
-- Refactor main rendering code
 - Look at any performance improvements that can be used from openvino: https://github.com/bes-dev/stable_diffusion.openvino/tree/master
 - Refactor generation code to use commands and avoid passing multiple members
 
@@ -35,7 +33,8 @@
 - Extra configuration i.e. trigger_prompt not being loaded from model yaml
 - Heartbeat bug on windows (no connectivity)
 - Multi string search doesn't work properly (Set union not working as intended?)
-- Generated images don't seem to look correct, possible an issue with loading VAE? maybe other configuration is breaking, investigate image pipeline..
+- Too much logging with base64 images being sent to zmq
+- Multi process logging is broken
 
 # Done
 
@@ -47,3 +46,6 @@
 - Show existing configuration when editing model config
 - Adjustable grid snapping
 - Weighted prompts: https://huggingface.co/docs/diffusers/using-diffusers/weighted_prompts
+- Render chunk objects to data structure that orders images based on X/Y position, add lookup function to sample pixel values at coordinates for img2img and inpainting/outpainting
+- Refactor main rendering code
+- Generated images don't seem to look correct, possible an issue with loading VAE? maybe other configuration is breaking, investigate image pipeline.. (This turns out to be xformers, no free meals here)

@@ -80,7 +80,7 @@ private:
 
         ImGui::Indent();
         {
-          ImGui::Text("%s\n", i.second.c_str());
+          ImGui::TextWrapped("%s\n", i.second.c_str());
           if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1)) {
             ImGui::OpenPopup(i.first.c_str());
           }
@@ -128,8 +128,8 @@ private:
 
   void contentBrowser() {
     ImGui::SetNextWindowSizeConstraints(
-        ImVec2(CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get(), CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get()),
-        ImVec2(CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get(), CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get()));
+        ImVec2(64.0f, CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get()),
+        ImVec2(ImGui::GetWindowContentRegionWidth(), CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get()));
     ImGui::BeginChild("Content-Browser");
 
     if (m_current_directory != std::filesystem::path(c_base_content_directory) && m_filteredPaths.empty()) {

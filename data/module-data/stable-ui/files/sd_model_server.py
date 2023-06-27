@@ -4,8 +4,9 @@
 
 import traceback
 import threading, _thread
-from sd import txt2img as txt2img
-from sd import img2img as img2img
+from sd.commands import txt2img as txt2img
+from sd.commands import img2img as img2img
+from sd.commands import outpaint as outpaint
 from sd import sd_model
 from common import devices
 
@@ -377,6 +378,77 @@ class SDModelServer(MQServer):
                 },
                 "function": self.__image2image
             },
+            "outpaint": {
+                "help": "Outpaint using a self masked image",
+                "arguments": {
+                    "outpath_samples": {
+                        "help": "Base output folder",
+                        "required": True,
+                        "type": str
+                    },
+                    "subfolder_name": {
+                        "help": "Subfolder name to save images into",
+                        "required": False,
+                        "type": str
+                    },
+                    "prompt": {
+                        "help": "txt2img prompt",
+                        "required": True,
+                        "type": str
+                    },
+                    "negative_prompt": {
+                        "help": "txt2img negative prompt",
+                        "required": False,
+                        "type": str
+                    },
+                    "img_data": {
+                        "help": "Base64 encoded string of raw RGBA pixel data (null terminated)",
+                        "required": True,
+                        "type": str
+                    },
+                    "img_mask": {
+                        "help": "Base64 encoded string of raw RGBA mask data (null terminated)",
+                        "required": True,
+                        "type": str
+                    },
+                    "seed": {
+                        "help": "seed to generate against",
+                        "required": True,
+                        "type": int
+                    },
+                    "sampler_name": {
+                        "help": "Sampler to use for image generation, defaults to PLMS",
+                        "required": True,
+                        "type": str
+                    },
+                    "batch_size": {
+                        "help": "Number of images to generate concurrently",
+                        "required": False,
+                        "type": int
+                    },
+                    "strength": {
+                        "help": "Retain original image, range from 0.0 - 1.0",
+                        "required": True,
+                        "type": float
+                    },
+                    "n_iter": {
+                        "help": "Number of images to create",
+                        "required": False,
+                        "type": int
+                    },
+                    "steps": {
+                        "help": "Number of steps to run image generation over",
+                        "required": True,
+                        "type": int
+                    },
+                    "cfg_scale": {
+                        "help": "The degree of freedom sd gets when following a prompt",
+                        "required": True,
+                        "type": float
+                    }
+                },
+                "function": self.__outpainting
+            },
             "plugin": {
                 "help": "Call custom plugin command",
                 "arguments": {
@@ -443,6 +515,11 @@ class SDModelServer(MQServer):
 
     def __image2image(self, cmd):
         result = img2img.generate(
+            **cmd.arguments, model=self.model.model)
+        return f"{result}"
+    
+    def __outpainting(self, cmd):
+        result = outpaint.generate(
             **cmd.arguments, model=self.model.model)
         return f"{result}"
 

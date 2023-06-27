@@ -27,3 +27,24 @@ struct ModelConfig {
   bool enable_vaeSlicing = false;
   bool enable_seqCPUOffload = false;
 };
+
+// Supported pipelines
+struct PIPELINE {
+  const static int TXT = 0;
+  const static int IMG = 1;
+  const static int PAINT = 2;
+};
+
+// Data structure to hold prompting configuration
+struct pipelineConfig {
+  std::string prompt = "";
+  std::string negative_prompt = "";
+  std::string sampler = "pndm";
+  int iterations = 1;
+  int steps = 35;
+  double cfg = 7.5;
+  float strength = 0.5;
+  int width = 512;
+  int height = 512;
+  int seed = 0;
+};

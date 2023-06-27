@@ -20,7 +20,9 @@ class QDisplay_Image2Image : public QDisplay_Base {
 public:
   // Initialise render manager references
   QDisplay_Image2Image(std::shared_ptr<RenderManager> rm, GLFWwindow *w)
-      : QDisplay_Base(rm, w), m_preview{GLImage(512, 512, "preview")} {}
+      : QDisplay_Base(rm, w), m_preview{GLImage(512, 512, "preview")} {
+    m_config = rm->getPipeline(PIPELINE::IMG);
+  }
 
   virtual void render() {
 
@@ -54,21 +56,14 @@ public:
   }
 
 private:
-  // Window variables & flags
-  std::string m_prompt;
-  std::string m_negativePrompt;
-  std::string m_selectedSampler = "pndm";
+  std::shared_ptr<pipelineConfig> m_config;
+  bool m_randomSeed = true;
+
   std::vector<listItem> m_samplerList = {
       {.m_name = "ddim"},      {.m_name = "ddiminverse"}, {.m_name = "ddpm"},           {.m_name = "deis"},
       {.m_name = "dpmsmulti"}, {.m_name = "dpmssingle"},  {.m_name = "eulerancestral"}, {.m_name = "euler"},
       {.m_name = "heun"},      {.m_name = "kdpm2"},       {.m_name = "kdpm2ancestral"}, {.m_name = "lms"},
       {.m_name = "pndm"},      {.m_name = "unipc"}};
-
-  int m_steps = 35;
-  int m_seed = 0;
-  int m_nIter = 1;
-  float m_strength = 0.5;
-  double m_cfg = 7.5;
 
   std::unique_ptr<GLImage> m_image = 0;
   GLImage m_preview;
@@ -90,12 +85,10 @@ private:
         new GLImage(CONFIG::IMAGE_SIZE_X_LIMIT.get(), CONFIG::IMAGE_SIZE_Y_LIMIT.get(), "img2img"));
     std::string path = m_renderManager->getImage();
 
-    int seed = m_seed;
-    if (m_seed == 0) {
-      seed = rand() % INT_MAX + 1;
+    if (m_randomSeed) {
+      m_config->seed = rand() % INT_MAX + 1;
     }
-    StableManager::GetInstance().imageToImage(path, m_prompt, m_negativePrompt, m_selectedSampler, m_nIter, m_steps,
-                                              m_cfg, m_strength, seed, m_image->renderState);
+    StableManager::GetInstance().imageToImage(path, *m_config, m_image->renderState);
   }
 
   void renderPreview() {
@@ -126,21 +119,21 @@ private:
   void promptHelper() {
     if (ImGui::CollapsingHeader("Prompts")) {
       ImGui::Text("Prompt");
-      ImGui::InputTextMultiline("##prompt", &m_prompt, ImVec2(320, CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get()));
+      ImGui::InputTextMultiline("##prompt", &m_config->prompt, ImVec2(260, ImGui::GetWindowContentRegionWidth()));
 
       ImGui::Text("Negative Prompt");
-      ImGui::InputTextMultiline("##negative prompt", &m_negativePrompt,
-                                ImVec2(320, CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get()));
+      ImGui::InputTextMultiline("##negative prompt", &m_config->negative_prompt,
+                                ImVec2(260, ImGui::GetWindowContentRegionWidth()));
     }
   }
 
   void promptConfig() {
     if (ImGui::CollapsingHeader("Gen Config")) {
 
-      if (ImGui::BeginCombo("Sampler", m_selectedSampler.c_str(), ImGuiComboFlags_NoArrowButton)) {
+      if (ImGui::BeginCombo("Sampler", m_config->sampler.c_str(), ImGuiComboFlags_NoArrowButton)) {
         for (auto &item : m_samplerList) {
           if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
-            m_selectedSampler = item.m_name;
+            m_config->sampler = item.m_name;
           }
           if (item.m_isSelected) {
             ImGui::SetItemDefaultFocus();
@@ -149,11 +142,14 @@ private:
         ImGui::EndCombo();
       }
 
-      ImGui::InputInt("steps", &m_steps);
-      ImGui::InputInt("seed", &m_seed);
-      ImGui::SliderFloat("Strength", &m_strength, 0.0, 1.0, "%.2f");
-      ImGui::InputDouble("cfg scale", &m_cfg, 0.1);
-      ImGui::InputInt("Iterations", &m_nIter);
+      ImGui::InputInt("steps", &m_config->steps);
+      if (!m_randomSeed) {
+        ImGui::InputInt("seed", &m_config->seed);
+      }
+      ImGui::Checkbox("Randomize Seed", &m_randomSeed);
+      ImGui::SliderFloat("Strength", &m_config->strength, 0.0, 1.0, "%.2f");
+      ImGui::InputDouble("cfg scale", &m_config->cfg, 0.1);
+      ImGui::InputInt("Iterations", &m_config->iterations);
     }
   }
 };

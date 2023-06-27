@@ -52,7 +52,8 @@ Canvas::Canvas(glm::ivec2 position, const std::string &name, GLFWwindow *w, std:
 // TODO: This function doesn't work with non-matching aspect ratios
 // i.e. 512x768 causes issues
 // Retrieve raw pixel data from all images that fall space between two world space coordinates
-std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::ivec2 size) {
+// If the mask value is set we won't actually retrieve pixel data but instead create a mask for our sd pipeline to use
+std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::ivec2 size, bool mask) {
 
   // Raw pixel data, treat as 2d array
   std::vector<RGBAPixel> pixels(size.x * size.y);
@@ -107,10 +108,12 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
       // its own vector, note that openGL textures are indexed from the bottom left opposed to our coordinates which
       // index from the top left
       std::vector<RGBAPixel> selectionPixels;
-      for (int x = boundaryCoordinates.x; x < boundaryCoordinates.y; x++) {
-        for (int y = boundaryCoordinates.w; y < boundaryCoordinates.z; y++) {
-          int index = (y * image->m_image->m_height) + x;
-          selectionPixels.push_back(imgPixels[index]);
+      if (!mask) {
+        for (int x = boundaryCoordinates.x; x < boundaryCoordinates.y; x++) {
+          for (int y = boundaryCoordinates.w; y < boundaryCoordinates.z; y++) {
+            int index = (y * image->m_image->m_height) + x;
+            selectionPixels.push_back(imgPixels[index]);
+          }
         }
       }
 
@@ -128,7 +131,12 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
             glBindTexture(GL_TEXTURE_2D, 0);
             return pixels;
           } else {
-            pixels[index] = selectionPixels.at(i);
+            if (!mask) {
+              pixels[index] = selectionPixels.at(i);
+            } else {
+              pixels[index] = RGBAPixel{0xFF, 0xFF, 0xFF, 0xFF};
+            }
+
             i++;
           }
         }

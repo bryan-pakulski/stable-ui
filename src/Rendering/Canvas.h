@@ -30,7 +30,7 @@ public:
   void setTexture(GLuint *id);
 
   // Retrieve raw pixel data from all images that fall space between two world space coordinates
-  std::vector<RGBAPixel> getPixelsAtSelection(glm::ivec2 position, glm::ivec2 size);
+  std::vector<RGBAPixel> getPixelsAtSelection(glm::ivec2 position, glm::ivec2 size, bool mask = false);
 
   // Update or create new image wrapper from a basic GL image
   void createImage(std::shared_ptr<GLImage>, glm::ivec2 position);
