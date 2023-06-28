@@ -43,7 +43,7 @@ Image::Image(std::shared_ptr<GLImage> im, std::shared_ptr<OrthographicCamera> c,
 // Check if an image intersects with x1,y1, x2,y2
 bool Image::intersects(const glm::ivec2 &l1, const glm::ivec2 &r1, const glm::ivec2 &l2, const glm::ivec2 &r2) {
 
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Image::intersects, checking intersection of [", l1.x, l1.y, r1.x, r1.y,
+  QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Image::intersects, checking intersection of [", l1.x, l1.y, r1.x, r1.y,
                              "] and [", l2.x, l2.y, r2.x, r2.y, "]");
 
   // if rectangle has area 0, no overlap
@@ -58,7 +58,7 @@ bool Image::intersects(const glm::ivec2 &l1, const glm::ivec2 &r1, const glm::iv
   if (r1.y >= l2.y || r2.y >= l1.y)
     return false;
 
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "Image::intersects, found intersecting image!");
+  QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Image::intersects, found intersecting image!");
   return true;
 }
 

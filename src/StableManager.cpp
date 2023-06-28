@@ -106,6 +106,8 @@ void StableManager::outpaint(std::string &imgData, std::string &imgMask, pipelin
                                                     config.prompt,
                                                     config.negative_prompt,
                                                     m_renderManager->getActiveCanvas()->m_name,
+                                                    config.width,
+                                                    config.height,
                                                     imgData,
                                                     imgMask,
                                                     config.sampler,

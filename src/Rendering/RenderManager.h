@@ -53,6 +53,7 @@ public:
   void sendImageToCanvas(GLImage &im);
   void captureBuffer();
   void saveBuffer();
+  void paintSelection(bool sendToCanvas);
   std::shared_ptr<GLImage> getBuffer() { return m_selectionBuffer; }
   std::shared_ptr<GLImage> getMask() { return m_selectionMask; }
   void useImage(std::string path);
@@ -75,6 +76,10 @@ public:
     }
   }
 
+  int *getTxtPipelineStatus() { return &m_txtGenStatus; }
+  int *getImgPipelineStatus() { return &m_imgGenStatus; }
+  int *getPaintPipelineStatus() { return &m_paintGenStatus; }
+
   /*
     CALLBACKS
   */
@@ -94,6 +99,10 @@ private:
   std::shared_ptr<GLImage> m_selectionBuffer;
   std::shared_ptr<GLImage> m_selectionMask;
   bool m_captureBuffer = false;
+
+  int m_txtGenStatus = Q_RENDER_STATE::UNRENDERED;
+  int m_imgGenStatus = Q_RENDER_STATE::UNRENDERED;
+  int m_paintGenStatus = Q_RENDER_STATE::UNRENDERED;
 
   // These hold our pipeline configurations statically so that they can be accessed from anywhere in the front end (
   // every display holds a reference to this class )

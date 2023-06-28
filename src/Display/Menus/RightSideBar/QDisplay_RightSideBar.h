@@ -41,7 +41,7 @@ public:
 
     ImGui::Separator();
 
-    if (ImGui::CollapsingHeader("Tools")) {
+    if (ImGui::CollapsingHeader("Tools", ImGuiTreeNodeFlags_DefaultOpen)) {
       CanvasToolsWindow->render();
     }
 

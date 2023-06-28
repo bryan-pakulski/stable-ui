@@ -27,7 +27,7 @@ public:
   virtual void render() {
 
     // Generate option only available whilst a image isn't pending
-    if ((m_image && m_image->renderState != Q_RENDER_STATE::RENDERING) || !m_image) {
+    if ((*m_renderManager->getTxtPipelineStatus() != Q_RENDER_STATE::RENDERING)) {
       static const ImVec4 currentColor{0, 0.5f, 0, 1.0f};
 
       ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
@@ -38,7 +38,7 @@ public:
         renderImage();
       }
       ImGui::PopStyleColor(3);
-    } else if (m_image && m_image->renderState == Q_RENDER_STATE::RENDERING) {
+    } else if (*m_renderManager->getTxtPipelineStatus() == Q_RENDER_STATE::RENDERING) {
       static const ImVec4 currentColor{0.5f, 0, 0, 1.0f};
       ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
       ImGui::PushStyleColor(ImGuiCol_ButtonActive, currentColor);
@@ -70,7 +70,7 @@ private:
 
 private:
   void baseImagePreview() {
-    if (ImGui::CollapsingHeader("Base Image")) {
+    if (ImGui::CollapsingHeader("Base Image", ImGuiTreeNodeFlags_DefaultOpen)) {
       if (m_renderManager->getImage() != "" && m_preview.m_image_source != m_renderManager->getImage()) {
         m_preview.loadFromImage(m_renderManager->getImage());
       } else {
@@ -88,14 +88,14 @@ private:
     if (m_randomSeed) {
       m_config->seed = rand() % INT_MAX + 1;
     }
-    StableManager::GetInstance().imageToImage(path, *m_config, m_image->renderState);
+    StableManager::GetInstance().imageToImage(path, *m_config, *m_renderManager->getImgPipelineStatus());
   }
 
   void renderPreview() {
     if (ImGui::CollapsingHeader("Render Preview")) {
       if (m_image) {
         // Once image is marked as rendered display on screen
-        if (m_image->renderState == Q_RENDER_STATE::RENDERED) {
+        if (*m_renderManager->getTxtPipelineStatus() == Q_RENDER_STATE::RENDERED) {
           ImGui::Text("image width: %d image height:%d", m_image->m_width, m_image->m_height);
           if (ImGui::Button("Send to Canvas")) {
             // Send image to be rendered on canvas at selection coordinates
@@ -106,7 +106,6 @@ private:
           if (!m_image->textured) {
             m_image->loadFromImage(StableManager::GetInstance().getLatestFile(
                 CONFIG::OUTPUT_DIRECTORY.get() + "/" + m_renderManager->getActiveCanvas()->m_name));
-            m_image->textured = Q_RENDER_STATE::RENDERED;
           }
 
           ImGui::Image((void *)(intptr_t)m_image->m_texture, ImVec2(m_image->m_width * 0.3, m_image->m_height * 0.3));
@@ -117,18 +116,18 @@ private:
 
   // Prompt
   void promptHelper() {
-    if (ImGui::CollapsingHeader("Prompts")) {
+    if (ImGui::CollapsingHeader("Prompts", ImGuiTreeNodeFlags_DefaultOpen)) {
       ImGui::Text("Prompt");
-      ImGui::InputTextMultiline("##prompt", &m_config->prompt, ImVec2(260, ImGui::GetWindowContentRegionWidth()));
+      ImGui::InputTextMultiline("##prompt", &m_config->prompt, ImVec2(ImGui::GetWindowContentRegionWidth(), 240));
 
       ImGui::Text("Negative Prompt");
       ImGui::InputTextMultiline("##negative prompt", &m_config->negative_prompt,
-                                ImVec2(260, ImGui::GetWindowContentRegionWidth()));
+                                ImVec2(ImGui::GetWindowContentRegionWidth(), 240));
     }
   }
 
   void promptConfig() {
-    if (ImGui::CollapsingHeader("Gen Config")) {
+    if (ImGui::CollapsingHeader("Gen Config", ImGuiTreeNodeFlags_DefaultOpen)) {
 
       if (ImGui::BeginCombo("Sampler", m_config->sampler.c_str(), ImGuiComboFlags_NoArrowButton)) {
         for (auto &item : m_samplerList) {

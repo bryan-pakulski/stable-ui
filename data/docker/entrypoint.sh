@@ -1,20 +1,5 @@
 #!/bin/bash
 
-# Check existance of git folders, update / initialise as necessary
-if [ ! -d "/sd" ] 
-then
-    echo "Setting up Stable Diffusion git repository" 
-    # V1
-    #git clone https://github.com/CompVis/stable-diffusion.git /sd/ 
-    # V2
-    #git clone https://github.com/Stability-AI/stablediffusion.git /sd/
-    # V2 Fork
-    git clone https://github.com/bryan-pakulski/stablediffusion.git /sd/
-else
-    echo "Checking for updates to Stable Diffusion"
-    cd /sd && git pull
-fi
-
 if [ ! -d "/sd/textual-inversion" ]
 then
     echo "Setting up Textual Inversion git repository"

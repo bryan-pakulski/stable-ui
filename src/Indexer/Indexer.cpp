@@ -83,7 +83,7 @@ std::set<meta_node> Indexer::find(const std::string &searchTerm) {
 
   if (CONFIG::ENABLE_DEBUG_LOGGING.get() == 1) {
     for (auto &i : results) {
-      std::cout << "Search match: " << i.m_filepath << std::endl;
+      std::cerr << "Search match: " << i.m_filepath << std::endl;
     }
   }
   return results;

@@ -45,32 +45,45 @@ bool GLHELPER::LoadTextureFromFile(const char *filename, GLuint *out_texture, in
   return true;
 }
 
-void GLHELPER::SaveTextureToFile(const char *filename, GLuint *texture, int width, int height) {
-  // Allocate array of pixels
+void GLHELPER::SaveTextureToFile(const char *filename, GLuint *texture, int width, int height, int flip) {
   uint8_t *pixels = new uint8_t[width * height * 4];
 
   // Get texture data
-  glGetTexImage(*texture, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+  // Note if that texture is not aligned to 4 bytes as expected by open GL we may need to pack it
+  // See:
+  //      glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
+  //      glPixelStorei(GL_PACK_ALIGNMENT, 1)
+
+  glBindTexture(GL_TEXTURE_2D, *texture);
+  glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glBindTexture(GL_TEXTURE_2D, 0);
 
   // Save texture as png file
-  stbi_flip_vertically_on_write(1);
+  stbi_flip_vertically_on_write(flip);
   stbi_write_png(filename, width, height, 4, pixels, width * 4);
 
   // Free array of pixels
-  free(pixels);
+  delete[] pixels;
 }
 
 // Converts OpenGL Texture into a Base64 string
 // This assumes an RGBA texture
 std::string GLHELPER::textureToBase64String(GLuint *texture, int width, int height) {
-  uint8_t *pixels = new uint8_t[width * height * 4];
-  glGetTexImage(*texture, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-
   int data_length = width * height * 4;
-  int encoded_data_length = Base64encode_len(data_length);
-  std::string base64_string(encoded_data_length, ' ');
+  uint8_t *pixels = new uint8_t[width * height * 4];
 
-  Base64encode(base64_string.data(), pixels, data_length);
+  glBindTexture(GL_TEXTURE_2D, *texture);
+  glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  int encoded_data_length = Base64encode_len(data_length);
+  char base64_string[encoded_data_length];
+
+  Base64encode(base64_string, reinterpret_cast<const unsigned char *>(pixels), data_length);
 
   /* Decode can be done as follows
   char* data = NULL;
@@ -80,6 +93,6 @@ std::string GLHELPER::textureToBase64String(GLuint *texture, int width, int heig
   data_length = Base64decode(data, base64_string);
   */
 
-  free(pixels);
+  delete[] pixels;
   return base64_string;
 }

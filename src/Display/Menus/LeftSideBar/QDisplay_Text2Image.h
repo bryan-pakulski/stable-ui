@@ -26,7 +26,7 @@ public:
   virtual void render() {
 
     // Generate option only available whilst a image isn't pending
-    if ((m_image && m_image->renderState != Q_RENDER_STATE::RENDERING) || !m_image) {
+    if ((*m_renderManager->getImgPipelineStatus() != Q_RENDER_STATE::RENDERING)) {
       static const ImVec4 currentColor{0, 0.5f, 0, 1.0f};
 
       ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
@@ -37,7 +37,7 @@ public:
         renderImage();
       }
       ImGui::PopStyleColor(3);
-    } else if (m_image && m_image->renderState == Q_RENDER_STATE::RENDERING) {
+    } else if (*m_renderManager->getImgPipelineStatus() != Q_RENDER_STATE::RENDERING) {
       static const ImVec4 currentColor{0.5f, 0, 0, 1.0f};
       ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
       ImGui::PushStyleColor(ImGuiCol_ButtonActive, currentColor);
@@ -75,14 +75,14 @@ private:
     if (m_randomSeed) {
       m_config->seed = rand() % INT_MAX + 1;
     }
-    StableManager::GetInstance().textToImage(*m_config, m_image->renderState);
+    StableManager::GetInstance().textToImage(*m_config, *m_renderManager->getTxtPipelineStatus());
   }
 
   void imageWindow() {
     if (ImGui::CollapsingHeader("Preview")) {
       if (m_image) {
         // Once image is marked as rendered display on screen
-        if (m_image->renderState == Q_RENDER_STATE::RENDERED) {
+        if (*m_renderManager->getImgPipelineStatus() == Q_RENDER_STATE::RENDERED) {
           ImGui::Text("image width: %d image height:%d", m_image->m_width, m_image->m_height);
           if (ImGui::Button("Send to Canvas")) {
             // Send image to be rendered on canvas at selection coordinates
@@ -104,18 +104,18 @@ private:
 
   // Prompt
   void promptHelper() {
-    if (ImGui::CollapsingHeader("Prompts")) {
+    if (ImGui::CollapsingHeader("Prompts", ImGuiTreeNodeFlags_DefaultOpen)) {
       ImGui::Text("Prompt");
-      ImGui::InputTextMultiline("##prompt", &m_config->prompt, ImVec2(260, ImGui::GetWindowContentRegionWidth()));
+      ImGui::InputTextMultiline("##prompt", &m_config->prompt, ImVec2(ImGui::GetWindowContentRegionWidth(), 240));
 
       ImGui::Text("Negative Prompt");
       ImGui::InputTextMultiline("##negative prompt", &m_config->negative_prompt,
-                                ImVec2(260, ImGui::GetWindowContentRegionWidth()));
+                                ImVec2(ImGui::GetWindowContentRegionWidth(), 240));
     }
   }
 
   void promptConfig() {
-    if (ImGui::CollapsingHeader("Gen Config")) {
+    if (ImGui::CollapsingHeader("Gen Config", ImGuiTreeNodeFlags_DefaultOpen)) {
       // Width control
       ImGui::SliderInt("width", &m_config->width, 1, CONFIG::IMAGE_SIZE_X_LIMIT.get());
       if (ImGui::BeginPopupContextItem("width")) {

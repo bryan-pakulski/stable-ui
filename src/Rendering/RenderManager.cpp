@@ -100,6 +100,29 @@ void RenderManager::saveBuffer() {
                               m_selectionBuffer->m_height);
 }
 
+void RenderManager::paintSelection(bool sendToCanvas) {
+  captureBuffer();
+
+  m_paintPipeline->width = m_selectionBuffer->m_width;
+  m_paintPipeline->height = m_selectionBuffer->m_height;
+
+  std::string b64Image = GLHELPER::textureToBase64String(&m_selectionBuffer->m_texture, m_selectionBuffer->m_width,
+                                                         m_selectionBuffer->m_height);
+
+  std::string b64Mask = GLHELPER::textureToBase64String(&m_selectionMask->m_texture, m_selectionBuffer->m_width,
+                                                        m_selectionBuffer->m_height);
+
+  // TODO: process pixels and send to outpainting pipeline
+  // TODO: Use PIL Processesing to create mask for outpainting https: //
+  // note.nkmk.me/en/python-pillow-composite/
+  StableManager::GetInstance().outpaint(b64Image, b64Mask, *m_paintPipeline, m_paintGenStatus);
+
+  if (sendToCanvas) {
+    // TODO: Save current selection coordinates, Once paintGenStatus returns as rendered then draw the new image to the
+    // canvas
+  }
+}
+
 // Make a canvas active
 void RenderManager::selectCanvas(int id) {
   if (getActiveCanvas()) {

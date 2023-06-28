@@ -42,10 +42,10 @@ class MQServer():
         self.commandList = {}
         
     # Create a command from a message
-    def parseMessage(self, message):
+    def parseMessage(self, message, log):
         if self.debuglogging:
             logging.info(f"Recieved message: {message.decode()}")
-        return Command(message.decode())
+        return Command(message.decode(), log)
 
     # Validate a command is correct against the command list
     def validateCommand(self, cmd):
@@ -90,22 +90,21 @@ class MQServer():
 
 class Command():
 
-    def __init__(self, command):
+    def __init__(self, command, log=False):
         self.command = None
         self.arguments = {}
-        self.parse(command)
+        self.parse(command, log)
 
-    def parse(self, command):
+    def parse(self, command, log=False):
         # Split the message into the command and arguments
         command_and_args = command.split(":")
         self.command = str(command_and_args[0])
 
-        print("Creating command: ", self.command)
+        if log:
+          logging.info(f"Created Command: {self.command}")
 
-        print(command_and_args)
         if (len(command_and_args) > 1):
             for pair in command_and_args[1:]:
-                print(pair)
                 arg, val = pair.split("=", 1)
                 self.arguments[arg] = val
 
@@ -143,7 +142,7 @@ class HeartBeatServer(MQServer):
 
             # We received a response
             try:
-                cmd = self.parseMessage(message)
+                cmd = self.parseMessage(message, False)
                 if (self.validateCommand(cmd)):
                     response = self.hookCommand(cmd)
                 else:
@@ -162,7 +161,7 @@ class SDModelServer(MQServer):
 
     def __init__(self):
         MQServer.__init__(self)
-        self.debuglogging = True
+        self.debuglogging = False
         self.commandList = {
             "quit": {
                 "help": "Shuts down SD Model Server",
@@ -401,6 +400,16 @@ class SDModelServer(MQServer):
                         "required": False,
                         "type": str
                     },
+                    "img_width": {
+                        "help": "Image width to reconstruct b64 encoded data",
+                        "required": True,
+                        "type": int
+                    },
+                    "img_height": {
+                        "help": "Image height to reconstruct b64 encoded data",
+                        "required": True,
+                        "type": int
+                    },
                     "img_data": {
                         "help": "Base64 encoded string of raw RGBA pixel data (null terminated)",
                         "required": True,
@@ -537,12 +546,13 @@ class SDModelServer(MQServer):
             except zmq.Again as e:
                 time.sleep(1.0)
                 continue
-
-            logging.info("Server Received request: %s" % message)
+            
+            if self.debuglogging:
+              logging.debug("Server Received request: %s" % message)
 
             # Break down message, message format is as follows: command:var1=val1,var2=val2 ...
             try:
-                cmd = self.parseMessage(message)
+                cmd = self.parseMessage(message, True)
                 if (self.validateCommand(cmd)):
                     response = self.hookCommand(cmd)
                 else:

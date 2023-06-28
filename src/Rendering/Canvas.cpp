@@ -134,7 +134,7 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
             if (!mask) {
               pixels[index] = selectionPixels.at(i);
             } else {
-              pixels[index] = RGBAPixel{0xFF, 0xFF, 0xFF, 0xFF};
+              pixels[index] = RGBAPixel{0x00, 0x00, 0x00, 0xFF};
             }
 
             i++;

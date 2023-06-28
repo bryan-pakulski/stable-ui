@@ -40,8 +40,8 @@ public:
     }
 
     if (*m_saving) {
-      ImGui::Begin("Saving Model Configuration");
-      ImGui::Text("Saving model configuration and copying to docker image, please wait...");
+      ImGui::Begin("Saving Model");
+      ImGui::Text("Copying model to docker image, please wait...");
       ImGui::End();
     }
   }

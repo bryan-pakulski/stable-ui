@@ -10,6 +10,7 @@ class StableMetaData():
     img_path = None
     xmpfile = None
     xmp = None
+    debug = True
 
     # Initialise against an image
     def __init__(self, img_path):
@@ -20,7 +21,8 @@ class StableMetaData():
         
         # We initialise an empty meta dictionary as these fresh PNG's won't have any existing data
         if (self.xmp is None):
-            print(f"Failed to load xmp from file: {img_path} creating new xmp data")
+            if self.debug:
+              print(f"Failed to load xmp from file: {img_path} creating new xmp data")
             self.xmp = libxmp.XMPMeta()
 
     def addMetaData(self, data_dict):
@@ -33,9 +35,11 @@ class StableMetaData():
     # Save modified metadata back to file
     def save(self):
         if not self.xmpfile.can_put_xmp(self.xmp):
-            print("Invalid XMP data, unable to save to file")
+            if self.debug:
+              print("Invalid XMP data, unable to save to file")
             return
         
         self.xmpfile.put_xmp(self.xmp)
-        print(f"Wrote tags: {self.xmpfile.get_xmp()}")
+        if self.debug:
+          print(f"Wrote tags: {self.xmpfile.get_xmp()}")
         self.xmpfile.close_file()

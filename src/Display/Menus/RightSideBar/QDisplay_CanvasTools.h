@@ -27,10 +27,6 @@ public:
     layerHelper();
     ImGui::Separator();
 
-    ImGui::Text("Selection");
-    selectionPreview();
-    ImGui::Separator();
-
     ImGui::Text("Debug Info");
     debugInfo();
     ImGui::Separator();
@@ -48,41 +44,6 @@ private:
   float c_visibilityIconSize = 12.0f;
 
 private:
-  // Selection preview
-  void selectionPreview() {
-
-    ImGui::SliderInt("Selection X", &m_renderManager->m_selection->m_size.x, 0, 1024);
-    if (ImGui::BeginPopupContextItem("Selection X")) {
-      if (ImGui::MenuItem("Reset")) {
-        m_renderManager->m_selection->m_size.x = 512;
-      }
-      ImGui::EndPopup();
-    }
-
-    ImGui::SliderInt("Selection Y", &m_renderManager->m_selection->m_size.y, 0, 1024);
-    if (ImGui::BeginPopupContextItem("Selection Y")) {
-      if (ImGui::MenuItem("Reset")) {
-        m_renderManager->m_selection->m_size.y = 512;
-      }
-      ImGui::EndPopup();
-    }
-
-    ImGui::Checkbox("Snap to grid", &m_renderManager->m_selection->m_snap);
-
-    if (m_renderManager->m_selection->m_snap) {
-      ImGui::SliderInt("Selection Snap", &m_renderManager->m_selection->m_pixelSnap, 1, 512);
-    }
-
-    // TODO: add send to img2img
-    if (ImGui::Button("Save buffer to file")) {
-      m_renderManager->saveBuffer();
-    }
-    ImGui::Image((void *)(intptr_t)m_renderManager->getBuffer()->m_texture,
-                 ImVec2(m_renderManager->getBuffer()->m_width * 0.4, m_renderManager->getBuffer()->m_height * 0.4));
-    ImGui::Image((void *)(intptr_t)m_renderManager->getMask()->m_texture,
-                 ImVec2(m_renderManager->getMask()->m_width * 0.4, m_renderManager->getMask()->m_height * 0.4));
-  }
-
   void debugInfo() {
     // Debug menu to view camera coordinates
     ImGui::Text("Camera X: %s", std::to_string(m_renderManager->m_camera->m_position.x).c_str());

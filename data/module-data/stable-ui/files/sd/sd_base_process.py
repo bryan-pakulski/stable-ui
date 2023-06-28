@@ -1,6 +1,7 @@
 import gc
 import os
 import logging
+import random
 import torch
 import base64
 
@@ -54,7 +55,7 @@ class StableDiffusionBaseProcess():
         logging.addLevelName(logging.ERROR, "ERR")
         logging.addLevelName(logging.DEBUG, "DBG")
 
-        logging.info("Starting up sd_server")
+        logging.info("Starting up Stable Diffusion Process")
 
     # Create subfolder for our images
     def create_sub_folder(self, name, default):
@@ -156,6 +157,9 @@ class StableDiffusionImg2Img(StableDiffusionBaseProcess):
         md.save()
 
     def load_img(self, path):
+      return Image.open(path).convert("RGB")
+    
+    def legacy_load_img(self, path):
         image = Image.open(path).convert("RGB")
         w, h = image.size
         print(f"loaded input image of size ({w}, {h}) from {path}")
@@ -166,22 +170,22 @@ class StableDiffusionImg2Img(StableDiffusionBaseProcess):
         image = image[None].transpose(0, 3, 1, 2)
         image = torch.from_numpy(image)
         return 2.*image - 1.
-    
+      
     def cpu_sample(self):
         pass
 
     def sample(self):
-      outputs = self.pipe(prompt_embeds=self.prompt_embeds, negative_prompt=self.prompt, image=self.load_img(self.init_img), generator=self.generator, num_inference_steps=self.steps, strength=self.strength, guidance_scale = self.cfg_scale, num_images_per_prompt=self.n_iter)
-      for image in outputs.images:
-          base_count = len(os.listdir(self.outpath_samples))
-          img_name = os.path.join(self.outpath_samples, f"{base_count:05}.png")
-          image.save(img_name)
-          self.save_metadata(img_name)
-      self.cleanup()
+        outputs = self.pipe(prompt_embeds=self.prompt_embeds, negative_prompt=self.prompt, image=self.load_img(self.init_img), generator=self.generator, num_inference_steps=self.steps, strength=self.strength, guidance_scale = self.cfg_scale, num_images_per_prompt=self.n_iter)
+        for image in outputs.images:
+            base_count = len(os.listdir(self.outpath_samples))
+            img_name = os.path.join(self.outpath_samples, f"{base_count:05}.png")
+            image.save(img_name)
+            self.save_metadata(img_name)
+        self.cleanup()
 
 class StableDiffusionOutpainting(StableDiffusionBaseProcess):
 
-    def __init__(self, outpath_samples, subfolder_name, prompt, negative_prompt, img_data, img_mask, seed, sampler_name, batch_size, strength, n_iter, steps, cfg_scale, model):
+    def __init__(self, outpath_samples, subfolder_name, prompt, negative_prompt, img_width, img_height, img_data, img_mask, seed, sampler_name, batch_size, strength, n_iter, steps, cfg_scale, model):
         super().__init__(outpath_samples=outpath_samples, prompt=prompt, negative_prompt=negative_prompt, seed=seed,
                          sampler_name=sampler_name, batch_size=batch_size, n_iter=n_iter, steps=steps, cfg_scale=cfg_scale, model=model)
 
@@ -191,8 +195,11 @@ class StableDiffusionOutpainting(StableDiffusionBaseProcess):
         self.create_sub_folder(subfolder_name, "outpaint")
 
         # Process base64 img data into PIL image for sd pipeline
+        self.width = img_width
+        self.height = img_height
         self.image = self.convert_img(img_data)
         self.mask = self.convert_img(img_mask)
+        #Image.fromarray(np.array(self.image)[:, :, 3] == 0)
         
         self.strength = strength
 
@@ -216,21 +223,15 @@ class StableDiffusionOutpainting(StableDiffusionBaseProcess):
         md.save()
 
     def convert_img(self, data):
-        base64_bytes = data.encode('ascii')
-        message_bytes = base64.b64decode(base64_bytes)
-        message = message_bytes.decode('ascii')
+        pixels = 4 # RGBA
+        w = self.width
+        h = self.height
 
-        image = Image.fromarray(np.uint8([ord(c) for c in message])).convert('RGBA')
-        w, h = image.size
-        print(f"loaded input image of size ({w}, {h}) from base64 data")
-        # resize to integer multiple of 32
-        w, h = map(lambda x: x - x % 32, (w, h))
-        image = image.resize((w, h), resample=PIL.Image.LANCZOS)
-        image = np.array(image).astype(np.float32) / 255.0
-        image = image[None].transpose(0, 3, 1, 2)
-        image = torch.from_numpy(image)
-        return 2.*image - 1.
-    
+        message_bytes = base64.b64decode(data)
+        arr = np.uint8([c for c in message_bytes])
+        arr = arr.reshape(w, h, pixels)
+        return Image.fromarray(arr).convert('RGB')
+
     def cpu_sample(self):
         pass
 

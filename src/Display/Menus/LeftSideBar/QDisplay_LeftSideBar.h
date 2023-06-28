@@ -3,6 +3,7 @@
 #include <fstream>
 #include <imgui.h>
 #include <filesystem>
+#include <memory>
 
 #include "Helpers/States.h"
 #include "StableManager.h"
@@ -11,8 +12,9 @@
 #include "Rendering/RenderManager.h"
 #include "Config/config.h"
 #include "Display/QDisplay_Base.h"
-#include "QDisplay_Text2Image.h"
-#include "QDisplay_Image2Image.h"
+#include "Display/Menus/LeftSideBar/QDisplay_Text2Image.h"
+#include "Display/Menus/LeftSideBar/QDisplay_Image2Image.h"
+#include "Display/Menus/LeftSideBar/QDisplay_Painting.h"
 
 class QDisplay_LeftSideBar : public QDisplay_Base {
 
@@ -23,6 +25,7 @@ public:
     // Initialise sub menus
     Text2ImageWindow = std::unique_ptr<QDisplay_Text2Image>(new QDisplay_Text2Image(rm, w));
     Image2ImageWindow = std::unique_ptr<QDisplay_Image2Image>(new QDisplay_Image2Image(rm, w));
+    PaintingWindow = std::unique_ptr<QDisplay_Painting>(new QDisplay_Painting(rm, w));
 
     // Set drag drop callback
     glfwSetDropCallback(w, drop_callback);
@@ -48,39 +51,38 @@ public:
     // Tabbed menu
 
     // Rendering menus
-    if (ImGui::CollapsingHeader("Rendering")) {
-      if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::LOADED) {
-        {
-          if (ImGui::Button("text")) {
-            activeTab = tabs::TXT2IMG;
-          }
-          ImGui::SameLine();
-          if (ImGui::Button("image")) {
-            activeTab = tabs::IMG2IMG;
-          }
-          ImGui::SameLine();
-          if (ImGui::Button("painting")) {
-            activeTab = tabs::PAINTING;
-          }
+    if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::LOADED) {
+      {
+        if (ImGui::Button("text")) {
+          activeTab = tabs::TXT2IMG;
         }
-        ImGui::Separator();
-
-        if (activeTab == tabs::TXT2IMG) {
-          Text2ImageWindow->render();
+        ImGui::SameLine();
+        if (ImGui::Button("image")) {
+          activeTab = tabs::IMG2IMG;
         }
-        if (activeTab == tabs::IMG2IMG) {
-          Image2ImageWindow->render();
+        ImGui::SameLine();
+        if (ImGui::Button("painting")) {
+          activeTab = tabs::PAINTING;
         }
-        if (activeTab == tabs::PAINTING) {
-        }
-
-      } else if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::NONE_LOADED) {
-        ImGui::Text("Please import and load a model first!");
-      } else if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::LOADING) {
-        ImGui::Text("Loading model to memory..");
-      } else if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::FAILED) {
-        ImGui::Text("Model failed to load, please check logs or reload");
       }
+      ImGui::Separator();
+
+      if (activeTab == tabs::TXT2IMG) {
+        Text2ImageWindow->render();
+      }
+      if (activeTab == tabs::IMG2IMG) {
+        Image2ImageWindow->render();
+      }
+      if (activeTab == tabs::PAINTING) {
+        PaintingWindow->render();
+      }
+
+    } else if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::NONE_LOADED) {
+      ImGui::Text("Please import and load a model first!");
+    } else if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::LOADING) {
+      ImGui::Text("Loading model to memory..");
+    } else if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::FAILED) {
+      ImGui::Text("Model failed to load, please check logs or reload");
     }
 
     ImGui::Separator();
@@ -98,6 +100,7 @@ private:
 
   std::unique_ptr<QDisplay_Text2Image> Text2ImageWindow;
   std::unique_ptr<QDisplay_Image2Image> Image2ImageWindow;
+  std::unique_ptr<QDisplay_Painting> PaintingWindow;
 
   // Window Options
   const std::string c_windowName = "Helper Window";

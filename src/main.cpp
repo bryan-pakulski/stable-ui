@@ -8,6 +8,8 @@
 
 int main() {
 
+  std::srand(std::time(nullptr));
+
   // Initialise display and logic manager
   QDisplay::GetInstance().AttachManager(StableManager::GetInstance().getRenderManager());
 
