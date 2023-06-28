@@ -18,6 +18,9 @@ public:
   // Initialise render manager references
   QDisplay_Painting(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     m_config = rm->getPipeline(PIPELINE::PAINT);
+
+    // When using inpainting strength must be set to 1.0 otherwise we may get unexpected results using our mask
+    m_config->strength = 1.0f;
   }
 
   virtual void render() {
