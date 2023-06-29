@@ -26,7 +26,7 @@ public:
   virtual void render() {
 
     // Generate option only available whilst a image isn't pending
-    if ((*m_renderManager->getImgPipelineStatus() != Q_RENDER_STATE::RENDERING)) {
+    if ((m_renderManager->getImgPipelineStatus() != Q_RENDER_STATE::RENDERING)) {
       static const ImVec4 currentColor{0, 0.5f, 0, 1.0f};
 
       ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
@@ -37,7 +37,7 @@ public:
         renderImage();
       }
       ImGui::PopStyleColor(3);
-    } else if (*m_renderManager->getImgPipelineStatus() != Q_RENDER_STATE::RENDERING) {
+    } else if (m_renderManager->getImgPipelineStatus() == Q_RENDER_STATE::RENDERING) {
       static const ImVec4 currentColor{0.5f, 0, 0, 1.0f};
       ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
       ImGui::PushStyleColor(ImGuiCol_ButtonActive, currentColor);
@@ -75,14 +75,14 @@ private:
     if (m_randomSeed) {
       m_config->seed = rand() % INT_MAX + 1;
     }
-    StableManager::GetInstance().textToImage(*m_config, *m_renderManager->getTxtPipelineStatus());
+    StableManager::GetInstance().textToImage(*m_config, m_renderManager->getTxtPipelineStatus());
   }
 
   void imageWindow() {
     if (ImGui::CollapsingHeader("Preview")) {
       if (m_image) {
         // Once image is marked as rendered display on screen
-        if (*m_renderManager->getImgPipelineStatus() == Q_RENDER_STATE::RENDERED) {
+        if (m_renderManager->getImgPipelineStatus() == Q_RENDER_STATE::RENDERED) {
           ImGui::Text("image width: %d image height:%d", m_image->m_width, m_image->m_height);
           if (ImGui::Button("Send to Canvas")) {
             // Send image to be rendered on canvas at selection coordinates

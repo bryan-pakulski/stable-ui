@@ -72,7 +72,7 @@ void GLHELPER::SaveTextureToFile(const char *filename, GLuint *texture, int widt
 // This assumes an RGBA texture
 std::string GLHELPER::textureToBase64String(GLuint *texture, int width, int height) {
   int data_length = width * height * 4;
-  uint8_t *pixels = new uint8_t[width * height * 4];
+  uint8_t *pixels = new uint8_t[data_length];
 
   glBindTexture(GL_TEXTURE_2D, *texture);
   glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);

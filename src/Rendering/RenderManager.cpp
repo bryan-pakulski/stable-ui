@@ -66,17 +66,17 @@ void RenderManager::captureBuffer() {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::captureBuffer capturing to texture, selection at: ",
                              m_selection->getPosition().x, m_selection->getPosition().y);
 
+  m_selectionBuffer->resize(m_selection->m_size.x, m_selection->m_size.y);
+  m_selectionMask->resize(m_selection->m_size.x, m_selection->m_size.y);
+
   std::vector<RGBAPixel> pixels =
       getActiveCanvas()->getPixelsAtSelection(m_selection->getPosition(), m_selection->m_size);
   std::vector<RGBAPixel> mask =
       getActiveCanvas()->getPixelsAtSelection(m_selection->getPosition(), m_selection->m_size, true);
 
-  m_selectionBuffer->resize(m_selection->m_size.x, m_selection->m_size.y);
-  m_selectionMask->resize(m_selection->m_size.x, m_selection->m_size.y);
-
   // Create the texture buffer with correct format, internal format and properties
   glBindTexture(GL_TEXTURE_2D, m_selectionBuffer->m_texture);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_selectionBuffer->m_width, m_selectionBuffer->m_width, 0, GL_RGBA,
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_selectionBuffer->m_width, m_selectionBuffer->m_height, 0, GL_RGBA,
                GL_UNSIGNED_BYTE, pixels.data());
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -85,7 +85,7 @@ void RenderManager::captureBuffer() {
   glBindTexture(GL_TEXTURE_2D, 0);
 
   glBindTexture(GL_TEXTURE_2D, m_selectionMask->m_texture);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_selectionMask->m_width, m_selectionMask->m_width, 0, GL_RGBA,
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_selectionMask->m_width, m_selectionMask->m_height, 0, GL_RGBA,
                GL_UNSIGNED_BYTE, mask.data());
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

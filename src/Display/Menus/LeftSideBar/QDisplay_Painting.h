@@ -26,7 +26,7 @@ public:
   virtual void render() {
 
     // Generate option only available whilst a image isn't pending
-    if ((*m_renderManager->getPaintPipelineStatus() != Q_RENDER_STATE::RENDERING)) {
+    if ((m_renderManager->getPaintPipelineStatus() != Q_RENDER_STATE::RENDERING)) {
       static const ImVec4 currentColor{0, 0.5f, 0, 1.0f};
 
       ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
@@ -37,7 +37,7 @@ public:
         renderImage();
       }
       ImGui::PopStyleColor(3);
-    } else if (*m_renderManager->getPaintPipelineStatus() == Q_RENDER_STATE::RENDERING) {
+    } else if (m_renderManager->getPaintPipelineStatus() == Q_RENDER_STATE::RENDERING) {
       static const ImVec4 currentColor{0.5f, 0, 0, 1.0f};
       ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
       ImGui::PushStyleColor(ImGuiCol_ButtonActive, currentColor);
@@ -103,13 +103,17 @@ private:
 
     ImGui::Separator();
 
+    float scaleFactor = ImGui::GetWindowContentRegionWidth() / (float)m_renderManager->getBuffer()->m_width;
+
     ImGui::Image((void *)(intptr_t)m_renderManager->getBuffer()->m_texture,
-                 ImVec2(m_renderManager->getBuffer()->m_width * 0.4, m_renderManager->getBuffer()->m_height * 0.4));
+                 ImVec2(m_renderManager->getBuffer()->m_width * scaleFactor,
+                        m_renderManager->getBuffer()->m_height * scaleFactor));
 
     ImGui::Separator();
 
-    ImGui::Image((void *)(intptr_t)m_renderManager->getMask()->m_texture,
-                 ImVec2(m_renderManager->getMask()->m_width * 0.4, m_renderManager->getMask()->m_height * 0.4));
+    ImGui::Image(
+        (void *)(intptr_t)m_renderManager->getMask()->m_texture,
+        ImVec2(m_renderManager->getMask()->m_width * scaleFactor, m_renderManager->getMask()->m_height * scaleFactor));
 
     ImGui::Separator();
   }

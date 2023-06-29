@@ -3,6 +3,8 @@
 - Basic drawing tools (draw, erase, colour)
 - Save canvas to file
 - Load saved canvas
+- Images added to canvas are merged onto existing pixel array (actual layers)
+- Proper layering system (not just per image)
 
 # Core systems
 
@@ -28,17 +30,14 @@
 
 - Max of 27 images generated before overwriting, decide on new naming format
 - Logging order is incorrect due to multiprocess access (gui C++ application, multiple python docker processes)
-- Save canvas buffer coordinates not working correctly
-- Selection not offseting correctly on Y axis, constrained to initial screenspace (check transform logic)
 - Extra configuration i.e. trigger_prompt not being loaded from model yaml
 - Heartbeat bug on windows (no connectivity)
 - Multi string search doesn't work properly (Set union not working as intended?)
-- Too much logging with base64 images being sent to zmq
-- Multi process logging is broken
+- Generate button not changing state on txt2img / img2img
 
 # Done
 
-- Fix Crash when docker closes and then ui is closed afterwards
+- (FIX) Crash when docker closes and then ui is closed afterwards
 - Add search and indexing system on prompt, image hash etc.. for image browser, will need some sort of metadata saved for each image generated (store inside image??)
 - Move to huggingface diffusers library system to load models (see: https://github.com/huggingface/diffusers)
 - use Xformers library https://github.com/facebookresearch/xformers/tree/main
@@ -49,3 +48,8 @@
 - Render chunk objects to data structure that orders images based on X/Y position, add lookup function to sample pixel values at coordinates for img2img and inpainting/outpainting
 - Refactor main rendering code
 - Generated images don't seem to look correct, possible an issue with loading VAE? maybe other configuration is breaking, investigate image pipeline.. (This turns out to be xformers, no free meals here)
+- (FIX) Too much logging with base64 images being sent to zmq
+- (FIX) Selection not offseting correctly on Y axis, constrained to initial screenspace (check transform logic)
+- (FIX) Save canvas buffer coordinates not working correctly
+- (FIX) images above 512x512 resolution aren't being scaled correctly on canvas
+- (FIX) Unable to use selection of non square sizes / images of non square size

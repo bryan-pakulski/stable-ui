@@ -62,14 +62,14 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
   // vector
   for (auto &image : m_editorGrid) {
 
-    // Convert the origin as center to top left for simpler calculation
-    glm::ivec2 l1 = {(position.x - (size.x / 2)), (position.y + (size.y / 2))};
-    glm::ivec2 r1 = {(position.x + (size.x / 2)), (position.y - (size.y / 2))};
+    // Convert the origin as center to bottom left for simpler calculation
+    glm::ivec2 l1 = {(position.x - (size.x / 2)), (position.y - (size.y / 2))};
+    glm::ivec2 r1 = {(position.x + (size.x / 2)), (position.y + (size.y / 2))};
 
     glm::ivec2 l2 = {(image->getPosition().x - image->m_image->m_width / 2),
-                     (image->getPosition().y + image->m_image->m_height / 2)};
-    glm::ivec2 r2 = {(image->getPosition().x + image->m_image->m_width / 2),
                      (image->getPosition().y - image->m_image->m_height / 2)};
+    glm::ivec2 r2 = {(image->getPosition().x + image->m_image->m_width / 2),
+                     (image->getPosition().y + image->m_image->m_height / 2)};
 
     if (image->intersects(l1, r1, l2, r2) && image->m_renderFlag) {
 
@@ -77,26 +77,25 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
       // As these fall on the cartesian plane, these can be negative!
       int leftX = std::max(l1.x, l2.x);
       int rightX = std::min(r1.x, r2.x);
-      int topY = std::min(l1.y, l2.y);
-      int bottomY = std::max(r1.y, r2.y);
+      int topY = std::min(r1.y, r2.y);
+      int bottomY = std::max(l1.y, l2.y);
+
+      QLogger::GetInstance().Log(LOGLEVEL::DEBUG,
+                                 "Canvas::getPixelsAtSelection Selection Dimensions: ", std::abs(rightX - leftX), " x ",
+                                 std::abs(topY - bottomY));
 
       // Treat image as our origin (bottom left cartesion)
-      glm::ivec2 imageOffset = {(image->getPosition().x - image->m_image->m_width / 2),
-                                (image->getPosition().y - image->m_image->m_height / 2)};
-
-      glm::ivec4 boundaryCoordinates = {leftX - imageOffset.x, rightX - imageOffset.x, topY - imageOffset.y,
-                                        bottomY - imageOffset.y};
+      glm::ivec4 sourceCoordinates = {leftX - l2.x, bottomY - l2.y, rightX - l2.x, topY - l2.y};
 
       // Get offset selection coordinates so we know where to copy the raw data
-      glm::ivec2 selectionOffset = {(position.x - (size.x / 2)), (position.y - (size.y / 2))};
-      glm::ivec4 offsetCoordinates = {leftX - selectionOffset.x, rightX - selectionOffset.x, topY - selectionOffset.y,
-                                      bottomY - selectionOffset.y};
+      glm::ivec4 destinationCoordinates = {leftX - l1.x, bottomY - l1.y, rightX - l1.x, topY - l1.y};
 
-      QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Canvas::getPixelsAtSelection Source Rect: {", boundaryCoordinates.x,
-                                 boundaryCoordinates.w, "}", "{", boundaryCoordinates.y, boundaryCoordinates.z, "}");
-      QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Canvas::getPixelsAtSelection Destination Rect: {",
-                                 offsetCoordinates.x, offsetCoordinates.w, "}", "{", offsetCoordinates.y,
-                                 offsetCoordinates.z, "}");
+      QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Canvas::getPixelsAtSelection offset Source Rect: {",
+                                 sourceCoordinates.x, sourceCoordinates.y, "}", "{", sourceCoordinates.z,
+                                 sourceCoordinates.w, "}");
+      QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Canvas::getPixelsAtSelection offset Destination Rect: {",
+                                 destinationCoordinates.x, destinationCoordinates.y, "}", "{", destinationCoordinates.z,
+                                 destinationCoordinates.w, "}");
 
       // Bind image texture and read pixel data for our selected area
       glBindTexture(GL_TEXTURE_2D, image->m_image->m_texture);
@@ -109,9 +108,9 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
       // index from the top left
       std::vector<RGBAPixel> selectionPixels;
       if (!mask) {
-        for (int x = boundaryCoordinates.x; x < boundaryCoordinates.y; x++) {
-          for (int y = boundaryCoordinates.w; y < boundaryCoordinates.z; y++) {
-            int index = (y * image->m_image->m_height) + x;
+        for (int y = sourceCoordinates.y; y < sourceCoordinates.w; y++) {
+          for (int x = sourceCoordinates.x; x < sourceCoordinates.z; x++) {
+            int index = y * image->m_image->m_width + x;
             selectionPixels.push_back(imgPixels[index]);
           }
         }
@@ -119,11 +118,11 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
 
       // Copy the selectionPixels to our main image
       int i = 0;
-      for (int x = offsetCoordinates.x; x < offsetCoordinates.y; x++) {
-        for (int y = offsetCoordinates.w; y < offsetCoordinates.z; y++) {
-          int index = (y * size.y) + x;
+      for (int y = destinationCoordinates.y; y < destinationCoordinates.w; y++) {
+        for (int x = destinationCoordinates.x; x < destinationCoordinates.z; x++) {
+          int index = y * size.x + x;
 
-          if (index >= size.x * size.y || index < 0) {
+          if (index > size.x * size.y || index < 0) {
             QLogger::GetInstance().Log(LOGLEVEL::ERR, "Invalid buffer captured! expected max size ", size.x * size.y,
                                        " got out of bounds index at", index);
             ErrorHandler::GetInstance().setError("Invalid image buffer captured!");
@@ -136,9 +135,9 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
             } else {
               pixels[index] = RGBAPixel{0x00, 0x00, 0x00, 0xFF};
             }
-
-            i++;
           }
+
+          i++;
         }
       }
 

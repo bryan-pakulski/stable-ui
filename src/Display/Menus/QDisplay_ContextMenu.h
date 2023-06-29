@@ -18,7 +18,7 @@ public:
   virtual void render() {
     if (ImGui::BeginPopup("context menu")) {
       {
-        if (*m_renderManager->getPaintPipelineStatus() != Q_RENDER_STATE::RENDERING &&
+        if (m_renderManager->getPaintPipelineStatus() != Q_RENDER_STATE::RENDERING &&
             (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::LOADED)) {
           if (ImGui::Selectable("Outpaint")) {
             m_renderManager->paintSelection(true);

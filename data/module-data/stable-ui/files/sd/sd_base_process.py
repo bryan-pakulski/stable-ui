@@ -175,7 +175,7 @@ class StableDiffusionImg2Img(StableDiffusionBaseProcess):
         pass
 
     def sample(self):
-        outputs = self.pipe(prompt_embeds=self.prompt_embeds, negative_prompt=self.prompt, image=self.load_img(self.init_img), generator=self.generator, num_inference_steps=self.steps, strength=self.strength, guidance_scale = self.cfg_scale, num_images_per_prompt=self.n_iter)
+        outputs = self.pipe(prompt_embeds=self.prompt_embeds, negative_prompt=self.prompt, image=self.legacy_load_img(self.init_img), generator=self.generator, num_inference_steps=self.steps, strength=self.strength, guidance_scale = self.cfg_scale, num_images_per_prompt=self.n_iter)
         for image in outputs.images:
             base_count = len(os.listdir(self.outpath_samples))
             img_name = os.path.join(self.outpath_samples, f"{base_count:05}.png")
@@ -199,6 +199,7 @@ class StableDiffusionOutpainting(StableDiffusionBaseProcess):
         self.height = img_height
         self.image = self.convert_img(img_data)
         self.mask = self.convert_img(img_mask)
+        # Extract mask from alpha channel, where index 3 == 0
         #Image.fromarray(np.array(self.image)[:, :, 3] == 0)
         
         self.strength = strength
@@ -229,17 +230,21 @@ class StableDiffusionOutpainting(StableDiffusionBaseProcess):
 
         message_bytes = base64.b64decode(data)
         arr = np.uint8([c for c in message_bytes])
-        arr = arr.reshape(w, h, pixels)
+        arr = arr.reshape(h, w, pixels)
         return Image.fromarray(arr).convert('RGB')
 
     def cpu_sample(self):
         pass
-
+      
+    # Inpainting pipeline
     def sample(self):
-      outputs = self.pipe(prompt_embeds=self.prompt_embeds, negative_prompt=self.prompt, image=self.image, mask_image=self.mask, generator=self.generator, num_inference_steps=self.steps, strength=self.strength, guidance_scale = self.cfg_scale, num_images_per_prompt=self.n_iter)
+      outputs = self.pipe(prompt_embeds=self.prompt_embeds, negative_prompt=self.prompt, image=self.image, width=self.width, height=self.height, mask_image=self.mask, generator=self.generator, num_inference_steps=self.steps, strength=self.strength, guidance_scale = self.cfg_scale, num_images_per_prompt=self.n_iter)
       for image in outputs.images:
           base_count = len(os.listdir(self.outpath_samples))
           img_name = os.path.join(self.outpath_samples, f"{base_count:05}.png")
           image.save(img_name)
           self.save_metadata(img_name)
       self.cleanup()
+
+    # Img2Img pipeline
+    # TODO: https://huggingface.co/spaces/Rothfeld/stable-diffusion-mat-outpainting-primer/blob/main/outpainting_example2.py

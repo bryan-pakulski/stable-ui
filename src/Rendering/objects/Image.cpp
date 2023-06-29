@@ -46,20 +46,15 @@ bool Image::intersects(const glm::ivec2 &l1, const glm::ivec2 &r1, const glm::iv
   QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Image::intersects, checking intersection of [", l1.x, l1.y, r1.x, r1.y,
                              "] and [", l2.x, l2.y, r2.x, r2.y, "]");
 
-  // if rectangle has area 0, no overlap
-  if (l1.x == r1.x || l1.y == r1.y || r2.x == l2.x || l2.y == r2.y)
-    return false;
+  bool wp = std::min(r1.x, r2.x) > std::max(l1.x, l2.x);
+  bool hp = std::min(r1.y, r2.y) > std::max(l1.y, l2.y);
 
-  // If one rectangle is on left side of other
-  if (l1.x >= r2.x || l2.x >= r1.x)
+  if (wp && hp) {
+    QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Image::intersects, found intersecting image!");
+    return true;
+  } else {
     return false;
-
-  // If one rectangle is above other
-  if (r1.y >= l2.y || r2.y >= l1.y)
-    return false;
-
-  QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Image::intersects, found intersecting image!");
-  return true;
+  }
 }
 
 // Render onto screen, offset based on world coordinates & window size

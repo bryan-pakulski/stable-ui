@@ -76,9 +76,9 @@ public:
     }
   }
 
-  int *getTxtPipelineStatus() { return &m_txtGenStatus; }
-  int *getImgPipelineStatus() { return &m_imgGenStatus; }
-  int *getPaintPipelineStatus() { return &m_paintGenStatus; }
+  int &getTxtPipelineStatus() { return m_txtGenStatus; }
+  int &getImgPipelineStatus() { return m_imgGenStatus; }
+  int &getPaintPipelineStatus() { return m_paintGenStatus; }
 
   /*
     CALLBACKS
