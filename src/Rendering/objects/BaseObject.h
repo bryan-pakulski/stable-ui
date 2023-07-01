@@ -55,6 +55,9 @@ public:
   // Set matrix coordinates for projection
   void setMat4(std::string uniformName, glm::mat4x4 mat, std::string shaderName);
 
+  // Check if image intersects a given selection space
+  bool intersects(const glm::ivec2 &l1, const glm::ivec2 &r1, const glm::ivec2 &l2, const glm::ivec2 &r2);
+
 protected:
   glm::ivec2 m_position;
   std::map<std::string, std::shared_ptr<shader>> m_shaders;

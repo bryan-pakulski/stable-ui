@@ -55,6 +55,8 @@ Canvas::Canvas(glm::ivec2 position, const std::string &name, GLFWwindow *w, std:
 // If the mask value is set we won't actually retrieve pixel data but instead create a mask for our sd pipeline to use
 std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::ivec2 size, bool mask) {
 
+  // TODO: Call this query on each layer to check for intersections
+
   // Raw pixel data, treat as 2d array
   std::vector<RGBAPixel> pixels(size.x * size.y);
 
@@ -102,6 +104,7 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
 
       std::vector<RGBAPixel> imgPixels(image->m_image->m_width * image->m_image->m_height);
       glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgPixels.data());
+      glBindTexture(GL_TEXTURE_2D, 0);
 
       // Iterate over the pixels in the intersection rectangle and extract the relative pixels from the image into
       // its own vector, note that openGL textures are indexed from the bottom left opposed to our coordinates which
@@ -126,8 +129,6 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
             QLogger::GetInstance().Log(LOGLEVEL::ERR, "Invalid buffer captured! expected max size ", size.x * size.y,
                                        " got out of bounds index at", index);
             ErrorHandler::GetInstance().setError("Invalid image buffer captured!");
-
-            glBindTexture(GL_TEXTURE_2D, 0);
             return pixels;
           } else {
             if (!mask) {
@@ -140,8 +141,6 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
           i++;
         }
       }
-
-      glBindTexture(GL_TEXTURE_2D, 0);
     }
   }
 

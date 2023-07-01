@@ -22,9 +22,6 @@ public:
   Image(std::shared_ptr<GLImage> im, std::shared_ptr<OrthographicCamera> c, glm::ivec2 position);
   ~Image() {}
 
-  // Check if image intersects a given selection space
-  bool intersects(const glm::ivec2 &l1, const glm::ivec2 &r1, const glm::ivec2 &l2, const glm::ivec2 &r2);
-
   void updateLogic() override {}
   void updateVisual() override;
 
