@@ -53,6 +53,7 @@ public:
   void sendImageToCanvas(GLImage &im);
   void captureBuffer();
   void saveBuffer();
+  void eraseSelection();
   void paintSelection(bool sendToCanvas);
   std::shared_ptr<GLImage> getBuffer() { return m_selectionBuffer; }
   std::shared_ptr<GLImage> getMask() { return m_selectionMask; }

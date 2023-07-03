@@ -1,9 +1,7 @@
 #include "Canvas.h"
 #include "Display/ErrorHandler.h"
-#include "Helpers/QLogger.h"
-#include "Helpers/GLHelper.h"
-#include "Rendering/objects/GLImage/GLImage.h"
 #include <chrono>
+#include <memory>
 
 Canvas::~Canvas() {}
 
@@ -47,82 +45,40 @@ Canvas::Canvas(glm::ivec2 position, const std::string &name, GLFWwindow *w, std:
   linkShaders(gridVertexShader, gridFragmentShader, success, gridShader);
   setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices), gridShader);
   createShader(gridShader, "background_grid");
+
+  // Create default layer
+  createLayer(glm::ivec2{2560, 1440}, "Base Layer", true);
 }
 
-// TODO: This function doesn't work with non-matching aspect ratios
 // i.e. 512x768 causes issues
 // Retrieve raw pixel data from all images that fall space between two world space coordinates
 // If the mask value is set we won't actually retrieve pixel data but instead create a mask for our sd pipeline to use
 std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::ivec2 size, bool mask) {
 
-  // TODO: Call this query on each layer to check for intersections
-
   // Raw pixel data, treat as 2d array
   std::vector<RGBAPixel> pixels(size.x * size.y);
+  std::vector<RGBAPixel> selectionPixels;
 
   // We are assuming that our m_editorGrid stays sorted, which should be true as we only emplace data at the end of the
   // vector
-  for (auto &image : m_editorGrid) {
+  for (auto &layer : m_editorGrid) {
 
-    // Convert the origin as center to bottom left for simpler calculation
-    glm::ivec2 l1 = {(position.x - (size.x / 2)), (position.y - (size.y / 2))};
-    glm::ivec2 r1 = {(position.x + (size.x / 2)), (position.y + (size.y / 2))};
+    LocalIntersect intersect =
+        GLHELPER::GetLocalIntersectSourceDest(position, size, layer->getPosition(), layer->c_size);
 
-    glm::ivec2 l2 = {(image->getPosition().x - image->m_image->m_width / 2),
-                     (image->getPosition().y - image->m_image->m_height / 2)};
-    glm::ivec2 r2 = {(image->getPosition().x + image->m_image->m_width / 2),
-                     (image->getPosition().y + image->m_image->m_height / 2)};
-
-    if (image->intersects(l1, r1, l2, r2) && image->m_renderFlag) {
-
-      // Calculate intersection rectangle
-      // As these fall on the cartesian plane, these can be negative!
-      int leftX = std::max(l1.x, l2.x);
-      int rightX = std::min(r1.x, r2.x);
-      int topY = std::min(r1.y, r2.y);
-      int bottomY = std::max(l1.y, l2.y);
-
-      QLogger::GetInstance().Log(LOGLEVEL::DEBUG,
-                                 "Canvas::getPixelsAtSelection Selection Dimensions: ", std::abs(rightX - leftX), " x ",
-                                 std::abs(topY - bottomY));
-
-      // Treat image as our origin (bottom left cartesion)
-      glm::ivec4 sourceCoordinates = {leftX - l2.x, bottomY - l2.y, rightX - l2.x, topY - l2.y};
-
-      // Get offset selection coordinates so we know where to copy the raw data
-      glm::ivec4 destinationCoordinates = {leftX - l1.x, bottomY - l1.y, rightX - l1.x, topY - l1.y};
-
-      QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Canvas::getPixelsAtSelection offset Source Rect: {",
-                                 sourceCoordinates.x, sourceCoordinates.y, "}", "{", sourceCoordinates.z,
-                                 sourceCoordinates.w, "}");
-      QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Canvas::getPixelsAtSelection offset Destination Rect: {",
-                                 destinationCoordinates.x, destinationCoordinates.y, "}", "{", destinationCoordinates.z,
-                                 destinationCoordinates.w, "}");
-
-      // Bind image texture and read pixel data for our selected area
-      glBindTexture(GL_TEXTURE_2D, image->m_image->m_texture);
-
-      std::vector<RGBAPixel> imgPixels(image->m_image->m_width * image->m_image->m_height);
-      glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgPixels.data());
-      glBindTexture(GL_TEXTURE_2D, 0);
+    if (intersect.collision && layer->m_renderFlag) {
 
       // Iterate over the pixels in the intersection rectangle and extract the relative pixels from the image into
       // its own vector, note that openGL textures are indexed from the bottom left opposed to our coordinates which
       // index from the top left
-      std::vector<RGBAPixel> selectionPixels;
       if (!mask) {
-        for (int y = sourceCoordinates.y; y < sourceCoordinates.w; y++) {
-          for (int x = sourceCoordinates.x; x < sourceCoordinates.z; x++) {
-            int index = y * image->m_image->m_width + x;
-            selectionPixels.push_back(imgPixels[index]);
-          }
-        }
+        std::vector<RGBAPixel> selectionPixels = layer->getPixelsAtSelection(intersect.sourceCoordinates);
       }
 
       // Copy the selectionPixels to our main image
       int i = 0;
-      for (int y = destinationCoordinates.y; y < destinationCoordinates.w; y++) {
-        for (int x = destinationCoordinates.x; x < destinationCoordinates.z; x++) {
+      for (int y = intersect.destinationCoordinates.y; y < intersect.destinationCoordinates.w; y++) {
+        for (int x = intersect.destinationCoordinates.x; x < intersect.destinationCoordinates.z; x++) {
           int index = y * size.x + x;
 
           if (index > size.x * size.y || index < 0) {
@@ -149,11 +105,16 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
   return pixels;
 }
 
-void Canvas::updateLogic() {
+// Clear out pixel data in our layer, ignore images
+void Canvas::eraseSelection(glm::ivec2 position, glm::ivec2 size) {
+  for (auto &layer : m_editorGrid) {
+    layer->eraseSelection(position, size);
+  }
+}
 
-  // Check which chunks are in view and should be rendered
-  for (auto &chunk : m_editorGrid) {
-    chunk->updateLogic();
+void Canvas::updateLogic() {
+  for (auto &layer : m_editorGrid) {
+    layer->updateLogic();
   }
 }
 
@@ -218,15 +179,15 @@ void Canvas::renderGrid() {
 
 void Canvas::renderImages() {
   // Check which chunks are in view and should be rendered
-  for (auto &image : m_editorGrid) {
-    image->updateVisual();
+  for (auto &layer : m_editorGrid) {
+    layer->updateVisual();
   }
 }
 
 // TODO: Create a new grid chunk object/s based on provided image & coordinates
-void Canvas::createImage(std::shared_ptr<GLImage> image, glm::ivec2 position) {
+void Canvas::createImage(int layerId, std::shared_ptr<GLImage> image, glm::ivec2 position) {
   QLogger::GetInstance().Log(LOGLEVEL::INFO,
                              "Canvas::createImage Creating new image chunk at coordinates: ", position.x, position.y,
                              "on canvas: ", m_name);
-  m_editorGrid.emplace_back(new Image(image, m_camera, position));
+  m_editorGrid[layerId]->addImage(Image(image, m_camera, position));
 }

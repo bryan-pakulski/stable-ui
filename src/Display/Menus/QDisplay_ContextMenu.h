@@ -9,6 +9,7 @@
 #include "Helpers/States.h"
 #include "Rendering/RenderManager.h"
 #include "StableManager.h"
+#include "imgui.h"
 
 class QDisplay_ContextMenu : public QDisplay_Base {
 public:
@@ -27,6 +28,11 @@ public:
           if (ImGui::Selectable("Capture to buffer")) {
             m_renderManager->captureBuffer();
           }
+        }
+
+        if (ImGui::Selectable("Erase Selection")) {
+          // Erase content from main layer
+          m_renderManager->eraseSelection();
         }
 
         if (ImGui::Selectable("Info")) {

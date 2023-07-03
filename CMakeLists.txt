@@ -141,6 +141,7 @@ add_executable( stable-ui
                 src/Rendering/RenderManager.cpp
                 src/Rendering/objects/BaseObject.cpp 
                 src/Rendering/objects/Selection.cpp
+                src/Rendering/objects/Layer.cpp
                 src/Rendering/objects/Image.cpp
                 src/Rendering/objects/GLImage/GLImage.cpp
                 src/ThirdParty/sha1/sha1.cpp

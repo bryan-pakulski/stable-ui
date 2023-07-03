@@ -104,6 +104,12 @@ void RenderManager::saveBuffer() {
                               m_selectionBuffer->m_height);
 }
 
+void RenderManager::eraseSelection() {
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::eraseSelection deleting selection");
+
+  getActiveCanvas()->eraseSelection(m_selection->getPosition(), m_selection->m_size);
+}
+
 void RenderManager::paintSelection(bool sendToCanvas) {
   captureBuffer();
 
@@ -158,9 +164,10 @@ std::shared_ptr<Canvas> RenderManager::getActiveCanvas() {
 void RenderManager::useImage(std::string path) { m_baseImage = path; }
 const std::string RenderManager::getImage() { return m_baseImage; }
 
-// Get image from canvas, based on selection coordinates
+// Send an image to the canvas, ignoring layers
 void RenderManager::sendImageToCanvas(GLImage &im) {
-  m_canvas[m_activeId]->createImage(std::shared_ptr<GLImage>(new GLImage(im)), m_selection->getPosition());
+  // TODO: allow control of active layer
+  m_canvas[m_activeId]->createImage(0, std::shared_ptr<GLImage>(new GLImage(im)), m_selection->getPosition());
 }
 
 // Mouse movement callback

@@ -1,10 +1,10 @@
 # Main Canvas
 
-- Basic drawing tools (draw, erase, colour)
+- Basic drawing tools (draw, erase(DONE), colour)
 - Save canvas to file
 - Load saved canvas
 - Images added to canvas are merged onto existing pixel array (actual layers)
-- Proper layering system (not just per image)
+
 
 # Core systems
 
@@ -34,6 +34,7 @@
 - Heartbeat bug on windows (no connectivity)
 - Multi string search doesn't work properly (Set union not working as intended?)
 - Generate button not changing state on txt2img / img2img
+- Improve layering system interaction
 
 # Done
 
@@ -53,3 +54,4 @@
 - (FIX) Save canvas buffer coordinates not working correctly
 - (FIX) images above 512x512 resolution aren't being scaled correctly on canvas
 - (FIX) Unable to use selection of non square sizes / images of non square size
+- Proper layering system (not just per image)

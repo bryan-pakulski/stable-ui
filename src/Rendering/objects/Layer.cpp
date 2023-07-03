@@ -3,8 +3,8 @@
 #include "Rendering/objects/GLImage/GLImage.h"
 #include "glm/fwd.hpp"
 
-Layer::Layer(std::shared_ptr<OrthographicCamera> c, glm::ivec2 dimensions, std::string name)
-    : BaseObject(glm::ivec2{0, 0}), m_camera(c), m_name(name), c_size(dimensions) {
+Layer::Layer(std::shared_ptr<OrthographicCamera> c, glm::ivec2 dimensions, std::string name, bool protect)
+    : BaseObject(glm::ivec2{0, 0}), m_camera(c), m_name(name), c_size(dimensions), c_protected(protect) {
 
   pixelData.resize(dimensions.x * dimensions.y, RGBAPixel{0x00, 0x00, 0x00, 0x00});
 
@@ -12,8 +12,6 @@ Layer::Layer(std::shared_ptr<OrthographicCamera> c, glm::ivec2 dimensions, std::
   m_layerImage = std::shared_ptr<Image>(new Image(m_rawImage, c, m_position));
   m_updateTexture = true;
 }
-
-void Layer::addImage(Image im) { m_images.push_back(im); }
 
 void Layer::mergeImage(Image im) {
 
@@ -44,19 +42,41 @@ void Layer::mergeImage(Image im) {
     for (int y = intersect.destinationCoordinates.y; y < intersect.destinationCoordinates.w; y++) {
       for (int x = intersect.destinationCoordinates.x; x < intersect.destinationCoordinates.z; x++) {
         int index = y * c_size.x + x;
-
         if (index > c_size.x * c_size.y || index < 0) {
           continue;
         } else {
-          imgPixels[index] = selectionPixels.at(i);
+          pixelData[index] = selectionPixels.at(i);
         }
 
         i++;
       }
     }
 
-    // Inverse Y
-    imgPixels = GLHELPER::FlipMatrixY(imgPixels, c_size.x, c_size.y);
+    updateTexture();
+  }
+}
+
+void Layer::eraseSelection(glm::ivec2 position, glm::ivec2 size) {
+  LocalIntersect intersect = GLHELPER::GetLocalIntersectSourceDest(getPosition(), c_size, position, size);
+
+  if (intersect.collision && m_renderFlag) {
+    QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Deleting selection from layer pixel data at",
+                               intersect.destinationCoordinates.x, intersect.destinationCoordinates.w, "and",
+                               intersect.destinationCoordinates.y, intersect.destinationCoordinates.z);
+
+    for (int y = intersect.destinationCoordinates.y; y < intersect.destinationCoordinates.w; y++) {
+      for (int x = intersect.destinationCoordinates.x; x < intersect.destinationCoordinates.z; x++) {
+        int index = y * c_size.x + x;
+
+        if (index > c_size.x * c_size.y || index < 0) {
+          continue;
+        } else {
+          pixelData[index] = RGBAPixel{0x00, 0x00, 0x00, 0x00};
+        }
+      }
+    }
+
+    updateTexture();
   }
 }
 
@@ -73,6 +93,8 @@ void Layer::updateLogic() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
     glBindTexture(GL_TEXTURE_2D, 0);
+
+    m_updateTexture = false;
   }
 
   for (auto &image : m_images) {
@@ -83,10 +105,28 @@ void Layer::updateLogic() {
 }
 
 void Layer::updateVisual() {
-  for (auto &image : m_images) {
-    image.updateVisual();
-  }
+  if (m_renderFlag) {
+    m_layerImage->updateVisual();
 
-  m_layerImage->updateVisual();
-  // TODO: render black rectangle around layer size limits
+    for (auto &image : m_images) {
+      image.updateVisual();
+    }
+
+    // TODO: render black rectangle around layer size limits
+  }
+}
+
+std::vector<RGBAPixel> Layer::getPixelsAtSelection(glm::ivec4 coordinates) {
+
+  // Return values from images / layer at these coordinates
+  std::vector<RGBAPixel> selectionPixels;
+
+  // TODO: Return image
+
+  for (int y = coordinates.y; y < coordinates.w; y++) {
+    for (int x = coordinates.x; x < coordinates.z; x++) {
+      int index = y * m_layerImage->m_image->m_width + x;
+      selectionPixels.push_back(pixelData[index]);
+    }
+  }
 }

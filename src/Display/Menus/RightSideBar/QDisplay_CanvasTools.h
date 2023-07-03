@@ -23,7 +23,7 @@ public:
     cameraHelper();
     ImGui::Separator();
 
-    ImGui::Text("Layer Helper");
+    ImGui::Text("Layer Tools");
     layerHelper();
     ImGui::Separator();
 
@@ -39,6 +39,7 @@ private:
 
   // Layer options
   int m_selectedLayerIndex = -1;
+  int m_selectedImageIndex = -1;
   std::unique_ptr<GLImage> m_visible_icon;
   std::unique_ptr<GLImage> m_hidden_icon;
   float c_visibilityIconSize = 12.0f;
@@ -66,16 +67,19 @@ private:
 
   // Layer Code
   void layerHelper() {
+    if (ImGui::Button("Create Layer")) {
+      m_renderManager->getActiveCanvas()->createLayer(glm::ivec2{1920, 1080}, "New Layer", false);
+    }
     if (ImGui::BeginListBox("Layers")) {
-      for (auto &item : m_renderManager->getActiveCanvas()->m_editorGrid) {
-        const char *item_name = item->m_image->m_image_source.c_str();
-        int index = std::addressof(item) - std::addressof(m_renderManager->getActiveCanvas()->m_editorGrid.front());
+      for (auto &layer : m_renderManager->getActiveCanvas()->m_editorGrid) {
+        const char *item_name = layer->m_name.c_str();
+        int index = std::addressof(layer) - std::addressof(m_renderManager->getActiveCanvas()->m_editorGrid.front());
         const bool is_selected = index == m_selectedLayerIndex;
 
         // Visibility icons
-        ImGui::PushID(static_cast<const void *>(&*item)); // We need a unique identifier for images to allow ImGui to
-                                                          // perform interaction, hence using memory location
-        GLImage icon = item->m_renderFlag ? *m_visible_icon : *m_hidden_icon;
+        ImGui::PushID(static_cast<const void *>(&*layer)); // We need a unique identifier for images to allow ImGui to
+                                                           // perform interaction, hence using memory location
+        GLImage icon = layer->m_renderFlag ? *m_visible_icon : *m_hidden_icon;
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
         ImGui::ImageButton((void *)(intptr_t)icon.m_texture, {c_visibilityIconSize, c_visibilityIconSize}, {1, 0},
                            {0, 1});
@@ -83,7 +87,7 @@ private:
 
         // Toggle item visibility flag
         if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-          item->m_renderFlag = !item->m_renderFlag;
+          layer->m_renderFlag = !layer->m_renderFlag;
         }
         ImGui::SameLine();
 
@@ -100,20 +104,81 @@ private:
       ImGui::EndListBox();
     }
 
+    if (ImGui::Button("Delete Layer")) {
+      m_renderManager->getActiveCanvas()->deleteLayer(m_selectedLayerIndex);
+      m_selectedLayerIndex = -1;
+    }
+
     if (m_selectedLayerIndex != -1) {
-      ImGui::Text("Layer Tools");
 
-      // TODO: scaling is not consistent with the coordinates of other resources, look to bring together all resources
-      // under the same coordinate format
-      ImGui::InputInt("img x",
-                      &m_renderManager->getActiveCanvas()->m_editorGrid[m_selectedLayerIndex]->getPosition().x);
-      ImGui::InputInt("img y",
-                      &m_renderManager->getActiveCanvas()->m_editorGrid[m_selectedLayerIndex]->getPosition().y);
+      ImGui::Separator();
+      ImGui::Text("Layer Content");
+      layerContentHelper(m_selectedLayerIndex);
 
-      if (ImGui::Button("Delete Layer")) {
-        m_renderManager->getActiveCanvas()->deleteImage(m_selectedLayerIndex);
-        m_selectedLayerIndex = -1;
+      // Image in layer control
+      if (m_selectedImageIndex != -1) {
+        ImGui::Text("Layer Image");
+
+        ImGui::InputInt("img x", &m_renderManager->getActiveCanvas()
+                                      ->m_editorGrid[m_selectedLayerIndex]
+                                      ->getImages()[m_selectedImageIndex]
+                                      .getPosition()
+                                      .x);
+        ImGui::InputInt("img y", &m_renderManager->getActiveCanvas()
+                                      ->m_editorGrid[m_selectedLayerIndex]
+                                      ->getImages()[m_selectedImageIndex]
+                                      .getPosition()
+                                      .y);
+
+        if (ImGui::Button("Merge Image with Layer")) {
+          m_renderManager->getActiveCanvas()->m_editorGrid[m_selectedLayerIndex]->mergeImageFromStack(
+              m_selectedImageIndex);
+          m_selectedImageIndex = -1;
+        }
+
+        if (ImGui::Button("Delete Image")) {
+          m_renderManager->getActiveCanvas()->m_editorGrid[m_selectedLayerIndex]->deleteImage(m_selectedImageIndex);
+          m_selectedImageIndex = -1;
+        }
       }
+    }
+  }
+
+  // Layer content Helper
+  void layerContentHelper(int layerId) {
+    if (ImGui::BeginListBox("Layer Content")) {
+      for (auto &image : m_renderManager->getActiveCanvas()->m_editorGrid.at(layerId)->getImages()) {
+        const char *item_name = image.m_image->m_image_source.c_str();
+        int index = std::addressof(image) -
+                    std::addressof(m_renderManager->getActiveCanvas()->m_editorGrid.at(layerId)->getImages().front());
+        const bool is_selected = index == m_selectedImageIndex;
+
+        // Visibility icons
+        ImGui::PushID(static_cast<const void *>(&image)); // We need a unique identifier for images to allow ImGui to
+                                                          // perform interaction, hence using memory location
+        GLImage icon = image.m_renderFlag ? *m_visible_icon : *m_hidden_icon;
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+        ImGui::ImageButton((void *)(intptr_t)icon.m_texture, {c_visibilityIconSize, c_visibilityIconSize}, {1, 0},
+                           {0, 1});
+        ImGui::PopStyleColor();
+
+        // Toggle item visibility flag
+        if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+          image.m_renderFlag = !image.m_renderFlag;
+        }
+        ImGui::SameLine();
+
+        if (ImGui::Selectable(item_name, is_selected)) {
+          m_selectedImageIndex = index;
+        }
+
+        if (is_selected) {
+          ImGui::SetItemDefaultFocus();
+        }
+        ImGui::PopID();
+      }
+
+      ImGui::EndListBox();
     }
   }
 };
