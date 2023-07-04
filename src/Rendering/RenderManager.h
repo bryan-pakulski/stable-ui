@@ -50,6 +50,8 @@ public:
   std::shared_ptr<Canvas> createCanvas(int x, int y, const std::string &name);
   std::shared_ptr<Canvas> getActiveCanvas();
   void selectCanvas(int id);
+  void setActiveLayer(int id) { m_canvas[m_activeId]->setActiveLayer(id); }
+  int getActiveLayer() { return m_canvas[m_activeId]->getActiveLayer(); }
   void sendImageToCanvas(GLImage &im);
   void sendImageToCanvasAtPos(GLImage &im, glm::ivec2 position);
   void captureBuffer();

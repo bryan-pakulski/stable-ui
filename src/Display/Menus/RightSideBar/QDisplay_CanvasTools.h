@@ -38,7 +38,6 @@ private:
   std::pair<int, int> m_windowSize{};
 
   // Layer options
-  int m_selectedLayerIndex = -1;
   int m_selectedImageIndex = -1;
   std::unique_ptr<GLImage> m_visible_icon;
   std::unique_ptr<GLImage> m_hidden_icon;
@@ -68,13 +67,14 @@ private:
   // Layer Code
   void layerHelper() {
     if (ImGui::Button("Create Layer")) {
+      // TODO: create a popup to set layer size & name
       m_renderManager->getActiveCanvas()->createLayer(glm::ivec2{1920, 1080}, "New Layer", false);
     }
     if (ImGui::BeginListBox("Layers")) {
       for (auto &layer : m_renderManager->getActiveCanvas()->m_editorGrid) {
         const char *item_name = layer->m_name.c_str();
         int index = std::addressof(layer) - std::addressof(m_renderManager->getActiveCanvas()->m_editorGrid.front());
-        const bool is_selected = index == m_selectedLayerIndex;
+        const bool is_selected = index == m_renderManager->getActiveLayer();
 
         // Visibility icons
         ImGui::PushID(static_cast<const void *>(&*layer)); // We need a unique identifier for images to allow ImGui to
@@ -92,7 +92,7 @@ private:
         ImGui::SameLine();
 
         if (ImGui::Selectable(item_name, is_selected)) {
-          m_selectedLayerIndex = index;
+          m_renderManager->setActiveLayer(index);
         }
 
         if (is_selected) {
@@ -104,42 +104,42 @@ private:
       ImGui::EndListBox();
     }
 
-    if (ImGui::Button("Delete Layer")) {
-      m_renderManager->getActiveCanvas()->deleteLayer(m_selectedLayerIndex);
-      m_selectedLayerIndex = -1;
+    if (m_renderManager->getActiveLayer() != 0) {
+      if (ImGui::Button("Delete Layer")) {
+        m_renderManager->getActiveCanvas()->deleteLayer(m_renderManager->getActiveLayer());
+        m_renderManager->setActiveLayer(m_renderManager->getActiveLayer() - 1);
+      }
     }
 
-    if (m_selectedLayerIndex != -1) {
+    ImGui::Separator();
+    ImGui::Text("Layer Content");
+    layerContentHelper(m_renderManager->getActiveLayer());
 
-      ImGui::Separator();
-      ImGui::Text("Layer Content");
-      layerContentHelper(m_selectedLayerIndex);
+    // Image in layer control
+    if (m_selectedImageIndex != -1) {
+      ImGui::Text("Layer Image");
 
-      // Image in layer control
-      if (m_selectedImageIndex != -1) {
-        ImGui::Text("Layer Image");
+      ImGui::InputInt("img x", &m_renderManager->getActiveCanvas()
+                                    ->m_editorGrid[m_renderManager->getActiveLayer()]
+                                    ->getImages()[m_selectedImageIndex]
+                                    .getPosition()
+                                    .x);
+      ImGui::InputInt("img y", &m_renderManager->getActiveCanvas()
+                                    ->m_editorGrid[m_renderManager->getActiveLayer()]
+                                    ->getImages()[m_selectedImageIndex]
+                                    .getPosition()
+                                    .y);
 
-        ImGui::InputInt("img x", &m_renderManager->getActiveCanvas()
-                                      ->m_editorGrid[m_selectedLayerIndex]
-                                      ->getImages()[m_selectedImageIndex]
-                                      .getPosition()
-                                      .x);
-        ImGui::InputInt("img y", &m_renderManager->getActiveCanvas()
-                                      ->m_editorGrid[m_selectedLayerIndex]
-                                      ->getImages()[m_selectedImageIndex]
-                                      .getPosition()
-                                      .y);
+      if (ImGui::Button("Merge Image with Layer")) {
+        m_renderManager->getActiveCanvas()->m_editorGrid[m_renderManager->getActiveLayer()]->mergeImageFromStack(
+            m_selectedImageIndex);
+        m_selectedImageIndex -= 1;
+      }
 
-        if (ImGui::Button("Merge Image with Layer")) {
-          m_renderManager->getActiveCanvas()->m_editorGrid[m_selectedLayerIndex]->mergeImageFromStack(
-              m_selectedImageIndex);
-          m_selectedImageIndex = -1;
-        }
-
-        if (ImGui::Button("Delete Image")) {
-          m_renderManager->getActiveCanvas()->m_editorGrid[m_selectedLayerIndex]->deleteImage(m_selectedImageIndex);
-          m_selectedImageIndex = -1;
-        }
+      if (ImGui::Button("Delete Image")) {
+        m_renderManager->getActiveCanvas()->m_editorGrid[m_renderManager->getActiveLayer()]->deleteImage(
+            m_selectedImageIndex);
+        m_selectedImageIndex -= 1;
       }
     }
   }

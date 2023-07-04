@@ -167,14 +167,15 @@ const std::string RenderManager::getImage() { return m_baseImage; }
 
 // Send an image to the canvas, ignoring layers
 void RenderManager::sendImageToCanvas(GLImage &im) {
-  // TODO: allow control of active layer
-  m_canvas[m_activeId]->createImage(0, std::shared_ptr<GLImage>(new GLImage(im)), m_selection->getPosition());
+  m_canvas[m_activeId]->createImage(m_canvas[m_activeId]->getActiveLayer(), std::shared_ptr<GLImage>(new GLImage(im)),
+                                    m_selection->getPosition());
 }
 
 // Send an image to the canvas, ignoring layers
 void RenderManager::sendImageToCanvasAtPos(GLImage &im, glm::ivec2 position) {
   // TODO: allow control of active layer
-  m_canvas[m_activeId]->createImage(0, std::shared_ptr<GLImage>(new GLImage(im)), position);
+  m_canvas[m_activeId]->createImage(m_canvas[m_activeId]->getActiveLayer(), std::shared_ptr<GLImage>(new GLImage(im)),
+                                    position);
 }
 
 // Mouse movement callback

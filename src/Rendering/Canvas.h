@@ -39,6 +39,15 @@ public:
   // Update or create new image wrapper from a basic GL image
   void createImage(int layerId, std::shared_ptr<GLImage>, glm::ivec2 position);
 
+  int getActiveLayer() { return m_activeLayer; }
+  void setActiveLayer(int id) {
+    if (id < 0 || id > m_editorGrid.size()) {
+      m_activeLayer = 0;
+    } else {
+      m_activeLayer = id;
+    }
+  }
+
   // Create a new layer
   void createLayer(glm::ivec2 dimensions, std::string name, bool protect = false) {
     m_editorGrid.push_back(std::unique_ptr<Layer>(new Layer(m_camera, dimensions, name, protect)));
@@ -60,4 +69,5 @@ public:
 private:
   std::shared_ptr<OrthographicCamera> m_camera;
   float m_time = 0.0f;
+  int m_activeLayer = 0;
 };
