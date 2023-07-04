@@ -12,7 +12,6 @@
 - Add input sanitisation on sd_client on messages being sent, delimit or convert " to '?
 - Document Indexing / Crawling engine
 - Look at any performance improvements that can be used from openvino: https://github.com/bes-dev/stable_diffusion.openvino/tree/master
-- Refactor generation code to use commands and avoid passing multiple members
 
 # Functionality
 
@@ -22,9 +21,9 @@
 - Power of two scaling for selection box
 - Render grid
 - Load module progress bar or status window
-- Inpainting: https://huggingface.co/docs/diffusers/using-diffusers/inpaint
 - Depth to Img: https://huggingface.co/docs/diffusers/using-diffusers/depth2img
 - Outpainting workflow: https://github.com/lkwq007/stablediffusion-infinity
+- Add additional inpainting method: https://huggingface.co/spaces/Rothfeld/stable-diffusion-mat-outpainting-primer/blob/main/outpainting_example2.py
 
 # Bugs
 
@@ -55,3 +54,5 @@
 - (FIX) Unable to use selection of non square sizes / images of non square size
 - Proper layering system (not just per image)
 - Generate button not changing state on txt2img / img2img
+- Refactor generation code to use commands and avoid passing multiple members
+- Inpainting: https://huggingface.co/docs/diffusers/using-diffusers/inpaint
