@@ -33,7 +33,6 @@
 - Extra configuration i.e. trigger_prompt not being loaded from model yaml
 - Heartbeat bug on windows (no connectivity)
 - Multi string search doesn't work properly (Set union not working as intended?)
-- Generate button not changing state on txt2img / img2img
 - Improve layering system interaction
 
 # Done
@@ -55,3 +54,4 @@
 - (FIX) images above 512x512 resolution aren't being scaled correctly on canvas
 - (FIX) Unable to use selection of non square sizes / images of non square size
 - Proper layering system (not just per image)
+- Generate button not changing state on txt2img / img2img

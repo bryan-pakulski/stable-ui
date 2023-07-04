@@ -1,5 +1,6 @@
 #include "Canvas.h"
 #include "Display/ErrorHandler.h"
+#include "Rendering/objects/GLImage/GLImage.h"
 #include <chrono>
 #include <memory>
 
@@ -56,7 +57,8 @@ Canvas::Canvas(glm::ivec2 position, const std::string &name, GLFWwindow *w, std:
 std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::ivec2 size, bool mask) {
 
   // Raw pixel data, treat as 2d array
-  std::vector<RGBAPixel> pixels(size.x * size.y);
+  std::vector<RGBAPixel> pixels(size.x * size.y,
+                                mask ? RGBAPixel{0xFF, 0xFF, 0xFF, 0xFF} : RGBAPixel{0x00, 0x00, 0x00, 0x00});
   std::vector<RGBAPixel> selectionPixels;
 
   // We are assuming that our m_editorGrid stays sorted, which should be true as we only emplace data at the end of the
@@ -71,9 +73,7 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
       // Iterate over the pixels in the intersection rectangle and extract the relative pixels from the image into
       // its own vector, note that openGL textures are indexed from the bottom left opposed to our coordinates which
       // index from the top left
-      if (!mask) {
-        std::vector<RGBAPixel> selectionPixels = layer->getPixelsAtSelection(intersect.sourceCoordinates);
-      }
+      selectionPixels = layer->getPixelsAtSelection(intersect.sourceCoordinates, position, size);
 
       // Copy the selectionPixels to our main image
       int i = 0;
@@ -90,7 +90,10 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
             if (!mask) {
               pixels[index] = selectionPixels.at(i);
             } else {
-              pixels[index] = RGBAPixel{0x00, 0x00, 0x00, 0xFF};
+              // Ignore alpha channel
+              if (selectionPixels.at(i).alpha != 0x00) {
+                pixels[index] = RGBAPixel{0x00, 0x00, 0x00, 0xFF};
+              }
             }
           }
 
@@ -184,7 +187,6 @@ void Canvas::renderImages() {
   }
 }
 
-// TODO: Create a new grid chunk object/s based on provided image & coordinates
 void Canvas::createImage(int layerId, std::shared_ptr<GLImage> image, glm::ivec2 position) {
   QLogger::GetInstance().Log(LOGLEVEL::INFO,
                              "Canvas::createImage Creating new image chunk at coordinates: ", position.x, position.y,

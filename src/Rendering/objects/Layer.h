@@ -45,7 +45,7 @@ public:
 
   // Returns array of pixels at coordinate, selection coordinates are indexed from the bottom left
   // In typical cartesian format
-  std::vector<RGBAPixel> getPixelsAtSelection(glm::ivec4 coordinates);
+  std::vector<RGBAPixel> getPixelsAtSelection(glm::ivec4 coordinates, glm::ivec2 position, glm::ivec2 size);
 
 private:
   std::vector<Image> m_images;

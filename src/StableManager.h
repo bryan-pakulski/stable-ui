@@ -40,17 +40,17 @@ public:
   void launchSDModelServer();
   void releaseSDModel();
   void attachModel(ModelConfig model);
-  int getModelState() { return m_modelState; }
-  void setModelState(int state) { m_modelState = state; }
   const ModelConfig &getLoadedModel() { return m_model; }
 
-  void setRenderState(int state);
+  // TODO: Make these functions thread safe, basic mutex lock should suffice
+  int getModelState() { return m_modelState; }
+  void setModelState(int state) { m_modelState = state; }
+  void setRenderState(int state) { m_renderState = state; }
   int getRenderState() { return m_renderState; }
-  void textToImage(pipelineConfig &config, int &renderState);
 
-  void imageToImage(std::string &imgPath, pipelineConfig &config, int &renderState);
-
-  void outpaint(std::string &imgData, std::string &imgMask, pipelineConfig &config, int &renderState);
+  void textToImage(pipelineConfig &config);
+  void imageToImage(std::string &imgPath, pipelineConfig &config);
+  void outpaint(std::string &imgData, std::string &imgMask, pipelineConfig &config);
 
   // Retrieve last modified file from path
   std::string getLatestFile(const std::string &path);

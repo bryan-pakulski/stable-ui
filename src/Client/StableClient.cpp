@@ -3,6 +3,7 @@
 #include "Display/ErrorHandler.h"
 #include "Helpers/States.h"
 #include "Helpers/QLogger.h"
+#include "StableManager.h"
 #include "ThirdParty/cppzmq/zmq.hpp"
 #include <sstream>
 
@@ -46,57 +47,57 @@ void StableClient::heartbeat(int &state) {
 }
 
 // Reloads sd server in docker (release any models in memory)
-void StableClient::releaseModel(int &state) {
+void StableClient::releaseModel() {
   commands::restartServer cmd = commands::restartServer();
   std::string msg = sendMessage(cmd.getCommandString());
   if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
-    state = Q_MODEL_STATUS::NONE_LOADED;
+    StableManager::GetInstance().setModelState(Q_MODEL_STATUS::NONE_LOADED);
   } else {
-    state = Q_MODEL_STATUS::FAILED;
+    StableManager::GetInstance().setModelState(Q_MODEL_STATUS::FAILED);
   }
 }
 
 // Load a stable diffusion model into memory in preperation for running inference commands
-void StableClient::loadModelToMemory(commands::loadModelToMemory command, int &state) {
+void StableClient::loadModelToMemory(commands::loadModelToMemory command) {
 
   std::string msg = sendMessage(command.getCommandString());
   if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
-    state = Q_MODEL_STATUS::LOADED;
+    StableManager::GetInstance().setModelState(Q_MODEL_STATUS::LOADED);
   } else {
-    state = Q_MODEL_STATUS::FAILED;
+    StableManager::GetInstance().setModelState(Q_MODEL_STATUS::FAILED);
   }
 }
 
 // Text to image
-void StableClient::textToImage(commands::textToImage command, int &renderState) {
+void StableClient::textToImage(commands::textToImage command) {
 
   std::string msg = sendMessage(command.getCommandString());
   if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
-    renderState = Q_RENDER_STATE::RENDERED;
+    StableManager::GetInstance().setRenderState(Q_RENDER_STATE::RENDERED);
   } else {
-    renderState = Q_RENDER_STATE::UNRENDERED;
+    StableManager::GetInstance().setRenderState(Q_RENDER_STATE::UNRENDERED);
   }
 }
 
 // Image to image
-void StableClient::imageToImage(commands::imageToImage command, int &renderState) {
+void StableClient::imageToImage(commands::imageToImage command) {
 
   std::string msg = sendMessage(command.getCommandString());
   if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
-    renderState = Q_RENDER_STATE::RENDERED;
+    StableManager::GetInstance().setRenderState(Q_RENDER_STATE::RENDERED);
   } else {
-    renderState = Q_RENDER_STATE::UNRENDERED;
+    StableManager::GetInstance().setRenderState(Q_RENDER_STATE::UNRENDERED);
   }
 }
 
 // Outpainting
-void StableClient::outpainting(commands::outpainting command, int &renderState) {
+void StableClient::outpainting(commands::outpainting command) {
 
   std::string msg = sendMessage(command.getCommandString());
   if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
-    renderState = Q_RENDER_STATE::RENDERED;
+    StableManager::GetInstance().setRenderState(Q_RENDER_STATE::RENDERED);
   } else {
-    renderState = Q_RENDER_STATE::UNRENDERED;
+    StableManager::GetInstance().setRenderState(Q_RENDER_STATE::UNRENDERED);
   }
 }
 

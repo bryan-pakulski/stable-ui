@@ -26,7 +26,7 @@ public:
   virtual void render() {
 
     // Generate option only available whilst a image isn't pending
-    if ((m_renderManager->getPaintPipelineStatus() != Q_RENDER_STATE::RENDERING)) {
+    if ((StableManager::GetInstance().getRenderState() != Q_RENDER_STATE::RENDERING)) {
       static const ImVec4 currentColor{0, 0.5f, 0, 1.0f};
 
       ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
@@ -37,7 +37,7 @@ public:
         renderImage();
       }
       ImGui::PopStyleColor(3);
-    } else if (m_renderManager->getPaintPipelineStatus() == Q_RENDER_STATE::RENDERING) {
+    } else if (StableManager::GetInstance().getRenderState() == Q_RENDER_STATE::RENDERING) {
       static const ImVec4 currentColor{0.5f, 0, 0, 1.0f};
       ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
       ImGui::PushStyleColor(ImGuiCol_ButtonActive, currentColor);

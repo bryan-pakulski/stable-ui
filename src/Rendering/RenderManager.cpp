@@ -115,6 +115,7 @@ void RenderManager::paintSelection(bool sendToCanvas) {
 
   m_paintPipeline->width = m_selectionBuffer->m_width;
   m_paintPipeline->height = m_selectionBuffer->m_height;
+  glm::ivec2 coords = m_selection->getPosition();
 
   std::string b64Image = GLHELPER::textureToBase64String(&m_selectionBuffer->m_texture, m_selectionBuffer->m_width,
                                                          m_selectionBuffer->m_height);
@@ -122,14 +123,14 @@ void RenderManager::paintSelection(bool sendToCanvas) {
   std::string b64Mask = GLHELPER::textureToBase64String(&m_selectionMask->m_texture, m_selectionBuffer->m_width,
                                                         m_selectionBuffer->m_height);
 
-  // TODO: process pixels and send to outpainting pipeline
-  // TODO: Use PIL Processesing to create mask for outpainting https: //
-  // note.nkmk.me/en/python-pillow-composite/
-  StableManager::GetInstance().outpaint(b64Image, b64Mask, *m_paintPipeline, m_paintGenStatus);
+  StableManager::GetInstance().outpaint(b64Image, b64Mask, *m_paintPipeline);
 
   if (sendToCanvas) {
     // TODO: Save current selection coordinates, Once paintGenStatus returns as rendered then draw the new image to the
     // canvas
+    GLImage im(m_paintPipeline->width, m_paintPipeline->height, "inpaint");
+
+    // sendImageToCanvasAtPos(im, coords);
   }
 }
 
@@ -168,6 +169,12 @@ const std::string RenderManager::getImage() { return m_baseImage; }
 void RenderManager::sendImageToCanvas(GLImage &im) {
   // TODO: allow control of active layer
   m_canvas[m_activeId]->createImage(0, std::shared_ptr<GLImage>(new GLImage(im)), m_selection->getPosition());
+}
+
+// Send an image to the canvas, ignoring layers
+void RenderManager::sendImageToCanvasAtPos(GLImage &im, glm::ivec2 position) {
+  // TODO: allow control of active layer
+  m_canvas[m_activeId]->createImage(0, std::shared_ptr<GLImage>(new GLImage(im)), position);
 }
 
 // Mouse movement callback

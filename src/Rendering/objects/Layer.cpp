@@ -116,17 +116,48 @@ void Layer::updateVisual() {
   }
 }
 
-std::vector<RGBAPixel> Layer::getPixelsAtSelection(glm::ivec4 coordinates) {
+std::vector<RGBAPixel> Layer::getPixelsAtSelection(glm::ivec4 coordinates, glm::ivec2 position, glm::ivec2 size) {
 
   // Return values from images / layer at these coordinates
   std::vector<RGBAPixel> selectionPixels;
 
-  // TODO: Return image
-
   for (int y = coordinates.y; y < coordinates.w; y++) {
     for (int x = coordinates.x; x < coordinates.z; x++) {
       int index = y * m_layerImage->m_image->m_width + x;
-      selectionPixels.push_back(pixelData[index]);
+      if (index > c_size.x * c_size.y || index < 0) {
+        continue;
+      } else {
+        selectionPixels.push_back(pixelData[index]);
+      }
     }
   }
+
+  // Get image data
+  // TODO: Y offset is incorrect
+  for (auto &image : m_images) {
+    LocalIntersect intersect = GLHELPER::GetLocalIntersectSourceDest(
+        position, size, image.getPosition(), glm::ivec2{image.m_image->m_width, image.m_image->m_width});
+
+    if (intersect.collision && image.m_renderFlag) {
+
+      // Bind image texture and read pixel data for our selected area
+      glBindTexture(GL_TEXTURE_2D, image.m_image->m_texture);
+      std::vector<RGBAPixel> imgPixels(image.m_image->m_width * image.m_image->m_height);
+      glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgPixels.data());
+      glBindTexture(GL_TEXTURE_2D, 0);
+
+      for (int y = intersect.sourceCoordinates.y; y < intersect.sourceCoordinates.w; y++) {
+        for (int x = intersect.sourceCoordinates.x; x < intersect.sourceCoordinates.z; x++) {
+          int index = y * image.m_image->m_width + x;
+          if (index > selectionPixels.size() || index < 0) {
+            continue;
+          } else {
+            selectionPixels[index] = imgPixels[index];
+          }
+        }
+      }
+    }
+  }
+
+  return selectionPixels;
 }

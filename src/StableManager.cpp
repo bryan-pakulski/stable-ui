@@ -41,23 +41,22 @@ void StableManager::attachModel(ModelConfig modelConfig) {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableManager::attachModel Attaching model: ", modelConfig.name,
                              " to Stable Diffusion Docker Server");
   m_model = modelConfig;
-  m_modelState = Q_MODEL_STATUS::LOADING;
+  setModelState(Q_MODEL_STATUS::LOADING);
 
   commands::loadModelToMemory cmd = commands::loadModelToMemory{modelConfig};
 
-  m_Thread = std::thread(
-      std::bind(&StableClient::loadModelToMemory, &StableClient::GetInstance(), cmd, std::ref(m_modelState)));
+  m_Thread = std::thread(std::bind(&StableClient::loadModelToMemory, &StableClient::GetInstance(), cmd));
   m_Thread.detach();
 }
 
 void StableManager::releaseSDModel() {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableManager::releaseSDModel releasing model from server...");
 
-  m_Thread = std::thread(std::bind(&StableClient::releaseModel, &StableClient::GetInstance(), m_modelState));
+  m_Thread = std::thread(std::bind(&StableClient::releaseModel, &StableClient::GetInstance()));
   m_Thread.detach();
 }
 // Text to Image, save and preview result
-void StableManager::textToImage(pipelineConfig &config, int &renderState) {
+void StableManager::textToImage(pipelineConfig &config) {
   commands::textToImage cmd = commands::textToImage{m_model,
                                                     config.prompt,
                                                     config.width,
@@ -71,15 +70,14 @@ void StableManager::textToImage(pipelineConfig &config, int &renderState) {
                                                     config.seed,
                                                     CONFIG::OUTPUT_DIRECTORY.get()};
 
-  renderState = Q_RENDER_STATE::RENDERING;
+  setRenderState(Q_RENDER_STATE::RENDERING);
 
-  m_Thread =
-      std::thread(std::bind(&StableClient::textToImage, &StableClient::GetInstance(), cmd, std::ref(renderState)));
+  m_Thread = std::thread(std::bind(&StableClient::textToImage, &StableClient::GetInstance(), cmd));
   m_Thread.detach();
 }
 
 // Image to Image, save and preview
-void StableManager::imageToImage(std::string &imgPath, pipelineConfig &config, int &renderState) {
+void StableManager::imageToImage(std::string &imgPath, pipelineConfig &config) {
   commands::imageToImage cmd = commands::imageToImage{m_model,
                                                       config.prompt,
                                                       config.negative_prompt,
@@ -93,15 +91,14 @@ void StableManager::imageToImage(std::string &imgPath, pipelineConfig &config, i
                                                       config.seed,
                                                       CONFIG::OUTPUT_DIRECTORY.get()};
 
-  renderState = Q_RENDER_STATE::RENDERING;
+  setRenderState(Q_RENDER_STATE::RENDERING);
 
-  m_Thread =
-      std::thread(std::bind(&StableClient::imageToImage, &StableClient::GetInstance(), cmd, std::ref(renderState)));
+  m_Thread = std::thread(std::bind(&StableClient::imageToImage, &StableClient::GetInstance(), cmd));
   m_Thread.detach();
 }
 
 // Outpaint, render result to canvas
-void StableManager::outpaint(std::string &imgData, std::string &imgMask, pipelineConfig &config, int &renderState) {
+void StableManager::outpaint(std::string &imgData, std::string &imgMask, pipelineConfig &config) {
   commands::outpainting cmd = commands::outpainting{m_model,
                                                     config.prompt,
                                                     config.negative_prompt,
@@ -118,10 +115,9 @@ void StableManager::outpaint(std::string &imgData, std::string &imgMask, pipelin
                                                     config.seed,
                                                     CONFIG::OUTPUT_DIRECTORY.get()};
 
-  renderState = Q_RENDER_STATE::RENDERING;
+  setRenderState(Q_RENDER_STATE::RENDERING);
 
-  m_Thread =
-      std::thread(std::bind(&StableClient::outpainting, &StableClient::GetInstance(), cmd, std::ref(renderState)));
+  m_Thread = std::thread(std::bind(&StableClient::outpainting, &StableClient::GetInstance(), cmd));
   m_Thread.detach();
 }
 

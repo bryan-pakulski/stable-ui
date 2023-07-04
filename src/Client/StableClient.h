@@ -20,11 +20,11 @@ public:
 
   // Commands list
   void heartbeat(int &state);
-  void releaseModel(int &state);
-  void loadModelToMemory(commands::loadModelToMemory command, int &state);
-  void textToImage(commands::textToImage command, int &renderState);
-  void imageToImage(commands::imageToImage command, int &renderState);
-  void outpainting(commands::outpainting command, int &renderState);
+  void releaseModel();
+  void loadModelToMemory(commands::loadModelToMemory command);
+  void textToImage(commands::textToImage command);
+  void imageToImage(commands::imageToImage command);
+  void outpainting(commands::outpainting command);
 
 private:
   zmq::context_t m_ctx;
