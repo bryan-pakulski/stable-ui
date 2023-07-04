@@ -74,6 +74,7 @@ void StableClient::textToImage(commands::textToImage command) {
   std::string msg = sendMessage(command.getCommandString());
   if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
     StableManager::GetInstance().setRenderState(Q_RENDER_STATE::RENDERED);
+    StableManager::GetInstance().getLatestFiles(true);
   } else {
     StableManager::GetInstance().setRenderState(Q_RENDER_STATE::UNRENDERED);
   }
@@ -85,6 +86,7 @@ void StableClient::imageToImage(commands::imageToImage command) {
   std::string msg = sendMessage(command.getCommandString());
   if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
     StableManager::GetInstance().setRenderState(Q_RENDER_STATE::RENDERED);
+    StableManager::GetInstance().getLatestFiles(true);
   } else {
     StableManager::GetInstance().setRenderState(Q_RENDER_STATE::UNRENDERED);
   }
@@ -96,6 +98,7 @@ void StableClient::outpainting(commands::outpainting command) {
   std::string msg = sendMessage(command.getCommandString());
   if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
     StableManager::GetInstance().setRenderState(Q_RENDER_STATE::RENDERED);
+    StableManager::GetInstance().getLatestFiles(true);
   } else {
     StableManager::GetInstance().setRenderState(Q_RENDER_STATE::UNRENDERED);
   }

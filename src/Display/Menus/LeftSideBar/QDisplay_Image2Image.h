@@ -52,7 +52,6 @@ public:
     baseImagePreview();
     promptHelper();
     promptConfig();
-    renderPreview();
   }
 
 private:
@@ -89,29 +88,6 @@ private:
       m_config->seed = rand() % INT_MAX + 1;
     }
     StableManager::GetInstance().imageToImage(path, *m_config);
-  }
-
-  void renderPreview() {
-    if (ImGui::CollapsingHeader("Render Preview")) {
-      if (m_image) {
-        // Once image is marked as rendered display on screen
-        if (StableManager::GetInstance().getRenderState() == Q_RENDER_STATE::RENDERED) {
-          ImGui::Text("image width: %d image height:%d", m_image->m_width, m_image->m_height);
-          if (ImGui::Button("Send to Canvas")) {
-            // Send image to be rendered on canvas at selection coordinates
-            m_renderManager->sendImageToCanvas(*m_image);
-          }
-
-          // Retrieve latest redered file
-          if (!m_image->textured) {
-            m_image->loadFromImage(StableManager::GetInstance().getLatestFile(
-                CONFIG::OUTPUT_DIRECTORY.get() + "/" + m_renderManager->getActiveCanvas()->m_name));
-          }
-
-          ImGui::Image((void *)(intptr_t)m_image->m_texture, ImVec2(m_image->m_width * 0.3, m_image->m_height * 0.3));
-        }
-      }
-    }
   }
 
   // Prompt

@@ -36,9 +36,10 @@ public:
   ~Crawler() {}
 
   // Crawl filesystem
-  void traverse() {
+  void traverse(bool collectLatestFiles) {
     // First check our existing entries and account for deletions and updates
     updateIndex();
+    m_newFiles.clear();
 
     for (const auto &entry : std::filesystem::recursive_directory_iterator(m_rootPath)) {
       const std::string filepath = entry.path().string();
@@ -49,14 +50,22 @@ public:
           m_fileInfo[filepath] =
               FileInfo{std::filesystem::last_write_time(filepath), std::filesystem::file_size(filepath)};
           m_modifiedQueue->push(std::pair<std::string, QUEUE_STATUS>{filepath, QUEUE_STATUS::ADDED});
+
+          if (collectLatestFiles) {
+            QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Crawler::Traverse Collecting filepath for preview:", filepath);
+            m_newFiles.push_back(filepath);
+          }
         }
       }
     }
   }
 
+  std::vector<std::string> getLatestCrawledFiles() { return m_newFiles; }
+
 private:
   std::string m_rootPath;
   std::unordered_map<std::string, FileInfo> m_fileInfo;
+  std::vector<std::string> m_newFiles;
 
 private:
   bool is_file_modified(const std::string &filepath) {

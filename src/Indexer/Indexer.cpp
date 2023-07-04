@@ -20,7 +20,7 @@ Indexer::Indexer(std::string folder_path) {
   m_crawlerQueue = std::make_shared<asyncQueue<std::pair<std::string, QUEUE_STATUS>>>();
   m_crawler = Crawler(folder_path, m_crawlerQueue);
 
-  m_crawlerThread = std::thread(&Indexer::crawlerThreadWorker, this);
+  forceUpdate(false);
   m_queueThread = std::thread(&Indexer::indexerCrawlerQueueThreadWorker, this);
 
   // TODO: launch caching on seperate thread, cacheing thread allows for add / update / remove calls
@@ -28,22 +28,12 @@ Indexer::Indexer(std::string folder_path) {
 }
 
 Indexer::~Indexer() {
-  // Kill crawler sleeping thread
-  m_kill_timer.kill();
+
   // Kill queue watching thread
   m_crawlerQueue->kill();
   m_queueConditionVariable.notify_all();
 
-  m_crawlerThread.join();
   m_queueThread.join();
-}
-
-// Run crawler traversal function every X time period to identify any filesystem changes
-void Indexer::crawlerThreadWorker() {
-  while (m_kill_timer.wait_for(std::chrono::milliseconds(c_crawlerSleepTime))) {
-    QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Indexer::crawlerThreadWorker firing");
-    m_crawler.traverse();
-  }
 }
 
 // Run indexer queue monitor on another thread and update the inverted index whenever the crawler discovers changes to

@@ -15,6 +15,9 @@
 
 class StableManager {
 public:
+  std::vector<std::string> m_latestFiles;
+
+public:
   static StableManager &GetInstance() {
     static StableManager s_stableManager;
     return s_stableManager;
@@ -52,8 +55,8 @@ public:
   void imageToImage(std::string &imgPath, pipelineConfig &config);
   void outpaint(std::string &imgData, std::string &imgMask, pipelineConfig &config);
 
-  // Retrieve last modified file from path
-  std::string getLatestFile(const std::string &path);
+  // Retrieve last modified file/s that the indexer was able to locate after a manual run
+  void getLatestFiles(bool collectLatestFiles = false) { m_latestFiles = m_indexer.forceUpdate(collectLatestFiles); }
 
 private:
   std::shared_ptr<RenderManager> m_renderManager;

@@ -15,6 +15,7 @@
 #include "Display/Menus/LeftSideBar/QDisplay_Text2Image.h"
 #include "Display/Menus/LeftSideBar/QDisplay_Image2Image.h"
 #include "Display/Menus/LeftSideBar/QDisplay_Painting.h"
+#include "Display/Menus/LeftSideBar/QDisplay_Preview.h"
 
 class QDisplay_LeftSideBar : public QDisplay_Base {
 
@@ -23,9 +24,10 @@ public:
   QDisplay_LeftSideBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
 
     // Initialise sub menus
-    Text2ImageWindow = std::unique_ptr<QDisplay_Text2Image>(new QDisplay_Text2Image(rm, w));
-    Image2ImageWindow = std::unique_ptr<QDisplay_Image2Image>(new QDisplay_Image2Image(rm, w));
-    PaintingWindow = std::unique_ptr<QDisplay_Painting>(new QDisplay_Painting(rm, w));
+    m_Text2ImageWindow = std::unique_ptr<QDisplay_Text2Image>(new QDisplay_Text2Image(rm, w));
+    m_Image2ImageWindow = std::unique_ptr<QDisplay_Image2Image>(new QDisplay_Image2Image(rm, w));
+    m_PaintingWindow = std::unique_ptr<QDisplay_Painting>(new QDisplay_Painting(rm, w));
+    m_PreviewWindow = std::unique_ptr<QDisplay_Preview>(new QDisplay_Preview(rm, w));
 
     // Set drag drop callback
     glfwSetDropCallback(w, drop_callback);
@@ -54,28 +56,31 @@ public:
     if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::LOADED) {
       {
         if (ImGui::Button("text")) {
-          activeTab = tabs::TXT2IMG;
+          m_activeTab = tabs::TXT2IMG;
         }
         ImGui::SameLine();
         if (ImGui::Button("image")) {
-          activeTab = tabs::IMG2IMG;
+          m_activeTab = tabs::IMG2IMG;
         }
         ImGui::SameLine();
         if (ImGui::Button("painting")) {
-          activeTab = tabs::PAINTING;
+          m_activeTab = tabs::PAINTING;
         }
       }
       ImGui::Separator();
 
-      if (activeTab == tabs::TXT2IMG) {
-        Text2ImageWindow->render();
+      if (m_activeTab == tabs::TXT2IMG) {
+        m_Text2ImageWindow->render();
       }
-      if (activeTab == tabs::IMG2IMG) {
-        Image2ImageWindow->render();
+      if (m_activeTab == tabs::IMG2IMG) {
+        m_Image2ImageWindow->render();
       }
-      if (activeTab == tabs::PAINTING) {
-        PaintingWindow->render();
+      if (m_activeTab == tabs::PAINTING) {
+        m_PaintingWindow->render();
       }
+
+      ImGui::Separator();
+      m_PreviewWindow->render();
 
     } else if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::NONE_LOADED) {
       ImGui::Text("Please import and load a model first!");
@@ -98,12 +103,13 @@ private:
     static const int TRAINING = 3;
   };
 
-  std::unique_ptr<QDisplay_Text2Image> Text2ImageWindow;
-  std::unique_ptr<QDisplay_Image2Image> Image2ImageWindow;
-  std::unique_ptr<QDisplay_Painting> PaintingWindow;
+  std::unique_ptr<QDisplay_Text2Image> m_Text2ImageWindow;
+  std::unique_ptr<QDisplay_Image2Image> m_Image2ImageWindow;
+  std::unique_ptr<QDisplay_Painting> m_PaintingWindow;
+  std::unique_ptr<QDisplay_Preview> m_PreviewWindow;
 
   // Window Options
   const std::string c_windowName = "Helper Window";
   std::pair<int, int> m_windowSize{};
-  int activeTab = tabs::TXT2IMG;
+  int m_activeTab = tabs::TXT2IMG;
 };

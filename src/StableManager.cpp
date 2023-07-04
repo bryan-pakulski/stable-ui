@@ -121,30 +121,6 @@ void StableManager::outpaint(std::string &imgData, std::string &imgMask, pipelin
   m_Thread.detach();
 }
 
-std::string StableManager::getLatestFile(const std::string &path) {
-  std::string outfile = "";
-  std::filesystem::file_time_type lastWrite;
-
-  try {
-    for (const auto &entry : fs::directory_iterator(path)) {
-      if (entry.is_regular_file()) {
-        if (outfile == "") {
-          lastWrite = entry.last_write_time();
-          outfile = entry.path().string();
-        } else if (lastWrite < entry.last_write_time()) {
-          lastWrite = entry.last_write_time();
-          outfile = entry.path().string();
-        }
-      }
-    }
-  } catch (const fs::filesystem_error &err) {
-    ErrorHandler::GetInstance().setError("Failed to parse path for new files");
-    QLogger::GetInstance().Log(LOGLEVEL::ERR, err.what());
-  }
-
-  return outfile;
-}
-
 // Search our inverted index for a term
 std::set<std::string> StableManager::searchIndex(const std::string &searchTerm) {
   std::set<std::string> results;

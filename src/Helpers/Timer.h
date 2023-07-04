@@ -10,12 +10,18 @@ struct timer_killer {
     std::unique_lock<std::mutex> lock(m);
     return !cv.wait_for(lock, time, [&] { return terminate; });
   }
+
   void kill() {
     std::unique_lock<std::mutex> lock(m);
     terminate = true;
     cv.notify_all();
   }
-  // I like to explicitly delete/default special member functions:
+
+  void update() {
+    std::unique_lock<std::mutex> lock(m);
+    cv.notify_all();
+  }
+
   timer_killer() = default;
   timer_killer(timer_killer &&) = delete;
   timer_killer(timer_killer const &) = delete;

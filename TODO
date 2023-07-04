@@ -27,12 +27,12 @@
 
 # Bugs
 
-- Max of 27 images generated before overwriting, decide on new naming format
 - Logging order is incorrect due to multiprocess access (gui C++ application, multiple python docker processes)
 - Extra configuration i.e. trigger_prompt not being loaded from model yaml
 - Heartbeat bug on windows (no connectivity)
 - Multi string search doesn't work properly (Set union not working as intended?)
 - Improve layering system interaction
+- Move content browser to dropdown menu, integrate preview
 
 # Done
 
@@ -56,3 +56,5 @@
 - Generate button not changing state on txt2img / img2img
 - Refactor generation code to use commands and avoid passing multiple members
 - Inpainting: https://huggingface.co/docs/diffusers/using-diffusers/inpaint
+- (FIX) Max of 27 images generated before overwriting, decide on new naming format
+- Removed timer for indexer, fired manually after new images are generated
