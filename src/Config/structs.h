@@ -18,9 +18,10 @@ struct ModelConfig {
   std::string trigger_prompt = "";
   std::string vae = "";
   std::string vae_config = "";
+  bool convert_vae = false;
   std::string scheduler = "pndm";
 
-  bool enable_xformers = true;
+  bool enable_xformers = false;
   bool enable_tf32 = true;
   bool enable_t16 = true;
   bool enable_vaeTiling = true;

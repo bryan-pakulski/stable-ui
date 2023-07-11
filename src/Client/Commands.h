@@ -70,6 +70,7 @@ public:
     m_parameters.push_back(makePair("checkpoint_config_path", model.config));
     m_parameters.push_back(makePair("vae_path", model.vae));
     m_parameters.push_back(makePair("vae_config", model.vae_config));
+    m_parameters.push_back(makePair("convert_vae", model.convert_vae));
     m_parameters.push_back(makePair("scheduler", model.scheduler));
     m_parameters.push_back(makePair("hash", model.hash));
 

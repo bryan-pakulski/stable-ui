@@ -201,6 +201,11 @@ class SDModelServer(MQServer):
                         "required": False,
                         "type": str
                     },
+                    "convert_vae": {
+                        "help": "Flag to convert original ckpt / .safetensor vae to diffusers on load",
+                        "required": True,
+                        "type": bool
+                    },
                     "scheduler": {
                         "help": "Scheduler to use, defaults to pndm, options available: [pndm, lms, heun, euler, ancestral, dpm, ddim]",
                         "required": False,

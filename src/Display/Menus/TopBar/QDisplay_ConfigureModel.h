@@ -177,6 +177,8 @@ private:
             }
             ImGui::EndCombo();
           }
+
+          ImGui::Checkbox("Convert VAE to Diffusers", &m_modelConfig.convert_vae);
         }
 
         // Scheduler

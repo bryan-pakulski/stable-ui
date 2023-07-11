@@ -1,9 +1,16 @@
 from diffusers import StableDiffusionPipeline, EulerAncestralDiscreteScheduler
 from diffusers.models import modeling_utils
-from diffusers.pipelines.stable_diffusion.convert_from_ckpt import download_from_original_stable_diffusion_ckpt
+from diffusers.pipelines.stable_diffusion.convert_from_ckpt import (
+    download_from_original_stable_diffusion_ckpt,
+    create_vae_diffusers_config
+)
+
+from sd import convert
 
 import torch
 import safetensors.torch
+from safetensors import safe_open
+from omegaconf import OmegaConf
 import logging
 import sys
 from diffusers.models import AutoencoderKL
@@ -11,7 +18,7 @@ from diffusers.models import AutoencoderKL
 from common import devices
 
 class StableDiffusionModel():
-    def __init__(self, checkpoint_path: str = "", vae_path: str = "", vae_config: str = "", checkpoint_config_path: str = "", scheduler: str = "pndm", hash: str = "", enable_xformers: bool = False, enable_tf32: bool = False, enable_t16: bool = False, enable_vaeTiling: bool = False, enable_vaeSlicing: bool = False, enable_seqCPUOffload: bool = False):
+    def __init__(self, checkpoint_path: str = "", vae_path: str = "", vae_config: str = "", convert_vae: bool = False, checkpoint_config_path: str = "", scheduler: str = "pndm", hash: str = "", enable_xformers: bool = False, enable_tf32: bool = False, enable_t16: bool = False, enable_vaeTiling: bool = False, enable_vaeSlicing: bool = False, enable_seqCPUOffload: bool = False):
         # Initialise logging
         logging.basicConfig(
             filename="/logs/sd_pipeline.log",
@@ -31,6 +38,7 @@ class StableDiffusionModel():
         self.checkpoint_config = checkpoint_config_path
         self.vae_path = vae_path
         self.vae_config = vae_config
+        self.convert_vae = convert_vae
         self.scheduler = scheduler
         self.model_hash = hash
 
@@ -61,15 +69,26 @@ class StableDiffusionModel():
         if (self.model is not None):
             del self.model
 
-    def loadVAE(self):
-        if (self.vae_path != ""):
-            self.vae = AutoencoderKL.from_pretrained(self.vae_path, torch_dtype=devices.dtype, local_files_only=True)
-
-
     def load_vae(self, vae_config):
-        if (self.vae_path != ""):
-            encoder = AutoencoderKL()
+        if self.convert_vae:
+            original_config = OmegaConf.load(vae_config)
+            image_size = 512
+            if self.vae_path.endswith(".safetensors"):
+                checkpoint = {}
+                with safe_open(self.vae_path, framework="pt", device="cpu") as f:
+                    for key in f.keys():
+                        checkpoint[key] = f.get_tensor(key)
+            else:
+                checkpoint = torch.load(self.vae_path, map_location=devices.get_cuda_device_string())["state_dict"]
 
+            # Convert the VAE model.
+            vae_config = create_vae_diffusers_config(original_config, image_size=image_size)
+            converted_vae_checkpoint = convert.custom_convert_ldm_vae_checkpoint(checkpoint, vae_config)
+
+            self.vae = AutoencoderKL(**vae_config)
+            self.vae.load_state_dict(converted_vae_checkpoint)
+        else:
+            encoder = AutoencoderKL()
             modelConfig = encoder.from_config(vae_config, local_files_only=True)
             if (self.vae_path.endswith(".safetensors")):
                 state_dict = safetensors.torch.load_file(self.vae_path, device="cpu")
@@ -85,7 +104,8 @@ class StableDiffusionModel():
             self.vae = self.vae.to(devices.dtype)
 
             self.vae.register_to_config(_name_or_path=self.vae_path)
-            self.vae.eval()
+        
+        self.vae.eval()
 
 
     def loadLORA(self):
@@ -120,7 +140,8 @@ class StableDiffusionModel():
                 devices.dtype, devices.dtype_vae = torch.float16, torch.float16
 
             # Load VAE
-            self.load_vae(self.vae_config)
+            if (self.vae_path != ""):
+                self.load_vae(self.vae_config)
 
             # Load Model
             self.model = download_from_original_stable_diffusion_ckpt(self.checkpoint_path, self.checkpoint_config, scheduler_type=self.scheduler, device=devices.get_cuda_device_string(), from_safetensors=self.safe_tensors, load_safety_checker=False)
