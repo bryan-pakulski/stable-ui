@@ -1,14 +1,4 @@
 #!/bin/bash
-
-if [ ! -d "/sd/textual-inversion" ]
-then
-    echo "Setting up Textual Inversion git repository"
-    git clone https://github.com/rinongal/textual_inversion.git /sd/textual-inversion
-else
-    echo "Checking for updates to Textual Inversion"
-    cd /sd/textual-inversion && git pull
-fi
-
 #
 # Starts conda env
 #
@@ -48,9 +38,6 @@ fi
 . /opt/conda/etc/profile.d/conda.sh
 conda activate $ENV_NAME
 conda info | grep active
-
-cd /sd
-pip install -e .
 
 # Additional Modules Setup
 if [ ! -d "/modules" ]

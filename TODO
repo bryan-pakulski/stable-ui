@@ -7,7 +7,9 @@
 
 
 # Core systems
-
+- When importing models convert them into diffusers format, save model configuration under checkpoint path so that it can be used:
+    https://github.com/huggingface/diffusers/blob/main/scripts/convert_vae_pt_to_diffusers.py
+- Add control net support: https://huggingface.co/blog/controlnet
 - initialise string with a maximum length, this is important as if we reload configuration by editing the string manually via ImGui we don't have the hooks to re-size memory and we risk overwriting if the initial string is too short (This can potentially be resolved by using std::string as a resizable datatype, see imgui_stdlib.h)
 - Add input sanitisation on sd_client on messages being sent, delimit or convert " to '?
 - Document Indexing / Crawling engine
@@ -58,3 +60,4 @@
 - Inpainting: https://huggingface.co/docs/diffusers/using-diffusers/inpaint
 - (FIX) Max of 27 images generated before overwriting, decide on new naming format
 - Removed timer for indexer, fired manually after new images are generated
+- Fix docker permissions on linux
