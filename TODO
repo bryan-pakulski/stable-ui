@@ -7,11 +7,14 @@
 - Images added to canvas are merged onto existing pixel array (actual layers)
 
 # Core systems
+
 - Add control net support: https://huggingface.co/blog/controlnet
 - initialise string with a maximum length, this is important as if we reload configuration by editing the string manually via ImGui we don't have the hooks to re-size memory and we risk overwriting if the initial string is too short (This can potentially be resolved by using std::string as a resizable datatype, see imgui_stdlib.h)
 - Add input sanitisation on sd_client on messages being sent, delimit or convert " to '?
 - Document Indexing / Crawling engine
 - Look at any performance improvements that can be used from openvino: https://github.com/bes-dev/stable_diffusion.openvino/tree/master
+  https://huggingface.co/docs/diffusers/main/en/optimization/open_vino
+  https://huggingface.co/docs/optimum/intel/optimization_ov
 
 # Functionality
 
@@ -33,6 +36,7 @@
 - Multi string search doesn't work properly (Set union not working as intended?)
 - Improve layering system interaction
 - Move content browser to dropdown menu, integrate preview
+- On first run it is required to do a pip uninstall opencv-python opencv-python-headless and reinstall pip install opencv-python-headless
 
 # Done
 

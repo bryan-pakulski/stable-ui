@@ -28,11 +28,11 @@ Modules can have a basic gui at this point in time, see `gui.yaml` at the root d
 
 # Updating modules
 
-In order to update the module files simply drag and drop the latest module into the `data/module-data` directory.
+In order to update the module files simply drag and drop the latest module into the `data/modules-data` directory.
 
 Modules inside docker will automatically be updated when the container is restarted and it detects that module files have changed. The `entrypoint.sh` script will call each module `update.sh` script.
 
-This will run in the `data/module-data/<MODULE>` directory
+This will run in the `data/modules/<MODULE>` directory
 
 # Module GUI
 

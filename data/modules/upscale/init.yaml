@@ -2,7 +2,7 @@
 module:
   name: upscale
   working-directory: /modules/upscale
-  gui-path: "data/module-data/upscale/files/gui.yaml"
+  gui-path: "data/modules/upscale/files/gui.yaml"
 
   filepaths:
     "files/gui.yaml": "/modules/upscale/gui.yaml"

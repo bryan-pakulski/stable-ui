@@ -18,6 +18,8 @@ from diffusers import StableDiffusionImg2ImgPipeline
 from diffusers import StableDiffusionInpaintPipeline
 from compel import Compel
 
+#from optimum.intel.openvino import OVStableDiffusionPipeline
+
 # TODO: implement weighted prompts see:
 # https://huggingface.co/docs/diffusers/using-diffusers/weighted_prompts
 
@@ -83,7 +85,13 @@ class StableDiffusionTxt2Img(StableDiffusionBaseProcess):
     def __init__(self, outpath_samples: str = "", subfolder_name: str = "", prompt: str = "", negative_prompt: str = "", seed: int = -1, sampler_name: str = "", batch_size: int = 1, n_iter: int = 1, steps: int = 50, cfg_scale: float = 7.0, width: int = 512, height: int = 512, model: object = None):
         super().__init__(outpath_samples, prompt, negative_prompt, seed,
                          sampler_name, batch_size, n_iter, steps, cfg_scale, width, height, model)
-
+        
+        """
+        if (devices.get_cuda_device_string() == "cpu"):
+            self.pipe = OVStableDiffusionPipeline(**self.model.components, export=False)
+        else:
+            self.pipe = StableDiffusionPipeline(**self.model.components, requires_safety_checker=False)
+        """
         self.pipe = StableDiffusionPipeline(**self.model.components, requires_safety_checker=False)
         self.pipe.scheduler = self.sampler
         self.get_prompt_embeds(self.pipe)

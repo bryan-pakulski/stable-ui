@@ -12,7 +12,7 @@ services:
     volumes:
       - ../models:/models
       - ../output:/data/output
-      - ../module-data:/module-data
+      - ../modules:/module-data
       - ../config:/config
       - ../logs:/logs
       - conda_env:/opt/conda

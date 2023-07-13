@@ -7,36 +7,19 @@ dependencies:
   - python=3.9.16
   - pip=20.3
   - cudatoolkit=11.3
-  - pytorch=1.12.1
-  - torchvision=0.13.1
-  - numpy=1.24.3
+  - pytorch=2.0.1
+  - numpy=1.25.0
   - pip:
-    - pyyaml
-    - albumentations==1.3.0
-    - diffusers
-    - compel
-    - opencv-python-headless
-    - pudb==2019.2
-    - imageio==2.9.0
-    - imageio-ffmpeg==0.4.2
-    - pytorch-lightning==1.4.2
-    - omegaconf==2.1.1
-    - test-tube>=0.7.5
-    - streamlit==1.12.1
-    - einops==0.3.0
-    - torch-fidelity==0.3.0
-    - taming-transformers-rom1504
-    - transformers==4.25.1
-    - xformers
-    - webdataset==0.2.5
-    - torchmetrics==0.6.0
-    - kornia==0.6
-    - gradio==3.1.6
-    - accelerate
-    - pynvml==11.4.1
-    - basicsr>=1.3.4.0
-    - open_clip_torch==2.0.2
-    - invisible-watermark>=0.1.5
-    - safetensors==0.2.7
-    - streamlit-drawable-canvas==0.8.0
-    - python-xmp-toolkit==2.0.1
+      - pyyaml                        # Python yaml support
+      - accelerate                    # enables the same PyTorch code to be run across any distributed configuration
+      - compel                        # Text prompt weighting
+      - opencv-python-headless        # OpenCV without dependant libraries
+      - diffusers                     # Hugging face diffusers
+      - transformers==4.30.2          # Transformers
+      - xformers                      # Facebook fast x transformers
+      - optimum-openvino              # OpenVINO optimisation
+      - omegaconf==2.1.1              # Configuration
+      - torchmetrics==0.6.0           # Pytorch metrics                             (not used atm)
+      - pynvml                        # Python Nvidia management library            (not used atm)
+      - safetensors==0.3.1            # Safer storage format for models
+      - python-xmp-toolkit==2.0.1     # XMP support for python
