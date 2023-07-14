@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <imgui.h>
+#include "imgui_internal.h"
 #include <filesystem>
 #include <memory>
 
@@ -38,78 +39,76 @@ public:
     // TODO: do something with drag/drop operations
   }
 
+  void update_dock() {
+    dock_id = ImGui::GetID(c_dockName.c_str());
+
+    dock_size.x = ImGui::DockBuilderGetNode(dock_id)->Size.x;
+    dock_size.y = m_windowSize.second;
+
+    ImGui::DockBuilderSetNodeSize(dock_id, dock_size);
+    ImGui::DockBuilderSetNodePos(dock_id, dock_pos);
+    ImGui::DockBuilderFinish(dock_id);
+  }
+
+  void dock_init() {
+
+    // Create main dock node
+    dock_id = ImGui::GetID(c_dockName.c_str());
+
+    ImGui::DockBuilderRemoveNode(dock_id); // Clear any preexisting layouts associated with the ID we just chose
+    ImGui::DockBuilderAddNode(dock_id);    // Create a new dock node to use
+
+    dock_size.y = m_windowSize.second;
+
+    ImGui::DockBuilderSetNodeSize(dock_id, dock_size);
+    ImGui::DockBuilderSetNodePos(dock_id, dock_pos);
+
+    ImGuiID dock_upper = ImGui::DockBuilderSplitNode(dock_id, ImGuiDir_Left, 1.0f, nullptr, &dock_id);
+    ImGuiID dock_lower = ImGui::DockBuilderSplitNode(dock_upper, ImGuiDir_Down, 0.5f, nullptr, &dock_upper);
+
+    ImGui::DockBuilderDockWindow(m_Text2ImageWindow->m_windowName.c_str(), dock_upper);
+    ImGui::DockBuilderDockWindow(m_Image2ImageWindow->m_windowName.c_str(), dock_upper);
+    ImGui::DockBuilderDockWindow(m_PaintingWindow->m_windowName.c_str(), dock_upper);
+    ImGui::DockBuilderDockWindow(m_PreviewWindow->m_windowName.c_str(), dock_lower);
+
+    ImGui::DockBuilderFinish(dock_id);
+
+    m_dock_init = false;
+  }
+
   virtual void render() {
     getWindowSize(m_windowSize);
 
-    // Bottom helper bar
-    ImGui::SetNextWindowPos(ImVec2(0, CONFIG::IMGUI_TOP_WINDOW_HEIGHT.get()));
-    ImGui::SetNextWindowSize(ImVec2(CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get(), float(m_windowSize.second)));
-
-    ImGui::SetNextWindowSizeConstraints(ImVec2(CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get(), float(m_windowSize.second)),
-                                        ImVec2(CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get(), float(m_windowSize.second)));
-
-    ImGui::Begin(c_windowName.c_str(), 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
-
-    // Tabbed menu
-
-    // Rendering menus
-    if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::LOADED) {
-      {
-        if (ImGui::Button("text")) {
-          m_activeTab = tabs::TXT2IMG;
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("image")) {
-          m_activeTab = tabs::IMG2IMG;
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("painting")) {
-          m_activeTab = tabs::PAINTING;
-        }
-      }
-      ImGui::Separator();
-
-      if (m_activeTab == tabs::TXT2IMG) {
-        m_Text2ImageWindow->render();
-      }
-      if (m_activeTab == tabs::IMG2IMG) {
-        m_Image2ImageWindow->render();
-      }
-      if (m_activeTab == tabs::PAINTING) {
-        m_PaintingWindow->render();
-      }
-
-      ImGui::Separator();
-      m_PreviewWindow->render();
-
-    } else if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::NONE_LOADED) {
-      ImGui::Text("Please import and load a model first!");
-    } else if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::LOADING) {
-      ImGui::Text("Loading model to memory..");
-    } else if (StableManager::GetInstance().getModelState() == Q_MODEL_STATUS::FAILED) {
-      ImGui::Text("Model failed to load, please check logs or reload");
+    if (m_dock_init) {
+      dock_init();
     }
 
-    ImGui::Separator();
+    update_dock();
 
-    ImGui::End();
+    if (dock_size.x > CONFIG::IMGUI_TOOLS_WINDOW_MIN_WIDTH.get()) {
+      m_Text2ImageWindow->render();
+      m_Image2ImageWindow->render();
+      m_PaintingWindow->render();
+      m_PreviewWindow->render();
+    } else {
+      m_window_class.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoWindowMenuButton | ImGuiDockNodeFlags_NoTabBar;
+      ImGui::SetNextWindowClass(&m_window_class);
+      ImGui::Begin(m_PreviewWindow->m_windowName.c_str(), 0, ImGuiWindowFlags_NoMove);
+      ImGui::End();
+    }
   }
 
 private:
-  struct tabs {
-    static const int TXT2IMG = 0;
-    static const int IMG2IMG = 1;
-    static const int PAINTING = 2;
-    static const int TRAINING = 3;
-  };
-
   std::unique_ptr<QDisplay_Text2Image> m_Text2ImageWindow;
   std::unique_ptr<QDisplay_Image2Image> m_Image2ImageWindow;
   std::unique_ptr<QDisplay_Painting> m_PaintingWindow;
   std::unique_ptr<QDisplay_Preview> m_PreviewWindow;
 
-  // Window Options
-  const std::string c_windowName = "Helper Window";
   std::pair<int, int> m_windowSize{};
-  int m_activeTab = tabs::TXT2IMG;
+
+  const std::string c_dockName = "dock_left_panel";
+  ImGuiID dock_id;
+  ImVec2 dock_pos{0, CONFIG::IMGUI_TOP_WINDOW_HEIGHT.get()};
+  ImVec2 dock_size{CONFIG::IMGUI_TOOLS_WINDOW_WIDTH.get(), (float)CONFIG::WINDOW_HEIGHT.get()};
+  bool m_dock_init = true;
 };

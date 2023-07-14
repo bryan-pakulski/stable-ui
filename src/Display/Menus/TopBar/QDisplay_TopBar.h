@@ -11,6 +11,7 @@
 #include "QDisplay_ImportVAE.h"
 #include "QDisplay_LoadModel.h"
 #include "QDisplay_PluginsWindow.h"
+#include "QDisplay_ContentBrowser.h"
 #include "StableManager.h"
 
 #include <fstream>
@@ -27,6 +28,7 @@ public:
     m_importVAEWindow = std::unique_ptr<QDisplay_ImportVAE>(new QDisplay_ImportVAE(rm, w));
     m_loadModelWindow = std::unique_ptr<QDisplay_LoadModel>(new QDisplay_LoadModel(rm, w));
     m_pluginsWindow = std::unique_ptr<QDisplay_PluginsWindow>(new QDisplay_PluginsWindow(rm, w));
+    m_contentBrowserWindow = std::unique_ptr<QDisplay_ContentBrowser>(new QDisplay_ContentBrowser(rm, w));
 
     // Load images
     m_docker_connected_icon = std::unique_ptr<GLImage>(new GLImage(32, 32, "connected_icon"));
@@ -58,6 +60,10 @@ public:
 
         if (ImGui::MenuItem("Import VAE")) {
           m_importVAEWindow->openWindow();
+        }
+
+        if (ImGui::MenuItem("Content Browser")) {
+          m_contentBrowserWindow->m_isOpen = true;
         }
 
         ImGui::EndMenu();
@@ -128,6 +134,7 @@ public:
     m_importVAEWindow->render();
     m_loadModelWindow->render();
     m_pluginsWindow->render();
+    m_contentBrowserWindow->render();
   }
 
 private:
@@ -142,6 +149,7 @@ private:
   std::unique_ptr<QDisplay_ImportVAE> m_importVAEWindow;
   std::unique_ptr<QDisplay_LoadModel> m_loadModelWindow;
   std::unique_ptr<QDisplay_PluginsWindow> m_pluginsWindow;
+  std::unique_ptr<QDisplay_ContentBrowser> m_contentBrowserWindow;
 
   // Docker status icons
   std::unique_ptr<GLImage> m_docker_connected_icon;

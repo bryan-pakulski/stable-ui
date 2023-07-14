@@ -1,14 +1,22 @@
 #pragma once
 
-#include "Helpers/QLogger.h"
+#include <memory>
+// Manage auto_ptr warnings and deprecation in C++11
+#if (__cplusplus >= 201103L)
+template <typename T> using auto_ptr = std::unique_ptr<T>;
+#else
+using std::auto_ptr;
+#endif // C++11
+
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#include <memory>
+
 #include <vector>
 
+#include "Helpers/QLogger.h"
 #include "Rendering/RenderManager.h"
 #include "Config/config.h"
 #include "Menus/QDisplay_ContextMenu.h"
@@ -179,6 +187,11 @@ private:
     // TODO: make configurable?
     embraceTheDarkness();
 
+    // Disable ini file configuration from being generated
+    // io.IniFilename = NULL;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
+    io.ConfigWindowsMoveFromTitleBarOnly = true;
+
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(m_window, true);
     ImGui_ImplOpenGL3_Init(m_glsl_version.c_str());
@@ -189,13 +202,6 @@ private:
     } else {
       QLogger::GetInstance().Log(LOGLEVEL::INFO, "QDisplay::QDisplay:: GLAD initialized");
     }
-
-    // Set clear colour
-    glClearColor(backgroundR, backgroundG, backgroundB, 1.0f);
-
-    // Disable ini file configuration from being generated
-    // io.IniFilename = NULL;
-    io.ConfigWindowsMoveFromTitleBarOnly = true;
   }
 
   ~QDisplay() { cleanupDisplay(); }

@@ -21,36 +21,45 @@ public:
   // Initialise render manager references
   QDisplay_Text2Image(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     m_config = rm->getPipeline(PIPELINE::TXT);
+    m_windowName = "txt2img";
   }
 
   virtual void render() {
 
-    // Generate option only available whilst a image isn't pending
-    if ((StableManager::GetInstance().getRenderState() != Q_RENDER_STATE::RENDERING)) {
-      static const ImVec4 currentColor{0, 0.5f, 0, 1.0f};
+    ImGui::Begin(m_windowName.c_str());
 
-      ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
-      ImGui::PushStyleColor(ImGuiCol_ButtonActive, currentColor);
-      ImGui::PushStyleColor(ImGuiCol_ButtonHovered, currentColor);
+    if (StableManager::GetInstance().getModelState() != Q_MODEL_STATUS::LOADED) {
+      ImGui::Text("Load Model to memory first!");
+    } else {
+      // Generate option only available whilst a image isn't pending
+      if ((StableManager::GetInstance().getRenderState() != Q_RENDER_STATE::RENDERING)) {
+        static const ImVec4 currentColor{0, 0.5f, 0, 1.0f};
 
-      if (ImGui::Button("Generate", ImVec2(150, 40))) {
-        renderImage();
+        ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, currentColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, currentColor);
+
+        if (ImGui::Button("Generate", ImVec2(150, 40))) {
+          renderImage();
+        }
+        ImGui::PopStyleColor(3);
+      } else if (StableManager::GetInstance().getRenderState() == Q_RENDER_STATE::RENDERING) {
+        static const ImVec4 currentColor{0.5f, 0, 0, 1.0f};
+        ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, currentColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, currentColor);
+
+        if (ImGui::Button("Cancel", ImVec2(150, 40))) {
+          // TODO: cut render short?
+        }
+        ImGui::PopStyleColor(3);
       }
-      ImGui::PopStyleColor(3);
-    } else if (StableManager::GetInstance().getRenderState() == Q_RENDER_STATE::RENDERING) {
-      static const ImVec4 currentColor{0.5f, 0, 0, 1.0f};
-      ImGui::PushStyleColor(ImGuiCol_Button, currentColor);
-      ImGui::PushStyleColor(ImGuiCol_ButtonActive, currentColor);
-      ImGui::PushStyleColor(ImGuiCol_ButtonHovered, currentColor);
 
-      if (ImGui::Button("Cancel", ImVec2(150, 40))) {
-        // TODO: cut render short?
-      }
-      ImGui::PopStyleColor(3);
+      promptHelper();
+      promptConfig();
     }
 
-    promptHelper();
-    promptConfig();
+    ImGui::End();
   }
 
 private:

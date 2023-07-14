@@ -6,6 +6,7 @@
 #include "Helpers/GLHelper.h"
 #include "Display/QDisplay_Base.h"
 #include "imgui.h"
+#include "imgui_internal.h"
 
 class QDisplay_CanvasTools : public QDisplay_Base {
 public:
@@ -16,9 +17,15 @@ public:
 
     m_visible_icon->loadFromImage("data/images/visible.png");
     m_hidden_icon->loadFromImage("data/images/hidden.png");
+
+    m_windowName = "canvas_tools";
   }
 
   virtual void render() {
+    m_window_class.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
+    ImGui::SetNextWindowClass(&m_window_class);
+    ImGui::Begin(m_windowName.c_str(), 0, ImGuiWindowFlags_NoMove);
+
     ImGui::Text("Camera");
     cameraHelper();
     ImGui::Separator();
@@ -30,11 +37,10 @@ public:
     ImGui::Text("Debug Info");
     debugInfo();
     ImGui::Separator();
+    ImGui::End();
   }
 
 private:
-  // Window Options
-  const std::string c_windowName = "Tools Window";
   std::pair<int, int> m_windowSize{};
 
   // Layer options
