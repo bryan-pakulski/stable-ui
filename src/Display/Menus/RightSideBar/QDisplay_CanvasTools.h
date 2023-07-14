@@ -22,8 +22,6 @@ public:
   }
 
   virtual void render() {
-    m_window_class.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
-    ImGui::SetNextWindowClass(&m_window_class);
     ImGui::Begin(m_windowName.c_str(), 0, ImGuiWindowFlags_NoMove);
 
     ImGui::Text("Camera");

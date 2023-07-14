@@ -12,13 +12,15 @@
 #include "Rendering/RenderManager.h"
 #include "Config/config.h"
 #include "Display/QDisplay_Base.h"
-#include "QDisplay_CanvasTools.h"
+#include "Display/Menus/RightSideBar/QDisplay_CanvasTools.h"
+#include "Display/Menus/RightSideBar/QDisplay_SelectionTools.h"
 
 class QDisplay_RightSideBar : public QDisplay_Base {
 public:
   // Initialise render manager reference
   QDisplay_RightSideBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     CanvasToolsWindow = std::unique_ptr<QDisplay_CanvasTools>(new QDisplay_CanvasTools(rm, w));
+    SelectionToolsWindow = std::unique_ptr<QDisplay_SelectionTools>(new QDisplay_SelectionTools(rm, w));
   }
 
   void update_dock() {
@@ -48,9 +50,11 @@ public:
     ImGui::DockBuilderSetNodeSize(dock_id, dock_size);
     ImGui::DockBuilderSetNodePos(dock_id, dock_pos);
 
-    ImGuiID dock_upper = ImGui::DockBuilderSplitNode(dock_id, ImGuiDir_Left, 1.0f, nullptr, &dock_id);
+    ImGuiID dock_upper = ImGui::DockBuilderSplitNode(dock_id, ImGuiDir_Up, 0.6f, nullptr, &dock_id);
+    ImGuiID dock_lower = ImGui::DockBuilderSplitNode(dock_id, ImGuiDir_Down, 0.4f, nullptr, &dock_id);
 
     ImGui::DockBuilderDockWindow(CanvasToolsWindow->m_windowName.c_str(), dock_upper);
+    ImGui::DockBuilderDockWindow(SelectionToolsWindow->m_windowName.c_str(), dock_lower);
 
     ImGui::DockBuilderFinish(dock_id);
 
@@ -68,6 +72,7 @@ public:
 
     if (dock_size.x > CONFIG::IMGUI_TOOLS_WINDOW_MIN_WIDTH.get()) {
       CanvasToolsWindow->render();
+      SelectionToolsWindow->render();
     } else {
       m_window_class.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoWindowMenuButton | ImGuiDockNodeFlags_NoTabBar;
       ImGui::SetNextWindowClass(&m_window_class);
@@ -84,6 +89,7 @@ public:
 
 private:
   std::unique_ptr<QDisplay_CanvasTools> CanvasToolsWindow;
+  std::unique_ptr<QDisplay_SelectionTools> SelectionToolsWindow;
   std::pair<int, int> m_windowSize{};
 
   const std::string c_dockName = "dock_tools";
