@@ -23,13 +23,13 @@ These are requirements on both Windows (WSL) & Linux
 
 # Features
 
-- text to image / image to image generation
+- text to image / image to image / outpainting pipelines
+- Stable Diffusion v1, v2 & sdxl support
 - CPU support
 - custom module extensions
 - vae, pickle & safetensor model support
 - low VRAM Support
 - weighted prompts using compel (++ and -- to emphasize keywords)
-- Stable Diffusion v1 & v2
 - LORA support (TODO)
 - infinite canvas inpainting & outpainting (TODO)
 - textual inversion training (TODO)

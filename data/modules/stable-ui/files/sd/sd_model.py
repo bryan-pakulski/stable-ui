@@ -8,6 +8,7 @@ from diffusers.pipelines.stable_diffusion.convert_from_ckpt import (
 from sd import convert
 
 import torch
+import yaml
 import safetensors.torch
 from safetensors import safe_open
 from omegaconf import OmegaConf
@@ -41,7 +42,8 @@ class StableDiffusionModel():
         self.convert_vae = convert_vae
         self.scheduler = scheduler
         self.model_hash = hash
-
+        self.model_type = ""
+        
         if (self.checkpoint_path.endswith(".safetensors")):
             self.safe_tensors=True
         else:
@@ -52,9 +54,10 @@ class StableDiffusionModel():
         #   path: "/path/to/lora/model"
         #   weight: 0.85
         # }
+        # TODO: LORA support
         self.loras = []
 
-        # TODO: if CPU is enabled we don't want any of these optimisations enabled
+        # TODO: if CPU is enabled we might want some of these optimisations disabled
         # Optimisations
         self.enable_xformers = enable_xformers
         self.enable_tf32 = enable_tf32
@@ -62,6 +65,25 @@ class StableDiffusionModel():
         self.enable_vaeTiling = enable_vaeTiling
         self.enable_vaeSlicing = enable_vaeSlicing
         self.enable_seqCPUOffload = enable_seqCPUOffload
+
+    # Return type of model based on configuration used
+    def get_model_type(self):
+        with open(self.checkpoint_config) as f:
+            config_dict = yaml.safe_load(f)
+        
+        target = config_dict['model']['target']
+
+        target_map = {
+            "sgm.models.diffusion.DiffusionEngine": "sdxl",
+            "ldm.models.diffusion.ddpm.LatentInpaintDiffusion": "sd",
+            "ldm.models.diffusion.ddpm.LatentDepth2ImageDiffusion": "sd",
+            "ldm.models.diffusion.ddpm.LatentDiffusion": "sd"
+        }
+
+        if target in target_map:
+            return target_map[target]
+        else:
+            return "sd"
 
     def clean(self):
         devices.torch_gc()
@@ -133,12 +155,19 @@ class StableDiffusionModel():
 
     def load_model(self):
         try:
+            logging.info(f"Using device: {devices.get_cuda_device_string()}")
+            # Determine model type
+            self.model_type = self.get_model_type()
+            logging.info(f"Deducing model type from config: {self.model_type}")
+            
             # Determine type size
             if devices.get_cuda_device_string() == "cpu" or not self.enable_t16:
                 devices.dtype, devices.dtype_vae = torch.float32, torch.float32
+                logging.info("Using torch.float32 weights")
             else:
                 devices.dtype, devices.dtype_vae = torch.float16, torch.float16
-
+                logging.info("Using torch.float16 weights")
+            
             # Load VAE
             if (self.vae_path != ""):
                 self.load_vae(self.vae_config)
@@ -155,10 +184,9 @@ class StableDiffusionModel():
             self.enableOptimisations()
             self.model.to(devices.get_cuda_device_string(), torch_dtype=devices.dtype)
 
-            # Store hash for future use when we pass model by reference
-            self.model.model_hash = self.model_hash
+            logging.info(f"Loaded model with hash: {self.model_hash}")
         except:
             self.clean()
-            logging.error('Failed to create model', file=sys.stderr)
+            logging.error('Failed to create model')
 
     # TODO: When generating an image use the cross_attention_kwargs={"scale":"weight"} for lora support

@@ -524,17 +524,17 @@ class SDModelServer(MQServer):
 
     def __text2image(self, cmd):
         result = txt2img.generate(
-            **cmd.arguments, model=self.model.model)
+            **cmd.arguments, model=self.model)
         return f"{result}"
 
     def __image2image(self, cmd):
         result = img2img.generate(
-            **cmd.arguments, model=self.model.model)
+            **cmd.arguments, model=self.model)
         return f"{result}"
     
     def __outpainting(self, cmd):
         result = outpaint.generate(
-            **cmd.arguments, model=self.model.model)
+            **cmd.arguments, model=self.model)
         return f"{result}"
 
     # Main loop

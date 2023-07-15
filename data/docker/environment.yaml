@@ -1,17 +1,19 @@
 name: ldm
 channels:
+  - conda-forge
+  - nvidia
   - pytorch
-  - defaults
 dependencies:
   - git
   - python=3.9.16
   - pip=20.3
-  - cudatoolkit=11.3
-  - pytorch=2.0.1
+  - nvidia::cudatoolkit
+  - pytorch::pytorch=2.0.1
   - numpy=1.25.0
   - pip:
       - pyyaml                        # Python yaml support
-      - accelerate                    # enables the same PyTorch code to be run across any distributed configuration
+      - accelerate                    # Enables the same PyTorch code to be run across any distributed configuration
+      - invisible-watermark           # Adds watermark to generated images
       - compel                        # Text prompt weighting
       - opencv-python-headless        # OpenCV without dependant libraries
       - diffusers                     # Hugging face diffusers
