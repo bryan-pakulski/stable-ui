@@ -18,6 +18,7 @@ from diffusers import StableDiffusionPipeline
 from diffusers import StableDiffusionImg2ImgPipeline
 from diffusers import StableDiffusionInpaintPipeline
 from diffusers import StableDiffusionXLPipeline
+from diffusers import StableDiffusionXLImg2ImgPipeline
 from compel import Compel
 
 #from optimum.intel.openvino import OVStableDiffusionPipeline
@@ -82,6 +83,13 @@ class StableDiffusionBaseProcess():
     def cleanup(self):
         self.prompt_embeds = None
         gc.collect()
+        
+    # Check pipelines
+    def is_pipeline_in(self, classNames):
+        for className in classNames:
+            if type(self.pipeline) is className:
+                return True
+        return False
 
 class StableDiffusionTxt2Img(StableDiffusionBaseProcess):
 
@@ -89,23 +97,27 @@ class StableDiffusionTxt2Img(StableDiffusionBaseProcess):
         super().__init__(outpath_samples, prompt, negative_prompt, seed,
                          sampler_name, batch_size, n_iter, steps, cfg_scale, width, height, model)
         
-        # SDXL pipeline
-        if self.sd_model.model_type == "sdxl":
-            self.pipe = StableDiffusionXLPipeline(**self.pipeline.components)
+        # Load SDXL pipeline 
+        if self.sd_model.model_type == "sdxl" and not self.is_pipeline_in([StableDiffusionXLPipeline]):
+            self.pipeline = StableDiffusionXLPipeline(**self.pipeline.components)
+            self.pipeline.enable_model_cpu_offload()
+            self.pipeline.unet = torch.compile(self.pipeline.unet, mode="reduce-overhead", fullgraph=True)
+            
         # Normal latent diffusion
-        else:
+        elif self.sd_model.model_type == "sd" and not self.is_pipeline_in([StableDiffusionPipeline, OVStableDiffusionPipeline]):
             #TODO: openvino pipeline for cpu
             """
             if (devices.get_cuda_device_string() == "cpu"):
-                self.pipe = OVStableDiffusionPipeline(**self.pipeline.components, export=False)
+                self.pipeline = OVStableDiffusionPipeline(**self.pipeline.components, export=False)
             else:
-                self.pipe = StableDiffusionPipeline(**self.pipeline.components, requires_safety_checker=False)
+                self.pipeline = StableDiffusionPipeline(**self.pipeline.components, requires_safety_checker=False)
             """
-
-            self.pipe = StableDiffusionPipeline(**self.pipeline.components, requires_safety_checker=False)
-
-        self.pipe.scheduler = self.sampler
-        self.get_prompt_embeds(self.pipe)
+            self.pipeline = StableDiffusionPipeline(**self.pipeline.components, requires_safety_checker=False)
+            self.get_prompt_embeds(self.pipeline)
+            
+        logging.info(f"Created pipeline: {type(self.pipeline)}")
+        
+        self.pipeline.scheduler = self.sampler
         self.create_sub_folder(subfolder_name, "txt2img")
 
     def save_metadata(self, img):
@@ -132,7 +144,6 @@ class StableDiffusionTxt2Img(StableDiffusionBaseProcess):
 
     def sdxl_sample(self):
         self.pipeline.scheduler = self.sampler
-        
         
         prompt_embeds, negative_prompt_embeds, pooled_prompt_embeds, negative_pooled_prompt_embeds = self.pipeline.encode_prompt(prompt=self.prompt, device=devices.get_cuda_device_string(), negative_prompt=self.negative_prompt)
 
@@ -163,10 +174,25 @@ class StableDiffusionImg2Img(StableDiffusionBaseProcess):
     def __init__(self, outpath_samples, subfolder_name, prompt, negative_prompt, init_img, seed, sampler_name, batch_size, strength, n_iter, steps, cfg_scale, model):
         super().__init__(outpath_samples=outpath_samples, prompt=prompt, negative_prompt=negative_prompt, seed=seed,
                          sampler_name=sampler_name, batch_size=batch_size, n_iter=n_iter, steps=steps, cfg_scale=cfg_scale, model=model)
-
-        self.pipe = StableDiffusionImg2ImgPipeline(**self.pipeline.components, requires_safety_checker=False)
-        self.pipe.scheduler = self.sampler
-        self.get_prompt_embeds(self.pipe)
+        
+        # SDXL pipeline
+        if self.sd_model.model_type == "sdxl" and not self.is_pipeline_in([StableDiffusionXLImg2ImgPipeline]):
+            self.pipeline = StableDiffusionXLImg2ImgPipeline(**self.pipelineline.components)
+            self.pipeline.enable_model_cpu_offload()
+            self.pipeline.unet = torch.compile(self.pipeline.unet, mode="reduce-overhead", fullgraph=True)
+        # Normal latent diffusion
+        elif self.sd_model.model_type == "sd" and not self.is_pipeline_in([StableDiffusionImg2ImgPipeline,OVStableDiffusionPipeline]):
+            #TODO: openvino pipeline for cpu
+            """
+            if (devices.get_cuda_device_string() == "cpu"):
+                self.pipeline = OVStableDiffusionPipeline(**self.pipeline.components, export=False)
+            """
+            self.pipeline= StableDiffusionImg2ImgPipeline(**self.pipeline.components, requires_safety_checker=False)
+            self.get_prompt_embeds(self.pipeline)
+            
+        logging.info(f"Created pipeline: {type(self.pipeline)}")
+        
+        self.pipeline.scheduler = self.sampler
         self.create_sub_folder(subfolder_name, "img2img")
 
         self.init_img = init_img
@@ -210,10 +236,24 @@ class StableDiffusionImg2Img(StableDiffusionBaseProcess):
         return 2.*image - 1.
       
     def cpu_sample(self):
-        pass
+        #TODO: CPU specific changes here???
+        self.sample()
+        
+    def sdxl_sample(self):
+        self.pipeline.scheduler = self.sampler
+        prompt_embeds, negative_prompt_embeds, pooled_prompt_embeds, negative_pooled_prompt_embeds = self.pipeline.encode_prompt(prompt=self.prompt, device=devices.get_cuda_device_string(), negative_prompt=self.negative_prompt)
+
+        outputs = self.pipeline(image=self.legacy_load_img(self.init_img), prompt_embeds=prompt_embeds, pooled_prompt_embeds=pooled_prompt_embeds, negative_prompt_embeds=negative_prompt_embeds, negative_pooled_prompt_embeds=negative_pooled_prompt_embeds, generator=self.generator, num_inference_steps=self.steps, strength=self.strength, guidance_scale = self.cfg_scale, num_images_per_prompt=self.n_iter)
+
+        for image in outputs.images:
+            base_count = len(os.listdir(self.outpath_samples))
+            img_name = os.path.join(self.outpath_samples, f"{base_count:05}.png")
+            image.save(img_name)
+            self.save_metadata(img_name)
+        self.cleanup()
 
     def sample(self):
-        outputs = self.pipe(prompt_embeds=self.prompt_embeds, negative_prompt=self.negative_prompt, image=self.legacy_load_img(self.init_img), generator=self.generator, num_inference_steps=self.steps, strength=self.strength, guidance_scale = self.cfg_scale, num_images_per_prompt=self.n_iter)
+        outputs = self.pipeline(prompt_embeds=self.prompt_embeds, negative_prompt=self.negative_prompt, image=self.legacy_load_img(self.init_img), generator=self.generator, num_inference_steps=self.steps, strength=self.strength, guidance_scale = self.cfg_scale, num_images_per_prompt=self.n_iter)
         for image in outputs.images:
             base_count = len(os.listdir(self.outpath_samples))
             img_name = os.path.join(self.outpath_samples, f"{base_count:05}.png")
@@ -227,9 +267,13 @@ class StableDiffusionOutpainting(StableDiffusionBaseProcess):
         super().__init__(outpath_samples=outpath_samples, prompt=prompt, negative_prompt=negative_prompt, seed=seed,
                          sampler_name=sampler_name, batch_size=batch_size, n_iter=n_iter, steps=steps, cfg_scale=cfg_scale, model=model)
 
-        self.pipe = StableDiffusionInpaintPipeline(**self.pipeline.components, requires_safety_checker=False)
-        self.pipe.scheduler = self.sampler
-        self.get_prompt_embeds(self.pipe)
+        if self.sd_model.model_type == "sd" and not self.is_pipeline_in([StableDiffusionInpaintPipeline]):
+            self.pipeline = StableDiffusionInpaintPipeline(**self.pipeline.components, requires_safety_checker=False)
+            self.get_prompt_embeds(self.pipeline)
+            
+        logging.info(f"Created pipeline: {type(self.pipeline)}")
+            
+        self.pipeline.scheduler = self.sampler
         self.create_sub_folder(subfolder_name, "outpaint")
 
         # Process base64 img data into PIL image for sd pipeline
@@ -273,11 +317,16 @@ class StableDiffusionOutpainting(StableDiffusionBaseProcess):
         return Image.fromarray(arr).convert('RGB')
 
     def cpu_sample(self):
+        #TODO: CPU specific changes here???
+        self.sample()
+        
+    def sdxl_sample(self):
+        # TODO: inpaint pipeline for sdxl???
         pass
       
     # Inpainting pipeline
     def sample(self):
-        outputs = self.pipe(prompt_embeds=self.prompt_embeds, negative_prompt=self.negative_prompt, image=self.image, width=self.width, height=self.height, mask_image=self.mask, generator=self.generator, num_inference_steps=self.steps, strength=self.strength, guidance_scale = self.cfg_scale, num_images_per_prompt=self.n_iter)
+        outputs = self.pipeline(prompt_embeds=self.prompt_embeds, negative_prompt=self.negative_prompt, image=self.image, width=self.width, height=self.height, mask_image=self.mask, generator=self.generator, num_inference_steps=self.steps, strength=self.strength, guidance_scale = self.cfg_scale, num_images_per_prompt=self.n_iter)
         for image in outputs.images:
             base_count = len(os.listdir(self.outpath_samples))
             img_name = os.path.join(self.outpath_samples, f"{base_count:05}.png")
