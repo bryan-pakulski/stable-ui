@@ -4,10 +4,11 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <vector>
+#include <string>
+#include <bitset>
 
 #include "ThirdParty/stb/stb_image.h"
 #include "ThirdParty/stb/stb_image_write.h"
-#include <bits/stdc++.h>
 
 #define HASH_SIZE 128
 
