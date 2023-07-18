@@ -11,12 +11,131 @@
 #include "QDisplay_ImportVAE.h"
 #include "QDisplay_LoadModel.h"
 #include "QDisplay_PluginsWindow.h"
+#include "QDisplay_ContentBrowser.h"
+#include "StableManager.h"
 
 #include <fstream>
 #include <imgui.h>
+#include <imgui_stdlib.h>
 #include <memory>
 
 class QDisplay_TopBar : public QDisplay_Base {
+public:
+  // Initialise render manager reference
+  QDisplay_TopBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+    m_configureModelWindow = std::unique_ptr<QDisplay_ConfigureModel>(new QDisplay_ConfigureModel(rm, w));
+    m_importModelWindow = std::unique_ptr<QDisplay_ImportModel>(new QDisplay_ImportModel(rm, w));
+    m_importVAEWindow = std::unique_ptr<QDisplay_ImportVAE>(new QDisplay_ImportVAE(rm, w));
+    m_loadModelWindow = std::unique_ptr<QDisplay_LoadModel>(new QDisplay_LoadModel(rm, w));
+    m_pluginsWindow = std::unique_ptr<QDisplay_PluginsWindow>(new QDisplay_PluginsWindow(rm, w));
+    m_contentBrowserWindow = std::unique_ptr<QDisplay_ContentBrowser>(new QDisplay_ContentBrowser(rm, w));
+
+    // Load images
+    m_docker_connected_icon = std::unique_ptr<GLImage>(new GLImage(32, 32, "connected_icon"));
+    m_docker_disconnected_icon = std::unique_ptr<GLImage>(new GLImage(32, 32, "disconnected_icon"));
+
+    m_docker_connected_icon->loadFromImage("data/images/connected.png");
+    m_docker_disconnected_icon->loadFromImage("data/images/disconnected.png");
+  }
+
+  /*
+   * Main Menu renderer, contains logic for showing additional display items
+   */
+  virtual void render() {
+    if (ImGui::BeginMainMenuBar()) {
+
+      if (ImGui::BeginMenu("File")) {
+
+        if (ImGui::MenuItem("New Canvas")) {
+          newFileOpen = true;
+        }
+
+        if (ImGui::MenuItem("Load Canvas")) {
+          loadFileOpen = true;
+        }
+
+        if (ImGui::MenuItem("Import Model")) {
+          m_importModelWindow->openWindow();
+        }
+
+        if (ImGui::MenuItem("Import VAE")) {
+          m_importVAEWindow->openWindow();
+        }
+
+        if (ImGui::MenuItem("Content Browser")) {
+          m_contentBrowserWindow->m_isOpen = true;
+        }
+
+        ImGui::EndMenu();
+      }
+
+      if (ImGui::BeginMenu("Model")) {
+
+        if (ImGui::MenuItem("Load Model To Memory")) {
+          m_loadModelWindow->openWindow();
+        }
+
+        if (ImGui::MenuItem("Configure Models")) {
+          m_configureModelWindow->openWindow();
+        }
+
+        ImGui::EndMenu();
+      }
+
+      if (ImGui::BeginMenu("Plugins")) {
+        m_pluginsWindow->menus();
+
+        ImGui::EndMenu();
+      }
+
+      if (ImGui::BeginMenu("Debug")) {
+
+        if (ImGui::MenuItem("Release model from memory")) {
+          StableManager::GetInstance().releaseSDModel();
+        }
+
+        if (ImGui::MenuItem("Restart SD Server")) {
+          StableManager::GetInstance().launchSDModelServer();
+        }
+
+        if (ImGui::MenuItem("Open Log")) {
+          logFileOpen = true;
+        }
+
+        ImGui::EndMenu();
+      }
+
+      ImGui::Separator();
+      if (ImGui::MenuItem(std::string("Canvas - " + m_renderManager->getActiveCanvas()->m_name).c_str())) {
+        selectCanvasOpen = true;
+      }
+
+      // Docker connection state
+      ImGui::Separator();
+      {
+        GLImage icon = Heartbeat::GetInstance().getState() ? *m_docker_connected_icon : *m_docker_disconnected_icon;
+        ImGui::Image((void *)(intptr_t)icon.m_texture, {c_dockerIconSize, c_dockerIconSize}, {1, 0}, {0, 1});
+        std::string dockerState = Heartbeat::GetInstance().getState() ? "Docker Connected" : "Docker Disconnected";
+        ImGui::MenuItem(dockerState.c_str());
+      }
+
+      ImGui::EndMainMenuBar();
+    }
+
+    // These will only render if their corresponding flags are set
+    QDisplay_LogFile();
+    QDisplay_NewFile();
+    QDisplay_LoadFile();
+    QDisplay_SelectCanvasOpen();
+
+    // Render additional windows
+    m_configureModelWindow->render();
+    m_importModelWindow->render();
+    m_importVAEWindow->render();
+    m_loadModelWindow->render();
+    m_pluginsWindow->render();
+    m_contentBrowserWindow->render();
+  }
 
 private:
   // Window triggers
@@ -30,10 +149,11 @@ private:
   std::unique_ptr<QDisplay_ImportVAE> m_importVAEWindow;
   std::unique_ptr<QDisplay_LoadModel> m_loadModelWindow;
   std::unique_ptr<QDisplay_PluginsWindow> m_pluginsWindow;
+  std::unique_ptr<QDisplay_ContentBrowser> m_contentBrowserWindow;
 
   // Docker status icons
-  std::unique_ptr<Image> m_docker_connected_icon;
-  std::unique_ptr<Image> m_docker_disconnected_icon;
+  std::unique_ptr<GLImage> m_docker_connected_icon;
+  std::unique_ptr<GLImage> m_docker_disconnected_icon;
   float c_dockerIconSize = 15.0f;
 
   // Log config
@@ -43,8 +163,9 @@ private:
   clock_t lastLogReadTime;
 
   // New file config
-  char m_canvasName[256] = "new";
+  std::string m_canvasName = "new";
 
+private:
   /*
    * Popup for displaying log file output
    */
@@ -101,10 +222,10 @@ private:
       ImGui::OpenPopup("NEW_FILE");
       if (ImGui::BeginPopupModal("NEW_FILE")) {
 
-        ImGui::InputText("canvas name", m_canvasName, 256);
+        ImGui::InputText("canvas name", &m_canvasName);
 
         if (ImGui::Button("Create Canvas")) {
-          m_renderManager->createCanvas(0, 0, std::string(m_canvasName));
+          m_renderManager->createCanvas(0, 0, m_canvasName);
           newFileOpen = false;
         }
 
@@ -154,116 +275,5 @@ private:
       }
       ImGui::EndPopup();
     }
-  }
-
-public:
-  // Initialise render manager reference
-  QDisplay_TopBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
-    m_configureModelWindow = std::unique_ptr<QDisplay_ConfigureModel>(new QDisplay_ConfigureModel(rm, w));
-    m_importModelWindow = std::unique_ptr<QDisplay_ImportModel>(new QDisplay_ImportModel(rm, w));
-    m_importVAEWindow = std::unique_ptr<QDisplay_ImportVAE>(new QDisplay_ImportVAE(rm, w));
-    m_loadModelWindow = std::unique_ptr<QDisplay_LoadModel>(new QDisplay_LoadModel(rm, w));
-    m_pluginsWindow = std::unique_ptr<QDisplay_PluginsWindow>(new QDisplay_PluginsWindow(rm, w));
-
-    // Load images
-    m_docker_connected_icon = std::unique_ptr<Image>(new Image(32, 32, "connected_icon"));
-    m_docker_disconnected_icon = std::unique_ptr<Image>(new Image(32, 32, "disconnected_icon"));
-
-    m_docker_connected_icon->loadFromImage("data/images/connected.png");
-    m_docker_disconnected_icon->loadFromImage("data/images/disconnected.png");
-  }
-
-  /*
-   * Main Menu renderer, contains logic for showing additional display items
-   */
-  virtual void render() {
-    if (ImGui::BeginMainMenuBar()) {
-
-      if (ImGui::BeginMenu("File")) {
-
-        if (ImGui::MenuItem("New Canvas")) {
-          newFileOpen = true;
-        }
-
-        if (ImGui::MenuItem("Load Canvas")) {
-          loadFileOpen = true;
-        }
-
-        if (ImGui::MenuItem("Import Model")) {
-          m_importModelWindow->openWindow();
-        }
-
-        if (ImGui::MenuItem("Import VAE")) {
-          m_importVAEWindow->openWindow();
-        }
-
-        ImGui::EndMenu();
-      }
-
-      if (ImGui::BeginMenu("Model")) {
-
-        if (ImGui::MenuItem("Load Model To Memory")) {
-          m_loadModelWindow->openWindow();
-        }
-
-        if (ImGui::MenuItem("Configure Models")) {
-          m_configureModelWindow->openWindow();
-        }
-
-        ImGui::EndMenu();
-      }
-
-      if (ImGui::BeginMenu("Plugins")) {
-        m_pluginsWindow->menus();
-
-        ImGui::EndMenu();
-      }
-
-      if (ImGui::BeginMenu("Debug")) {
-
-        if (ImGui::MenuItem("Release model from memory")) {
-          SDCommandsInterface::GetInstance().releaseSDModelServer();
-        }
-
-        if (ImGui::MenuItem("Restart SD Server")) {
-          SDCommandsInterface::GetInstance().launchSDModelServer();
-        }
-
-        if (ImGui::MenuItem("Open Log")) {
-          logFileOpen = true;
-        }
-
-        ImGui::EndMenu();
-      }
-
-      ImGui::Separator();
-      if (ImGui::MenuItem(std::string("Canvas - " + m_renderManager->getActiveCanvas()->m_name).c_str())) {
-        selectCanvasOpen = true;
-      }
-
-      // Docker connection state
-      ImGui::Separator();
-      {
-        Image icon = Heartbeat::GetInstance().getState() ? *m_docker_connected_icon : *m_docker_disconnected_icon;
-        ImGui::Image((void *)(intptr_t)icon.m_texture, {c_dockerIconSize, c_dockerIconSize}, {1, 0}, {0, 1});
-        std::string dockerState = Heartbeat::GetInstance().getState() ? "Docker Connected" : "Docker Disconnected";
-        ImGui::MenuItem(dockerState.c_str());
-      }
-
-      ImGui::EndMainMenuBar();
-    }
-
-    // These will only render if their corresponding flags are set
-    QDisplay_LogFile();
-    QDisplay_NewFile();
-    QDisplay_LoadFile();
-    QDisplay_SelectCanvasOpen();
-
-    // Render additional windows
-    m_configureModelWindow->render();
-    m_importModelWindow->render();
-    m_importVAEWindow->render();
-    m_loadModelWindow->render();
-    m_pluginsWindow->render();
   }
 };

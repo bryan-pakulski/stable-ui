@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "Client/Commands.h"
 #include "Config/config.h"
 #include "Helpers/States.h"
 #include "ThirdParty/cppzmq/zmq.hpp"
@@ -19,16 +20,11 @@ public:
 
   // Commands list
   void heartbeat(int &state);
-  void releaseMemory();
-  void loadModelToMemory(std::string ckpt_path, std::string config_path, std::string vae_path, std::string precision,
-                         int &state);
-
-  void textToImage(std::string hash, std::string outDir, std::string &canvasName, std::string prompt,
-                   std::string negative_prompt, std::string &samplerName, int batch_size, int steps, double cfg,
-                   int seed, int width, int height, int &renderState);
-  void imageToImage(std::string hash, std::string outDir, std::string &prompt, std::string &negative_prompt,
-                    std::string &canvas_name, std::string &img_path, std::string &sampler_name, int batch_size,
-                    int n_iter, int steps, double cfg_scale, double strength, int seed, int &renderState);
+  void releaseModel();
+  void loadModelToMemory(commands::loadModelToMemory command);
+  void textToImage(commands::textToImage command);
+  void imageToImage(commands::imageToImage command);
+  void outpainting(commands::outpainting command);
 
 private:
   zmq::context_t m_ctx;
@@ -41,8 +37,9 @@ private:
   std::string m_addr = "tcp://" + CONFIG::DOCKER_IP_ADDRESS.get() + ":5555";
   std::string m_heartbeat_addr = "tcp://" + CONFIG::DOCKER_IP_ADDRESS.get() + ":5556";
 
+private:
   std::string sendMessage(const std::string &message);
 
   StableClient();
-  ~StableClient();
+  ~StableClient() {}
 };

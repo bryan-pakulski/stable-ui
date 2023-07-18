@@ -1,16 +1,16 @@
 #pragma once
 
 #include "Config/config.h"
+#include "Config/structs.h"
 #include "Config/types.h"
 #include "Indexer/Indexer.h"
 #include "Helpers/QLogger.h"
-#include "Client/SDCommandsInterface.h"
 #include "Helpers/States.h"
 
 #include "Rendering/objects/BaseObject.h"
-#include "Rendering/objects/image/Image.h"
+#include "Rendering/objects/GLImage/GLImage.h"
 #include "Rendering/objects/Selection.h"
-#include "Rendering/Camera.h"
+#include "Rendering/OrthographicCamera.h"
 #include "Rendering/Canvas.h"
 
 #include <glad/glad.h>
@@ -19,21 +19,27 @@
 #include <memory>
 #include <vector>
 
+/*
+  This class is responsible for managing the camera and rendering of our main canvas / providing canvas interaction
+*/
+
 class RenderManager {
 public:
-  explicit RenderManager(GLFWwindow &w);
-  ~RenderManager();
-
   // Actively rendered canvas
   int m_activeId = 0;
   std::vector<std::shared_ptr<Canvas>> m_canvas;
   // Camera details
   bool m_cameraDrag = false;
-  std::shared_ptr<Camera> m_camera;
+  std::shared_ptr<OrthographicCamera> m_camera;
   // Selection
   std::shared_ptr<Selection> m_selection;
   // Right click context window
   bool m_contextWindowVisible = false;
+
+public:
+  explicit RenderManager(GLFWwindow &w);
+  ~RenderManager();
+
   // Main update loop
   void update();
 
@@ -41,34 +47,38 @@ public:
     CANVAS FUNCTIONS
   */
 
-  // Create new canvas object for rendering
   std::shared_ptr<Canvas> createCanvas(int x, int y, const std::string &name);
-  // Get current active canvas
   std::shared_ptr<Canvas> getActiveCanvas();
-  // Make a canvas active
   void selectCanvas(int id);
-  // Send an image to current active canvas
-  void sendImageToCanvas(Image &im);
-  // Set capture buffer flag (Move pixels inside selection to a texture)
+  void setActiveLayer(int id) { m_canvas[m_activeId]->setActiveLayer(id); }
+  int getActiveLayer() { return m_canvas[m_activeId]->getActiveLayer(); }
+  void sendImageToCanvas(GLImage &im);
+  void sendImageToCanvasAtPos(GLImage &im, glm::ivec2 position);
   void captureBuffer();
-
-  /*
-    IMAGE GENERATION
-  */
-
-  // Get / Set image to use for base rendering
+  void saveBuffer();
+  void eraseSelection();
+  void paintSelection(bool sendToCanvas);
+  std::shared_ptr<GLImage> getBuffer() { return m_selectionBuffer; }
+  std::shared_ptr<GLImage> getMask() { return m_selectionMask; }
   void useImage(std::string path);
   const std::string getImage();
 
-  // Generate txt2img
-  void textToImage(std::string prompt, std::string negative_prompt, std::string &sampler_name, int samples, int steps,
-                   double cfg, int seed, int width, int height, int &renderState);
-
-  // Generate img2img
-  void imageToImage(std::string &imgPath, std::string prompt, std::string negative_prompt, std::string &samplerName,
-                    int samples, int steps, double cfg, double strength, int seed, int &renderState);
-
-  void genFromSelection();
+  /*
+    PIPELINE CONFIGURATION
+  */
+  std::shared_ptr<pipelineConfig> getPipeline(int pipeline) {
+    if (pipeline == PIPELINE::TXT) {
+      return m_txtPipeline;
+    } else if (pipeline == PIPELINE::IMG) {
+      return m_imgPipeline;
+    } else if (pipeline == PIPELINE::PAINT) {
+      return m_paintPipeline;
+    } else {
+      QLogger::GetInstance().Log(LOGLEVEL::ERR,
+                                 "RenderManager::getPipeline Invalid pipeline enum, not found in config!");
+      return nullptr;
+    }
+  }
 
   /*
     CALLBACKS
@@ -84,11 +94,17 @@ public:
 
 private:
   GLFWwindow &m_window;
-  static GLuint fbo;
-  static GLuint m_colorBufferTexture;
 
   std::string m_baseImage;
+  std::shared_ptr<GLImage> m_selectionBuffer;
+  std::shared_ptr<GLImage> m_selectionMask;
   bool m_captureBuffer = false;
+
+  // These hold our pipeline configurations statically so that they can be accessed from anywhere in the front end (
+  // every display holds a reference to this class )
+  std::shared_ptr<pipelineConfig> m_txtPipeline;
+  std::shared_ptr<pipelineConfig> m_imgPipeline;
+  std::shared_ptr<pipelineConfig> m_paintPipeline;
 
   // Process inputs
   void logicLoop();

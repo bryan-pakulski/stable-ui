@@ -6,29 +6,22 @@
 
 #include "Helpers/QLogger.h"
 #include "Helpers/GLHelper.h"
-#include "Camera.h"
+#include "Rendering/OrthographicCamera.h"
+
+#include "Rendering/objects/Layer.h"
 
 #include "Rendering/objects/BaseObject.h"
-#include "Rendering/objects/chunk/Chunk.h"
-#include "Rendering/objects/image/Image.h"
+#include "Rendering/objects/Image.h"
+#include "Rendering/objects/GLImage/GLImage.h"
 
 class Canvas : public BaseObject {
-private:
-  std::pair<int, int> m_coords{}; // Pixel Coordinates (top left)
-  std::pair<int, int> m_screen{}; // Screen size
-
-  std::shared_ptr<Camera> m_camera;
-
-  // Reference to texture for main window
-  GLuint m_texture_id;
-  float m_time = 0.0f;
-
 public:
   bool m_active = false;
-  std::vector<std::unique_ptr<Chunk>> m_editorGrid;
+  std::vector<std::unique_ptr<Layer>> m_editorGrid;
   std::string m_name;
 
-  Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *w, std::shared_ptr<Camera> c);
+public:
+  Canvas(glm::ivec2 position, const std::string &name, GLFWwindow *w, std::shared_ptr<OrthographicCamera> c);
   virtual ~Canvas();
 
   void updateLogic() override;
@@ -38,13 +31,43 @@ public:
   void renderImages();
   void setTexture(GLuint *id);
 
-  // Update or create new chunk for a given Image
-  void createImage(std::shared_ptr<Image>, std::pair<int, int> chunk_coordinates);
+  // Retrieve raw pixel data from all images that fall space between two world space coordinates
+  std::vector<RGBAPixel> getPixelsAtSelection(glm::ivec2 position, glm::ivec2 size, bool mask = false);
 
-  // Delete chunk by index
-  void deleteChunk(int index);
+  void eraseSelection(glm::ivec2 position, glm::ivec2 size);
 
-  // Hide chunk by index
-  void hideChunk(int index);
-  void showChunk(int index);
+  // Update or create new image wrapper from a basic GL image
+  void createImage(int layerId, std::shared_ptr<GLImage>, glm::ivec2 position);
+
+  int getActiveLayer() { return m_activeLayer; }
+  void setActiveLayer(int id) {
+    if (id < 0 || id > m_editorGrid.size()) {
+      m_activeLayer = 0;
+    } else {
+      m_activeLayer = id;
+    }
+  }
+
+  // Create a new layer
+  void createLayer(glm::ivec2 dimensions, std::string name, bool protect = false) {
+    m_editorGrid.push_back(std::unique_ptr<Layer>(new Layer(m_camera, dimensions, name, protect)));
+  }
+
+  // Delete layer by index
+  void deleteLayer(int index) {
+    if (m_editorGrid[index]->c_protected) {
+      QLogger::GetInstance().Log(LOGLEVEL::INFO, "Unable to delete protected layer!");
+    } else {
+      m_editorGrid.erase(m_editorGrid.begin() + index);
+    }
+  }
+
+  // layer visibility control
+  void hideLayer(int index) { m_editorGrid[index]->m_renderFlag = false; }
+  void showLayer(int index) { m_editorGrid[index]->m_renderFlag = true; }
+
+private:
+  std::shared_ptr<OrthographicCamera> m_camera;
+  float m_time = 0.0f;
+  int m_activeLayer = 0;
 };

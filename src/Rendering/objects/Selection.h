@@ -1,37 +1,41 @@
 #include "BaseObject.h"
 #include "Helpers/GLHelper.h"
-#include "Rendering/Camera.h"
-#include "Rendering/objects/image/Image.h"
+#include "Rendering/OrthographicCamera.h"
+#include "Rendering/objects/GLImage/GLImage.h"
 #include <memory>
 
 class Selection : public BaseObject {
 
+public:
+  glm::ivec2 m_size{512, 512}; // Selection image size
+  bool m_dragging = false;     // Dragging flag
+  int m_pixelSnap = 64;        // Size of pixel snapping
+  bool m_snap = true;
+
+public:
+  Selection(glm::ivec2 position, GLFWwindow *w, std::shared_ptr<OrthographicCamera> c);
+  virtual ~Selection();
+
+  glm::ivec2 getPosition() { return glm::ivec2{m_position.x, m_position.y}; }
+
+  void UpdateDrag(glm::vec2 position);
+
+  void updateLogic() override {}
+  void updateVisual() override;
+
 private:
-  std::shared_ptr<Camera> m_camera; // Camera ptr
+  std::shared_ptr<OrthographicCamera> m_camera; // Camera ptr
 
   // Mouse positions for dragging across screen
   glm::vec2 prev_mouse;
   glm::vec2 cur_mouse;
-  glm::vec3 m_position;
 
+private:
   void setTexture(GLuint *id);
 
-public:
-  GLuint m_selection_texture_buffer = 0;
-  std::pair<int, int> m_size{512, 512}; // Selection image size
-  bool m_captureInProgress = false;     // Capture flag, when set we will update the m_position
-  int m_pixelSnap = 512;                // Size of pixel snapping
-
-  Selection(std::pair<int, int> coords, GLFWwindow *w, std::shared_ptr<Camera> c);
-  virtual ~Selection();
-
-  std::pair<int, int> getCoordinates();
-
-  void startCapture(float x, float y);
-  void updateCapture(float x, float y);
-  void captureBuffer();
-  void saveBuffer();
-
-  void updateLogic() override;
-  void updateVisual() override;
+  // Round to nearest multiple, works with negative numbers
+  int roundUp(int x, int multiple) {
+    int isPositive = (int)(x >= 0);
+    return ((x + isPositive * (multiple - 1)) / multiple) * multiple;
+  }
 };

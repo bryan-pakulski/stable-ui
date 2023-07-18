@@ -12,7 +12,7 @@ services:
     volumes:
       - ../models:/models
       - ../output:/data/output
-      - ../module-data:/module-data
+      - ../modules:/module-data
       - ../config:/config
       - ../logs:/logs
       - conda_env:/opt/conda
@@ -36,5 +36,5 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 10.5.0.0/16
+        - subnet: 10.5.0.0/27
           gateway: 10.5.0.1

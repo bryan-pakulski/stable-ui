@@ -11,6 +11,7 @@
 #include "Helpers/QLogger.h"
 
 // Files to actually index
+// TODO: this list is referenced a few times and redefined in different places, refactor and move somewhere like config
 static const std::set<std::string> s_filetypes = {".png", ".jpg", ".jpeg"};
 
 struct FileInfo {
@@ -26,6 +27,7 @@ public:
   // The indexer then pops from this queue to update the inverted index
   std::shared_ptr<asyncQueue<std::pair<std::string, QUEUE_STATUS>>> m_modifiedQueue;
 
+public:
   Crawler() {}
   Crawler(const std::string &path, std::shared_ptr<asyncQueue<std::pair<std::string, QUEUE_STATUS>>> queue)
       : m_modifiedQueue(queue), m_rootPath(path) {
@@ -34,9 +36,10 @@ public:
   ~Crawler() {}
 
   // Crawl filesystem
-  void traverse() {
+  void traverse(bool collectLatestFiles) {
     // First check our existing entries and account for deletions and updates
     updateIndex();
+    m_newFiles.clear();
 
     for (const auto &entry : std::filesystem::recursive_directory_iterator(m_rootPath)) {
       const std::string filepath = entry.path().string();
@@ -47,15 +50,24 @@ public:
           m_fileInfo[filepath] =
               FileInfo{std::filesystem::last_write_time(filepath), std::filesystem::file_size(filepath)};
           m_modifiedQueue->push(std::pair<std::string, QUEUE_STATUS>{filepath, QUEUE_STATUS::ADDED});
+
+          if (collectLatestFiles) {
+            QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Crawler::Traverse Collecting filepath for preview:", filepath);
+            m_newFiles.push_back(filepath);
+          }
         }
       }
     }
   }
 
+  std::vector<std::string> getLatestCrawledFiles() { return m_newFiles; }
+
 private:
   std::string m_rootPath;
   std::unordered_map<std::string, FileInfo> m_fileInfo;
+  std::vector<std::string> m_newFiles;
 
+private:
   bool is_file_modified(const std::string &filepath) {
     std::filesystem::file_time_type last_modified = std::filesystem::last_write_time(filepath);
     size_t file_size = std::filesystem::file_size(filepath);

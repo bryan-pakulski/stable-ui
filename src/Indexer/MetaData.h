@@ -150,6 +150,7 @@ public:
 private:
   bool m_initialised = true;
 
+private:
   XMP() { initialise(); }
   ~XMP() {
     // Terminate the toolkit
@@ -170,7 +171,7 @@ private:
       std::ofstream *outFile = static_cast<std::ofstream *>(refCon);
       (*outFile).write(buffer, bufferSize);
     } catch (XMP_Error &e) {
-      std::cout << e.GetErrMsg() << std::endl;
+      std::cerr << e.GetErrMsg() << std::endl;
       return -1; // Return a bad status
     }
 

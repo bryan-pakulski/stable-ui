@@ -1,8 +1,0 @@
-# Basic module that serves as the default client/server handler for stable-ui
-module:
-  name: upscale
-  working-directory: /modules/upscale
-  gui-path: "data/module-data/upscale/files/gui.yaml"
-
-  filepaths:
-    "files/gui.yaml": "/modules/upscale/gui.yaml"

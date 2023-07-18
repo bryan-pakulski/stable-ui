@@ -11,16 +11,20 @@
 #include "Indexer/asyncQueue.h"
 #include "Indexer/MetaData.h"
 
-// Crawler worker thread will fire every minute to check filesystem for changes
-static const std::chrono::duration<long long, std::milli> c_crawlerSleepTime(60000);
-
 class Indexer {
+public:
 public:
   Indexer(std::string folder_path);
   ~Indexer();
 
   // Return all nodes that matches the searchterm
   std::set<meta_node> find(const std::string &searchTerm);
+
+  std::vector<std::string> forceUpdate(bool collectLatestFiles = false) {
+    QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Indexer::forceUpdate firing");
+    m_crawler.traverse(collectLatestFiles);
+    return m_crawler.getLatestCrawledFiles();
+  }
 
 private:
   std::string m_root_path;
@@ -42,6 +46,7 @@ private:
   // Crawl filesystem recursively for select filetypes to feed our inverted index
   Crawler m_crawler;
 
+private:
   // Load and save data for our inverted index in memory
   void saveIndex();
   void loadIndex();

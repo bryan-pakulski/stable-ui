@@ -11,7 +11,6 @@ WINDOW_HEIGHT: 936
 ############################
 ### Docker Configuration ###
 ############################
-STABLE_DIFFUSION_DOCKER_PATH: "/sd/"
 OUTPUT_DIRECTORY: "/data/output"
 # This IP address shouldn't change as the network is created via docker compose
 # The ui application uses this to interact with the stable diffusion server
@@ -20,17 +19,15 @@ DOCKER_IP_ADDRESS: "127.0.0.1"
 ######################################
 ### Stable Diffusion Configuration ###
 ######################################
-MODELS_DIRECTORY: "data/models"
-PROMPT_LENGTH_LIMIT: 2048
-IMAGE_SIZE_X_LIMIT: 1024
-IMAGE_SIZE_Y_LIMIT: 1024
-STAR_FIELD: 0
+IMAGE_SIZE_X_LIMIT: 4096
+IMAGE_SIZE_Y_LIMIT: 4096
+STAR_FIELD: false
 
 ##############################
 ### Internal configuration ###
 ##############################
 ENABLE_OPENGL_DEBUG_OUTPUT: 0
-ENABLE_DEBUG_LOGGING: 0
+ENABLE_DEBUG_LOGGING: 1
 INDEX_CACHE: "data/cache"
 # Relative path of the docker output directory
 CRAWLER_PATH: "data/output"

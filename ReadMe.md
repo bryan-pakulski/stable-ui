@@ -23,13 +23,14 @@ These are requirements on both Windows (WSL) & Linux
 
 # Features
 
-- text to image / image to image generation
+- text to image / image to image / outpainting pipelines
+- Stable Diffusion v1, v2 & sdxl support
 - CPU support
 - custom module extensions
 - vae, pickle & safetensor model support
-- Stable Diffusion v1 & v2
+- low VRAM Support
+- weighted prompts using compel (++ and -- to emphasize keywords)
 - LORA support (TODO)
-- low VRAM Support (TODO)
 - infinite canvas inpainting & outpainting (TODO)
 - textual inversion training (TODO)
 
@@ -64,14 +65,6 @@ In order to speed up inference time and use resources more effeciently the follo
 
 - jemalloc memory allocation library is used inside the docker image for more efficient memory allocation (https://github.com/jemalloc/jemalloc)
 - numactl is installed to ensure that inference is pinned across all available CPU cores (https://linux.die.net/man/8/numactl)
-
-### Full Precision
-
-### Autocast Precision
-
-### Medium Precision
-
-### Low Precision
 
 ## Controls
 

@@ -83,6 +83,7 @@ endif()
 FetchContent_Declare(
         imgui
         GIT_REPOSITORY https://github.com/ocornut/imgui.git
+        GIT_TAG v1.89.7-docking
 )
 FetchContent_MakeAvailable(imgui)
 FetchContent_GetProperties(imgui)
@@ -134,17 +135,18 @@ add_executable( stable-ui
                 src/StableManager.cpp
                 src/Client/Heartbeat.cpp
                 src/Client/StableClient.cpp
-                src/Client/SDCommandsInterface.cpp
                 src/Helpers/GLHelper.cpp
                 src/Indexer/Indexer.cpp
-                src/Rendering/Camera.cpp
+                src/Rendering/OrthographicCamera.cpp
                 src/Rendering/Canvas.cpp 
                 src/Rendering/RenderManager.cpp
                 src/Rendering/objects/BaseObject.cpp 
                 src/Rendering/objects/Selection.cpp
-                src/Rendering/objects/chunk/Chunk.cpp
-                src/Rendering/objects/image/Image.cpp
+                src/Rendering/objects/Layer.cpp
+                src/Rendering/objects/Image.cpp
+                src/Rendering/objects/GLImage/GLImage.cpp
                 src/ThirdParty/sha1/sha1.cpp
+                src/ThirdParty/base64/base64.c
         )
 
 # XMP has to be built manually (see src/ThirdParty/build_xmp_libraries.sh)

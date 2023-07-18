@@ -29,6 +29,7 @@ public:
   clock_t m_LAST_WRITE_TIME{};
   std::thread m_Thread;
 
+public:
   static QLogger &GetInstance() {
     static QLogger s_Logger;
     return s_Logger;
@@ -74,6 +75,7 @@ private:
   struct stat logStat {};
   std::mutex m_mutex;
 
+private:
   // Open file on instantiation
   QLogger() { log.open(QLOGGER_LOGFILE, std::ios_base::app); }
 

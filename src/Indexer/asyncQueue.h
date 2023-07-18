@@ -7,14 +7,11 @@
 // https://www.justsoftwaresolutions.co.uk/threading/implementing-a-thread-safe-queue-using-condition-variables.html
 
 template <typename Data> class asyncQueue {
-private:
-  std::queue<Data> m_queue;
-  std::mutex m_mutex;
-  std::condition_variable m_conditionVariable;
 
 public:
   bool killed = false;
 
+public:
   void kill() {
     std::unique_lock<std::mutex> lock(m_mutex);
     killed = true;
@@ -56,4 +53,9 @@ public:
     popped_value = m_queue.front();
     m_queue.pop();
   }
+
+private:
+  std::queue<Data> m_queue;
+  std::mutex m_mutex;
+  std::condition_variable m_conditionVariable;
 };

@@ -1,11 +1,12 @@
 #include "RenderManager.h"
+#include "Client/StableClient.h"
+#include "Config/config.h"
 #include "GLFW/glfw3.h"
-#include "imgui.h"
+#include "Rendering/OrthographicCamera.h"
+#include "StableManager.h"
+#include <imgui.h>
 #include "imgui_impl_glfw.h"
 #include "Indexer/MetaData.h"
-
-GLuint RenderManager::fbo = 0;
-GLuint RenderManager::m_colorBufferTexture = 0;
 
 // Initialise render manager
 RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
@@ -15,36 +16,18 @@ RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
   glfwSetWindowUserPointer(&m_window, (void *)this);
 
   // Create objects
-  m_camera = std::shared_ptr<Camera>(new Camera(&m_window));
-  m_selection = std::shared_ptr<Selection>(new Selection(std::pair<int, int>(0, 0), &m_window, m_camera));
+  m_camera = std::shared_ptr<OrthographicCamera>(new OrthographicCamera(&m_window));
+  m_selection = std::shared_ptr<Selection>(new Selection(glm::ivec2{0, 0}, &m_window, m_camera));
+
+  // Initialise selection buffer texture
+  m_selectionBuffer = std::shared_ptr<GLImage>(new GLImage(m_selection->m_size.x, m_selection->m_size.y, "buffer"));
+  m_selectionMask = std::shared_ptr<GLImage>(new GLImage(m_selection->m_size.x, m_selection->m_size.y, "buffer_mask"));
+
+  m_txtPipeline = std::shared_ptr<pipelineConfig>(new pipelineConfig());
+  m_imgPipeline = std::shared_ptr<pipelineConfig>(new pipelineConfig());
+  m_paintPipeline = std::shared_ptr<pipelineConfig>(new pipelineConfig());
 
   createCanvas(0, 0, "default");
-
-  RenderManager::recalculateFramebuffer(m_camera->m_screen.first, m_camera->m_screen.second);
-}
-
-void RenderManager::recalculateFramebuffer(int width, int height) {
-
-  glGenFramebuffers(1, &fbo);
-  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-  // Attach color buffer
-  glGenTextures(1, &m_colorBufferTexture);
-  glBindTexture(GL_TEXTURE_2D, m_colorBufferTexture);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-  glGenerateMipmap(GL_TEXTURE_2D);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glBindTexture(GL_TEXTURE_2D, 0);
-
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_colorBufferTexture, 0);
-
-  GLenum framebuffer_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-  if (framebuffer_status != GL_FRAMEBUFFER_COMPLETE) {
-    // Handle error with framebuffer here
-  }
-
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 // Destructor, destroy remaining instances
@@ -72,62 +55,99 @@ void RenderManager::logicLoop() {
 void RenderManager::renderLoop() {
   m_camera->updateVisual();
 
-  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-  glColorMask(true, true, true, true);
-  glClearColor(0, 0, 0, 0);
-  glClear(GL_COLOR_BUFFER_BIT);
-
-  getActiveCanvas()->renderImages();
-  getActiveCanvas()->setTexture(&m_colorBufferTexture);
-
-  // Capture render buffer to texture if flag is set
-  if (m_captureBuffer == true) {
-    m_selection->captureBuffer();
-    m_captureBuffer = false;
-  }
-
-  // Render canvas background / fbo of our images / selection
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  glClear(GL_COLOR_BUFFER_BIT);
-  glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
   getActiveCanvas()->updateVisual();
+  getActiveCanvas()->renderImages();
 
   m_selection->updateVisual();
 }
 
 // Set capture render buffer flag, check for out of bounds condition and raise error if required
 void RenderManager::captureBuffer() {
-  // TODO: Check camera x / y offset in conjunction with selection offset and display size
-  m_captureBuffer = true;
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::captureBuffer Setting capture buffer flag to ",
-                             m_captureBuffer);
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::captureBuffer capturing to texture, selection at: ",
+                             m_selection->getPosition().x, m_selection->getPosition().y);
+
+  m_selectionBuffer->resize(m_selection->m_size.x, m_selection->m_size.y);
+  m_selectionMask->resize(m_selection->m_size.x, m_selection->m_size.y);
+
+  std::vector<RGBAPixel> pixels =
+      getActiveCanvas()->getPixelsAtSelection(m_selection->getPosition(), m_selection->m_size);
+  std::vector<RGBAPixel> mask =
+      getActiveCanvas()->getPixelsAtSelection(m_selection->getPosition(), m_selection->m_size, true);
+
+  // Create the texture buffer with correct format, internal format and properties
+  glBindTexture(GL_TEXTURE_2D, m_selectionBuffer->m_texture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_selectionBuffer->m_width, m_selectionBuffer->m_height, 0, GL_RGBA,
+               GL_UNSIGNED_BYTE, pixels.data());
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_NEAREST);
+
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindTexture(GL_TEXTURE_2D, m_selectionMask->m_texture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_selectionMask->m_width, m_selectionMask->m_height, 0, GL_RGBA,
+               GL_UNSIGNED_BYTE, mask.data());
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_NEAREST);
+
+  glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-// Generate img2img from the selection buffer, check for out of bounds condition and raise error if required
-void RenderManager::genFromSelection() {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO,
-                             "RenderManager::genFromSelection Generating img2img from selection on canvas ");
-
-  // TODO: call img2img with selection buffer
+void RenderManager::saveBuffer() {
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::saveBuffer saving to data/output/buffer.png");
+  GLHELPER::SaveTextureToFile("data/output/buffer.png", &m_selectionBuffer->m_texture, m_selectionBuffer->m_width,
+                              m_selectionBuffer->m_height);
 }
 
-// Make a canvas active, pass texture to main window
+void RenderManager::eraseSelection() {
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::eraseSelection deleting selection");
+
+  getActiveCanvas()->eraseSelection(m_selection->getPosition(), m_selection->m_size);
+}
+
+void RenderManager::paintSelection(bool sendToCanvas) {
+  captureBuffer();
+
+  m_paintPipeline->width = m_selectionBuffer->m_width;
+  m_paintPipeline->height = m_selectionBuffer->m_height;
+  glm::ivec2 coords = m_selection->getPosition();
+
+  std::string b64Image = GLHELPER::textureToBase64String(&m_selectionBuffer->m_texture, m_selectionBuffer->m_width,
+                                                         m_selectionBuffer->m_height);
+
+  std::string b64Mask = GLHELPER::textureToBase64String(&m_selectionMask->m_texture, m_selectionBuffer->m_width,
+                                                        m_selectionBuffer->m_height);
+
+  StableManager::GetInstance().outpaint(b64Image, b64Mask, *m_paintPipeline);
+
+  if (sendToCanvas) {
+    // TODO: Save current selection coordinates, Once paintGenStatus returns as rendered then draw the new image to the
+    // canvas
+    GLImage im(m_paintPipeline->width, m_paintPipeline->height, "inpaint");
+
+    // sendImageToCanvasAtPos(im, coords);
+  }
+}
+
+// Make a canvas active
 void RenderManager::selectCanvas(int id) {
-  // Disable old canvas
   if (getActiveCanvas()) {
     m_canvas[m_activeId]->m_active = false;
   }
 
   m_activeId = id;
-  // Set new canvas to active
   m_canvas[m_activeId]->m_active = true;
 }
 
 // Create new canvas object & return a reference
 std::shared_ptr<Canvas> RenderManager::createCanvas(int x, int y, const std::string &name) {
   QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::createCanvas Creating new canvas");
-  m_canvas.emplace_back(new Canvas(std::pair<int, int>{x, y}, name, &m_window, m_camera));
+  m_canvas.emplace_back(new Canvas(glm::ivec2{x, y}, name, &m_window, m_camera));
   selectCanvas(m_canvas.size() - 1);
   return m_canvas.back();
 }
@@ -145,24 +165,17 @@ std::shared_ptr<Canvas> RenderManager::getActiveCanvas() {
 void RenderManager::useImage(std::string path) { m_baseImage = path; }
 const std::string RenderManager::getImage() { return m_baseImage; }
 
-// Get image from canvas, based on selection coordinates
-void RenderManager::sendImageToCanvas(Image &im) {
-  m_canvas[m_activeId]->createImage(std::shared_ptr<Image>(new Image(im)), m_selection->getCoordinates());
+// Send an image to the canvas, ignoring layers
+void RenderManager::sendImageToCanvas(GLImage &im) {
+  m_canvas[m_activeId]->createImage(m_canvas[m_activeId]->getActiveLayer(), std::shared_ptr<GLImage>(new GLImage(im)),
+                                    m_selection->getPosition());
 }
 
-// Text to Image, render result to canvas
-void RenderManager::textToImage(std::string prompt, std::string negative_prompt, std::string &samplerName, int samples,
-                                int steps, double cfg, int seed, int width, int height, int &renderState) {
-  SDCommandsInterface::GetInstance().textToImage(getActiveCanvas()->m_name, prompt, negative_prompt, samplerName,
-                                                 samples, steps, cfg, seed, width, height, renderState);
-}
-
-// Image to Image, render result to canvas
-void RenderManager::imageToImage(std::string &imgPath, std::string prompt, std::string negative_prompt,
-                                 std::string &samplerName, int samples, int steps, double cfg, double strength,
-                                 int seed, int &renderState) {
-  SDCommandsInterface::GetInstance().imageToImage(getActiveCanvas()->m_name, imgPath, prompt, negative_prompt,
-                                                  samplerName, samples, steps, cfg, strength, seed, renderState);
+// Send an image to the canvas, ignoring layers
+void RenderManager::sendImageToCanvasAtPos(GLImage &im, glm::ivec2 position) {
+  // TODO: allow control of active layer
+  m_canvas[m_activeId]->createImage(m_canvas[m_activeId]->getActiveLayer(), std::shared_ptr<GLImage>(new GLImage(im)),
+                                    position);
 }
 
 // Mouse movement callback
@@ -172,19 +185,13 @@ void RenderManager::mouse_cursor_callback(GLFWwindow *window, double xposIn, dou
 
   // Move camera view
   if (rm->m_cameraDrag) {
-    rm->m_camera->moveCameraPosition(static_cast<float>(xposIn) - rm->m_camera->prev_mouse.x,
-                                     static_cast<float>(yposIn) - rm->m_camera->prev_mouse.y);
-    rm->m_camera->prev_mouse.x = xposIn;
-    rm->m_camera->prev_mouse.y = yposIn;
+    rm->m_camera->moveCamera(glm::vec2{xposIn, yposIn});
   }
 
   // Catch selection coordinates
-  if (rm->m_selection->m_captureInProgress) {
-    rm->m_selection->updateCapture(xposIn, yposIn);
+  if (rm->m_selection->m_dragging) {
+    rm->m_selection->UpdateDrag(glm::vec2{xposIn, yposIn});
   }
-
-  rm->m_camera->cur_mouse.x = xposIn;
-  rm->m_camera->cur_mouse.y = yposIn;
 }
 
 // Mouse button callback function for dragging camera and interacting with canvas
@@ -199,20 +206,20 @@ void RenderManager::mouse_btn_callback(GLFWwindow *window, int button, int actio
 
   if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
     if (GLFW_PRESS == action) {
-      rm->m_camera->prev_mouse.x = rm->m_camera->cur_mouse.x;
-      rm->m_camera->prev_mouse.y = rm->m_camera->cur_mouse.y;
+      double xpos, ypos;
+      glfwGetCursorPos(window, &xpos, &ypos);
+
       rm->m_cameraDrag = true;
+      rm->m_camera->onMousePressed(glm::vec2{xpos, ypos});
     } else if (GLFW_RELEASE == action) {
       rm->m_cameraDrag = false;
     }
   }
 
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-    double xpos, ypos;
-    glfwGetCursorPos(window, &xpos, &ypos);
-    rm->m_selection->startCapture(xpos, ypos);
+    rm->m_selection->m_dragging = true;
   } else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
-    rm->m_selection->m_captureInProgress = false;
+    rm->m_selection->m_dragging = false;
   }
 
   if (button == GLFW_MOUSE_BUTTON_RIGHT) {
@@ -227,7 +234,7 @@ void RenderManager::mouse_scroll_callback(GLFWwindow *window, double xoffset, do
   }
 
   RenderManager *rm = (RenderManager *)glfwGetWindowUserPointer(window);
-  rm->m_camera->m_zoom -= (yoffset * rm->m_camera->m_zoomSpeed);
+  rm->m_camera->m_zoom -= yoffset * rm->m_camera->m_zoomSpeed;
 }
 
 // Callback to log GL errors

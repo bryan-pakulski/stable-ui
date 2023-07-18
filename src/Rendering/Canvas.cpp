@@ -1,15 +1,16 @@
 #include "Canvas.h"
+#include "Display/ErrorHandler.h"
+#include "Rendering/objects/GLImage/GLImage.h"
 #include <chrono>
+#include <memory>
 
 Canvas::~Canvas() {}
 
-Canvas::Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *w, std::shared_ptr<Camera> c)
-    : BaseObject(coords), m_coords{coords}, m_name{name} {
+Canvas::Canvas(glm::ivec2 position, const std::string &name, GLFWwindow *w, std::shared_ptr<OrthographicCamera> c)
+    : BaseObject(position), m_name{name} {
   int success;
   m_window = w;
-  m_camera = std::shared_ptr<Camera>(c);
-
-  glfwGetFramebufferSize(m_window, &m_screen.first, &m_screen.second);
+  m_camera = std::shared_ptr<OrthographicCamera>(c);
 
   // Set vertex data
   float vertices[] = {
@@ -46,74 +47,104 @@ Canvas::Canvas(std::pair<int, int> coords, const std::string &name, GLFWwindow *
   setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices), gridShader);
   createShader(gridShader, "background_grid");
 
-  std::string vFBOShaderSource = readShader("data/shaders/Base_V.glsl");
-  std::string fFBOShaderSource = readShader("data/shaders/Base_F.glsl");
-  unsigned int fboVertexShader = initVertexShader(vFBOShaderSource.c_str(), success);
-  unsigned int fboFragmentShader = initFragmentShader(fFBOShaderSource.c_str(), success);
-  linkShaders(fboVertexShader, fboFragmentShader, success, fboShader);
-  setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices), fboShader);
+  // Create default layer
+  createLayer(glm::ivec2{2560, 1440}, "Base Layer", true);
+}
 
-  createShader(fboShader, "fbo");
+// i.e. 512x768 causes issues
+// Retrieve raw pixel data from all images that fall space between two world space coordinates
+// If the mask value is set we won't actually retrieve pixel data but instead create a mask for our sd pipeline to use
+std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::ivec2 size, bool mask) {
+
+  // Raw pixel data, treat as 2d array
+  std::vector<RGBAPixel> pixels(size.x * size.y,
+                                mask ? RGBAPixel{0xFF, 0xFF, 0xFF, 0xFF} : RGBAPixel{0x00, 0x00, 0x00, 0x00});
+  std::vector<RGBAPixel> selectionPixels;
+
+  // We are assuming that our m_editorGrid stays sorted, which should be true as we only emplace data at the end of the
+  // vector
+  for (auto &layer : m_editorGrid) {
+
+    LocalIntersect intersect =
+        GLHELPER::GetLocalIntersectSourceDest(position, size, layer->getPosition(), layer->c_size);
+
+    if (intersect.collision && layer->m_renderFlag) {
+
+      // Iterate over the pixels in the intersection rectangle and extract the relative pixels from the image into
+      // its own vector, note that openGL textures are indexed from the bottom left opposed to our coordinates which
+      // index from the top left
+      selectionPixels = layer->getPixelsAtSelection(intersect.sourceCoordinates, position, size);
+
+      // Copy the selectionPixels to our main image
+      int i = 0;
+      for (int y = intersect.destinationCoordinates.y; y < intersect.destinationCoordinates.w; y++) {
+        for (int x = intersect.destinationCoordinates.x; x < intersect.destinationCoordinates.z; x++) {
+          int index = y * size.x + x;
+
+          if (index > size.x * size.y || index < 0) {
+            QLogger::GetInstance().Log(LOGLEVEL::ERR, "Invalid buffer captured! expected max size ", size.x * size.y,
+                                       " got out of bounds index at", index);
+            ErrorHandler::GetInstance().setError("Invalid image buffer captured!");
+            return pixels;
+          } else {
+            if (!mask) {
+              pixels[index] = selectionPixels.at(i);
+            } else {
+              // Ignore alpha channel
+              if (selectionPixels.at(i).alpha != 0x00) {
+                pixels[index] = RGBAPixel{0x00, 0x00, 0x00, 0xFF};
+              }
+            }
+          }
+
+          i++;
+        }
+      }
+    }
+  }
+
+  // Inverse Y
+  pixels = GLHELPER::FlipMatrixY(pixels, size.x, size.y);
+  return pixels;
+}
+
+// Clear out pixel data in our layer, ignore images
+void Canvas::eraseSelection(glm::ivec2 position, glm::ivec2 size) {
+  for (auto &layer : m_editorGrid) {
+    layer->eraseSelection(position, size);
+  }
 }
 
 void Canvas::updateLogic() {
-  // Get updated screen size
-  glfwGetFramebufferSize(m_window, &m_screen.first, &m_screen.second);
-
-  // Check which chunks are in view and should be rendered
-  for (auto &chunk : m_editorGrid) {
-    chunk->updateLogic();
+  for (auto &layer : m_editorGrid) {
+    layer->updateLogic();
   }
 }
 
 void Canvas::updateVisual() {
-
-  // TODO: make background configurable i.e. grid / star system etc...
-  if (CONFIG::STAR_FIELD.get() == 1) {
+  if (CONFIG::STAR_FIELD.get()) {
     renderStarField();
   } else {
     renderGrid();
   }
-
-  // Render FBO texture on top of background
-  glUseProgram(getShader("fbo")->shaderProgram);
-
-  setMat4("view", m_camera->getViewMatrix(), "fbo");
-  setMat4("projection", m_camera->getProjectionMatrix(), "fbo");
-
-  glm::mat4 model =
-      glm::translate(glm::mat4(1.0f), glm::vec3(m_camera->m_position.x, m_camera->m_position.y, 0.0f)) * // translation
-      glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                                  // rotation
-      glm::scale(glm::mat4(1.0f), glm::vec3(m_camera->m_screen.first * m_camera->m_zoom,
-                                            m_camera->m_screen.second * m_camera->m_zoom, 1.0f)); // scale
-  setMat4("model", model, "fbo");
-
-  glBindVertexArray(getShader("fbo")->VAO);
-
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glBindTexture(GL_TEXTURE_2D, m_texture_id);
-  glBindVertexArray(getShader("background")->VAO);
-  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }
 
 void Canvas::renderStarField() {
   glUseProgram(getShader("background")->shaderProgram);
 
   // View code
-  setMat4("view", m_camera->getViewMatrix(), "background");
-  setMat4("projection", m_camera->getProjectionMatrix(), "background");
+  setMat4("view", m_camera->GetViewMatrix(), "background");
+  setMat4("projection", m_camera->GetProjectionMatrix(), "background");
 
   glm::mat4 model =
-      glm::translate(glm::mat4(1.0f), glm::vec3(m_camera->m_position.x, m_camera->m_position.y, 0.0f)) * // translation
+      glm::translate(glm::mat4(1.0f), glm::vec3(m_camera->m_position.x, m_camera->m_position.y, 1.0f)) * // translation
       glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                                  // rotation
-      glm::scale(glm::mat4(1.0f), glm::vec3(m_camera->m_screen.first * m_camera->m_zoom,
-                                            m_camera->m_screen.second * m_camera->m_zoom, 1.0f)); // scale
+      glm::scale(glm::mat4(1.0f), glm::vec3(m_camera->m_screen.x, m_camera->m_screen.y, 1.0f));          // scale
   setMat4("model", model, "background");
 
   // Set screen size, camera coords and time
-  glUniform2f(glGetUniformLocation(getShader("background")->shaderProgram, "iResolution"), m_camera->m_screen.first,
-              m_camera->m_screen.second);
+  glUniform2f(glGetUniformLocation(getShader("background")->shaderProgram, "iResolution"), m_camera->m_screen.x,
+              m_camera->m_screen.y);
   glUniform2f(glGetUniformLocation(getShader("background")->shaderProgram, "iMouse"), -m_camera->m_position.x,
               -m_camera->m_position.y);
 
@@ -129,15 +160,21 @@ void Canvas::renderGrid() {
   glUseProgram(getShader("background_grid")->shaderProgram);
 
   // View code
-  setMat4("view", m_camera->getViewMatrix(), "background_grid");
-  setMat4("projection", m_camera->getProjectionMatrix(), "background_grid");
+  setMat4("view", m_camera->GetViewMatrix(), "background_grid");
+  setMat4("projection", m_camera->GetProjectionMatrix(), "background_grid");
 
   glm::mat4 model =
       glm::translate(glm::mat4(1.0f), glm::vec3(m_camera->m_position.x, m_camera->m_position.y, 0.0f)) * // translation
       glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 0.0f, 1.0f)) *                                  // rotation
-      glm::scale(glm::mat4(1.0f), glm::vec3(m_camera->m_screen.first * m_camera->m_zoom,
-                                            m_camera->m_screen.second * m_camera->m_zoom, 1.0f)); // scale
+      glm::scale(glm::mat4(1.0f), glm::vec3(m_camera->m_screen.x * m_camera->m_zoom,
+                                            m_camera->m_screen.y * m_camera->m_zoom, 1.0f)); // scale
   setMat4("model", model, "background_grid");
+
+  glUniform2f(glGetUniformLocation(getShader("background_grid")->shaderProgram, "iResolution"), m_camera->m_screen.x,
+              m_camera->m_screen.y);
+  glUniform2f(glGetUniformLocation(getShader("background_grid")->shaderProgram, "iPos"), -m_camera->m_position.x,
+              -m_camera->m_position.y);
+  glUniform1f(glGetUniformLocation(getShader("background_grid")->shaderProgram, "zoom"), m_camera->m_zoom);
 
   glBindVertexArray(getShader("background_grid")->VAO);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
@@ -145,28 +182,14 @@ void Canvas::renderGrid() {
 
 void Canvas::renderImages() {
   // Check which chunks are in view and should be rendered
-  for (auto &chunk : m_editorGrid) {
-    if (chunk->visible(m_coords, m_screen)) {
-      chunk->updateVisual();
-    }
+  for (auto &layer : m_editorGrid) {
+    layer->updateVisual();
   }
 }
 
-// Set Canvas Texture
-void Canvas::setTexture(GLuint *id) { m_texture_id = *id; }
-
-// TODO: Create a new grid chunk object/s based on provided image & coordinates
-void Canvas::createImage(std::shared_ptr<Image> image, std::pair<int, int> chunk_coordinates) {
+void Canvas::createImage(int layerId, std::shared_ptr<GLImage> image, glm::ivec2 position) {
   QLogger::GetInstance().Log(LOGLEVEL::INFO,
-                             "Canvas::createImage Creating new image chunk at coordinates: ", chunk_coordinates.first,
-                             chunk_coordinates.second, "on canvas: ", m_name);
-  m_editorGrid.emplace_back(
-      new Chunk(image, m_camera, chunk_coordinates.first, chunk_coordinates.second, m_editorGrid.size()));
+                             "Canvas::createImage Creating new image chunk at coordinates: ", position.x, position.y,
+                             "on canvas: ", m_name);
+  m_editorGrid[layerId]->addImage(Image(image, m_camera, position));
 }
-
-void Canvas::deleteChunk(int index) { m_editorGrid.erase(m_editorGrid.begin() + index); }
-
-// Chunk visibility control
-void Canvas::hideChunk(int index) { m_editorGrid[index]->m_renderFlag = false; }
-
-void Canvas::showChunk(int index) { m_editorGrid[index]->m_renderFlag = true; }

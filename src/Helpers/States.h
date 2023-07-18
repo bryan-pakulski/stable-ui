@@ -1,15 +1,11 @@
 #pragma once
 
-#include <string>
-
-#ifndef _EXEC_STATE
-#define _EXEC_STATE
-
 // Docker command execution
 struct Q_COMMAND_EXECUTION_STATE {
   const static int FAILED = -1;
   const static int PENDING = 0;
   const static int SUCCESS = 1;
+  const static int NONE = 2;
 };
 
 // Docker status
@@ -39,5 +35,3 @@ struct HEARTBEAT_STATE {
   const static int POLL = 0;
   const static int ALIVE = 1;
 };
-
-#endif

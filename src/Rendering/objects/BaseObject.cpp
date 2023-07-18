@@ -1,12 +1,9 @@
 #include "BaseObject.h"
 #include <sstream>
 
-BaseObject::BaseObject(std::pair<int, int> pixelCoords) : pixelCoords{pixelCoords} {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "BaseObject::BaseObject Object initialized at", pixelCoords.first,
-                             pixelCoords.second);
+BaseObject::BaseObject(glm::ivec2 position) : m_position{position} {
+  QLogger::GetInstance().Log(LOGLEVEL::INFO, "BaseObject::BaseObject Object initialized at", position.x, position.y);
 }
-
-BaseObject::~BaseObject() {}
 
 // Read shader file
 std::string BaseObject::readShader(const char *filePath) {
@@ -28,7 +25,6 @@ std::string BaseObject::readShader(const char *filePath) {
 // Link shaders
 void BaseObject::linkShaders(unsigned int vertexShader, unsigned int fragmentShader, int &success,
                              std::shared_ptr<shader> sh) {
-  char errorInfo[512] = "";
   sh->shaderProgram = glCreateProgram();
 
   glAttachShader(sh->shaderProgram, vertexShader);
@@ -37,8 +33,11 @@ void BaseObject::linkShaders(unsigned int vertexShader, unsigned int fragmentSha
   glGetProgramiv(sh->shaderProgram, GL_LINK_STATUS, &success);
 
   if (!success) {
-    glGetProgramInfoLog(sh->shaderProgram, 512, nullptr, errorInfo);
-    QLogger::GetInstance().Log(LOGLEVEL::ERR, "BaseObject::linkShaders ERROR::PROGRAM::LINKING_FAILED\n", errorInfo);
+    GLint length = 0;
+    glGetShaderiv(sh->shaderProgram, GL_INFO_LOG_LENGTH, &length);
+    std::string errorLog(length, ' '); // Resize and fill with space character
+    glGetProgramInfoLog(sh->shaderProgram, length, &length, &errorLog[0]);
+    QLogger::GetInstance().Log(LOGLEVEL::ERR, "BaseObject::linkShaders ERROR::PROGRAM::LINKING_FAILED\n", errorLog);
   }
 
   // delete shaders after linking
@@ -94,3 +93,20 @@ void BaseObject::createShader(std::shared_ptr<shader> sh, std::string name) { m_
 
 // Get shader
 std::shared_ptr<shader> BaseObject::getShader(std::string name) { return m_shaders.at(name); }
+
+// Check if an image intersects with x1,y1, x2,y2
+bool BaseObject::intersects(const glm::ivec2 &l1, const glm::ivec2 &r1, const glm::ivec2 &l2, const glm::ivec2 &r2) {
+
+  QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "BaseObject::intersects, checking intersection of [", l1.x, l1.y, r1.x,
+                             r1.y, "] and [", l2.x, l2.y, r2.x, r2.y, "]");
+
+  bool wp = std::min(r1.x, r2.x) > std::max(l1.x, l2.x);
+  bool hp = std::min(r1.y, r2.y) > std::max(l1.y, l2.y);
+
+  if (wp && hp) {
+    QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Image::intersects, found intersecting image!");
+    return true;
+  } else {
+    return false;
+  }
+}

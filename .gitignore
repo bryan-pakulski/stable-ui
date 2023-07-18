@@ -1,8 +1,10 @@
 .cache/
 .cppcheck/
 build/
+models/
 .vs
 
+*.bin
 *.ckpt
 *.safetensors
 *.pth

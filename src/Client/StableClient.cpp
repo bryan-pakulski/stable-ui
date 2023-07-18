@@ -3,6 +3,7 @@
 #include "Display/ErrorHandler.h"
 #include "Helpers/States.h"
 #include "Helpers/QLogger.h"
+#include "StableManager.h"
 #include "ThirdParty/cppzmq/zmq.hpp"
 #include <sstream>
 
@@ -27,8 +28,6 @@ StableClient::StableClient() {
   m_heartbeatSocket.set(zmq::sockopt::linger, 0);
 }
 
-StableClient::~StableClient() {}
-
 // Heartbeat ping/pong to determine server status
 void StableClient::heartbeat(int &state) {
   commands::heartbeat cmd = commands::heartbeat();
@@ -48,54 +47,60 @@ void StableClient::heartbeat(int &state) {
 }
 
 // Reloads sd server in docker (release any models in memory)
-void StableClient::releaseMemory() {
+void StableClient::releaseModel() {
   commands::restartServer cmd = commands::restartServer();
   std::string msg = sendMessage(cmd.getCommandString());
+  if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
+    StableManager::GetInstance().setModelState(Q_MODEL_STATUS::NONE_LOADED);
+  } else {
+    StableManager::GetInstance().setModelState(Q_MODEL_STATUS::FAILED);
+  }
 }
 
 // Load a stable diffusion model into memory in preperation for running inference commands
-void StableClient::loadModelToMemory(std::string ckpt_path, std::string config_path, std::string vae_path,
-                                     std::string precision, int &state) {
+void StableClient::loadModelToMemory(commands::loadModelToMemory command) {
 
-  commands::loadModelToMemory cmd = commands::loadModelToMemory{ckpt_path, config_path, vae_path, precision};
-  std::string msg = sendMessage(cmd.getCommandString());
+  std::string msg = sendMessage(command.getCommandString());
   if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
-    state = Q_MODEL_STATUS::LOADED;
+    StableManager::GetInstance().setModelState(Q_MODEL_STATUS::LOADED);
   } else {
-    state = Q_MODEL_STATUS::FAILED;
+    StableManager::GetInstance().setModelState(Q_MODEL_STATUS::FAILED);
   }
 }
 
 // Text to image
-void StableClient::textToImage(std::string hash, std::string outDir, std::string &canvasName, std::string prompt,
-                               std::string negative_prompt, std::string &samplerName, int batch_size, int steps,
-                               double cfg, int seed, int width, int height, int &renderState) {
+void StableClient::textToImage(commands::textToImage command) {
 
-  commands::textToImage cmd = commands::textToImage(hash, prompt, width, height, negative_prompt, canvasName,
-                                                    samplerName, batch_size, 1, steps, cfg, seed, outDir);
-
-  std::string msg = sendMessage(cmd.getCommandString());
+  std::string msg = sendMessage(command.getCommandString());
   if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
-    renderState = Q_RENDER_STATE::RENDERED;
+    StableManager::GetInstance().setRenderState(Q_RENDER_STATE::RENDERED);
+    StableManager::GetInstance().getLatestFiles(true);
   } else {
-    renderState = Q_RENDER_STATE::UNRENDERED;
+    StableManager::GetInstance().setRenderState(Q_RENDER_STATE::UNRENDERED);
   }
 }
 
 // Image to image
-void StableClient::imageToImage(std::string hash, std::string outDir, std::string &prompt, std::string &negative_prompt,
-                                std::string &canvas_name, std::string &img_path, std::string &sampler_name,
-                                int batch_size, int n_iter, int steps, double cfg_scale, double strength, int seed,
-                                int &renderState) {
-  commands::imageToImage cmd =
-      commands::imageToImage(hash, prompt, negative_prompt, canvas_name, img_path, sampler_name, batch_size, n_iter,
-                             steps, cfg_scale, strength, seed, outDir);
+void StableClient::imageToImage(commands::imageToImage command) {
 
-  std::string msg = sendMessage(cmd.getCommandString());
+  std::string msg = sendMessage(command.getCommandString());
   if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
-    renderState = Q_RENDER_STATE::RENDERED;
+    StableManager::GetInstance().setRenderState(Q_RENDER_STATE::RENDERED);
+    StableManager::GetInstance().getLatestFiles(true);
   } else {
-    renderState = Q_RENDER_STATE::UNRENDERED;
+    StableManager::GetInstance().setRenderState(Q_RENDER_STATE::UNRENDERED);
+  }
+}
+
+// Outpainting
+void StableClient::outpainting(commands::outpainting command) {
+
+  std::string msg = sendMessage(command.getCommandString());
+  if (m_dockerCommandStatus == Q_COMMAND_EXECUTION_STATE::SUCCESS) {
+    StableManager::GetInstance().setRenderState(Q_RENDER_STATE::RENDERED);
+    StableManager::GetInstance().getLatestFiles(true);
+  } else {
+    StableManager::GetInstance().setRenderState(Q_RENDER_STATE::UNRENDERED);
   }
 }
 

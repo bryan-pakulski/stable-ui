@@ -10,49 +10,6 @@
 
 class InvertedIndex {
 
-private:
-  // Inverted hashmap, one string key can point to many different related nodes
-  std::map<std::string, std::vector<meta_node>> m_index;
-
-  std::set<std::string> getUniqueTerms(std::string str) {
-    // Strip special characters
-    std::string clean_str;
-    for (char c : str) {
-      if (std::isalpha(c) || std::isdigit(c) || std::isspace(c) ||
-          c == '.') {   // Check if character is alphabetic, numeral, full stop or a space
-        clean_str += c; // If so, add it to clean_str
-      }
-    }
-
-    // Convert to lowercase
-    std::transform(clean_str.begin(), clean_str.end(), clean_str.begin(), ::tolower);
-
-    // Split into unique terms
-    std::set<std::string> key_set;
-    if (clean_str.find(' ') == std::string::npos) {
-      key_set.insert(clean_str);
-    } else {
-      std::stringstream ss(clean_str);
-      std::string word;
-      while (std::getline(ss, word, ' ')) {
-        key_set.insert(word);
-      }
-    }
-    return key_set;
-  }
-
-  // This function takes two vectors and returns a new vector containing only the elements that are present in both
-  std::set<meta_node> intersection(const std::set<meta_node> &v1, const std::set<meta_node> &v2) {
-    std::set<meta_node> result;
-    std::set<meta_node> s1(v1.begin(), v1.end());
-    for (auto &node : v2) {
-      if (s1.find(node) != s1.end()) {
-        result.insert(node);
-      }
-    }
-    return result;
-  }
-
 public:
   InvertedIndex() {}
   ~InvertedIndex() {}
@@ -127,5 +84,48 @@ public:
       }
     }
     return finalNodes;
+  }
+
+private:
+  // Inverted hashmap, one string key can point to many different related nodes
+  std::map<std::string, std::vector<meta_node>> m_index;
+
+  std::set<std::string> getUniqueTerms(std::string str) {
+    // Strip special characters
+    std::string clean_str;
+    for (char c : str) {
+      if (std::isalpha(c) || std::isdigit(c) || std::isspace(c) ||
+          c == '.') {   // Check if character is alphabetic, numeral, full stop or a space
+        clean_str += c; // If so, add it to clean_str
+      }
+    }
+
+    // Convert to lowercase
+    std::transform(clean_str.begin(), clean_str.end(), clean_str.begin(), ::tolower);
+
+    // Split into unique terms
+    std::set<std::string> key_set;
+    if (clean_str.find(' ') == std::string::npos) {
+      key_set.insert(clean_str);
+    } else {
+      std::stringstream ss(clean_str);
+      std::string word;
+      while (std::getline(ss, word, ' ')) {
+        key_set.insert(word);
+      }
+    }
+    return key_set;
+  }
+
+  // This function takes two vectors and returns a new vector containing only the elements that are present in both
+  std::set<meta_node> intersection(const std::set<meta_node> &v1, const std::set<meta_node> &v2) {
+    std::set<meta_node> result;
+    std::set<meta_node> s1(v1.begin(), v1.end());
+    for (auto &node : v2) {
+      if (s1.find(node) != s1.end()) {
+        result.insert(node);
+      }
+    }
+    return result;
   }
 };

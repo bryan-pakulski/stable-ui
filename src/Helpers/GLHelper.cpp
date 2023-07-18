@@ -2,6 +2,8 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
 #include "GLHelper.h"
+#include "ThirdParty/base64/base64.h"
+#include "QLogger.h"
 
 bool GLHELPER::LoadTextureFromFile(const char *filename, GLuint *out_texture, int *out_width, int *out_height,
                                    bool tiled, bool flipImage) {
@@ -26,8 +28,8 @@ bool GLHELPER::LoadTextureFromFile(const char *filename, GLuint *out_texture, in
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   } else {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
   }
 
   // Upload pixels into texture
@@ -44,16 +46,70 @@ bool GLHELPER::LoadTextureFromFile(const char *filename, GLuint *out_texture, in
   return true;
 }
 
-void GLHELPER::SaveTextureToFile(const char *filename, GLuint *texture, int width, int height) {
-  // Allocate array of pixels
-  unsigned char *pixels = (unsigned char *)malloc(width * height * 4);
+void GLHELPER::SaveTextureToFile(const char *filename, GLuint *texture, int width, int height, int flip) {
+  uint8_t *pixels = new uint8_t[width * height * 4];
 
   // Get texture data
-  glGetTexImage(*texture, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+  // Note if that texture is not aligned to 4 bytes as expected by open GL we may need to pack it
+  // See:
+  //      glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
+  //      glPixelStorei(GL_PACK_ALIGNMENT, 1)
+
+  glBindTexture(GL_TEXTURE_2D, *texture);
+  glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glBindTexture(GL_TEXTURE_2D, 0);
 
   // Save texture as png file
-  stbi_write_png(filename, width, height, 4, pixels, 0);
+  stbi_flip_vertically_on_write(flip);
+  stbi_write_png(filename, width, height, 4, pixels, width * 4);
 
   // Free array of pixels
-  free(pixels);
+  delete[] pixels;
+}
+
+// Converts OpenGL Texture into a Base64 string
+// This assumes an RGBA texture
+std::string GLHELPER::textureToBase64String(GLuint *texture, int width, int height) {
+  int data_length = width * height * 4;
+  uint8_t *pixels = new uint8_t[data_length];
+
+  glBindTexture(GL_TEXTURE_2D, *texture);
+  glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  int encoded_data_length = Base64encode_len(data_length);
+  char base64_string[encoded_data_length];
+
+  Base64encode(base64_string, reinterpret_cast<const unsigned char *>(pixels), data_length);
+
+  /* Decode can be done as follows
+  char* data = NULL;
+  int data_length = 0;
+  int alloc_length = Base64decode_len(base64_string);
+  some_random_data = malloc(alloc_length);
+  data_length = Base64decode(data, base64_string);
+  */
+
+  delete[] pixels;
+  return base64_string;
+}
+
+bool GLHELPER::intersects(const glm::ivec2 &l1, const glm::ivec2 &r1, const glm::ivec2 &l2, const glm::ivec2 &r2) {
+
+  QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "BaseObject::intersects, checking intersection of [", l1.x, l1.y, r1.x,
+                             r1.y, "] and [", l2.x, l2.y, r2.x, r2.y, "]");
+
+  bool wp = std::min(r1.x, r2.x) > std::max(l1.x, l2.x);
+  bool hp = std::min(r1.y, r2.y) > std::max(l1.y, l2.y);
+
+  if (wp && hp) {
+    QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Image::intersects, found intersecting image!");
+    return true;
+  } else {
+    return false;
+  }
 }
