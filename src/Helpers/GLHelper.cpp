@@ -82,9 +82,9 @@ std::string GLHELPER::textureToBase64String(GLuint *texture, int width, int heig
   glBindTexture(GL_TEXTURE_2D, 0);
 
   int encoded_data_length = Base64encode_len(data_length);
-  char base64_string[encoded_data_length];
+  std::vector<char> base64_string(encoded_data_length);
 
-  Base64encode(base64_string, reinterpret_cast<const unsigned char *>(pixels), data_length);
+  Base64encode(base64_string.data(), reinterpret_cast<const unsigned char *>(pixels), data_length);
 
   /* Decode can be done as follows
   char* data = NULL;
@@ -95,7 +95,7 @@ std::string GLHELPER::textureToBase64String(GLuint *texture, int width, int heig
   */
 
   delete[] pixels;
-  return base64_string;
+  return base64_string.data();
 }
 
 bool GLHELPER::intersects(const glm::ivec2 &l1, const glm::ivec2 &r1, const glm::ivec2 &l2, const glm::ivec2 &r2) {
