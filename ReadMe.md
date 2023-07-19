@@ -75,9 +75,12 @@ In order to speed up inference time and use resources more effeciently the follo
 There is a github pipeline available for both linux & windows that runs on the master branch.
 Release artifacts are saved for each tagged version and published.
 
-If you'd like to build locally you can perform the following:
+If you'd like to build locally you can follow below steps after cloning the repo and initialising
+submodules:
 
-- Initialise submodules: `git submodule update --recursive --remote`
+- Initialise submodules: `cd src/ThirdParty && git submodule update --init --recursive && git submodule update --remote`
+
+It's assumed that you are using the CMake build system.
 
 ## Linux:
 
