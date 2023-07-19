@@ -1,13 +1,5 @@
 #pragma once
 
-#include <memory>
-// Manage auto_ptr warnings and deprecation in C++11
-#if (__cplusplus >= 201103L)
-template <typename T> using auto_ptr = std::unique_ptr<T>;
-#else
-using std::auto_ptr;
-#endif // C++11
-
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
