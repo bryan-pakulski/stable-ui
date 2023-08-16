@@ -22,10 +22,10 @@ shopt -s nocasematch
 
 if [[ $gpu == *' nvidia '* ]]; then
   printf 'Nvidia GPU is present:  %s\n' "$gpu"
-  docker compose --file docker-compose-nvidia.yml up -d
+  docker compose --project-name sd --file docker-compose-nvidia.yml up -d
 else
   printf 'Nvidia GPU is not present: %s\n' "$gpu"
-  docker compose --file docker-compose-cpu.yml up -d
+  docker compose --project-name sd --file docker-compose-cpu.yml up -d
 fi
 
 docker exec sd /home/entrypoint.sh

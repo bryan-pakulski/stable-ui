@@ -1,3 +1,7 @@
+# Local Repository
+#FROM localhost:5000/nvidia-cuda-12.2.0-runtime-ubuntu20.04
+
+# External repository
 FROM nvidia/cuda:12.2.0-runtime-ubuntu20.04
 
 ENV DEBIAN_FRONTEND=noninteractive

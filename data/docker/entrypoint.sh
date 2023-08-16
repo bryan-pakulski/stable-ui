@@ -12,19 +12,27 @@ ENV_MODIFIED=$(date -r $ENV_FILE "+%s")
 ENV_MODIFED_FILE="/home/.env_updated"
 if [[ -f $ENV_MODIFED_FILE ]]; then ENV_MODIFIED_CACHED=$(<${ENV_MODIFED_FILE}); else ENV_MODIFIED_CACHED=0; fi
 
-# Check for updates
-conda update -n base -c defaults conda
+# Check for updates if we are online:
+wget -q --spider http://google.com
 
-# Create/update conda env if needed
-if ! conda env list | grep ".*${ENV_NAME}.*" >/dev/null 2>&1; then
-    echo "Could not find conda env: ${ENV_NAME} ... creating ..."
-    conda env create -f $ENV_FILE
-    echo "source activate ${ENV_NAME}" > /root/.bashrc
-    ENV_UPDATED=1
-elif [[ ! -z $CONDA_FORCE_UPDATE && $CONDA_FORCE_UPDATE == "true" ]] || (( $ENV_MODIFIED > $ENV_MODIFIED_CACHED )); then
-    echo "Updating conda env: ${ENV_NAME} ..."
-    conda env update --file $ENV_FILE --prune
-    ENV_UPDATED=1
+if [ $? -eq 0 ]; then
+    echo "We are online, checking for conda updates"
+    conda update -n base -c defaults conda
+    
+    # Create/update conda env if needed
+    if ! conda env list | grep ".*${ENV_NAME}.*" >/dev/null 2>&1; then
+        echo "Could not find conda env: ${ENV_NAME} ... creating ..."
+        conda env create -f $ENV_FILE
+        echo "source activate ${ENV_NAME}" > /root/.bashrc
+        ENV_UPDATED=1
+    elif [[ ! -z $CONDA_FORCE_UPDATE && $CONDA_FORCE_UPDATE == "true" ]] || (( $ENV_MODIFIED > $ENV_MODIFIED_CACHED )); then
+        echo "Updating conda env: ${ENV_NAME} ..."
+        conda env update --file $ENV_FILE --prune
+        ENV_UPDATED=1
+    fi
+else
+    echo "[WARNING] - We are offline, conda packages may not be found!"
+    ENV_UPDATED=0
 fi
 
 # Clear artifacts from conda after create/update
