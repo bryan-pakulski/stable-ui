@@ -5,10 +5,7 @@ It is composed of a native front end app & dockerised backend server to ensure e
 
 # Requirements
 
-These are requirements on both Windows (WSL) & Linux
-
 - Docker see: https://github.com/NVIDIA/nvidia-docker#quickstart
-- nvidia-container-toolkit
 
 ### Linux specific requirements:
 

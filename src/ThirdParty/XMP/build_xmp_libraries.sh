@@ -22,15 +22,17 @@ if [ ! -d "XMP-Toolkit-SDK" ]; then
     git clone https://github.com/adobe/XMP-Toolkit-SDK
 
     # Setup zlib
-    wget https://www.zlib.net/zlib-1.2.13.tar.gz
+    wget https://www.zlib.net/current/zlib.tar.gz
+    mkdir -p zlib
     # Extract and copy .c and .h files
-    tar xzvf zlib-1.2.13.tar.gz
-    cp zlib-1.2.13/*.c XMP-Toolkit-SDK/third-party/zlib
-    cp zlib-1.2.13/*.h XMP-Toolkit-SDK/third-party/zlib
-    rm -rf zlib-1.2.13.tar.gz zlib-1.2.13
+    tar xzvf zlib.tar.gz -C zlib --strip-components=1
+    cp zlib/*.c XMP-Toolkit-SDK/third-party/zlib
+    cp zlib/*.h XMP-Toolkit-SDK/third-party/zlib
+    rm -rf zlib*
 
     # Set up libexpat
     git clone https://github.com/libexpat/libexpat
+    mkdir -p src/ThirdParty/XMP/XMP-Toolkit-SDK/third-party/expat
     cp -r libexpat/expat/lib XMP-Toolkit-SDK/third-party/expat/
     rm -rf libexpat
 fi

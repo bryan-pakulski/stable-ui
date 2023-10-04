@@ -3,6 +3,7 @@
 build/
 models/
 .vs
+.vscode
 
 *.bin
 *.ckpt

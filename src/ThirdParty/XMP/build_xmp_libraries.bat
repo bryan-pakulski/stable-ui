@@ -18,13 +18,13 @@ if not exist "XMP-Toolkit-SDK\" (
     copy overrides\CMakeUtils.bat XMP-Toolkit-SDK\build\shared\CMakeUtils.bat
 
     :: Setup zlib
-    powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://www.zlib.net/zlib-1.2.13.tar.gz', 'zlib-1.2.13.tar.gz')"
+    powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://www.zlib.net/current/zlib.tar.gz', 'zlib.tar.gz')"
     :: Extract and copy .c and .h files
-    tar -xzvf zlib-1.2.13.tar.gz
-    move zlib-1.2.13\*.c XMP-Toolkit-SDK\third-party\zlib
-    move zlib-1.2.13\*.h XMP-Toolkit-SDK\third-party\zlib
-    del zlib-1.2.13.tar.gz
-    rmdir zlib-1.2.13 /s /q
+    tar -xzvf zlib.tar.gz
+    move zlib.tar.gz\*.c XMP-Toolkit-SDK\third-party\zlib
+    move zlib.tar.gz\*.h XMP-Toolkit-SDK\third-party\zlib
+    del zlib.tar.gz.tar.gz
+    rmdir zlib* /s /q
 
     :: Set up libexpat
     git clone https://github.com/libexpat/libexpat
