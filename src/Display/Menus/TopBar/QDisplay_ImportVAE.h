@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 #include "Display/ErrorHandler.h"
-#include "ThirdParty/imgui/imfilebrowser.h"
+#include "ThirdParty/imgui/imfilebrowser/imfilebrowser.h"
 #include "Display/QDisplay_Base.h"
 
 #include <imgui_stdlib.h>

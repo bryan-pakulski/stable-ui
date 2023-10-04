@@ -14,7 +14,7 @@
 #include <vector>
 
 #ifndef IMGUI_VERSION
-#error "include imgui.h before this header"
+  #error "include imgui.h before this header"
 #endif
 
 using ImGuiFileBrowserFlags = int;

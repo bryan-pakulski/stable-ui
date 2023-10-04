@@ -7,7 +7,7 @@
 #include "Helpers/hash.h"
 
 #include <imgui.h>
-#include "ThirdParty/imgui/imfilebrowser.h"
+#include "ThirdParty/imgui/imfilebrowser/imfilebrowser.h"
 #include <imgui_stdlib.h>
 #include "yaml-cpp/emittermanip.h"
 #include <yaml-cpp/yaml.h>

@@ -79,6 +79,9 @@ submodules:
 
 It's assumed that you are using the CMake build system.
 
+Another thing to note is that the adobe XMP toolkit is downloaded & built as a dependency as part of the build script, it's not included as a submodule as
+there are some modfications required in order for the library to build correctly
+
 ## Linux:
 
 Install supporting libraries:

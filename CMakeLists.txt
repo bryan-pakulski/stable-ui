@@ -104,6 +104,7 @@ add_library(
         ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
         ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
         ${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.cpp
+        src/ThirdParty/imgui/imnodes/imnodes.cpp
 )
 
 target_compile_options(
@@ -162,6 +163,7 @@ target_include_directories(
         ${CMAKE_HOME_DIRECTORY}/src
         ${CMAKE_HOME_DIRECTORY}/src/ThirdParty/yaml-cpp/include
         ${CMAKE_HOME_DIRECTORY}/src/ThirdParty/XMP/XMP-Toolkit-SDK/public/include
+        ${CMAKE_HOME_DIRECTORY}/src/ThirdParty/imgui/imnodes
 )
 
 target_link_directories(

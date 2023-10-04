@@ -1,5 +1,5 @@
-#include "Display/ErrorHandler.h"
 #include "Display/QDisplay.h"
+#include "Display/ErrorHandler.h"
 #include "StableManager.h"
 #include "Client/StableClient.h"
 #include "Client/Heartbeat.h"

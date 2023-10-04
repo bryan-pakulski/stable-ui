@@ -1,8 +1,9 @@
 #pragma once
 
 #include <glad/glad.h>
-
 #include <GLFW/glfw3.h>
+
+#include "ThirdParty/imgui/imnodes/imnodes.h"
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
@@ -95,6 +96,7 @@ private:
   void cleanupDisplay() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
+    ImNodes::DestroyContext();
     ImGui::DestroyContext();
 
     glfwDestroyWindow(m_window);
@@ -172,6 +174,7 @@ private:
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImNodes::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
     (void)io;
 
