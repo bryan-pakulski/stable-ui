@@ -4,5 +4,4 @@ module:
   working-directory: /modules/stable-ui
   gui-path: ""
   filepaths:
-    # Stable diffusion server
     "files": "/modules/stable-ui"

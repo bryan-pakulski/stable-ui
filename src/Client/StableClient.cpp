@@ -37,8 +37,14 @@ void StableClient::heartbeat(int &state) {
   try {
     m_heartbeatSocket.send(msg, zmq::send_flags::none);
 
-    m_heartbeatSocket.recv(pong, zmq::recv_flags::none);
-    state = HEARTBEAT_STATE::ALIVE;
+    zmq::recv_result_t r = m_heartbeatSocket.recv(pong, zmq::recv_flags::none);
+    if (r.value()) {
+      state = HEARTBEAT_STATE::ALIVE;
+    } else {
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, "StableClient::heartbeat Invalid ping response!");
+      state = HEARTBEAT_STATE::DEAD;
+    }
+
   } catch (const zmq::error_t &err) {
     QLogger::GetInstance().Log(LOGLEVEL::ERR, err.what());
     state = HEARTBEAT_STATE::DEAD;
@@ -115,9 +121,12 @@ std::string StableClient::sendMessage(const std::string &message) {
   zmq::message_t recv;
   zmq::recv_result_t r = m_socket.recv(recv, zmq::recv_flags::none);
 
-  if (recv.str() == "FAILED" || !r.has_value()) {
+  QLogger::GetInstance().Log(LOGLEVEL::DBG2, "StableClient::sendMessage Received response: ", recv.str());
+
+  if (recv.str().find(s_failedResponse) || !r.has_value()) {
     m_dockerCommandStatus = Q_COMMAND_EXECUTION_STATE::FAILED;
-    ErrorHandler::GetInstance().setError("Docker command failed: " + message);
+    ErrorHandler::GetInstance().setError("Docker Command Failure",
+                                         "Command:\n\n" + message + "\n\n Response: \n\n" + recv.str());
   } else {
     m_dockerCommandStatus = Q_COMMAND_EXECUTION_STATE::SUCCESS;
   }

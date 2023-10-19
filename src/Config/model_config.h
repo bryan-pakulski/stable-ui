@@ -4,10 +4,10 @@
 #include <yaml-cpp/yaml.h>
 #include <yaml-cpp/exceptions.h>
 
-#include "Display/ErrorHandler.h"
-#include "Helpers/QLogger.h"
+#include <Display/ErrorHandler.h>
+#include <Helpers/QLogger.h>
+#include "config.h"
 #include "structs.h"
-#include "Config/config.h"
 
 namespace MODEL_CONFIG {
 
@@ -33,10 +33,7 @@ static ModelConfig loadModelConfig(std::string hash) {
     config.enable_vaeSlicing = data["vae_slicing"].as<bool>();
     config.enable_seqCPUOffload = data["seq_cpu_offloat"].as<bool>();
   } catch (const YAML::Exception &err) {
-    ErrorHandler::GetInstance().setError("Failed to read MODELS_CONFIGURATION FILE");
-    QLogger::GetInstance().Log(LOGLEVEL::ERR,
-                               "Failed to read and parse configuration file: ", CONFIG::MODELS_CONFIGURATION_FILE.get(),
-                               err.what());
+    ErrorHandler::GetInstance().setError("Configuration error", "Failed to read MODELS_CONFIGURATION FILE");
   }
 
   return config;
@@ -68,9 +65,8 @@ static void saveModelConfig(const ModelConfig &config) {
     std::ofstream fout(CONFIG::MODELS_CONFIGURATION_FILE.get());
     fout << _baseNode;
   } catch (const YAML::Exception &err) {
-    ErrorHandler::GetInstance().setError("Failed to configuration");
-    QLogger::GetInstance().Log(
-        LOGLEVEL::ERR, "Failed to save to configuration file: ", CONFIG::MODELS_CONFIGURATION_FILE.get(), err.what());
+    ErrorHandler::GetInstance().setError("Configuration error",
+                                         "Failed to save configuration file" + CONFIG::MODELS_CONFIGURATION_FILE.get());
   }
 }
 

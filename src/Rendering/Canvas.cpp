@@ -84,7 +84,7 @@ std::vector<RGBAPixel> Canvas::getPixelsAtSelection(glm::ivec2 position, glm::iv
           if (index > size.x * size.y || index < 0) {
             QLogger::GetInstance().Log(LOGLEVEL::ERR, "Invalid buffer captured! expected max size ", size.x * size.y,
                                        " got out of bounds index at", index);
-            ErrorHandler::GetInstance().setError("Invalid image buffer captured!");
+            ErrorHandler::GetInstance().setError("Invalid image buffer", "Invalid image buffer captured!");
             return pixels;
           } else {
             if (!mask) {

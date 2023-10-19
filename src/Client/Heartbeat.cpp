@@ -19,7 +19,7 @@ void Heartbeat::run() {
 
     // Only throw an error when we experience a connection failure, on initial connect the last_state is POLL
     if (m_state == HEARTBEAT_STATE::DEAD && m_lastState == HEARTBEAT_STATE::ALIVE) {
-      ErrorHandler::GetInstance().setError("No heartbeat to SD Server, is docker running?");
+      ErrorHandler::GetInstance().setError("Docker Heartbeat", "No heartbeat to SD Server, is docker running?");
       QLogger::GetInstance().Log(LOGLEVEL::ERR, "lost heartbeat with docker");
     }
 

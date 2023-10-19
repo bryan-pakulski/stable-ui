@@ -31,7 +31,6 @@
 
 # Bugs
 
-- Logging order is incorrect due to multiprocess access (gui C++ application, multiple python docker processes)
 - Extra configuration i.e. trigger_prompt not being loaded from model yaml
 - Heartbeat bug on windows (no connectivity)
 - Multi string search doesn't work properly (Set union not working as intended?)
@@ -41,6 +40,8 @@
 
 # Done
 
+- Improved error logging and capturing state from docker
+- (FIX) Logging order is incorrect due to multiprocess access (gui C++ application, multiple python docker processes), logging split across multiple files
 - (FIX) Crash when docker closes and then ui is closed afterwards
 - Add search and indexing system on prompt, image hash etc.. for image browser, will need some sort of metadata saved for each image generated (store inside image??)
 - Move to huggingface diffusers library system to load models (see: https://github.com/huggingface/diffusers)

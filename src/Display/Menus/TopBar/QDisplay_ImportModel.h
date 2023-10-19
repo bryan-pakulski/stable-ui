@@ -68,7 +68,7 @@ private:
       fs::copy_file(modelPath, "data/models/" + modelPath.filename().string());
       MODEL_CONFIG::saveModelConfig(m_modelConfig);
     } catch (fs::filesystem_error const &err) {
-      ErrorHandler::GetInstance().setError(err.what());
+      ErrorHandler::GetInstance().setError("Model Configuration Error", err.what());
     }
 
     *m_saving = false;

@@ -185,8 +185,10 @@ class StableDiffusionModel():
             self.model.to(devices.get_cuda_device_string(), torch_dtype=devices.dtype)
 
             logging.info(f"Loaded model with hash: {self.model_hash}")
+            return true
         except:
             self.clean()
             logging.error('Failed to create model')
+            return false
 
     # TODO: When generating an image use the cross_attention_kwargs={"scale":"weight"} for lora support

@@ -40,6 +40,7 @@ class MQServer():
         self.running = True
         self.debuglogging = False
         self.commandList = {}
+        self.FAIL_RESPONSE = "FAILED"
         
     # Create a command from a message
     def parseMessage(self, message, log):
@@ -518,9 +519,10 @@ class SDModelServer(MQServer):
             self.model.clean()
 
         self.model = sd_model.StableDiffusionModel(**cmd.arguments)
-        self.model.load_model()
-
-        return f"Model loaded... {cmd.arguments['checkpoint_path']}"
+        if (self.model.load_model()):
+            return f"Model loaded... {cmd.arguments['checkpoint_path']}"
+        else:
+            return f"{self.FAIL_RESPONSE} - Failed to load model to memory!"
 
     def __text2image(self, cmd):
         result = txt2img.generate(

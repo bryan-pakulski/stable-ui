@@ -58,9 +58,7 @@ private:
         m_ModelConfigList.push_back(i);
       }
     } catch (const fs::filesystem_error &err) {
-      ErrorHandler::GetInstance().setConfigError(CONFIG::MODEL_CONFIGURATIONS_DIRECTORY,
-                                                 "MODEL_CONFIGURATIONS_DIRECTORY");
-      QLogger::GetInstance().Log(LOGLEVEL::ERR, err.what());
+      ErrorHandler::GetInstance().setError("Configuration Error", "MODEL_CONFIGURATIONS_DIRECTORY config not set!");
     }
 
     // Load models list
@@ -87,8 +85,7 @@ private:
         }
       }
     } catch (const fs::filesystem_error &err) {
-      ErrorHandler::GetInstance().setConfigError(CONFIG::VAE_FOLDER_PATH, "VAE_FOLDER_PATH");
-      QLogger::GetInstance().Log(LOGLEVEL::ERR, err.what());
+      ErrorHandler::GetInstance().setError("Configuration Error", "VAE_FOLDER_PATH config not set!");
     }
 
     // Load VAE Config List
@@ -101,8 +98,7 @@ private:
         }
       }
     } catch (const fs::filesystem_error &err) {
-      ErrorHandler::GetInstance().setConfigError(CONFIG::VAE_FOLDER_PATH, "VAE_CONFIG_FOLDER_PATH");
-      QLogger::GetInstance().Log(LOGLEVEL::ERR, err.what());
+      ErrorHandler::GetInstance().setError("Configuration Error", "VAE_CONFIG_FOLDER_PATH config not set!");
     }
   }
 

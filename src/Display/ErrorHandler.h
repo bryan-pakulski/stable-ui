@@ -7,6 +7,7 @@
 #include "Config/types.h"
 
 struct Base_Error {
+  std::string m_title;
   std::string m_errorMessage;
   std::string m_id;
   bool alive = true;
@@ -17,7 +18,8 @@ struct Base_Error {
 };
 
 struct Error : public Base_Error {
-  Error(const std::string &error) {
+  Error(std::string title, const std::string &error) {
+    m_title = title;
     m_errorMessage = error;
     m_id = "ERROR_" + m_errorMessage;
   }
@@ -25,60 +27,18 @@ struct Error : public Base_Error {
   ~Error() {}
 
   void action() {
+    ImGui::SetNextWindowSize(ImVec2(480.0f, 260.0f));
     if (active == false) {
-      ImGui::OpenPopup(m_id.c_str());
+      ImGui::OpenPopup(m_title.c_str());
       active = true;
     }
 
-    if (ImGui::BeginPopupModal(m_id.c_str())) {
-      ImGui::Text("%s", m_errorMessage.c_str());
+    if (ImGui::BeginPopupModal(m_title.c_str(), 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
+      ImGui::TextWrapped("%s", m_errorMessage.c_str());
 
-      if (ImGui::Button("OK")) {
-        alive = false;
-      }
-      ImGui::EndPopup();
-    }
-  }
-};
-
-template <class T> struct ConfigError : public Base_Error {
-  T *m_variable;
-  std::string m_configPath;
-
-  ConfigError(T &variable, std::string &configPath) : m_variable(&variable), m_configPath(configPath) {
-    m_id = "CONFIG_ERROR_" + m_configPath;
-  };
-
-  ~ConfigError() {}
-
-  void setConfigValue() {
-    QLogger::GetInstance().Log(LOGLEVEL::DBG4, "ErrorHandler::setConfigValue Setting additional configuration for",
-                               m_configPath, "to value", m_variable->get());
-    CONFIG::setConfig(*m_variable, m_configPath);
-  }
-
-  void action() {
-    if (active == false) {
-      ImGui::OpenPopup(m_id.c_str());
-      active = true;
-    }
-
-    if (ImGui::BeginPopupModal(m_id.c_str())) {
-      ImGui::Text("Enter a value for configuration:");
-
-      // Attempt different dynamic casts to determine input type from imgui
-      if (dynamic_cast<CString *>(m_variable)) {
-        ImGui::InputText(m_configPath.c_str(), m_variable->getC_str(),
-                         10); // TODO: use CONFIG::DEFAULT_BUFFER_LENGTH.get() when string
-                              // length issue is fixed, see `types.h`
-      } else if (dynamic_cast<CInt *>(m_variable)) {
-        ImGui::InputInt(m_configPath.c_str(), dynamic_cast<CInt *>(m_variable)->ref());
-      } else if (dynamic_cast<CFloat *>(m_variable)) {
-        ImGui::InputFloat(m_configPath.c_str(), dynamic_cast<CFloat *>(m_variable)->ref());
-      }
-
-      if (ImGui::Button("OK")) {
-        setConfigValue();
+      auto windowWidth = ImGui::GetWindowSize().x;
+      ImGui::SetCursorPosX(((windowWidth)*0.5f) - (150.0f / 2.0f));
+      if (ImGui::Button("Okay", ImVec2(150, 40))) {
         alive = false;
       }
       ImGui::EndPopup();
@@ -98,20 +58,9 @@ public:
    *
    * @param const string
    */
-  void setError(const std::string &error) {
+  void setError(std::string title, const std::string &error) {
     QLogger::GetInstance().Log(LOGLEVEL::ERR, error);
-    m_errors.emplace_back(std::unique_ptr<Base_Error>(new Error(error)));
-  }
-
-  /*
-   * Set error state to true and store message, log an error in the QLogger
-   *
-   * @param ref T
-   * @param const string
-   */
-  template <class T> void setConfigError(T &variable, std::string configPath) {
-    QLogger::GetInstance().Log(LOGLEVEL::ERR, "Config error, prompting for config:", configPath);
-    m_errors.emplace_back(std::unique_ptr<ConfigError<T>>(new ConfigError<T>(variable, configPath)));
+    m_errors.emplace_back(std::unique_ptr<Base_Error>(new Error(title, error)));
   }
 
   /*

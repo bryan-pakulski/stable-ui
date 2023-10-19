@@ -56,7 +56,7 @@ private:
     try {
       fs::copy_file(modelPath, "data/models/vae/" + modelPath.filename().string());
     } catch (fs::filesystem_error const &err) {
-      ErrorHandler::GetInstance().setError(err.what());
+      ErrorHandler::GetInstance().setError("VAE Configuration Error", err.what());
     }
 
     *m_saving = false;
