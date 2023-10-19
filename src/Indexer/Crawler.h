@@ -7,7 +7,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "Indexer/asyncQueue.h"
+#include "Helpers/asyncQueue.h"
 #include "Helpers/QLogger.h"
 
 // Files to actually index
@@ -31,7 +31,7 @@ public:
   Crawler() {}
   Crawler(const std::string &path, std::shared_ptr<asyncQueue<std::pair<std::string, QUEUE_STATUS>>> queue)
       : m_modifiedQueue(queue), m_rootPath(path) {
-    QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Crawler::Crawler Initialising on path:", m_rootPath);
+    QLogger::GetInstance().Log(LOGLEVEL::DBG2, "Crawler::Crawler Initialising on path:", m_rootPath);
   }
   ~Crawler() {}
 
@@ -46,13 +46,13 @@ public:
       // Check if this is a new entry, only allow files from our fileTypes vector
       if (entry.is_regular_file() && !m_fileInfo.contains(filepath)) {
         if (s_filetypes.contains(entry.path().extension().string())) {
-          QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Crawler::Traverse Found new file:", filepath);
+          QLogger::GetInstance().Log(LOGLEVEL::DBG1, "Crawler::Traverse Found new file:", filepath);
           m_fileInfo[filepath] =
               FileInfo{std::filesystem::last_write_time(filepath), std::filesystem::file_size(filepath)};
           m_modifiedQueue->push(std::pair<std::string, QUEUE_STATUS>{filepath, QUEUE_STATUS::ADDED});
 
           if (collectLatestFiles) {
-            QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Crawler::Traverse Collecting filepath for preview:", filepath);
+            QLogger::GetInstance().Log(LOGLEVEL::DBG1, "Crawler::Traverse Collecting filepath for preview:", filepath);
             m_newFiles.push_back(filepath);
           }
         }
@@ -85,11 +85,11 @@ private:
   void updateIndex() {
     for (auto it = m_fileInfo.begin(); it != m_fileInfo.end();) {
       if (!std::filesystem::exists(it->first)) {
-        QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Crawler::updateIndex Removing deleted file:", it->first);
+        QLogger::GetInstance().Log(LOGLEVEL::DBG1, "Crawler::updateIndex Removing deleted file:", it->first);
         m_fileInfo.erase(it->first);
         m_modifiedQueue->push(std::pair<std::string, QUEUE_STATUS>{it->first, QUEUE_STATUS::DELETED});
       } else if (is_file_modified(it->first)) {
-        QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Crawler::updateIndex Updating modified file:", it->first);
+        QLogger::GetInstance().Log(LOGLEVEL::DBG1, "Crawler::updateIndex Updating modified file:", it->first);
         m_fileInfo[it->first] =
             FileInfo{std::filesystem::last_write_time(it->first), std::filesystem::file_size(it->first)};
         m_modifiedQueue->push(std::pair<std::string, QUEUE_STATUS>{it->first, QUEUE_STATUS::UPDATED});

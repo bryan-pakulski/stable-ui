@@ -1,6 +1,5 @@
 #include "Indexer.h"
 #include "Indexer/Crawler.h"
-#include "asyncQueue.h"
 #include "Config/config.h"
 #include "Config/config.h"
 #include "Helpers/QLogger.h"
@@ -51,16 +50,16 @@ void Indexer::indexerCrawlerQueueThreadWorker() {
     std::pair<std::string, QUEUE_STATUS> queueEntry;
     if (m_crawlerQueue->try_pop(queueEntry)) {
       if (queueEntry.second == QUEUE_STATUS::ADDED) {
-        QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Indexer::indexerCrawlerQueueThreadWorker Getting XMP data for",
+        QLogger::GetInstance().Log(LOGLEVEL::DBG2, "Indexer::indexerCrawlerQueueThreadWorker Getting XMP data for",
                                    queueEntry.first);
         std::pair<meta_node, metadata> data = XMP::GetInstance().readFile(queueEntry.first);
         m_II.add(data.second, data.first);
       } else if (queueEntry.second == QUEUE_STATUS::UPDATED) {
-        QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Indexer::indexerCrawlerQueueThreadWorker Updating XMP data for",
+        QLogger::GetInstance().Log(LOGLEVEL::DBG2, "Indexer::indexerCrawlerQueueThreadWorker Updating XMP data for",
                                    queueEntry.first);
         // TODO: implement updating existing index entries
       } else if (queueEntry.second == QUEUE_STATUS::DELETED) {
-        QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Indexer::indexerCrawlerQueueThreadWorker Removing XMP data for",
+        QLogger::GetInstance().Log(LOGLEVEL::DBG2, "Indexer::indexerCrawlerQueueThreadWorker Removing XMP data for",
                                    queueEntry.first);
         // TODO: implement deleting index entries
       }
@@ -71,10 +70,8 @@ void Indexer::indexerCrawlerQueueThreadWorker() {
 std::set<meta_node> Indexer::find(const std::string &searchTerm) {
   std::set<meta_node> results = m_II.search(searchTerm);
 
-  if (CONFIG::ENABLE_DEBUG_LOGGING.get() == 1) {
-    for (auto &i : results) {
-      std::cerr << "Search match: " << i.m_filepath << std::endl;
-    }
+  for (auto &i : results) {
+    QLogger::GetInstance().Log(LOGLEVEL::DBG1, "Search match: ", i.m_filepath);
   }
   return results;
 }

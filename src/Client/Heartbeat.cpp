@@ -14,7 +14,7 @@ void Heartbeat::run() {
   while (m_kill_timer.wait_for(std::chrono::seconds(c_timer))) {
 
     // Call sd-client to ping sd-server
-    QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Heartbeat - ping");
+    QLogger::GetInstance().Log(LOGLEVEL::DBG1, "Heartbeat - ping");
     StableClient::GetInstance().heartbeat(m_state);
 
     // Only throw an error when we experience a connection failure, on initial connect the last_state is POLL

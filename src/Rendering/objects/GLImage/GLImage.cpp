@@ -19,7 +19,7 @@ GLImage::GLImage(int width, int height, std::string name) : m_name(name), m_widt
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
-  QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Image::Image Successfully created blank texture", m_name);
+  QLogger::GetInstance().Log(LOGLEVEL::DBG2, "Image::Image Successfully created blank texture", m_name);
 }
 
 // This is a destructive operation
@@ -43,7 +43,7 @@ void GLImage::resize(int width, int height) {
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
-  QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Image::Image Successfully resized", m_name, " to size: ", width, height);
+  QLogger::GetInstance().Log(LOGLEVEL::DBG2, "Image::Image Successfully resized", m_name, " to size: ", width, height);
 }
 
 void GLImage::loadFromImage(std::string path, bool flipImage) {

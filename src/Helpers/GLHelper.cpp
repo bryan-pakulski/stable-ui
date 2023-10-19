@@ -100,14 +100,14 @@ std::string GLHELPER::textureToBase64String(GLuint *texture, int width, int heig
 
 bool GLHELPER::intersects(const glm::ivec2 &l1, const glm::ivec2 &r1, const glm::ivec2 &l2, const glm::ivec2 &r2) {
 
-  QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "BaseObject::intersects, checking intersection of [", l1.x, l1.y, r1.x,
+  QLogger::GetInstance().Log(LOGLEVEL::DBG2, "BaseObject::intersects, checking intersection of [", l1.x, l1.y, r1.x,
                              r1.y, "] and [", l2.x, l2.y, r2.x, r2.y, "]");
 
   bool wp = std::min(r1.x, r2.x) > std::max(l1.x, l2.x);
   bool hp = std::min(r1.y, r2.y) > std::max(l1.y, l2.y);
 
   if (wp && hp) {
-    QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Image::intersects, found intersecting image!");
+    QLogger::GetInstance().Log(LOGLEVEL::DBG2, "Image::intersects, found intersecting image!");
     return true;
   } else {
     return false;

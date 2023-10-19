@@ -26,8 +26,8 @@ template <class T> static void setConfig(T &variable, const std::string &configP
 }
 
 // StableDiffusion configuration
-static CInt IMAGE_SIZE_X_LIMIT(loadConfig<int>("IMAGE_SIZE_X_LIMIT", 512));
-static CInt IMAGE_SIZE_Y_LIMIT(loadConfig<int>("IMAGE_SIZE_Y_LIMIT", 512));
+static CInt IMAGE_SIZE_X_LIMIT(loadConfig<int>("IMAGE_SIZE_X_LIMIT", 1024));
+static CInt IMAGE_SIZE_Y_LIMIT(loadConfig<int>("IMAGE_SIZE_Y_LIMIT", 1024));
 static CString OUTPUT_DIRECTORY(loadConfig<std::string>("OUTPUT_DIRECTORY", "/data/output"));
 
 // ImGui configuration
@@ -60,6 +60,8 @@ static CString CRAWLER_PATH(loadConfig<std::string>("CRAWLER_PATH", "data/output
 
 // Logging
 static CInt ENABLE_GL_DEBUG(loadConfig<int>("ENABLE_OPENGL_DEBUG_OUTPUT", 0));
-static CInt ENABLE_DEBUG_LOGGING(loadConfig<int>("ENABLE_DEBUG_LOGGING", 0));
+static CInt ENABLE_TRACE_LOGGING(loadConfig<int>("ENABLE_TRACE_LOGGING", 0));
+static CInt DEBUG_LEVEL(loadConfig<int>("DEBUG_LEVEL", 5));
+static CString LOG_FILE(loadConfig<std::string>("LOG_FILE", "data/logs/stable-ui.log"));
 
 } // namespace CONFIG

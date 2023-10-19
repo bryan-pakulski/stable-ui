@@ -4,12 +4,16 @@
 #include <ctime>
 #include <fstream>
 #include <iomanip>
+#include <iostream>
+#include <ostream>
+#include <sstream>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <thread>
 #include <mutex>
 
 #include "Config/config.h"
+#include "Helpers/asyncQueue.h"
 
 #ifndef _WIN32
 #include <unistd.h>
@@ -19,15 +23,12 @@
 #define stat _stat
 #endif
 
-#define QLOGGER_LOGFILE "data/logs/sd_server.log"
-
-enum class LOGLEVEL { INFO, WARN, ERR, DEBUG };
+enum class LOGLEVEL { DBG1, DBG2, DBG3, DBG4, TRACE, INFO, WARN, ERR };
 
 class QLogger {
 
 public:
   clock_t m_LAST_WRITE_TIME{};
-  std::thread m_Thread;
 
 public:
   static QLogger &GetInstance() {
@@ -36,30 +37,24 @@ public:
   }
 
   /*
-   * Handle a generic captured exception (C++11) using the ... operator
-   * Exception is rethrown and error is logged
-   *
-   * @param ePtr
+   * Construct the log as a string and push to the logging queue
    */
-  static void ExceptionHandler(std::exception_ptr ePtr) {
-    try {
-      if (ePtr) {
-        std::rethrow_exception(ePtr);
-      }
-    } catch (const std::exception &err) {
-      QLogger::GetInstance().Error(std::string("Caught Exception: "), err.what());
-    }
-  }
-
   template <typename T, typename... Args> void Log(LOGLEVEL logLevel, T message, Args... args) {
-    std::lock_guard<std::mutex> guard(m_mutex);
-    m_Thread = std::thread(&QLogger::_Log<T, Args...>, this, logLevel, message, args...);
-    m_Thread.detach();
+    unsigned long thread_id = pthread_self();
+
+    std::thread([this, thread_id, logLevel, message, args...]() {
+      std::ostringstream log_buffer;
+
+      if (_Log(thread_id, log_buffer, logLevel, message, args...)) {
+        m_loggingQueue->push(log_buffer.str());
+      }
+      m_queueConditionVariable.notify_all();
+    }).detach();
   }
 
   void resetLog() {
-    log.close();
-    log.open(QLOGGER_LOGFILE, std::ios::out | std::ios::trunc);
+    m_logStream.close();
+    m_logStream.open(m_filepath, std::ios::out | std::ios::trunc);
     updateLogTimestamp();
   }
 
@@ -70,83 +65,97 @@ public:
   void operator=(QLogger const &) = delete;
 
 private:
-  // Output file
-  std::ofstream log;
-  struct stat logStat {};
-  std::mutex m_mutex;
+  std::string m_filepath;
+  std::ofstream m_logStream;
+  struct stat m_logStat {};
+
+  std::shared_ptr<asyncQueue<std::string>> m_loggingQueue;
+  std::thread m_queueThread;
+  std::mutex m_queueMutex;
+  std::condition_variable m_queueConditionVariable;
 
 private:
-  // Open file on instantiation
-  QLogger() { log.open(QLOGGER_LOGFILE, std::ios_base::app); }
+  QLogger() {
+    m_filepath = CONFIG::LOG_FILE.get();
+    m_logStream.open(m_filepath, std::ios_base::app);
 
-  ~QLogger() { log.close(); }
+    m_loggingQueue = std::make_shared<asyncQueue<std::string>>();
+    m_queueThread = std::thread(&QLogger::loggingThread, this);
+  }
 
-  void updateLogTimestamp() {
-    if (stat(QLOGGER_LOGFILE, &logStat) == 0) {
-      m_LAST_WRITE_TIME = clock();
+  ~QLogger() {
+    m_logStream.close();
+    m_loggingQueue->kill();
+    m_queueConditionVariable.notify_all();
+    m_queueThread.join();
+  }
+
+  void loggingThread() {
+    std::unique_lock<std::mutex> lock(m_queueMutex);
+    while (!m_loggingQueue->killed) {
+      m_queueConditionVariable.wait(lock, [this] { return !m_loggingQueue->empty() || m_loggingQueue->killed; });
+
+      if (m_loggingQueue->killed) {
+        continue;
+      }
+
+      // This is locked behind a mutex and so will only pop once there is data on the queue
+      std::string logMsg;
+      if (m_loggingQueue->try_pop(logMsg)) {
+        m_logStream << logMsg << std::flush;
+        updateLogTimestamp();
+      }
     }
   }
 
-  template <typename T, typename... Args> void _Log(LOGLEVEL logLevel, T message, Args... args) {
-    std::lock_guard<std::mutex> guard(m_mutex);
+  template <typename T, typename... Args>
+  bool _Log(unsigned long thread_id, std::ostringstream &ostream, LOGLEVEL logLevel, T message, Args... args) {
+
     if (logLevel == LOGLEVEL::INFO) {
-      log << std::string(getDateTime()).append(" - [info]: ") << message << ", ";
-      Info(args...);
+      ostream << getDateTime() << " - [" << thread_id << "] "
+              << " - [info]: " << message;
     } else if (logLevel == LOGLEVEL::WARN) {
-      log << std::string(getDateTime()).append(" - [warn]: ") << message << ", ";
-      Warning(args...);
+      ostream << getDateTime() << " - [" << thread_id << "] "
+              << " - [warn]: " << message;
     } else if (logLevel == LOGLEVEL::ERR) {
-      log << std::string(getDateTime()).append(" - [err]: ") << message << ", ";
-      Error(args...);
-    } else if (logLevel == LOGLEVEL::DEBUG && CONFIG::ENABLE_DEBUG_LOGGING.get() == 1) {
-      log << std::string(getDateTime()).append(" - [dbg]: ") << message << ", ";
-      Debug(args...);
+      ostream << getDateTime() << " - [" << thread_id << "] "
+              << " - [err]: " << message;
+    } else if (logLevel == LOGLEVEL::TRACE) {
+      if (CONFIG::ENABLE_TRACE_LOGGING.get() == 1) {
+        ostream << getDateTime() << " - [" << thread_id << "] "
+                << " - [trace]: " << message;
+      }
+    } else if ((int)logLevel >= CONFIG::DEBUG_LEVEL.get() - 1) {
+      ostream << getDateTime() << " - [" << thread_id << "] "
+              << " - [dbg" << (int)logLevel + 1 << "]: " << message;
+    } else {
+      return false;
     }
 
-    updateLogTimestamp();
-  }
+    // Append arguments
+    ([&] { ostream << ", " << args; }(), ...);
+    ostream << std::endl;
 
-  template <typename T> void Error(T message) { log << message << std::endl; }
-  template <typename T, typename... Args> void Error(T message, Args... args) {
-    log << message << ", ";
-    Error(args...);
+    return true;
   }
-
-  template <typename T> void Warning(T message) { log << message << std::endl; }
-  template <typename T, typename... Args> void Warning(T message, Args... args) {
-    log << message << ", ";
-    Warning(args...);
-  }
-
-  template <typename T> void Info(T message) { log << message << std::endl; }
-  template <typename T, typename... Args> void Info(T message, Args... args) {
-    log << message << ", ";
-    Info(args...);
-  }
-
-  template <typename T> void Debug(T message) { log << message << std::endl; }
-  template <typename T, typename... Args> void Debug(T message, Args... args) {
-    log << message << ", ";
-    Debug(args...);
-  }
-
-  // Empty EOL for single message logs without ...args
-  void Error() { log << std::endl; }
-  void Warning() { log << std::endl; }
-  void Info() { log << std::endl; }
-  void Debug() { log << std::endl; }
 
   /*
    * Gets current date time, strips new lines and returns string
    *
    * @return string
    */
-  static std::string getDateTime() {
+  std::string getDateTime() {
     time_t _tm = time(nullptr);
     struct tm *curtime = localtime(&_tm);
     std::string strTime = std::string(asctime(curtime));
     strTime.erase(std::remove(strTime.begin(), strTime.end(), '\n'), strTime.end());
 
     return strTime;
+  }
+
+  void updateLogTimestamp() {
+    if (stat(m_filepath.c_str(), &m_logStat) == 0) {
+      m_LAST_WRITE_TIME = clock();
+    }
   }
 };

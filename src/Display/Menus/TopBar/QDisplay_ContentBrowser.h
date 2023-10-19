@@ -117,7 +117,7 @@ private:
 
     ImGui::InputText("filter", &m_searchString);
     if (ImGui::Button("Lookup")) {
-      QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Searching for: ", m_searchString);
+      QLogger::GetInstance().Log(LOGLEVEL::DBG4, "Searching for: ", m_searchString);
       m_filteredPaths = StableManager::GetInstance().searchIndex(m_searchString);
     }
     ImGui::SameLine();

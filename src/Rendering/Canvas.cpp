@@ -188,7 +188,7 @@ void Canvas::renderImages() {
 }
 
 void Canvas::createImage(int layerId, std::shared_ptr<GLImage> image, glm::ivec2 position) {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO,
+  QLogger::GetInstance().Log(LOGLEVEL::DBG4,
                              "Canvas::createImage Creating new image chunk at coordinates: ", position.x, position.y,
                              "on canvas: ", m_name);
   m_editorGrid[layerId]->addImage(Image(image, m_camera, position));

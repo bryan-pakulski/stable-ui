@@ -46,7 +46,7 @@ public:
 
     // Loop through search terms
     for (std::string term : uniques) {
-      QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Stripped search term: ", term);
+      QLogger::GetInstance().Log(LOGLEVEL::DBG2, "Stripped search term: ", term);
       // Our search should be lower case
       std::transform(term.begin(), term.end(), term.begin(), ::tolower);
 

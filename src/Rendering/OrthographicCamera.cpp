@@ -6,7 +6,7 @@
 
 OrthographicCamera::OrthographicCamera(GLFWwindow *w) : m_viewMatrix(1.0f), m_window(w) {
   glfwGetFramebufferSize(m_window, &m_screen.x, &m_screen.y);
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "OrthographicCamera::OrthographicCamera Camera initialised ");
+  QLogger::GetInstance().Log(LOGLEVEL::TRACE, "OrthographicCamera::OrthographicCamera");
 
   m_offset = glm::vec3{-m_screen.x / 2.0 * m_zoom, -m_screen.y / 2.0 * m_zoom, 0.0f};
 

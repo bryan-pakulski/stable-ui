@@ -1,7 +1,6 @@
 .cache/
 .cppcheck/
 build/
-models/
 .vs
 .vscode
 

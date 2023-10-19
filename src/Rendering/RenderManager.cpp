@@ -10,7 +10,7 @@
 
 // Initialise render manager
 RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::RenderManager RenderManager initialized");
+  QLogger::GetInstance().Log(LOGLEVEL::TRACE, "RenderManager::RenderManager");
 
   // Allow access to camera variable through static callback function
   glfwSetWindowUserPointer(&m_window, (void *)this);
@@ -63,7 +63,7 @@ void RenderManager::renderLoop() {
 
 // Set capture render buffer flag, check for out of bounds condition and raise error if required
 void RenderManager::captureBuffer() {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::captureBuffer capturing to texture, selection at: ",
+  QLogger::GetInstance().Log(LOGLEVEL::DBG4, "RenderManager::captureBuffer capturing to texture, selection at: ",
                              m_selection->getPosition().x, m_selection->getPosition().y);
 
   m_selectionBuffer->resize(m_selection->m_size.x, m_selection->m_size.y);
@@ -99,13 +99,13 @@ void RenderManager::captureBuffer() {
 }
 
 void RenderManager::saveBuffer() {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::saveBuffer saving to data/output/buffer.png");
+  QLogger::GetInstance().Log(LOGLEVEL::DBG4, "RenderManager::saveBuffer saving to data/output/buffer.png");
   GLHELPER::SaveTextureToFile("data/output/buffer.png", &m_selectionBuffer->m_texture, m_selectionBuffer->m_width,
                               m_selectionBuffer->m_height);
 }
 
 void RenderManager::eraseSelection() {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::eraseSelection deleting selection");
+  QLogger::GetInstance().Log(LOGLEVEL::DBG4, "RenderManager::eraseSelection deleting selection");
 
   getActiveCanvas()->eraseSelection(m_selection->getPosition(), m_selection->m_size);
 }
@@ -146,7 +146,7 @@ void RenderManager::selectCanvas(int id) {
 
 // Create new canvas object & return a reference
 std::shared_ptr<Canvas> RenderManager::createCanvas(int x, int y, const std::string &name) {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "RenderManager::createCanvas Creating new canvas");
+  QLogger::GetInstance().Log(LOGLEVEL::DBG4, "RenderManager::createCanvas Creating new canvas");
   m_canvas.emplace_back(new Canvas(glm::ivec2{x, y}, name, &m_window, m_camera));
   selectCanvas(m_canvas.size() - 1);
   return m_canvas.back();

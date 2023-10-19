@@ -6,9 +6,9 @@
 #include <thread>
 
 #include "Helpers/Timer.h"
+#include "Helpers/asyncQueue.h"
 #include "Indexer/InvertedIndex.h"
 #include "Indexer/Crawler.h"
-#include "Indexer/asyncQueue.h"
 #include "Indexer/MetaData.h"
 
 class Indexer {
@@ -21,7 +21,7 @@ public:
   std::set<meta_node> find(const std::string &searchTerm);
 
   std::vector<std::string> forceUpdate(bool collectLatestFiles = false) {
-    QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Indexer::forceUpdate firing");
+    QLogger::GetInstance().Log(LOGLEVEL::DBG2, "Indexer::forceUpdate firing");
     m_crawler.traverse(collectLatestFiles);
     return m_crawler.getLatestCrawledFiles();
   }

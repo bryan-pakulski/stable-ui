@@ -12,7 +12,7 @@
 #include <functional>
 
 StableManager::StableManager() : m_indexer(CONFIG::CRAWLER_PATH.get()) {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableManager::StableManager initialized");
+  QLogger::GetInstance().Log(LOGLEVEL::TRACE, "StableManager::StableManager");
 
   // Intialise zmq server within docker to receive commands from client
   launchSDModelServer();
@@ -25,7 +25,7 @@ StableManager::StableManager() : m_indexer(CONFIG::CRAWLER_PATH.get()) {
 StableManager::~StableManager() {}
 
 void StableManager::launchSDModelServer() {
-  QLogger::GetInstance().Log(LOGLEVEL::INFO, "StableManager::launchSDModelServer starting up SD Model Server...");
+  QLogger::GetInstance().Log(LOGLEVEL::TRACE, "StableManager::launchSDModelServer");
 
   // Launch SD Server inside docker on startup
 #ifdef _WIN32

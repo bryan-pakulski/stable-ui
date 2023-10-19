@@ -60,7 +60,7 @@ void Layer::eraseSelection(glm::ivec2 position, glm::ivec2 size) {
   LocalIntersect intersect = GLHELPER::GetLocalIntersectSourceDest(getPosition(), c_size, position, size);
 
   if (intersect.collision && m_renderFlag) {
-    QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "Deleting selection from layer pixel data at",
+    QLogger::GetInstance().Log(LOGLEVEL::DBG2, "Deleting selection from layer pixel data at",
                                intersect.destinationCoordinates.x, intersect.destinationCoordinates.w, "and",
                                intersect.destinationCoordinates.y, intersect.destinationCoordinates.z);
 

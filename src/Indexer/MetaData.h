@@ -106,7 +106,7 @@ public:
 
       // If the file is open then read the metadata
       if (ok) {
-        QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "XMP::readFile", status, filename, " is opened  successfully");
+        QLogger::GetInstance().Log(LOGLEVEL::DBG1, "XMP::readFile", status, filename, " is opened  successfully");
 
         // Create the xmp object and get the xmp data
         SXMPMeta meta;
@@ -131,7 +131,7 @@ public:
           dumpFile.open(dumpPath, std::ios::out);
           meta.DumpObject(DumpXMPToFile, &dumpFile);
           dumpFile.close();
-          QLogger::GetInstance().Log(LOGLEVEL::DEBUG, "XMP::readFile dumped file to: ", dumpPath);
+          QLogger::GetInstance().Log(LOGLEVEL::DBG1, "XMP::readFile dumped file to: ", dumpPath);
         }
 
         // Close the SXMPFile.  The resource file is already closed if it was

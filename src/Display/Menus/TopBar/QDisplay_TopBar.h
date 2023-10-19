@@ -173,7 +173,6 @@ private:
 
     if (logFileOpen) {
       ImGui::SetNextWindowBgAlpha(0.9f);
-      ImGui::SetNextWindowSize(ImVec2(CONFIG::IMGUI_LOG_WINDOW_WIDTH.get(), CONFIG::IMGUI_LOG_WINDOW_HEIGHT.get()));
       ImGui::Begin("Log");
 
       if (ImGui::Button("Close")) {
@@ -193,7 +192,7 @@ private:
 
       // Only update text if required
       if (QLogger::GetInstance().m_LAST_WRITE_TIME != lastLogReadTime) {
-        logStream.open(QLOGGER_LOGFILE, std::ios::in);
+        logStream.open(CONFIG::LOG_FILE.get(), std::ios::in);
 
         logFileBuffer.clear();
         logFileBuffer.str(std::string());
