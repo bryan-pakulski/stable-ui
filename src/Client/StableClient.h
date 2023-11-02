@@ -36,7 +36,7 @@ private:
 
   std::string m_addr = "tcp://" + CONFIG::DOCKER_IP_ADDRESS.get() + ":5555";
   std::string m_heartbeat_addr = "tcp://" + CONFIG::DOCKER_IP_ADDRESS.get() + ":5556";
-  constexpr const static std::string s_failedResponse = "FAILED";
+  std::string s_failedResponse = "FAILED";
 
 private:
   std::string sendMessage(const std::string &message);
