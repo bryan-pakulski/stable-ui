@@ -200,12 +200,12 @@ private:
         ImGui::Separator();
 
         // TODO: mouse over popups with context information
-        ImGui::Checkbox("Enable xFormers", &m_modelConfig.enable_xformers);
         ImGui::Checkbox("Enable TF32", &m_modelConfig.enable_tf32);
         ImGui::Checkbox("Torch16 weights", &m_modelConfig.enable_t16);
         ImGui::Checkbox("Enable VAE tiling", &m_modelConfig.enable_vaeTiling);
         ImGui::Checkbox("Enable VAE slicing", &m_modelConfig.enable_vaeSlicing);
         ImGui::Checkbox("Enable sequential CPU offload", &m_modelConfig.enable_seqCPUOffload);
+        ImGui::Checkbox("Enable CPU Model offload", &m_modelConfig.enable_cpu_offload);
 
         // Save available once we fill in mandatory information
         if (m_modelConfig.config != "") {

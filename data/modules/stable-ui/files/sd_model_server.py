@@ -217,11 +217,6 @@ class SDModelServer(MQServer):
                         "required": False,
                         "type": str  
                     },
-                    "enable_xformers": {
-                        "help": "Memory efficient transformers",
-                        "required": False,
-                        "type": bool
-                    },
                     "enable_tf32": {
                         "help": "Lower precision floating point for certain nvidia gpus",
                         "required": False,
@@ -247,6 +242,11 @@ class SDModelServer(MQServer):
                         "required": False,
                         "type": bool
                     },
+                    "enable_cpu_offload": {
+                        "help": "offload main components of the pipeline (typically: text encoder, unet and vae) will be in the GPU while others wait in the CPU",
+                        "required": False,
+                        "type": bool
+                    }
                     
                 },
                 "function": self.__load_model
@@ -555,7 +555,7 @@ class SDModelServer(MQServer):
                 continue
             
             if self.debuglogging:
-              logging.debug("Server Received request: %s" % message)
+              logging.debug(f"Server Received request: {message}")
 
             # Break down message, message format is as follows: command:var1=val1,var2=val2 ...
             try:

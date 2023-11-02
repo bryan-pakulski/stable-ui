@@ -203,6 +203,7 @@ private:
         logUpdated = true;
       }
 
+      // ImGui::TextWrapped("%s", logFileBuffer.str().c_str());
       ImGui::TextUnformatted(logFileBuffer.str().c_str());
 
       // Move to bottom of screen

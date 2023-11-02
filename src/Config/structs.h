@@ -21,12 +21,12 @@ struct ModelConfig {
   bool convert_vae = false;
   std::string scheduler = "pndm";
 
-  bool enable_xformers = false;
   bool enable_tf32 = true;
   bool enable_t16 = true;
   bool enable_vaeTiling = true;
   bool enable_vaeSlicing = false;
   bool enable_seqCPUOffload = false;
+  bool enable_cpu_offload = false;
 };
 
 // Supported pipelines

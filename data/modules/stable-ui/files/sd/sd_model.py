@@ -1,7 +1,6 @@
-from diffusers import StableDiffusionPipeline, EulerAncestralDiscreteScheduler
+from diffusers import StableDiffusionPipeline, StableDiffusionXLPipeline
 from diffusers.models import modeling_utils
 from diffusers.pipelines.stable_diffusion.convert_from_ckpt import (
-    download_from_original_stable_diffusion_ckpt,
     create_vae_diffusers_config
 )
 
@@ -19,7 +18,7 @@ from diffusers.models import AutoencoderKL
 from common import devices
 
 class StableDiffusionModel():
-    def __init__(self, checkpoint_path: str = "", vae_path: str = "", vae_config: str = "", convert_vae: bool = False, checkpoint_config_path: str = "", scheduler: str = "pndm", hash: str = "", enable_xformers: bool = False, enable_tf32: bool = False, enable_t16: bool = False, enable_vaeTiling: bool = False, enable_vaeSlicing: bool = False, enable_seqCPUOffload: bool = False):
+    def __init__(self, checkpoint_path: str = "", vae_path: str = "", vae_config: str = "", convert_vae: bool = False, checkpoint_config_path: str = "", scheduler: str = "pndm", hash: str = "", enable_tf32: bool = False, enable_t16: bool = False, enable_vaeTiling: bool = False, enable_vaeSlicing: bool = False, enable_seqCPUOffload: bool = False, enable_cpu_offload: bool = False):
         # Initialise logging
         logging.basicConfig(
             filename="/logs/sd_pipeline.log",
@@ -59,12 +58,12 @@ class StableDiffusionModel():
 
         # TODO: if CPU is enabled we might want some of these optimisations disabled
         # Optimisations
-        self.enable_xformers = enable_xformers
         self.enable_tf32 = enable_tf32
         self.enable_t16 = enable_t16
         self.enable_vaeTiling = enable_vaeTiling
         self.enable_vaeSlicing = enable_vaeSlicing
         self.enable_seqCPUOffload = enable_seqCPUOffload
+        self.enable_cpu_offload = enable_cpu_offload
 
     # Return type of model based on configuration used
     def get_model_type(self):
@@ -88,8 +87,9 @@ class StableDiffusionModel():
     def clean(self):
         devices.torch_gc()
 
-        if (self.model is not None):
-            del self.model
+        del self.model
+        del self.vae
+        del self.loras
 
     def load_vae(self, vae_config):
         if self.convert_vae:
@@ -129,16 +129,12 @@ class StableDiffusionModel():
         
         self.vae.eval()
 
-
     def loadLORA(self):
         for lora in self.loras:
             self.model.unet.load_attn_procs(lora.path)
 
     # Optimisations, see https://huggingface.co/docs/diffusers/optimization/fp16
     def enableOptimisations(self):
-        if self.enable_xformers:
-            logging.info("Enabling xformers memory efficient attention")
-            self.model.enable_xformers_memory_efficient_attention()
         if self.enable_tf32:
             logging.info("Enabling TF32")
             torch.backends.cuda.matmul.allow_tf32 = True
@@ -148,11 +144,15 @@ class StableDiffusionModel():
         if self.enable_vaeSlicing:
             logging.info("Enabling VAE Slicing")
             self.model.enable_vae_slicing()
-        if self.enable_seqCPUOffload:
-            logging.info("Enabling CPU Offload")
-            self.model.enable_sequential_cpu_offload()
-        
 
+        # These options move different parts of the model to CPU, when using this we can't compile the unet for a speed improvement
+        if self.enable_seqCPUOffload:
+            logging.info("Enabling Sequential CPU Offloading")
+            self.model.enable_sequential_cpu_offload()
+        if self.enable_cpu_offload:
+            logging.info("Enabled Model CPU Offloading")
+            self.model.enable_model_cpu_offload()
+        
     def load_model(self):
         try:
             logging.info(f"Using device: {devices.get_cuda_device_string()}")
@@ -173,22 +173,31 @@ class StableDiffusionModel():
                 self.load_vae(self.vae_config)
 
             # Load Model
-            self.model = download_from_original_stable_diffusion_ckpt(self.checkpoint_path, self.checkpoint_config, scheduler_type=self.scheduler, device=devices.get_cuda_device_string(), from_safetensors=self.safe_tensors, load_safety_checker=False)
-            if self.vae != None:
-                self.model.vae = self.vae
+            if (self.model_type == "sdxl"):
+                pipeline = StableDiffusionXLPipeline
+            else:
+                pipeline = StableDiffusionPipeline
             
+
+            self.model = pipeline.from_single_file(pretrained_model_link_or_path=self.checkpoint_path, original_config_file=self.checkpoint_config, vae=self.vae, scheduler_type=self.scheduler, use_safetensors=self.safe_tensors, load_safety_checker=False, torch_dtype=devices.dtype)
+            logging.info(f"Created model pipeline for: {self.checkpoint_path}")
+
             # Load LORA
             self.loadLORA()
-            
+
             # Optimise and send to device
             self.enableOptimisations()
-            self.model.to(devices.get_cuda_device_string(), torch_dtype=devices.dtype)
 
-            logging.info(f"Loaded model with hash: {self.model_hash}")
-            return true
-        except:
+            if (not self.enable_seqCPUOffload and not self.enable_cpu_offload):
+                logging.info(f"Compiling model and sending to device: {devices.get_cuda_device_string()}")
+                self.model.unet = torch.compile(self.model.unet, mode="reduce-overhead", fullgraph=True)
+                self.model.to(devices.get_cuda_device_string(), torch_dtype=devices.dtype)
+
+            logging.info(f"Finished loading model with hash: {self.model_hash}")
+            return True
+        except Exception as error:
             self.clean()
-            logging.error('Failed to create model')
-            return false
+            logging.error(f'Failed to load model with error: {error}')
+            return False
 
     # TODO: When generating an image use the cross_attention_kwargs={"scale":"weight"} for lora support

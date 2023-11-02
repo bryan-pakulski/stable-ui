@@ -75,12 +75,12 @@ public:
     m_parameters.push_back(makePair("hash", model.hash));
 
     // Optimisations
-    m_parameters.push_back(makePair("enable_xformers", model.enable_xformers));
     m_parameters.push_back(makePair("enable_tf32", model.enable_tf32));
     m_parameters.push_back(makePair("enable_t16", model.enable_t16));
     m_parameters.push_back(makePair("enable_vaeTiling", model.enable_vaeTiling));
     m_parameters.push_back(makePair("enable_vaeSlicing", model.enable_vaeSlicing));
     m_parameters.push_back(makePair("enable_seqCPUOffload", model.enable_seqCPUOffload));
+    m_parameters.push_back(makePair("enable_cpu_offload", model.enable_cpu_offload));
   }
 };
 

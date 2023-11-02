@@ -40,6 +40,7 @@
 
 # Done
 
+- Removed Xformers and upgraded to pytorch 2.0 
 - Improved error logging and capturing state from docker
 - (FIX) Logging order is incorrect due to multiprocess access (gui C++ application, multiple python docker processes), logging split across multiple files
 - (FIX) Crash when docker closes and then ui is closed afterwards

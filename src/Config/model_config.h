@@ -26,12 +26,12 @@ static ModelConfig loadModelConfig(std::string hash) {
     config.vae_config = data["vae_config"].as<std::string>();
     config.convert_vae = data["convert_vae"].as<bool>();
     config.scheduler = data["scheduler"].as<std::string>();
-    config.enable_xformers = data["xformers"].as<bool>();
     config.enable_tf32 = data["tf32"].as<bool>();
     config.enable_t16 = data["t16"].as<bool>();
     config.enable_vaeTiling = data["vae_tiling"].as<bool>();
     config.enable_vaeSlicing = data["vae_slicing"].as<bool>();
     config.enable_seqCPUOffload = data["seq_cpu_offloat"].as<bool>();
+    config.enable_cpu_offload = data["enable_cpu_offload"].as<bool>();
   } catch (const YAML::Exception &err) {
     ErrorHandler::GetInstance().setError("Configuration error", "Failed to read MODELS_CONFIGURATION FILE");
   }
@@ -52,12 +52,12 @@ static void saveModelConfig(const ModelConfig &config) {
     model_node["vae_config"] = config.vae_config;
     model_node["convert_vae"] = config.convert_vae;
     model_node["scheduler"] = config.scheduler;
-    model_node["xformers"] = config.enable_xformers;
     model_node["tf32"] = config.enable_tf32;
     model_node["t16"] = config.enable_t16;
     model_node["vae_tiling"] = config.enable_vaeTiling;
     model_node["vae_slicing"] = config.enable_vaeSlicing;
     model_node["seq_cpu_offloat"] = config.enable_seqCPUOffload;
+    model_node["enable_cpu_offload"] = config.enable_cpu_offload;
 
     // Retrieve root node and dump back to file
     YAML::Node node, _baseNode = YAML::LoadFile(CONFIG::MODELS_CONFIGURATION_FILE.get());

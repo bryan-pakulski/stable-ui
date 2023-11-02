@@ -14,9 +14,10 @@ SHELL ["/bin/bash", "-c"]
 # libjemalloc: more efficient memory manager
 # numactl: more efficient core pinning for python
 # exempi: libraries to manipulate xmp data
+# build-essential: gcc required for torch compile
 
 RUN apt-get update && \
-  apt-get install -y libglib2.0-0 wget git supervisor libjemalloc2 numactl exempi vim && \
+  apt-get install -y libglib2.0-0 wget git supervisor libjemalloc2 numactl exempi vim build-essential && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 

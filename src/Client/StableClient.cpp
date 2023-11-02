@@ -38,11 +38,12 @@ void StableClient::heartbeat(int &state) {
     m_heartbeatSocket.send(msg, zmq::send_flags::none);
 
     zmq::recv_result_t r = m_heartbeatSocket.recv(pong, zmq::recv_flags::none);
-    if (r.value()) {
-      state = HEARTBEAT_STATE::ALIVE;
-    } else {
+    if (r.has_value() && (EAGAIN == r.value())) {
       QLogger::GetInstance().Log(LOGLEVEL::ERR, "StableClient::heartbeat Invalid ping response!");
       state = HEARTBEAT_STATE::DEAD;
+    } else {
+      QLogger::GetInstance().Log(LOGLEVEL::DBG1, "StableClient::heartbeat ", pong.to_string());
+      state = HEARTBEAT_STATE::ALIVE;
     }
 
   } catch (const zmq::error_t &err) {
@@ -121,15 +122,22 @@ std::string StableClient::sendMessage(const std::string &message) {
   zmq::message_t recv;
   zmq::recv_result_t r = m_socket.recv(recv, zmq::recv_flags::none);
 
-  QLogger::GetInstance().Log(LOGLEVEL::DBG2, "StableClient::sendMessage Received response: ", recv.str());
-
-  if (recv.str().find(s_failedResponse) || !r.has_value()) {
+  if (r.has_value() && (EAGAIN == r.value())) {
+    QLogger::GetInstance().Log(LOGLEVEL::ERR, "StableClient::sendMessage invalid response!");
     m_dockerCommandStatus = Q_COMMAND_EXECUTION_STATE::FAILED;
-    ErrorHandler::GetInstance().setError("Docker Command Failure",
-                                         "Command:\n\n" + message + "\n\n Response: \n\n" + recv.str());
+    return "";
   } else {
-    m_dockerCommandStatus = Q_COMMAND_EXECUTION_STATE::SUCCESS;
-  }
+    QLogger::GetInstance().Log(LOGLEVEL::DBG2, "StableClient::sendMessage Received response: ", recv.to_string());
 
-  return recv.str();
+    if (recv.to_string().find(s_failedResponse) != std::string::npos) {
+      m_dockerCommandStatus = Q_COMMAND_EXECUTION_STATE::FAILED;
+      ErrorHandler::GetInstance().setError("Docker Command Failure",
+                                           "Command:\n\n" + message + "\n\nResponse: \n\n" + recv.to_string());
+    } else {
+      m_dockerCommandStatus = Q_COMMAND_EXECUTION_STATE::SUCCESS;
+      QLogger::GetInstance().Log(LOGLEVEL::DBG4, "Docker Command Response: ", recv.to_string());
+    }
+
+    return recv.to_string();
+  }
 }

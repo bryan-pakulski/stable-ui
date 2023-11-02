@@ -16,9 +16,8 @@ dependencies:
       - invisible-watermark           # Adds watermark to generated images
       - compel                        # Text prompt weighting
       - opencv-python-headless        # OpenCV without dependant libraries
-      - diffusers                     # Hugging face diffusers
-      - transformers==4.30.2          # Transformers
-      - xformers                      # Facebook fast x transformers
+      - diffusers==0.21.0             # Hugging face diffusers
+      - transformers==4.34.1          # Transformers
       - optimum-openvino              # OpenVINO optimisation
       - omegaconf==2.1.1              # Configuration
       - torchmetrics==0.6.0           # Pytorch metrics                             (not used atm)

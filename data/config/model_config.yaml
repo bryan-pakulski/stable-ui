@@ -7,5 +7,4 @@
 # 'config'         - Additional config passed to SD commands when model is run i.e. yaml config path
 # 'trigger_prompt' - Inserts trigger keywords for a given model into the prompt when run, space seperated
 # 'vae'            - Path to a vae
-# 'xformers'       - Enable xformers
 models:
