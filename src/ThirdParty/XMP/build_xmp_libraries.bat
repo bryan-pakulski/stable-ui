@@ -20,11 +20,12 @@ if not exist "XMP-Toolkit-SDK\" (
     :: Setup zlib
     powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://www.zlib.net/current/zlib.tar.gz', 'zlib.tar.gz')"
     :: Extract and copy .c and .h files
-    tar -xzvf zlib.tar.gz
-    move zlib.tar.gz\*.c XMP-Toolkit-SDK\third-party\zlib
-    move zlib.tar.gz\*.h XMP-Toolkit-SDK\third-party\zlib
-    del zlib.tar.gz.tar.gz
-    rmdir zlib* /s /q
+    mkdir zlib
+    tar -xzvf zlib.tar.gz -C zlib --strip-components=1
+    move zlib\*.c XMP-Toolkit-SDK\third-party\zlib
+    move zlib\*.h XMP-Toolkit-SDK\third-party\zlib
+    del zlib.tar.gz
+    rmdir zlib /s /q
 
     :: Set up libexpat
     git clone https://github.com/libexpat/libexpat

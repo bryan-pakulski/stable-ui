@@ -14,6 +14,7 @@ else()
         set(CMAKE_CXX_FLAGS "/Wall")
         set(CMAKE_CXX_FLAGS_DEBUG "/Z7")
         set(CMAKE_CXX_FLAGS_RELEASE "/O2")
+        include(C:/vcpkg/scripts/buildsystems/vcpkg.cmake)
 endif()
 
 

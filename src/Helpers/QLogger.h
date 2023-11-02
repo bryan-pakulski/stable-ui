@@ -21,6 +21,9 @@
 
 #ifdef _WIN32
 #define stat _stat
+#define NOMINMAX
+#include <Windows.h>
+#include <processthreadsapi.h>
 #endif
 
 enum class LOGLEVEL { DBG1, DBG2, DBG3, DBG4, TRACE, INFO, WARN, ERR };
@@ -40,7 +43,13 @@ public:
    * Construct the log as a string and push to the logging queue
    */
   template <typename T, typename... Args> void Log(LOGLEVEL logLevel, T message, Args... args) {
-    unsigned long thread_id = pthread_self();
+
+    #ifdef _WIN32
+      unsigned long thread_id = GetCurrentThreadId();
+    #else
+      unsigned long thread_id = pthread_self();
+    #endif
+    
 
     std::thread([this, thread_id, logLevel, message, args...]() {
       std::ostringstream log_buffer;
