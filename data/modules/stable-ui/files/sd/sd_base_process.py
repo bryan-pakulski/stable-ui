@@ -19,6 +19,7 @@ from diffusers import StableDiffusionImg2ImgPipeline
 from diffusers import StableDiffusionInpaintPipeline
 from diffusers import StableDiffusionXLPipeline
 from diffusers import StableDiffusionXLImg2ImgPipeline
+from diffusers import StableDiffusionXLInpaintPipeline
 from compel import Compel
 
 #from optimum.intel.openvino import OVStableDiffusionPipeline
@@ -101,7 +102,6 @@ class StableDiffusionTxt2Img(StableDiffusionBaseProcess):
             if not self.is_pipeline_in([StableDiffusionXLPipeline]):
                 self.pipeline = StableDiffusionXLPipeline(**self.pipeline.components)
                 self.pipeline_type = type(StableDiffusionXLPipeline)
-            
         # Normal latent diffusion
         elif self.sd_model.model_type == "sd":
             if not self.is_pipeline_in([StableDiffusionPipeline]):
@@ -269,7 +269,12 @@ class StableDiffusionOutpainting(StableDiffusionBaseProcess):
         super().__init__(outpath_samples=outpath_samples, prompt=prompt, negative_prompt=negative_prompt, seed=seed,
                          sampler_name=sampler_name, batch_size=batch_size, n_iter=n_iter, steps=steps, cfg_scale=cfg_scale, model=model)
         
-        if self.sd_model.model_type == "sd":
+        if self.sd_model.model_type == "sdxl":
+            if not self.is_pipeline_in([StableDiffusionXLInpaintPipeline]):
+                self.pipeline = StableDiffusionXLInpaintPipeline(**self.pipeline.components)
+                self.pipeline_type = type(StableDiffusionXLInpaintPipeline)
+
+        elif self.sd_model.model_type == "sd":
             if not self.is_pipeline_in([StableDiffusionInpaintPipeline]):
                 self.pipeline = StableDiffusionInpaintPipeline(**self.pipeline.components, requires_safety_checker=False)
                 self.pipeline_type = type(StableDiffusionInpaintPipeline)
@@ -324,8 +329,14 @@ class StableDiffusionOutpainting(StableDiffusionBaseProcess):
         self.sample()
         
     def sdxl_sample(self):
-        # TODO: inpaint pipeline for sdxl???
-        pass
+        prompt_embeds, negative_prompt_embeds, pooled_prompt_embeds, negative_pooled_prompt_embeds = self.pipeline.encode_prompt(prompt=self.prompt, negative_prompt=self.negative_prompt)
+        outputs = self.pipeline(prompt_embeds=prompt_embeds, pooled_prompt_embeds=pooled_prompt_embeds, negative_prompt_embeds=negative_prompt_embeds, negative_pooled_prompt_embeds=negative_pooled_prompt_embeds, image=self.image, width=self.width, height=self.height, mask_image=self.mask, generator=self.generator, num_inference_steps=self.steps, strength=self.strength, guidance_scale = self.cfg_scale, num_images_per_prompt=self.n_iter)
+        for image in outputs.images:
+            base_count = len(os.listdir(self.outpath_samples))
+            img_name = os.path.join(self.outpath_samples, f"{base_count:05}.png")
+            image.save(img_name)
+            self.save_metadata(img_name)
+        self.cleanup()
       
     # Inpainting pipeline
     def sample(self):
