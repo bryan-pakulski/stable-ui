@@ -22,6 +22,8 @@ public:
   QDisplay_Text2Image(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
     m_config = rm->getPipeline(PIPELINE::TXT);
     m_windowName = "txt2img";
+
+    reloadFiles();
   }
 
   virtual void render() {
@@ -65,6 +67,8 @@ public:
 private:
   std::shared_ptr<pipelineConfig> m_config;
   bool m_randomSeed = true;
+  std::string m_refinerModel;
+  std::vector<listItem> m_refinerModelList;
 
   std::vector<listItem> m_samplerList = {
       {.m_name = "ddim"},      {.m_name = "ddiminverse"}, {.m_name = "ddpm"},           {.m_name = "deis"},
@@ -95,6 +99,40 @@ private:
       ImGui::Text("Negative Prompt");
       ImGui::InputTextMultiline("##negative prompt", &m_config->negative_prompt,
                                 ImVec2(ImGui::GetWindowContentRegionWidth(), 240));
+    }
+  }
+
+  void reloadFiles() {
+    // Load models list
+    try {
+      static YAML::Node configFile = YAML::LoadFile(CONFIG::MODELS_CONFIGURATION_FILE.get());
+      YAML::Node models = configFile["models"];
+      for (YAML::const_iterator it = models.begin(); it != models.end(); ++it) {
+        if (it->second["name"].as<std::string>() != "default") {
+          listItem i{.m_name = it->second["name"].as<std::string>(), .m_key = it->first.as<std::string>()};
+          m_refinerModelList.push_back(i);
+        }
+      }
+    } catch (const YAML::Exception &) {
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, "QDisplay_LoadModel::reloadFiles Failed to parse yaml file: ",
+                                 CONFIG::MODELS_CONFIGURATION_FILE.get());
+      return;
+    }
+  }
+
+  // Refiner configuration
+  void selectRefiner() {
+    if (ImGui::BeginCombo("model config", m_refinerModel.c_str(), ImGuiComboFlags_NoArrowButton)) {
+      for (auto &item : m_refinerModelList) {
+        if (ImGui::Selectable(item.m_name.c_str(), item.m_isSelected)) {
+          m_refinerModel = item.m_name;
+          m_config->refiner_model_hash = item.m_key;
+        }
+        if (item.m_isSelected) {
+          ImGui::SetItemDefaultFocus();
+        }
+      }
+      ImGui::EndCombo();
     }
   }
 
@@ -137,6 +175,11 @@ private:
       ImGui::Checkbox("Randomize Seed", &m_randomSeed);
       ImGui::InputDouble("cfg scale", &m_config->cfg, 0.1);
       ImGui::InputInt("Iterations", &m_config->iterations);
+      ImGui::Checkbox("Use Refiner", &m_config->use_refiner);
+
+      if (m_config->use_refiner) {
+        selectRefiner();
+      }
     }
   }
 };

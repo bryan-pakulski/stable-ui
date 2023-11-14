@@ -49,7 +49,10 @@ public:
 
   std::shared_ptr<Canvas> createCanvas(int x, int y, const std::string &name);
   std::shared_ptr<Canvas> getActiveCanvas();
+  void saveCanvas(const std::string &filename);
+  void loadCanvas(const std::string &filename);
   void selectCanvas(int id);
+  void renameCanvas(const std::string &name) { getActiveCanvas()->m_name = name; }
   void setActiveLayer(int id) { m_canvas[m_activeId]->setActiveLayer(id); }
   int getActiveLayer() { return m_canvas[m_activeId]->getActiveLayer(); }
   void sendImageToCanvas(GLImage &im);

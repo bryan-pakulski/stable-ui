@@ -68,3 +68,15 @@ void Image::updateVisual() {
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
   }
 }
+
+datafile Image::serialise() {
+  datafile df = getDF();
+
+  df["source"].setString(m_image->m_image_source);
+  df["width"].setInt(m_image->m_width);
+  df["height"].setInt(m_image->m_height);
+  df["x"].setInt(m_position.x);
+  df["y"].setInt(m_position.y);
+
+  return df;
+}

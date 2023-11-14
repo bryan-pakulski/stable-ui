@@ -1,7 +1,7 @@
 # Main Canvas
 
 - Basic drawing tools (draw, erase(DONE), colour)
-- Save canvas to file
+- Finalise serialization of images within layers
 - Load saved canvas
 - Export canvas to png
 - Images added to canvas are merged onto existing pixel array (actual layers)
@@ -31,6 +31,7 @@
 
 # Bugs
 
+- Crash on some text labels being empty i.e. layer / canvas name on rename
 - Extra configuration i.e. trigger_prompt not being loaded from model yaml
 - Heartbeat bug on windows (no connectivity)
 - Multi string search doesn't work properly (Set union not working as intended?)
@@ -40,6 +41,7 @@
 
 # Done
 
+- Save canvas to file
 - Removed Xformers and upgraded to pytorch 2.0 
 - Improved error logging and capturing state from docker
 - (FIX) Logging order is incorrect due to multiprocess access (gui C++ application, multiple python docker processes), logging split across multiple files

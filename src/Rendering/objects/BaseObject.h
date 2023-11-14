@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers/QLogger.h"
+#include "Helpers/Serializer.h"
 
 #include <glad/glad.h>
 
@@ -24,7 +25,7 @@ struct shader {
   }
 };
 
-class BaseObject {
+class BaseObject : public Serialisable {
 
 public:
   BaseObject(glm::ivec2 m_position);

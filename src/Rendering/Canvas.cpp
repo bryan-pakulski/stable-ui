@@ -46,9 +46,6 @@ Canvas::Canvas(glm::ivec2 position, const std::string &name, GLFWwindow *w, std:
   linkShaders(gridVertexShader, gridFragmentShader, success, gridShader);
   setShaderBuffers(vertices, sizeof(vertices), indices, sizeof(indices), gridShader);
   createShader(gridShader, "background_grid");
-
-  // Create default layer
-  createLayer(glm::ivec2{2560, 1440}, "Base Layer", true);
 }
 
 // i.e. 512x768 causes issues
@@ -192,4 +189,19 @@ void Canvas::createImage(int layerId, std::shared_ptr<GLImage> image, glm::ivec2
                              "Canvas::createImage Creating new image chunk at coordinates: ", position.x, position.y,
                              "on canvas: ", m_name);
   m_editorGrid[layerId]->addImage(Image(image, m_camera, position));
+}
+
+datafile Canvas::serialise() {
+  datafile df = getDF();
+
+  df["canvas"].setString(m_name);
+  df["x"].setInt(m_position.x);
+  df["y"].setInt(m_position.y);
+  df["layer_count"].setInt(m_editorGrid.size());
+
+  for (size_t i = 0; i < m_editorGrid.size(); i++) {
+    df["layer"][std::to_string(i)] = m_editorGrid[i]->serialise();
+  }
+
+  return df;
 }

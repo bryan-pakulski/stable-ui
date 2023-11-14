@@ -6,12 +6,18 @@
 #include "Client/Heartbeat.h"
 #include "Display/ErrorHandler.h"
 #include "Display/QDisplay_Base.h"
+
+#include "QDisplay_SaveFile.h"
+#include "QDisplay_LoadFile.h"
 #include "QDisplay_ConfigureModel.h"
 #include "QDisplay_ImportModel.h"
 #include "QDisplay_ImportVAE.h"
 #include "QDisplay_LoadModel.h"
 #include "QDisplay_PluginsWindow.h"
 #include "QDisplay_ContentBrowser.h"
+#include "QDisplay_NewCanvas.h"
+#include "QDisplay_LogWindow.h"
+
 #include "StableManager.h"
 
 #include <fstream>
@@ -23,12 +29,15 @@ class QDisplay_TopBar : public QDisplay_Base {
 public:
   // Initialise render manager reference
   QDisplay_TopBar(std::shared_ptr<RenderManager> rm, GLFWwindow *w) : QDisplay_Base(rm, w) {
+    m_saveFileWindow = std::unique_ptr<QDisplay_SaveFile>(new QDisplay_SaveFile(rm, w));
+    m_loadFileWindow = std::unique_ptr<QDisplay_LoadFile>(new QDisplay_LoadFile(rm, w));
     m_configureModelWindow = std::unique_ptr<QDisplay_ConfigureModel>(new QDisplay_ConfigureModel(rm, w));
     m_importModelWindow = std::unique_ptr<QDisplay_ImportModel>(new QDisplay_ImportModel(rm, w));
     m_importVAEWindow = std::unique_ptr<QDisplay_ImportVAE>(new QDisplay_ImportVAE(rm, w));
     m_loadModelWindow = std::unique_ptr<QDisplay_LoadModel>(new QDisplay_LoadModel(rm, w));
     m_pluginsWindow = std::unique_ptr<QDisplay_PluginsWindow>(new QDisplay_PluginsWindow(rm, w));
     m_contentBrowserWindow = std::unique_ptr<QDisplay_ContentBrowser>(new QDisplay_ContentBrowser(rm, w));
+    m_newCanvasPopup = std::unique_ptr<QDisplay_NewCanvas>(new QDisplay_NewCanvas(rm, w));
 
     // Load images
     m_docker_connected_icon = std::unique_ptr<GLImage>(new GLImage(32, 32, "connected_icon"));
@@ -46,20 +55,16 @@ public:
 
       if (ImGui::BeginMenu("File")) {
 
-        if (ImGui::MenuItem("New Canvas")) {
-          newFileOpen = true;
+        if (ImGui::MenuItem("New Project")) {
+          m_newCanvasPopup->openWindow();
         }
 
-        if (ImGui::MenuItem("Load Canvas")) {
-          loadFileOpen = true;
+        if (ImGui::MenuItem("Save Project")) {
+          m_saveFileWindow->openWindow();
         }
 
-        if (ImGui::MenuItem("Import Model")) {
-          m_importModelWindow->openWindow();
-        }
-
-        if (ImGui::MenuItem("Import VAE")) {
-          m_importVAEWindow->openWindow();
+        if (ImGui::MenuItem("Load Project")) {
+          m_loadFileWindow->openWindow();
         }
 
         if (ImGui::MenuItem("Content Browser")) {
@@ -70,6 +75,14 @@ public:
       }
 
       if (ImGui::BeginMenu("Model")) {
+
+        if (ImGui::MenuItem("Import New Model")) {
+          m_importModelWindow->openWindow();
+        }
+
+        if (ImGui::MenuItem("Import New VAE")) {
+          m_importVAEWindow->openWindow();
+        }
 
         if (ImGui::MenuItem("Load Model To Memory")) {
           m_loadModelWindow->openWindow();
@@ -106,7 +119,7 @@ public:
       }
 
       ImGui::Separator();
-      if (ImGui::MenuItem(std::string("Canvas - " + m_renderManager->getActiveCanvas()->m_name).c_str())) {
+      if (ImGui::MenuItem(std::string("Project - " + m_renderManager->getActiveCanvas()->m_name).c_str())) {
         selectCanvasOpen = true;
       }
 
@@ -124,26 +137,28 @@ public:
 
     // These will only render if their corresponding flags are set
     QDisplay_LogFile();
-    QDisplay_NewFile();
-    QDisplay_LoadFile();
     QDisplay_SelectCanvasOpen();
 
     // Render additional windows
+    m_saveFileWindow->render();
+    m_loadFileWindow->render();
     m_configureModelWindow->render();
     m_importModelWindow->render();
     m_importVAEWindow->render();
     m_loadModelWindow->render();
     m_pluginsWindow->render();
     m_contentBrowserWindow->render();
+    m_newCanvasPopup->render();
   }
 
 private:
   // Window triggers
-  bool newFileOpen = false;
   bool logFileOpen = false;
-  bool loadFileOpen = false;
   bool selectCanvasOpen = false;
 
+  std::unique_ptr<QDisplay_SaveFile> m_saveFileWindow;
+  std::unique_ptr<QDisplay_LoadFile> m_loadFileWindow;
+  std::unique_ptr<QDisplay_NewCanvas> m_newCanvasPopup;
   std::unique_ptr<QDisplay_ConfigureModel> m_configureModelWindow;
   std::unique_ptr<QDisplay_ImportModel> m_importModelWindow;
   std::unique_ptr<QDisplay_ImportVAE> m_importVAEWindow;
@@ -217,39 +232,11 @@ private:
     }
   }
 
-  void QDisplay_NewFile() {
-    if (newFileOpen) {
-      ImGui::OpenPopup("NEW_FILE");
-      if (ImGui::BeginPopupModal("NEW_FILE")) {
-
-        ImGui::InputText("canvas name", &m_canvasName);
-
-        if (ImGui::Button("Create Canvas")) {
-          m_renderManager->createCanvas(0, 0, m_canvasName);
-          newFileOpen = false;
-        }
-
-        if (ImGui::Button("Cancel")) {
-          newFileOpen = false;
-        }
-        ImGui::EndPopup();
-      }
-    }
-  }
-
-  void QDisplay_LoadFile() {
-    if (loadFileOpen) {
-
-      // Todo: Load file
-
-      loadFileOpen = false;
-    }
-  }
-
   void QDisplay_SelectCanvasOpen() {
     if (selectCanvasOpen) {
-      ImGui::OpenPopup("SELECTCANVAS");
-      if (ImGui::BeginPopupModal("SELECTCANVAS")) {
+
+      ImGui::OpenPopup("Select Canvas");
+      if (ImGui::BeginPopupModal("Select Canvas")) {
         if (ImGui::BeginListBox("Canvas")) {
           for (auto &item : m_renderManager->m_canvas) {
             const char *item_name = item->m_name.c_str();
@@ -258,7 +245,6 @@ private:
 
             if (ImGui::Selectable(item_name, is_selected)) {
               m_renderManager->selectCanvas(index);
-              selectCanvasOpen = false;
             }
 
             // Set the initial focus when opening the combo (scrolling +
@@ -270,6 +256,16 @@ private:
           ImGui::EndListBox();
         }
       }
+
+      ImGui::Separator();
+      ImGui::Text("Configuration: ");
+      ImGui::InputText("Project Name:", &m_renderManager->getActiveCanvas()->m_name);
+      ImGui::Separator();
+
+      if (ImGui::Button("okay")) {
+        selectCanvasOpen = false;
+      }
+      ImGui::SameLine();
       if (ImGui::Button("close")) {
         selectCanvasOpen = false;
       }

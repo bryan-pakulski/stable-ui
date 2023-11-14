@@ -2,8 +2,11 @@
 #include "Client/StableClient.h"
 #include "Config/config.h"
 #include "GLFW/glfw3.h"
+#include "Helpers/QLogger.h"
 #include "Rendering/OrthographicCamera.h"
+#include "Rendering/objects/GLImage/GLImage.h"
 #include "StableManager.h"
+#include <cstdint>
 #include <imgui.h>
 #include "imgui_impl_glfw.h"
 #include "Indexer/MetaData.h"
@@ -28,6 +31,7 @@ RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
   m_paintPipeline = std::shared_ptr<pipelineConfig>(new pipelineConfig());
 
   createCanvas(0, 0, "default");
+  getActiveCanvas()->createLayer(glm::ivec2{2560, 1440}, "Base Layer", true);
 }
 
 // Destructor, destroy remaining instances
@@ -134,6 +138,58 @@ void RenderManager::paintSelection(bool sendToCanvas) {
   }
 }
 
+void RenderManager::saveCanvas(const std::string &filename) {
+  datafile df;
+  if (datafile().write(getActiveCanvas()->serialise(), filename)) {
+    QLogger::GetInstance().Log(LOGLEVEL::INFO, "Saved file: ", filename);
+  } else {
+    QLogger::GetInstance().Log(LOGLEVEL::ERR, "Failed to save file: ", filename);
+  }
+}
+
+void RenderManager::loadCanvas(const std::string &filename) {
+  datafile df;
+
+  if (datafile().read(df, filename)) {
+
+    // check for duplicate filenames, attempt to recover if they exist
+    for (auto &canvas : m_canvas) {
+      if (df["canvas"].getString() == canvas->m_name) {
+        QLogger::GetInstance().Log(LOGLEVEL::ERR, "Duplicate canvas! renaming..", filename);
+        df["canvas"].setString(canvas->m_name + "_copy");
+      }
+    }
+
+    QLogger::GetInstance().Log(LOGLEVEL::ERR, "Loading canvas..", df["canvas"].getString());
+    createCanvas(df["x"].getInt(), df["y"].getInt(), df["canvas"].getString());
+
+    // Create layers
+    for (int i = 0; i < df["layer_count"].getInt(); i++) {
+      QLogger::GetInstance().Log(LOGLEVEL::ERR, "Creating Layer ", std::to_string(i));
+      datafile &layer = df["layer"][std::to_string(i)];
+      getActiveCanvas()->createLayer(glm::ivec2{layer["width"].getInt(), layer["height"].getInt()},
+                                     layer["name"].getString());
+
+      // Copy Raw Pixel Data
+      int idx = 0;
+      for (RGBAPixel &pixel : getActiveCanvas()->m_editorGrid.back()->pixelData) {
+        uint32_t px = df["layer"][std::to_string(i)]["pixelData"].getUInt(idx);
+        pixel.red = (px >> 24) & 0xFF;
+        pixel.green = (px >> 16) & 0xFF;
+        pixel.blue = (px >> 8) & 0xFF;
+        pixel.alpha = px & 0xFF;
+        idx++;
+      }
+
+      // Copy image information
+    }
+
+    QLogger::GetInstance().Log(LOGLEVEL::INFO, "Loaded file: ", filename);
+  } else {
+    QLogger::GetInstance().Log(LOGLEVEL::ERR, "Failed to load file: ", filename);
+  }
+}
+
 // Make a canvas active
 void RenderManager::selectCanvas(int id) {
   if (getActiveCanvas()) {
@@ -154,6 +210,7 @@ std::shared_ptr<Canvas> RenderManager::createCanvas(int x, int y, const std::str
 
 // Get active canvas
 std::shared_ptr<Canvas> RenderManager::getActiveCanvas() {
+  // TODO: we shouldn't return a nullptr...
   if (m_canvas.size() > 0) {
     return m_canvas[m_activeId];
   } else {

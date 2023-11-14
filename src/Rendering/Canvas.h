@@ -66,6 +66,8 @@ public:
   void hideLayer(int index) { m_editorGrid[index]->m_renderFlag = false; }
   void showLayer(int index) { m_editorGrid[index]->m_renderFlag = true; }
 
+  datafile serialise();
+
 private:
   std::shared_ptr<OrthographicCamera> m_camera;
   float m_time = 0.0f;

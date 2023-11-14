@@ -48,4 +48,6 @@ struct pipelineConfig {
   int width = 512;
   int height = 512;
   int seed = 0;
+  bool use_refiner = false;
+  std::string refiner_model_hash = "";
 };
