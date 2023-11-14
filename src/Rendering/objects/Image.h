@@ -25,6 +25,8 @@ public:
   void updateLogic() override {}
   void updateVisual() override;
 
+  datafile serialise();
+
 private:
   std::shared_ptr<OrthographicCamera> m_camera;
 };

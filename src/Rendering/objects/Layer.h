@@ -47,6 +47,8 @@ public:
   // In typical cartesian format
   std::vector<RGBAPixel> getPixelsAtSelection(glm::ivec4 coordinates, glm::ivec2 position, glm::ivec2 size);
 
+  datafile serialise();
+
 private:
   std::vector<Image> m_images;
   std::shared_ptr<OrthographicCamera> m_camera;

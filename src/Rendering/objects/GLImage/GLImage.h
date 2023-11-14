@@ -2,6 +2,7 @@
 #include "Helpers/GLHelper.h"
 #include "Helpers/States.h"
 
+#include <cstdint>
 #include <glad/glad.h>
 #include <iterator>
 
@@ -13,6 +14,17 @@ struct RGBAPixel {
   unsigned char green = 0xFF;
   unsigned char blue = 0xFF;
   unsigned char alpha = 0xFF;
+
+  uint32_t asInt() {
+
+    uint32_t packedColor = 0;
+    packedColor |= ((uint32_t)red) << 24;
+    packedColor |= ((uint32_t)green) << 16;
+    packedColor |= ((uint32_t)blue) << 8;
+    packedColor |= ((uint32_t)alpha);
+
+    return packedColor;
+  }
 };
 
 class GLImage {

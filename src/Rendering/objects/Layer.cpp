@@ -2,9 +2,10 @@
 #include "Rendering/OrthographicCamera.h"
 #include "Rendering/objects/GLImage/GLImage.h"
 #include "glm/fwd.hpp"
+#include <cstdint>
 
 Layer::Layer(std::shared_ptr<OrthographicCamera> c, glm::ivec2 dimensions, std::string name, bool protect)
-    : BaseObject(glm::ivec2{0, 0}), m_camera(c), m_name(name), c_size(dimensions), c_protected(protect) {
+    : BaseObject(glm::ivec2{0, 0}), c_size(dimensions), c_protected(protect), m_name(name), m_camera(c) {
 
   pixelData.resize(dimensions.x * dimensions.y, RGBAPixel{0x00, 0x00, 0x00, 0x00});
 
@@ -148,7 +149,7 @@ std::vector<RGBAPixel> Layer::getPixelsAtSelection(glm::ivec4 coordinates, glm::
 
       for (int y = intersect.sourceCoordinates.y; y < intersect.sourceCoordinates.w; y++) {
         for (int x = intersect.sourceCoordinates.x; x < intersect.sourceCoordinates.z; x++) {
-          int index = y * image.m_image->m_width + x;
+          size_t index = y * image.m_image->m_width + x;
           if (index > selectionPixels.size() || index < 0) {
             continue;
           } else {
@@ -160,4 +161,25 @@ std::vector<RGBAPixel> Layer::getPixelsAtSelection(glm::ivec4 coordinates, glm::
   }
 
   return selectionPixels;
+}
+
+datafile Layer::serialise() {
+  datafile df = getDF();
+
+  df["name"].setString(m_name);
+  df["width"].setInt(c_size.x);
+  df["height"].setInt(c_size.y);
+  df["renderFlag"].setInt(m_renderFlag);
+
+  // Raw pixel data
+  for (size_t i = 0; i < pixelData.size(); i++) {
+    df["pixelData"].setUInt(pixelData[i].asInt(), i);
+  }
+
+  // Image information
+  for (size_t i = 0; i < m_images.size(); i++) {
+    df["image"][std::to_string(i)] = m_images[i].serialise();
+  }
+
+  return df;
 }
