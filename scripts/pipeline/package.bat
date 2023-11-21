@@ -17,6 +17,6 @@ if "%1"=="-r" (
     move /Y build\Debug\* build\stable-ui-bin
 )
 
-copy /Y src\imgui.ini build\stable-ui-bin
+copy /Y data\config\imgui.ini build\stable-ui-bin
 copy /Y lib\*.dll build\stable-ui-bin
 copy /Y scripts\docker\start_docker.bat build\stable-ui-bin
