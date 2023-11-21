@@ -1,5 +1,6 @@
 # Main Canvas
 
+- parallel gzip, look into pigz, build binary to call externally while saving?
 - Basic drawing tools (draw, erase(DONE), colour)
 - Finalise serialization of images within layers
 - Name files .sdui by default
