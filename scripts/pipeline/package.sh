@@ -14,7 +14,7 @@ fi
 
 cp -ruv data build/stable-ui-bin/
 cp -uv scripts/docker/start_docker.sh build/stable-ui-bin/
-cp -uv src/imgui.ini build/stable-ui-bin/
+cp -uv data/config/imgui.ini build/stable-ui-bin/
 
 if [[ $DYNAMIC_LIBS == "ON" ]]; then
   cp -uv lib/*.so build/stable-ui-bin

@@ -2,7 +2,8 @@
 
 - Basic drawing tools (draw, erase(DONE), colour)
 - Finalise serialization of images within layers
-- Load saved canvas
+- Name files .sdui by default
+- Fix conflicting canvas names on load - concept of unsaved work state?
 - Export canvas to png
 - Images added to canvas are merged onto existing pixel array (actual layers)
 
@@ -41,6 +42,7 @@
 
 # Done
 
+- Load saved canvas
 - Save canvas to file
 - Removed Xformers and upgraded to pytorch 2.0 
 - Improved error logging and capturing state from docker

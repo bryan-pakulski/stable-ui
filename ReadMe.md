@@ -84,6 +84,7 @@ It's assumed that you are using the CMake build system.
 Install supporting libraries:
 
 - `libzmq` / `libzmq-dev` / `libzmq3-dev` (dependant on distribution)
+- `zlib`
 
 ### Building:
 
@@ -104,6 +105,7 @@ Libraries can be installed using vcpkg in the same manner as they are set up in 
 git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
 C:\vcpkg\bootstrap-vcpkg.bat
 C:\vcpkg\vcpkg install zeromq --triplet x64-windows
+C:\vcpkg\vcpkg install zlib
 ```
 
 ### Building

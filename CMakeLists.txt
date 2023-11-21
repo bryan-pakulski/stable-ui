@@ -179,11 +179,14 @@ if(UNIX)
                 glm
                 yaml-cpp
                 zmq
+                z
                 ${CMAKE_SOURCE_DIR}/lib/libXMPCore.so
                 ${CMAKE_SOURCE_DIR}/lib/libXMPFiles.so
                 ${OPENGL_LIBRARY}
                 )
         else()
+                set(ZLIB_USE_STATIC_LIBS "ON")
+
                 target_link_libraries(
                 stable-ui PRIVATE
                 imgui
@@ -192,6 +195,7 @@ if(UNIX)
                 glm
                 yaml-cpp
                 zmq
+                z
                 ${CMAKE_SOURCE_DIR}/lib/staticXMPCore.ar
                 ${CMAKE_SOURCE_DIR}/lib/staticXMPFiles.ar
                 ${OPENGL_LIBRARY}

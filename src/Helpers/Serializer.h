@@ -6,6 +6,7 @@
 #include <fstream>
 #include <stack>
 #include <sstream>
+#include <zlib.h>
 
 class datafile {
 public:
@@ -55,8 +56,15 @@ public:
     std::string sSeperator = std::string(1, sListSep) + " ";
     size_t nIndentCount = 0;
 
+    std::stringstream dataFileBuffer;
+    gzFile outFile = gzopen(sFileName.c_str(), "wb");
+
+    if (!outFile) {
+      return false;
+    }
+
     // Fully specified lambda, recursive
-    std::function<void(const datafile &, std::ofstream &)> write = [&](const datafile &n, std::ofstream &file) {
+    std::function<void(const datafile &, std::stringstream &)> parse = [&](const datafile &n, std::stringstream &buffer) {
       for (auto const &property : n.m_vecObjects) {
 
         // Lambda util function for indentation
@@ -69,7 +77,7 @@ public:
 
         // Check for children
         if (property.second.m_vecObjects.empty()) {
-          file << indent(sIndent, nIndentCount) << property.first << " = ";
+          buffer << indent(sIndent, nIndentCount) << property.first << " = ";
           size_t nItems = property.second.getValueCount();
 
           for (size_t i = 0; i < property.second.getValueCount(); i++) {
@@ -78,25 +86,25 @@ public:
             // it is not suffixed with the seperator
             size_t x = property.second.getString(i).find_first_of(sListSep);
             if (x != std::string::npos) {
-              file << "\"" << property.second.getString(i) << "\"" << ((nItems > 1) ? sSeperator : "");
+              buffer << "\"" << property.second.getString(i) << "\"" << ((nItems > 1) ? sSeperator : "");
             } else {
-              file << property.second.getString(i) << ((nItems > 1) ? sSeperator : "");
+              buffer << property.second.getString(i) << ((nItems > 1) ? sSeperator : "");
             }
 
             nItems--;
           }
 
           //  Property written, move to next line
-          file << "\n";
+          buffer << "\n";
         } else {
           // Property has children, force a new line
-          file << "\n" << indent(sIndent, nIndentCount) << property.first << "\n";
+          buffer << "\n" << indent(sIndent, nIndentCount) << property.first << "\n";
           // Open braces, and update indentation
-          file << indent(sIndent, nIndentCount) << "{\n";
+          buffer << indent(sIndent, nIndentCount) << "{\n";
           nIndentCount++;
           // Recursively write node
-          write(property.second, file);
-          file << indent(sIndent, nIndentCount) << "}\n\n";
+          parse(property.second, buffer);
+          buffer << indent(sIndent, nIndentCount) << "}\n\n";
         }
       }
 
@@ -106,102 +114,118 @@ public:
         nIndentCount--;
     };
 
-    std::ofstream file(sFileName);
-    if (file.is_open()) {
-      write(n, file);
-      return true;
+    parse(n, dataFileBuffer);
+
+    // Compress our data to save disk space, otherwise we are average 60MB for an empty project!
+    unsigned long int file_size = sizeof(char) * dataFileBuffer.str().size();
+    gzwrite(outFile, (void*) &file_size, sizeof(file_size));
+    gzwrite(outFile, (void*) (dataFileBuffer.str().data()), file_size);
+    gzclose(outFile);
+
+    return true;
+  }
+
+  inline static bool readCompressed(const std::string &sFileName, std::stringstream &buffer) {
+    unsigned long int size;
+    gzFile gz_file = gzopen(sFileName.c_str(), "rb");
+    if (!gz_file) {
+        return false;
     }
 
-    return false;
+    gzread(gz_file, (void*)&size, sizeof(size));
+    char* compressed_buffer = new char[size];
+    gzread(gz_file, compressed_buffer, size);
+
+    buffer.write(compressed_buffer, size);
+    delete[] compressed_buffer;
+    gzclose(gz_file);
+
+    return true;
   }
 
   inline static bool read(datafile &n, const std::string &sFileName, const char sListSep = ',') {
-    std::ifstream file(sFileName);
-    if (file.is_open()) {
 
-      std::string sPropName = "";
-      std::string sPropValue = "";
+    std::stringstream buffer;
+    if (!readCompressed(sFileName, buffer)) {
+      return false;
+    }
 
-      std::stack<std::reference_wrapper<datafile>> stkPath;
-      stkPath.push(n);
+    std::string sPropName = "";
+    std::string sPropValue = "";
 
-      // Read line by line and process stack
-      while (!file.eof()) {
-        std::string line;
-        std::getline(file, line);
+    std::stack<std::reference_wrapper<datafile>> stkPath;
+    stkPath.push(n);
 
-        // Lambda to remove whitespace from beginning and end of supplied string
-        auto trim = [](std::string &s) {
-          s.erase(0, s.find_first_not_of(" \t\n\r\f\v"));
-          s.erase(s.find_last_not_of(" \t\n\r\f\v") + 1);
-        };
+    std::string line;
+    while (std::getline(buffer, line)) {
+      // Lambda to remove whitespace from beginning and end of supplied string
+      auto trim = [](std::string &s) {
+        s.erase(0, s.find_first_not_of(" \t\n\r\f\v"));
+        s.erase(s.find_last_not_of(" \t\n\r\f\v") + 1);
+      };
 
-        trim(line);
+      trim(line);
 
-        if (!line.empty()) {
+      if (!line.empty()) {
 
-          // If we have an assignment operator split the string into it's key value pairs
-          size_t x = line.find_first_of('=');
-          if (x != std::string::npos) {
-            // Key
-            sPropName = line.substr(0, x);
-            trim(sPropName);
+        // If we have an assignment operator split the string into it's key value pairs
+        size_t x = line.find_first_of('=');
+        if (x != std::string::npos) {
+          // Key
+          sPropName = line.substr(0, x);
+          trim(sPropName);
 
-            // Value
-            sPropValue = line.substr(x + 1, line.size());
-            trim(sPropValue);
+          // Value
+          sPropValue = line.substr(x + 1, line.size());
+          trim(sPropValue);
 
-            // Iterate through string character by character and determine if we are parsing an array
-            // This also accounts for cases like follows, a = 1, 2, 3, "4,5", 6
-            bool bInQuotes = false;
-            std::string sToken;
-            size_t nTokenCount = 0;
-            for (const auto c : sPropValue) {
+          // Iterate through string character by character and determine if we are parsing an array
+          // This also accounts for cases like follows, a = 1, 2, 3, "4,5", 6
+          bool bInQuotes = false;
+          std::string sToken;
+          size_t nTokenCount = 0;
+          for (const auto c : sPropValue) {
 
-              if (c == '\"') {
-                bInQuotes = !bInQuotes;
+            if (c == '\"') {
+              bInQuotes = !bInQuotes;
+            } else {
+              if (bInQuotes) {
+                sToken.append(1, c);
               } else {
-                if (bInQuotes) {
-                  sToken.append(1, c);
+                if (c == sListSep) {
+                  trim(sToken);
+                  stkPath.top().get()[sPropName].setString(sToken, nTokenCount);
+                  sToken.clear();
+                  nTokenCount++;
                 } else {
-                  if (c == sListSep) {
-                    trim(sToken);
-                    stkPath.top().get()[sPropName].setString(sToken, nTokenCount);
-                    sToken.clear();
-                    nTokenCount++;
-                  } else {
-                    sToken.append(1, c);
-                  }
+                  sToken.append(1, c);
                 }
               }
             }
+          }
 
-            // Any residual characters at this point just make up the final token
-            if (!sToken.empty()) {
-              trim(sToken);
-              stkPath.top().get()[sPropName].setString(sToken, nTokenCount);
-            }
+          // Any residual characters at this point just make up the final token
+          if (!sToken.empty()) {
+            trim(sToken);
+            stkPath.top().get()[sPropName].setString(sToken, nTokenCount);
+          }
+        } else {
+          // If we don't have an equals operation we want to check if we are entering a new node (indicated by the
+          // presence of {})
+          if (line[0] == '{') {
+            stkPath.push(stkPath.top().get()[sPropName]);
           } else {
-            // If we don't have an equals operation we want to check if we are entering a new node (indicated by the
-            // presence of {})
-            if (line[0] == '{') {
-              stkPath.push(stkPath.top().get()[sPropName]);
+            if (line[0] == '}') {
+              stkPath.pop();
             } else {
-              if (line[0] == '}') {
-                stkPath.pop();
-              } else {
-                sPropName = line;
-              }
+              sPropName = line;
             }
           }
         }
       }
-
-      file.close();
-      return true;
     }
 
-    return false;
+    return true;
   }
 
 private:
