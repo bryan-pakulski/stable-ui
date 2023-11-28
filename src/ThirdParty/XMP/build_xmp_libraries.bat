@@ -11,8 +11,8 @@ set "lib_output=%CD%\lib"
 pushd src\ThirdParty\XMP
 
 if not exist "XMP-Toolkit-SDK\" (
-    :: Setup base library
-    git clone https://github.com/adobe/XMP-Toolkit-SDK
+    :: Setup base library, we are using v2023.07
+    git clone --depth 1 --branch v2023.07 https://github.com/adobe/XMP-Toolkit-SDK
 
     :: Copy overrides
     copy overrides\CMakeUtils.bat XMP-Toolkit-SDK\build\shared\CMakeUtils.bat
@@ -28,7 +28,7 @@ if not exist "XMP-Toolkit-SDK\" (
     rmdir zlib /s /q
 
     :: Set up libexpat
-    git clone https://github.com/libexpat/libexpat
+    git clone --depth 1 --branch R_2_5_0 https://github.com/libexpat/libexpat
     move libexpat\expat\lib XMP-Toolkit-SDK\third-party\expat\
     rmdir libexpat /s /q
 )

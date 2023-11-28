@@ -9,7 +9,7 @@
 #include <imgui.h>
 #include "ThirdParty/imgui/imfilebrowser.h"
 #include <imgui_stdlib.h>
-#include "yaml-cpp/emittermanip.h"
+#include <yaml-cpp/emittermanip.h>
 #include <yaml-cpp/yaml.h>
 #include <yaml-cpp/exceptions.h>
 #include <filesystem>

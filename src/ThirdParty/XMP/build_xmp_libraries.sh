@@ -18,8 +18,8 @@ lib_output=$(pwd)/lib
 pushd src/ThirdParty/XMP
 
 if [ ! -d "XMP-Toolkit-SDK" ]; then
-    # Setup base library
-    git clone https://github.com/adobe/XMP-Toolkit-SDK
+    # Setup base library, we are using v2023.07
+    git clone --depth 1 --branch v2023.07 https://github.com/adobe/XMP-Toolkit-SDK
 
     # Setup zlib
     wget https://www.zlib.net/current/zlib.tar.gz
@@ -31,8 +31,8 @@ if [ ! -d "XMP-Toolkit-SDK" ]; then
     rm -rf zlib*
 
     # Set up libexpat
-    git clone https://github.com/libexpat/libexpat
-    mkdir -p src/ThirdParty/XMP/XMP-Toolkit-SDK/third-party/expat
+    git clone --depth 1 --branch R_2_5_0 https://github.com/libexpat/libexpat
+    mkdir -p XMP-Toolkit-SDK/third-party/expat
     cp -r libexpat/expat/lib XMP-Toolkit-SDK/third-party/expat/
     rm -rf libexpat
 fi

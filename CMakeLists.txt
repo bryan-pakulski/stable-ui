@@ -123,8 +123,15 @@ find_package(OpenGL REQUIRED)  # for Dear ImGui
 find_package(Threads REQUIRED) # for GLFW
 find_package(X11 REQUIRED)     # for GLFW
 
-# Yaml-cpp
-add_subdirectory(${CMAKE_HOME_DIRECTORY}/src/ThirdParty/yaml-cpp)
+# Download and fetch yaml-cpp
+FetchContent_Declare(
+        yaml-cpp
+        GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+        GIT_TAG 0.8.0
+)
+
+set(YAML_CPP_BUILD_TESTS OFF)
+FetchContent_MakeAvailable(yaml-cpp)
 
 # Zero MQ should be install as part of the pipeline or using vcpkg
 if (WIN32)
@@ -161,7 +168,6 @@ target_include_directories(
         ${imgui_SOURCE_DIR}/misc/cpp
         ${glm_SOURCE_DIR}/src
         ${CMAKE_HOME_DIRECTORY}/src
-        ${CMAKE_HOME_DIRECTORY}/src/ThirdParty/yaml-cpp/include
         ${CMAKE_HOME_DIRECTORY}/src/ThirdParty/XMP/XMP-Toolkit-SDK/public/include
 )
 
