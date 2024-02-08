@@ -151,35 +151,37 @@ private:
   // Layer content Helper
   void layerContentHelper(int layerId) {
     if (ImGui::BeginListBox("Layer Content")) {
-      for (auto &image : m_renderManager->getActiveCanvas()->m_editorGrid.at(layerId)->getImages()) {
-        const char *item_name = image.m_image->m_image_source.c_str();
-        int index = std::addressof(image) -
-                    std::addressof(m_renderManager->getActiveCanvas()->m_editorGrid.at(layerId)->getImages().front());
-        const bool is_selected = index == m_selectedImageIndex;
+      if (m_renderManager->getActiveCanvas()->m_editorGrid.size() > layerId) {
+        for (auto &image : m_renderManager->getActiveCanvas()->m_editorGrid.at(layerId)->getImages()) {
+          const char *item_name = image.m_image->m_image_source.c_str();
+          int index = std::addressof(image) -
+                      std::addressof(m_renderManager->getActiveCanvas()->m_editorGrid.at(layerId)->getImages().front());
+          const bool is_selected = index == m_selectedImageIndex;
 
-        // Visibility icons
-        ImGui::PushID(static_cast<const void *>(&image)); // We need a unique identifier for images to allow ImGui to
-                                                          // perform interaction, hence using memory location
-        GLImage icon = image.m_renderFlag ? *m_visible_icon : *m_hidden_icon;
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-        ImGui::ImageButton((void *)(intptr_t)icon.m_texture, {c_visibilityIconSize, c_visibilityIconSize}, {1, 0},
-                           {0, 1});
-        ImGui::PopStyleColor();
+          // Visibility icons
+          ImGui::PushID(static_cast<const void *>(&image)); // We need a unique identifier for images to allow ImGui to
+                                                            // perform interaction, hence using memory location
+          GLImage icon = image.m_renderFlag ? *m_visible_icon : *m_hidden_icon;
+          ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+          ImGui::ImageButton((void *)(intptr_t)icon.m_texture, {c_visibilityIconSize, c_visibilityIconSize}, {1, 0},
+                             {0, 1});
+          ImGui::PopStyleColor();
 
-        // Toggle item visibility flag
-        if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-          image.m_renderFlag = !image.m_renderFlag;
+          // Toggle item visibility flag
+          if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+            image.m_renderFlag = !image.m_renderFlag;
+          }
+          ImGui::SameLine();
+
+          if (ImGui::Selectable(item_name, is_selected)) {
+            m_selectedImageIndex = index;
+          }
+
+          if (is_selected) {
+            ImGui::SetItemDefaultFocus();
+          }
+          ImGui::PopID();
         }
-        ImGui::SameLine();
-
-        if (ImGui::Selectable(item_name, is_selected)) {
-          m_selectedImageIndex = index;
-        }
-
-        if (is_selected) {
-          ImGui::SetItemDefaultFocus();
-        }
-        ImGui::PopID();
       }
 
       ImGui::EndListBox();

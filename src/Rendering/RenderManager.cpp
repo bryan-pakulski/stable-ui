@@ -31,7 +31,6 @@ RenderManager::RenderManager(GLFWwindow &w) : m_window{w} {
   m_paintPipeline = std::shared_ptr<pipelineConfig>(new pipelineConfig());
 
   createCanvas(0, 0, "default");
-  getActiveCanvas()->createLayer(glm::ivec2{2560, 1440}, "Base Layer", true);
 }
 
 // Destructor, destroy remaining instances
@@ -205,18 +204,14 @@ std::shared_ptr<Canvas> RenderManager::createCanvas(int x, int y, const std::str
   QLogger::GetInstance().Log(LOGLEVEL::DBG4, "RenderManager::createCanvas Creating new canvas");
   m_canvas.emplace_back(new Canvas(glm::ivec2{x, y}, name, &m_window, m_camera));
   selectCanvas(m_canvas.size() - 1);
+
+  // TODO: configurable layer size when creating canvas?
+  getActiveCanvas()->createLayer(glm::ivec2{2560, 1440}, "Output", true);
   return m_canvas.back();
 }
 
 // Get active canvas
-std::shared_ptr<Canvas> RenderManager::getActiveCanvas() {
-  // TODO: we shouldn't return a nullptr...
-  if (m_canvas.size() > 0) {
-    return m_canvas[m_activeId];
-  } else {
-    return nullptr;
-  }
-}
+std::shared_ptr<Canvas> RenderManager::getActiveCanvas() { return m_canvas[m_activeId]; }
 
 // Select an image to use as a base for generation
 void RenderManager::useImage(std::string path) { m_baseImage = path; }
