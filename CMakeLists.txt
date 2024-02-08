@@ -123,6 +123,8 @@ find_package(OpenGL REQUIRED)  # for Dear ImGui
 find_package(Threads REQUIRED) # for GLFW
 find_package(X11 REQUIRED)     # for GLFW
 
+find_package(ZLIB REQUIRED)
+
 # Download and fetch yaml-cpp
 FetchContent_Declare(
         yaml-cpp
@@ -185,7 +187,7 @@ if(UNIX)
                 glm
                 yaml-cpp
                 zmq
-                z
+                ZLIB::ZLIB
                 ${CMAKE_SOURCE_DIR}/lib/libXMPCore.so
                 ${CMAKE_SOURCE_DIR}/lib/libXMPFiles.so
                 ${OPENGL_LIBRARY}
@@ -201,7 +203,7 @@ if(UNIX)
                 glm
                 yaml-cpp
                 zmq
-                z
+                ZLIB::ZLIB
                 ${CMAKE_SOURCE_DIR}/lib/staticXMPCore.ar
                 ${CMAKE_SOURCE_DIR}/lib/staticXMPFiles.ar
                 ${OPENGL_LIBRARY}
@@ -217,6 +219,7 @@ else()
                 glm
                 yaml-cpp
                 libzmq-static
+                ZLIB::ZLIB
                 ${CMAKE_SOURCE_DIR}/lib/XMPCore.lib
                 ${CMAKE_SOURCE_DIR}/lib/XMPFiles.lib
                 ${OPENGL_LIBRARY}
