@@ -19,8 +19,8 @@ import logging
 context = zmq.Context()
 socket = context.socket(zmq.REP)
 heartbeatSocket = context.socket(zmq.REP)
-socket.bind("tcp://*:5555")
-heartbeatSocket.bind("tcp://*:5556")
+socket.bind("tcp://*:5577")
+heartbeatSocket.bind("tcp://*:5578")
 
 # Initialise logging
 logging.basicConfig(

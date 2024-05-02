@@ -4,7 +4,7 @@ This module contains the backbone of server functionality, it has a public inter
 # Networking & Connectivity
 
 This python server runs inside the docker container and is responsible for the generative side of the stable-ui application. Being a server it's not restricted to just using the C++ front end and can be used with any zero-mq
-client over ports 5555 / 5556.
+client over ports 5577 / 5578.
 
 By default the docker networking is set up with a bridge over to the server static address: `10.5.0.6`. This can be customised in the docker compose configuration as well as the gui `config.yaml`. In theory this could be set up for remote access with the right client.
 
